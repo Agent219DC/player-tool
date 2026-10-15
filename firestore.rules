@@ -1,0 +1,37 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email != null
+        && (request.auth.token.email_verified == true
+            || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+    function email() { return request.auth.token.email.lower(); }
+    function isOwner() { return signedIn() && email() == 'agent219dc@gmail.com'; }
+    function isStaff() {
+      return isOwner() || (signedIn()
+        && exists(/databases/$(database)/documents/config/staff)
+        && email() in get(/databases/$(database)/documents/config/staff).data.emails);
+    }
+
+    // Model settings, staff list, season rollover record: staff read, owner writes
+    match /config/{doc} {
+      allow read: if isStaff();
+      allow write: if isOwner();
+    }
+    // Team games played and current season: any staff member
+    match /shared/{doc} {
+      allow read, write: if isStaff();
+    }
+    // Display names for "updated by" lines
+    match /users/{uid} {
+      allow read: if isStaff();
+      allow write: if isStaff() && request.auth.uid == uid;
+    }
+    // Every position's board (qb_players, rb_players, ...)
+    match /{coll}/{doc} {
+      allow read, write: if isStaff() && coll.matches('[a-z]+_players');
+    }
+  }
+}
