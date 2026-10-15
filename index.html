@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
-<title>Marshall Football Player Tool</title>
+<title>Player Tool</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,8 +36,6 @@
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px;display:grid;gap:24px}
 .brand{display:flex;align-items:center;gap:14px}
-.logo{height:56px;width:auto;flex:none}
-@media (max-width:480px){.logo{height:44px}}
 header{position:relative;display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--accent);padding-bottom:12px}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 h1 span{color:var(--accent-text)}
@@ -234,7 +232,6 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 <style>
 #gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;padding:20px}
 #gate .card{width:min(420px,100%);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:26px;display:grid;gap:14px;text-align:center}
-#gate img{height:64px;margin:0 auto}
 #gate h1{font-size:30px}
 #gate .or{color:var(--muted);font-size:13px}
 #gate input{font-family:var(--body)}
@@ -244,13 +241,12 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 </style>
 <div id="gate">
   <div class="card">
-    <img id="gateLogo" alt="Marshall Football">
-    <div class="eyebrow">Player Tool</div>
-    <h1>Marshall <span>Football</span></h1>
+    <div class="eyebrow">Staff Board</div>
+    <h1>Player <span>Tool</span></h1>
     <p class="msg" id="gateMsg">Sign in with your staff account.</p>
     <button class="btn primary" type="button" id="gGoogle">Sign in with Google</button>
     <div class="or">or get a sign-in link by email</div>
-    <input id="gEmail" type="email" placeholder="you@marshall.edu" autocomplete="email">
+    <input id="gEmail" type="email" placeholder="you@email.com" autocomplete="email">
     <button class="btn" type="button" id="gLink">Email me a sign-in link</button>
   </div>
 </div>
@@ -312,10 +308,9 @@ window.claude={use:async n=>{
 <div class="wrap">
   <header>
     <div class="brand">
-      <img class="logo" src="data:image/png;base64,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" alt="Marshall Thundering Herd logo" width="84" height="56">
       <div>
-        <div class="eyebrow">Player Tool</div>
-        <h1>Marshall <span>Football</span></h1>
+        <div class="eyebrow">Staff Board</div>
+        <h1>Player <span>Tool</span></h1>
       </div>
     </div>
     <div class="pos" role="group" aria-label="Position" id="posBar"></div>
@@ -521,7 +516,7 @@ window.claude={use:async n=>{
         <h3 class="ot-h">Staff access</h3>
         <p class="note">Only these email addresses can sign in and use the board. You (the owner) always have access.</p>
         <div id="staffList"></div>
-        <div class="btns"><input id="staffEmail" type="email" placeholder="coach@marshall.edu" style="width:260px;max-width:100%;font-family:var(--body)"><button class="btn" type="button" id="staffAdd">Add</button></div>
+        <div class="btns"><input id="staffEmail" type="email" placeholder="coach@email.com" style="width:260px;max-width:100%;font-family:var(--body)"><button class="btn" type="button" id="staffAdd">Add</button></div>
       </div>
       <div>
         <h3 class="ot-h">Full backup</h3>
@@ -882,7 +877,6 @@ function updatePickUI(){
 }
 $("pickAll").addEventListener("click",()=>{LAST_ROWS.forEach(x=>PICK.add(pkey(x.p)));renderBoard()});
 $("pickNone").addEventListener("click",()=>{PICK.clear();renderBoard()});
-const LOGO=document.querySelector(".logo").src;
 const TIERRGB={Elite:[31,99,198],Impact:[123,63,196],Starter:[0,135,58],Rotation:[217,98,11],Pass:[198,40,40]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
@@ -892,9 +886,8 @@ async function printSelected(){
   const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  try{doc.addImage(LOGO,"PNG",W-40-63,16,63,42)}catch(e){}
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
-  doc.text(`Marshall Football · ${P.roles&&ROLEF!=="All"?(ROLEF==="Slot"?"SLOT":"WR"):P.label} Grades`,40,44);
+  doc.text(`Player Tool · ${P.roles&&ROLEF!=="All"?(ROLEF==="Slot"?"SLOT":"WR"):P.label} Grades`,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Player Tool  ·  Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
@@ -914,7 +907,7 @@ async function printSelected(){
   const y=doc.lastAutoTable.finalY+18;
   doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F Below.   Shaded rows = Marshall roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,Math.min(y,doc.internal.pageSize.getHeight()-24));
-  const fname=`Marshall ${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
+  const fname=`${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
   try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
@@ -928,10 +921,9 @@ async function printOverview(){
   const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  try{doc.addImage(LOGO,"PNG",W-40-63,16,63,42)}catch(e){}
   const title=(OV_SIDE==="def"?"Defensive Overview":"Offensive Overview")+(OV_MODE==="next"?" - Next Season":"");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
-  doc.text(`Marshall Football · ${title}`,40,44);
+  doc.text(`Player Tool · ${title}`,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Player Tool  ·  Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
@@ -959,7 +951,7 @@ async function printOverview(){
   const y=doc.lastAutoTable.finalY+18;
   doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed Marshall starter from model settings fills it. Targets exclude On Roster, Marshall, hidden, NIP and NGE players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
-  const fname=`Marshall ${title.toLowerCase()} ${new Date().toISOString().slice(0,10)}.pdf`;
+  const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
   try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
@@ -1002,7 +994,7 @@ async function exportCSV(){
   const label=P.roles&&ROLEF!=="All"?(ROLEF==="Slot"?"SLOT":"WR"):P.label;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view.");return}
-  try{await dl.save({filename:`Marshall ${label} board ${new Date().toISOString().slice(0,10)}.csv`,data:"\ufeff"+lines.join("\r\n")});flash("CSV ready. It opens in Excel or Google Sheets.")}
+  try{await dl.save({filename:`${label} board ${new Date().toISOString().slice(0,10)}.csv`,data:"\ufeff"+lines.join("\r\n")});flash("CSV ready. It opens in Excel or Google Sheets.")}
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the CSV. Try again.")}
 }
 $("csvBtn").addEventListener("click",exportCSV);
@@ -1024,13 +1016,13 @@ async function exportAll(){
     }));
     const wb=XL.utils.book_new();
     const sum=[["Position","Players on board"],...sheets.map(s=>[s.k,s.n])];
-    const ws0=XL.utils.aoa_to_sheet([["Marshall Football · Player Tool · all positions"],["Exported "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})],[],...sum]);ws0["!cols"]=[{wch:16},{wch:18}];
+    const ws0=XL.utils.aoa_to_sheet([["Player Tool · all positions"],["Exported "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})],[],...sum]);ws0["!cols"]=[{wch:16},{wch:18}];
     XL.utils.book_append_sheet(wb,ws0,"Summary");
     sheets.forEach(s=>{const ws=XL.utils.aoa_to_sheet([s.T.head,...s.T.data]);ws["!cols"]=s.T.head.map((h,i)=>({wch:Math.min(28,Math.max(String(h).length,...s.T.data.map(r=>String(r[i]??"").length))+2)}));XL.utils.book_append_sheet(wb,ws,s.k)});
     const buf=XL.write(wb,{bookType:"xlsx",type:"array"});
     let dl=null;try{dl=await claude.use("downloads")}catch(e){}
     if(!dl){flash("Saving files isn't available in this view.");return}
-    try{await dl.save({filename:`Marshall Player Tool all positions ${new Date().toISOString().slice(0,10)}.xlsx`,data:new Blob([buf])});flash("Spreadsheet ready: one tab per position.")}
+    try{await dl.save({filename:`Player Tool all positions ${new Date().toISOString().slice(0,10)}.xlsx`,data:new Blob([buf])});flash("Spreadsheet ready: one tab per position.")}
     catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the spreadsheet. Try again.")}
   }finally{btn.disabled=false;btn.textContent=old}
 }
@@ -1042,7 +1034,7 @@ function csvHeaders(){return ["Player","School",...(P.roles?["Role"]:[]),"Level"
 $("tplBtn").addEventListener("click",async()=>{
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view.");return}
-  try{await dl.save({filename:`Marshall ${P.label} import template.csv`,data:"\ufeff"+csvHeaders().map(csvCell).join(",")+"\r\n"});flash("Template ready. Fill one row per player, then use Import CSV.")}
+  try{await dl.save({filename:`${P.label} import template.csv`,data:"\ufeff"+csvHeaders().map(csvCell).join(",")+"\r\n"});flash("Template ready. Fill one row per player, then use Import CSV.")}
   catch(err){if(err&&err.code!=="declined")flash("Couldn't create the template. Try again.")}
 });
 $("impBtn").addEventListener("click",()=>{$("impFile").value="";$("impFile").click()});
@@ -1299,7 +1291,6 @@ async function pdfSave(doc,fname){
 function pdfHeader(doc,title,sub){
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  try{doc.addImage(LOGO,"PNG",W-40-63,16,63,42)}catch(e){}
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);doc.text(title,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
@@ -1310,7 +1301,7 @@ async function printRecruit(){
   if(!REC)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Marshall Football · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
+  const W=pdfHeader(doc,"Player Tool · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
   doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos.","Player","School","Status","Visit","Elig.","Grade","Tier"]],
     body:v.length?v.map(x=>[x.p.vdate?new Date(x.p.vdate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Not set",x.k+(x.k==="WR"&&x.p.role==="Slot"?" (SLOT)":""),x.p.name,x.p.school||"",x.p.status||"",vLabel(x.p),x.p.elig===0?"Grad":x.p.elig!=null?String(x.p.elig):"",x.r&&x.r.grade!=null?`${fmt(x.r.grade)} ${x.r.letter.replace("−","-")}`:"-",x.r&&x.r.tier?TIERNAME[x.r.tier]:""]):[["No visits","","","","","","","",""]],
@@ -1325,7 +1316,7 @@ async function printRecruit(){
     body:REC.rows.map(r=>[r.k,...REC_COLS.map(t=>String(r.c[t])),String(r.c.none),String(r.c.visits),String(r.total)]),
     styles:{font:"helvetica",fontSize:9,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"center"},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
-  await pdfSave(doc,`Marshall recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
+  await pdfSave(doc,`Recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
 }
 $("recPrint").addEventListener("click",printRecruit);
 
@@ -1335,7 +1326,7 @@ async function printReport(){
   const p=readForm();if(!p.name)p.name=P.unnamed;const r=score(p);if(!r)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Marshall Football · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
+  const W=pdfHeader(doc,"Player Tool · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
   const ink=[24,32,26],mut=[91,102,93];
   doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(...ink);doc.text(p.name,40,100);
   doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(...mut);
@@ -1374,7 +1365,7 @@ async function printReport(){
   if(p.prior&&p.prior.db){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);doc.text(`Blended with last season (${p.prior.db} ${P.sample}) at ${S.priorWeight} weight.`,40,y);y+=14}
   doc.setFontSize(8);doc.setTextColor(...mut);
   doc.text(doc.splitTextToSize("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F "+TIERNAME.Pass+". Confidence reflects sample size, season-to-season agreement and missing metrics.",W-80),40,doc.internal.pageSize.getHeight()-40);
-  await pdfSave(doc,`Marshall ${roleTxt} report ${p.name} ${new Date().toISOString().slice(0,10)}.pdf`);
+  await pdfSave(doc,`${roleTxt} report ${p.name} ${new Date().toISOString().slice(0,10)}.pdf`);
 }
 $("reportBtn").addEventListener("click",printReport);
 $("form").addEventListener("input",()=>setTimeout(updateReportBtn,0));
@@ -1417,7 +1408,7 @@ $("bkDown").addEventListener("click",async()=>{
   if(!OWNER||!DB)return;const b=$("bkDown");b.disabled=true;
   try{const data=await backupData();let dl=null;try{dl=await claude.use("downloads")}catch(e){}
     if(!dl){flash("Saving files isn't available in this view.");return}
-    await dl.save({filename:`Marshall Player Tool backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.")}
+    await dl.save({filename:`Player Tool backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.")}
   catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make the backup. Try again.")}
   finally{b.disabled=false}
 });
@@ -1602,6 +1593,5 @@ renderBoard();
 if(window.claude&&claude.use) connect(); else subscribe();
 </script>
 
-<script>document.getElementById("gateLogo").src=document.querySelector(".logo").src;</script>
 </body>
 </html>

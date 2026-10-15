@@ -1,6 +1,6 @@
-# Marshall Football · Player Tool
+# Player Tool
 
-Transfer-portal grading board for Marshall Football staff.
+Transfer-portal grading board for football staff.
 
 Live site: https://agent219dc.github.io/player-tool/
 
