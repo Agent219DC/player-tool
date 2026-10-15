@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>Player Tool</title>
+<meta name="description" content="Transfer-portal grading board for football staff. Staff sign-in required.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Player Tool">
+<meta property="og:description" content="Transfer-portal grading board for football staff. Staff sign-in required.">
+<meta property="og:url" content="https://agent219dc.github.io/player-tool/">
+<meta property="og:image" content="https://agent219dc.github.io/player-tool/icon-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#18201a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Player Tool">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -237,6 +252,9 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 #gate input{font-family:var(--body)}
 #gate .msg{font-size:14px;color:var(--muted);min-height:1.2em}
 #gate .msg.err{color:var(--tPass)}
+.bknag{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin:10px 0 4px;padding:10px 14px;border:1px solid var(--line);border-left:4px solid var(--cMed);border-radius:8px;background:var(--surface);font-size:14px}
+.bknag-btns{display:flex;gap:8px}
+.bknag .btn{padding:6px 12px;font-size:13px}
 #signOut{font:600 13px var(--body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;margin-left:6px}
 </style>
 <div id="gate">
@@ -316,6 +334,7 @@ window.claude={use:async n=>{
     <div class="pos" role="group" aria-label="Position" id="posBar"></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
+  <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
   <script>
   (function(){var K="mf_theme",b=document.getElementById("themeBtn"),root=document.documentElement;
     function sys(){return window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}
@@ -349,7 +368,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button> <button class="btn" type="button" id="recClose">Close</button></span>
     </div>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note">Counts each player once (his most recent season) and leaves out Marshall players, hidden players and Trash. Tap a number to open that board filtered to that status.</p>
+    <p class="note">Counts each player once (his most recent season) and leaves out our own players, hidden players and Trash. Tap a number to open that board filtered to that status.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
       <h2 style="font-size:19px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
@@ -364,7 +383,7 @@ window.claude={use:async n=>{
     </div>
     <div class="tablewrap"><table id="ovTbl"></table></div>
     <p class="note" id="ovModeNote" hidden><b>Next season:</b> players marked graduating (0 years left) drop off, every returning player counts whatever his confidence, and every target marked <b>Committed</b> joins the roster and competes for the spots. Remaining targets are paired with the new weakest starters.</p>
-    <p class="note">One row per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed Marshall starter from model settings fills it. Targets exclude On Roster, Marshall, hidden, NIP and NGE players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a row to open that position.</p>
+    <p class="note">One row per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and NGE players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a row to open that position.</p>
   </section>
 
   <div class="main">
@@ -489,7 +508,7 @@ window.claude={use:async n=>{
         <label>G6 factor<input id="s-G6" type="number" step="0.01"></label>
         <label>FCS factor<input id="s-FCS" type="number" step="0.01"></label>
       </div>
-      <fieldset><legend>Marshall starter (reference row)</legend>
+      <fieldset><legend>Our starter (reference row)</legend>
         <div class="grid2">
           <label>Name<input id="l-name" type="text"></label>
           <label>Level<select id="l-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
@@ -754,14 +773,14 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);
 `Raw (weighted)       ${fmt(r.raw)}
 × ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}
 Sample               ${p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
-${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (Marshall starter ${fmt(L.final)})
-Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = Marshall starter`;
+${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
+Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
   drawScale(r.grade,lg);
 }
 function drawScale(g,lg){
   const cuts=[0,60,70,80,90,100],cols=["--tPass","--tRotation","--tStarter","--tImpact","--tElite"];
   $("scale").innerHTML=`<div class="bands">${cols.map((k,i)=>`<div style="width:${cuts[i+1]-cuts[i]}%;background:var(${k});opacity:.35"></div>`).join("")}</div>
-  ${lg!=null?`<div class="linepin" style="left:${lg}%" title="Marshall starter"></div>`:""}${g!=null?`<div class="pin" style="left:${Math.max(0,Math.min(100,g))}%"></div>`:""}
+  ${lg!=null?`<div class="linepin" style="left:${lg}%" title="Our starter"></div>`:""}${g!=null?`<div class="pin" style="left:${Math.max(0,Math.min(100,g))}%"></div>`:""}
   <div class="ticks">${[0,60,70,80,90,100].map(t=>`<span style="left:${t}%">${t}</span>`).join("")}</div>`;
 }
 let sortKey="grade",sortDir=-1;
@@ -953,12 +972,12 @@ async function printOverview(){
   doc.text(`Player Tool  ·  Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
   const L=x=>x.r.letter.replace("−","-");
   const NEEDRGB={High:[176,58,46],Upgrade:[176,122,18],Set:[0,135,58]};
-  const head=[["Pos.","Need","Best Marshall player","Grade","Eligibility","Best target","Grade","Gap","Tier"]];
+  const head=[["Pos.","Need","Our best player","Grade","Eligibility","Best target","Grade","Gap","Tier"]];
   const body=rows.map(o=>[o.lbl,NEEDLABEL[o.need],
     o.best?(o.best.commit?`${o.best.p.name} · ${o.best.p.school||""}  [Committed]`:o.best.p.name):(OV_MODE==="next"?"None Available":"None entered"),
     o.best?`${fmt(o.best.r.grade)} ${L(o.best)}`:"-",
     o.best?eligText(o.best.p):"-",
-    o.top?`${o.top.p.name} · ${o.top.p.school||""}${o.top.p.level?" ("+o.top.p.level+")":""}${o.top.p.status&&o.top.p.status!=="Target"?"  ["+o.top.p.status+"]":""}`:"-",
+    o.top?`${o.top.p.name} · ${o.top.p.school||""}${o.top.p.level?" ("+o.top.p.level+")":""}${o.top.p.status&&o.top.p.status!=="Target"?"  ["+o.top.p.status+"]":""}`:(o.why?"None ("+o.why+")":"-"),
     o.top?`${fmt(o.top.r.grade)} ${L(o.top)}`:"-",
     o.best&&o.top?((o.top.r.grade-o.best.r.grade>=0?"+":"")+fmt(o.top.r.grade-o.best.r.grade)):"-",
     o.top&&o.top.r.tier?TIERNAME[o.top.r.tier]:"-"]);
@@ -974,7 +993,7 @@ async function printOverview(){
   });
   const y=doc.lastAutoTable.finalY+18;
   doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed Marshall starter from model settings fills it. Targets exclude On Roster, Marshall, hidden, NIP and NGE players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
+  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and NGE players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
@@ -1172,12 +1191,16 @@ async function renderOverview(){
         mine=mine.sort((a,b)=>b.r.grade-a.r.grade).slice(0,g.n);
         const tg2=live.filter(x=>isTarget(x)&&!(NEXT&&x.p.status==="Committed")).sort((a,b)=>b.r.grade-a.r.grade);
         const committed=commits.length;
+        /* when a spot ends up with no target, say why: red-flag (low confidence) targets or WRs with no role */
+        const lowN=all.filter(x=>isTarget(x)&&!live.includes(x)&&!(NEXT&&x.p.status==="Committed")).length;
+        const noRoleN=g.role?all.filter(x=>!x.p.role&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="NGE"&&x.p.status!=="NIP").length:0;
+        const why=[lowN?`${lowN} red-flag target${lowN>1?"s":""} left out`:"",noRoleN?`${noRoleN} ${k} with no role set`:""].filter(Boolean).join(" · ");
         for(let i=0;i<g.n;i++){
           const best=mine[i]||null;
           /* weakest spot is paired with the best target */
           const top=tg2[g.n-1-i]||null;
           const need=!best?"High":best.r.grade<70?"High":best.r.grade<80?"Upgrade":"Set";
-          rows.push({k,role:g.role||"",lbl:g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need});
+          rows.push({k,role:g.role||"",lbl:g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":why});
         }
       });
       return rows});
@@ -1186,12 +1209,12 @@ async function renderOverview(){
   const nm=(x,html)=>x&&x.p.id?`<button type="button" class="tlink" data-ok="${o_k(x)}" data-oid="${esc(x.p.id)}">${html}</button>`:html;
   function o_k(x){return x._k}
   out.forEach(o=>{if(o.best)o.best._k=o.k;if(o.top)o.top._k=o.k});
-  $("ovTbl").innerHTML=`<thead><tr><th>Pos.</th><th>Need</th><th>Best Marshall player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
+  $("ovTbl").innerHTML=`<thead><tr><th>Pos.</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
     <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
-    <td class="o-mn" data-l="Marshall">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
+    <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
     <td class="num o-mg">${o.best?`<b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}`:"–"}</td>
     <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">Grad</b>`:eligText(o.best.p)):"–"}</td>
-    <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:'<span class="sub">–</span>'}</td>
+    <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</td>
     <td class="num o-tg">${o.top?`<b>${fmt(o.top.r.grade)}</b> ${o.top.r.letter}`:"–"}</td>
     <td class="num o-gap">${o.best&&o.top?((o.top.r.grade-o.best.r.grade>=0?"+":"")+fmt(o.top.r.grade-o.best.r.grade)):"–"}</td>
     <td class="ctr o-tt">${o.top&&o.top.r.tier?`<span class="chip t-${o.top.r.tier}">${TIERNAME[o.top.r.tier]}</span>`:"–"}</td></tr>`).join("")}</tbody>`;
@@ -1421,6 +1444,14 @@ $("staffAdd").addEventListener("click",()=>{const e=($("staffEmail").value||"").
 $("staffList").addEventListener("click",e=>{const b=e.target.closest("[data-unstaff]");if(!b)return;if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to remove";return}saveStaff(STAFF.filter(x=>x!==b.dataset.unstaff))});
 
 /* ---------- owner tools: full backup ---------- */
+/* weekly reminder: the owner sees a banner when the last backup is more than 7 days old (or never) */
+let BK_LATER=false;
+function watchBackup(db){db.doc("config/backup").onSnapshot(s=>{
+  const last=s.exists&&s.data().last?new Date(s.data().last):null,days=last?Math.floor((Date.now()-last)/864e5):null;
+  const due=!last||days>=7;$("bkNag").hidden=!due||BK_LATER;
+  $("bkNagTxt").textContent=!last?"No backup on record yet. Download one so the board can be restored if something goes wrong.":`Last backup was ${days} days ago. Download a fresh one.`},()=>{})}
+$("bkNagGo").addEventListener("click",()=>$("bkDown").click());
+$("bkNagLater").addEventListener("click",()=>{BK_LATER=true;$("bkNag").hidden=true});
 async function backupData(){
   const out={};const keys=ALL_POS.filter(k=>POSITIONS[k]);
   for(const k of keys){const lc=k.toLowerCase();const qs=await DB.collection(lc+"_players").get().catch(()=>null);out[lc+"_players"]={};if(qs)qs.docs.forEach(d=>out[lc+"_players"][d.id]=d.data());
@@ -1432,7 +1463,8 @@ $("bkDown").addEventListener("click",async()=>{
   if(!OWNER||!DB)return;const b=$("bkDown");b.disabled=true;
   try{const data=await backupData();let dl=null;try{dl=await claude.use("downloads")}catch(e){}
     if(!dl){flash("Saving files isn't available in this view.");return}
-    await dl.save({filename:`Player Tool backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.")}
+    await dl.save({filename:`Player Tool backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.");
+    DB.doc("config/backup").set({last:new Date().toISOString()},{merge:true}).catch(()=>{})}
   catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make the backup. Try again.")}
   finally{b.disabled=false}
 });
@@ -1605,7 +1637,7 @@ async function connect(){
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();return}
   DB=db;subscribe();
 }
