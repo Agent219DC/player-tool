@@ -877,6 +877,10 @@ function updatePickUI(){
 }
 $("pickAll").addEventListener("click",()=>{LAST_ROWS.forEach(x=>PICK.add(pkey(x.p)));renderBoard()});
 $("pickNone").addEventListener("click",()=>{PICK.clear();renderBoard()});
+const CONFRGB={High:[0,135,58],Medium:[168,134,0],Low:[198,40,40]};
+/* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
+function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
+  doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
 const TIERRGB={Elite:[31,99,198],Impact:[123,63,196],Starter:[0,135,58],Rotation:[217,98,11],Pass:[198,40,40]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
@@ -895,9 +899,10 @@ async function printSelected(){
   /* columns mirror the board: Player · Ht · Wt · Level · Season · metrics · Score · Grade · Tier */
   const head=[["Player","Ht","Wt","Level","Season",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
   const schoolLine=p=>[(p.school||"")+(P.roles&&p.role?" · "+(p.role==="Slot"?"SLOT":"WR"):""),[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ");
-  const tags=x=>[x.p.status?"["+x.p.status+"]":"",x.p.star?"[Starred]":"",x.r.conf&&x.r.conf!=="–"?"("+[x.r.conf+" confidence",x.r.split?"seasons disagree":"",x.r.partialM?"3 of 4 metrics":""].filter(Boolean).join(", ")+")":""].filter(Boolean).join("  ");
+  const tags=x=>[x.p.status?"["+x.p.status+"]":"",x.p.star?"[Starred]":""].filter(Boolean).join("  ");
+  const hasFlag=x=>!!CONFRGB[x.r.conf], FLAGGAP="      ";
   const trendTxt=x=>{if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;return Math.abs(d)<0.1?"":(d>0?" (+":" (-")+fmt(Math.abs(d))+")"};
-  const body=rows.map(x=>[pdfTxt([x.p.name+(tags(x)?"  "+tags(x):""),schoolLine(x.p),recruitLine(x.p),metaLine(x.p)].filter(Boolean).join("\n")),
+  const body=rows.map(x=>[pdfTxt([x.p.name+(hasFlag(x)?FLAGGAP+(x.r.split||x.r.partialM?"  ":""):"  ")+tags(x),schoolLine(x.p),recruitLine(x.p),metaLine(x.p)].filter(Boolean).join("\n")),
     x.p.ht?pdfTxt(fmtHt(x.p.ht)):"-",x.p.wt?String(x.p.wt):"-",x.p.level||"",
     x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · G"+x.p.thru:""}`:"-",
     ...x.r.m.map((v,i)=>v==null?"-":pdfTxt(fm(v,i)+fcsMark(x.p,i))),fmt(x.r.grade)+trendTxt(x),pdfTxt(x.r.letter),TIERNAME[x.r.tier]||""]);
@@ -909,11 +914,22 @@ async function printSelected(){
     didParseCell:h=>{if(h.section==="body"&&h.column.index===cTier){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}
       if(h.section==="head"&&(h.column.index===1||h.column.index===2||(h.column.index>=cM&&h.column.index<=cScore)))h.cell.styles.halign="right";
       if(h.section==="head"&&h.column.index===cScore+1)h.cell.styles.halign="center";
-      if(h.section==="body"&&isOurs(rows[h.row.index].p))h.cell.styles.fillColor=[220,239,226]}
+      if(h.section==="body"&&isOurs(rows[h.row.index].p))h.cell.styles.fillColor=[220,239,226]},
+    didDrawCell:h=>{if(h.section!=="body"||h.column.index!==0)return;const x=rows[h.row.index];if(!hasFlag(x))return;
+      const first=(h.cell.text&&h.cell.text[0])||"",nmTxt=pdfTxt(x.p.name);if(!first.startsWith(nmTxt+FLAGGAP))return;
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+      const px=h.cell.x+h.cell.padding("left")+doc.getTextWidth(nmTxt)+3,py=h.cell.y+h.cell.padding("top")+.2,rgb=CONFRGB[x.r.conf];
+      pdfFlag(doc,px,py,9.5,rgb);
+      if(x.r.split||x.r.partialM){doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...rgb);doc.text("*",px+9.2,py+6.6)}}
   });
-  const y=doc.lastAutoTable.finalY+18;
-  doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F Below.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,Math.min(y,doc.internal.pageSize.getHeight()-24));
+  const y=Math.min(doc.lastAutoTable.finalY+18,doc.internal.pageSize.getHeight()-38);
+  if(rows.some(hasFlag)){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);let lx=40;
+    doc.text("Confidence:",lx,y);lx+=doc.getTextWidth("Confidence:")+6;
+    [["High","High"],["Medium","Medium"],["Low","Low"]].forEach(([k,t])=>{pdfFlag(doc,lx,y-7.5,9.5,CONFRGB[k]);lx+=11;doc.setTextColor(91,102,93);doc.text(t,lx,y);lx+=doc.getTextWidth(t)+10});
+    doc.text("·   * next to a flag = seasons disagree or only 3 of 4 metrics",lx,y)}
+  const y2=rows.some(hasFlag)?y+14:y;
+  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F Below.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,y2);
   const fname=`${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
