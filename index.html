@@ -194,7 +194,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
   #board td.cg::after{content:attr(data-l);font:700 16px var(--display)}
   #board td.ct{grid-area:tr;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
   #board td.ca{grid-area:ac;text-align:right}
-  #board td.cl,#board td.cs,#board td.cm,#board td.cc,#board td.chw{display:none}
+  #board td.cl,#board td.cs,#board td.cm,#board td.cc,#board td.chw,#board td.cel{display:none}
   .mob-hw{display:inline}
   #board tbody td[colspan]{grid-column:1/-1}
   #board tbody tr.line{background:var(--accent-soft)}
@@ -771,30 +771,32 @@ function renderBoard(){
   const ready=scaleReady();
   const rows=BOARD.map((p,idx)=>({p,idx,r:ready?score(p):(p.m&&missCount(p.m)<=1?{m:p.m,grade:null,final:null,letter:"–",tier:null,conf:"–"}:null)})).filter(x=>x.r&&(SHOWREF||!x.p.ref)&&(!P.roles||ROLEF==="All"||x.p.role===ROLEF)&&matchSearch(x.p));
   const empty=!rows.length;
-  const get=x=>sortKey==="ht"?(htIn(x.p.ht)??-1):sortKey==="wt"?(+x.p.wt||-1):sortKey==="name"?x.p.name:sortKey==="level"?x.p.level:sortKey==="season"?(x.p.season||"")+(x.p.thru==="full"?"z":String(x.p.thru||"").padStart(2,"0")):sortKey.startsWith("m")?x.r.m[+sortKey[1]]:sortKey==="final"?x.r.final:x.r.grade;
+  const get=x=>sortKey==="ht"?(htIn(x.p.ht)??-1):sortKey==="wt"?(+x.p.wt||-1):sortKey==="name"?x.p.name:sortKey==="level"?x.p.level:sortKey==="elig"?(x.p.elig??-1):sortKey==="season"?(x.p.season||"")+(x.p.thru==="full"?"z":String(x.p.thru||"").padStart(2,"0")):sortKey.startsWith("m")?x.r.m[+sortKey[1]]:sortKey==="final"?x.r.final:x.r.grade;
   rows.sort((a,b)=>{
     const ya=Number(a.p.season)||0, yb=Number(b.p.season)||0;
     if(ya!==yb) return yb-ya; /* most recent season always first */
     const A=get(a),B=get(b);return (A>B?1:A<B?-1:0)*sortDir});
   LAST_ROWS=rows;
   {const bn=$("boardNote");const show=!!(P.fcsNote&&rows.some(x=>x.p.level==="FCS"));bn.hidden=!show;if(show)bn.textContent="* "+P.fcsNote.text;}
-  const H=[["pick",""],["name","Player"],["ht","Ht"],["wt","Wt"],["level","Level"],["season","Season"],...METRICS.map((m,i)=>["m"+i,m.short]),["grade","Score"],["letter","Grade"],["tier","Tier"],["",""]];
+  const H=[["pick",""],["name","Player"],["ht","Ht"],["wt","Wt"],["level","Level"],["season","Season"],["elig","Yrs Left"],...METRICS.map((m,i)=>["m"+i,m.short]),["grade","Score"],["letter","Grade"],["tier","Tier"],["",""]];
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
-  $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
-   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600">${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");return (l||hw)?`<div class="sub bio">${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}</div>`:""})()}${recruitLine(x.p)?`<div class="sub recruit">${esc(recruitLine(x.p))}</div>`:""}${metaLine(x.p)?`<div class="sub meta">${esc(metaLine(x.p))}</div>`:""}`}</td>
-   <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
+  $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
+   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600">${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");return (l||hw)?`<div class="sub bio">${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}</div>`:""})()}${(()=>{const rl=recruitLine(x.p,true),el=eligLong(x.p);return rl||el?`<div class="sub recruit">${el?`<span class="mob-hw">${esc(el)}${rl?" · ":""}</span>`:""}${esc(rl)}</div>`:""})()}${metaLine(x.p)?`<div class="sub meta">${esc(metaLine(x.p))}</div>`:""}`}</td>
+   <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td><td class="num cel">${x.line?"—":esc(eligShort(x.p))}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
    <td class="num cg" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter">${x.r.letter}</span></td>
    <td class="ct" >${x.r.tier?`<span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span>`:'<span class="sub">Scale not set</span>'}</td>
    <td class="ca" style="white-space:nowrap">${x.line?"":`<button class="x" data-hide="${x.idx}" aria-label="${x.p.ref?"Unhide":"Hide"} ${esc(x.p.name)}">${x.p.ref?"Unhide":"Hide"}</button> <button class="x" data-del="${x.idx}" aria-label="Delete ${esc(x.p.name)}">Delete</button>`}</td></tr>`).join("")}
-   ${empty?`<tr><td colspan="14" class="sub">${boardState==="loading"?"Loading the shared board…":filtersOn()&&BOARD.length?`No players match these filters. <button type="button" class="btn" id="clearFilters" style="margin-left:8px;padding:4px 10px;font-size:13px">Clear filters</button>`:`No ${P.label}s on the board yet. Score one above and save him.`}</td></tr>`:""}</tbody>`;
+   ${empty?`<tr><td colspan="15" class="sub">${boardState==="loading"?"Loading the shared board…":filtersOn()&&BOARD.length?`No players match these filters. <button type="button" class="btn" id="clearFilters" style="margin-left:8px;padding:4px 10px;font-size:13px">Clear filters</button>`:`No ${P.label}s on the board yet. Score one above and save him.`}</td></tr>`:""}</tbody>`;
 }
 const isOurs=p=>p.status==="On Roster"||(!!p.marshall&&!p.status);
 function fixLegacy(p){if(p.status==="Passed")p.status="NGE";if(p.status==="Visit"){delete p.status;if(!p.visit)p.visit="Scheduled"}return p}
 const STATUSES=["On Roster","Target","Contacted","Offered","Committed","NIP","NGE"];
 function safeUrl(u){if(!u)return"";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return""}}
 function fmtDate(d){if(!d)return"";const t=new Date(d+"T12:00:00");return isNaN(t)?d:t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
-function recruitLine(p){const a=[];if(p.elig===0)a.push("Graduating");else if(p.elig)a.push(p.elig+(p.elig===1?" yr":" yrs")+" left");if(p.portal==="Yes")a.push("In portal"+(p.pdate?" since "+fmtDate(p.pdate):""));else if(p.portal==="No")a.push("Not in portal");else if(p.pdate)a.push("Entered portal "+fmtDate(p.pdate));if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
+function eligLong(p){return p.elig===0?"Graduating":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
+function eligShort(p){return p.elig===0?"Grad":p.elig?String(p.elig):"—"}
+function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.portal==="Yes")a.push("In portal"+(p.pdate?" since "+fmtDate(p.pdate):""));else if(p.portal==="No")a.push("Not in portal");else if(p.pdate)a.push("Entered portal "+fmtDate(p.pdate));if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
 function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
@@ -897,22 +899,21 @@ async function printSelected(){
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Player Tool  ·  Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
   /* columns mirror the board: Player · Ht · Wt · Level · Season · metrics · Score · Grade · Tier */
-  const head=[["Player","Ht","Wt","Level","Season",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
+  const head=[["Player","Ht","Wt","Level","Season","Yrs Left",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
   const schoolLine=p=>[(p.school||"")+(P.roles&&p.role?" · "+(p.role==="Slot"?"SLOT":"WR"):""),[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ");
-  const tags=x=>[x.p.status?"["+x.p.status+"]":"",x.p.star?"[Starred]":""].filter(Boolean).join("  ");
   const hasFlag=x=>!!CONFRGB[x.r.conf], FLAGGAP="      ";
   const trendTxt=x=>{if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;return Math.abs(d)<0.1?"":(d>0?" (+":" (-")+fmt(Math.abs(d))+")"};
-  const body=rows.map(x=>[pdfTxt([x.p.name+(hasFlag(x)?FLAGGAP+(x.r.split||x.r.partialM?"  ":""):"  ")+tags(x),schoolLine(x.p),recruitLine(x.p),metaLine(x.p)].filter(Boolean).join("\n")),
+  const body=rows.map(x=>[pdfTxt([x.p.name+(hasFlag(x)?FLAGGAP+(x.r.split||x.r.partialM?"  ":""):""),schoolLine(x.p)].filter(Boolean).join("\n")),
     x.p.ht?pdfTxt(fmtHt(x.p.ht)):"-",x.p.wt?String(x.p.wt):"-",x.p.level||"",
-    x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · G"+x.p.thru:""}`:"-",
+    x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · G"+x.p.thru:""}`:"-",pdfTxt(eligShort(x.p)).replace("—","-"),
     ...x.r.m.map((v,i)=>v==null?"-":pdfTxt(fm(v,i)+fcsMark(x.p,i))),fmt(x.r.grade)+trendTxt(x),pdfTxt(x.r.letter),TIERNAME[x.r.tier]||""]);
-  const nm=METRICS.length, cM=5, cScore=cM+nm, cTier=cScore+2;
+  const nm=METRICS.length, cEl=5, cM=6, cScore=cM+nm, cTier=cScore+2;
   doc.autoTable({head,body,startY:76,theme:"grid",
     styles:{font:"helvetica",fontSize:8.5,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
-    columnStyles:Object.fromEntries([[0,{cellWidth:"auto",valign:"top"}],[1,{halign:"right"}],[2,{halign:"right"}]].concat([...Array(nm).keys()].map(i=>[cM+i,{halign:"right"}])).concat([[cScore,{halign:"right",fontStyle:"bold"}],[cScore+1,{halign:"center",fontStyle:"bold"}]])),
+    columnStyles:Object.fromEntries([[0,{cellWidth:"auto",valign:"top"}],[1,{halign:"right"}],[2,{halign:"right"}],[cEl,{halign:"right"}]].concat([...Array(nm).keys()].map(i=>[cM+i,{halign:"right"}])).concat([[cScore,{halign:"right",fontStyle:"bold"}],[cScore+1,{halign:"center",fontStyle:"bold"}]])),
     didParseCell:h=>{if(h.section==="body"&&h.column.index===cTier){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}
-      if(h.section==="head"&&(h.column.index===1||h.column.index===2||(h.column.index>=cM&&h.column.index<=cScore)))h.cell.styles.halign="right";
+      if(h.section==="head"&&(h.column.index===1||h.column.index===2||h.column.index===cEl||(h.column.index>=cM&&h.column.index<=cScore)))h.cell.styles.halign="right";
       if(h.section==="head"&&h.column.index===cScore+1)h.cell.styles.halign="center";
       if(h.section==="body"&&isOurs(rows[h.row.index].p))h.cell.styles.fillColor=[220,239,226]},
     didDrawCell:h=>{if(h.section!=="body"||h.column.index!==0)return;const x=rows[h.row.index];if(!hasFlag(x))return;
