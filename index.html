@@ -1632,7 +1632,7 @@ async function runSearch(){
   const q=($("gSearch").value||"").trim().toLowerCase(),box=$("gResults");
   if(q.length<2){box.hidden=true;return}
   const data=await gData();
-  const hits=data.filter(x=>[x.p.name,x.p.school].filter(Boolean).join(" ").toLowerCase().includes(q))
+  const hits=data.filter(x=>!x.p.ref&&[x.p.name,x.p.school].filter(Boolean).join(" ").toLowerCase().includes(q))
     .sort((a,b)=>((+b.p.season||0)-(+a.p.season||0))||((b.r&&b.r.grade||0)-(a.r&&a.r.grade||0))).slice(0,12);
   box.innerHTML=hits.length?hits.map((x,i)=>`<button type="button" data-gi="${i}"><span class="gp">${x.k}${x.p.role&&x.k==="WR"?(x.p.role==="Slot"?" S":""):""}</span><span><b>${esc(x.p.name)}</b> <span class="sub">${esc(x.p.school||"")}${x.p.season?" · "+esc(x.p.season):""}${x.p.ref?" · hidden":""}</span></span><span class="gg">${x.r&&x.r.grade!=null?fmt(x.r.grade)+" "+x.r.letter:"–"}</span></button>`).join(""):`<div class="gnone">No players match “${esc(q)}”.</div>`;
   box.hidden=false;box._hits=hits;
