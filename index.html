@@ -579,7 +579,7 @@ window.claude={use:async n=>{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 /* ---------- positions ---------- */
-const ALL_POS=["QB","RB","WR","TE","IOL","OT","DT","DE","ILB","OLB","SAF","NIC","CB"];
+const ALL_POS=["QB","RB","WR","TE","IOL","OT","DT","DE","LB","SAF","NIC","CB"];
 const OFFENSE=["QB","RB","WR","TE","IOL","OT"];
 const sideOf=k=>OFFENSE.includes(k)?"off":"def";
 const BASE={mode:"mid",eliteCut:80,agreeGap:20,teamGames:6,seasonGames:12,priorWeight:0.5,cuts:{impact:60,starter:45,rotation:30},levels:{P4:1,G6:0.93,FCS:0.85},weights:[40,30,20,10]};
@@ -694,7 +694,7 @@ const POSITIONS={
       {name:"Cody Stufflebean",school:"Kansas State",level:"P4",season:"2025",thru:"full",db:575,m:[3.1,56.0,6.2,64.1],ref:true,test:true},
       {name:"Ezra Odinjor",school:"Toledo",level:"G6",season:"2025",thru:"full",db:492,m:[2.4,64.2,8.0,60.9],ref:true,test:true},
       {name:"Hunter Watson",school:"Monmouth",level:"FCS",season:"2025",thru:"full",db:650,m:[4.2,51.9,5.1,61.1],ref:true,test:true}]},
-  ILB:{label:"ILB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed ILB",conf:[450,225],
+  LB:{label:"LB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed LB",conf:[450,225],
     metrics:[
       {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
       {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
@@ -704,28 +704,14 @@ const POSITIONS={
       anchors:{mid:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]},full:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]}},
       line:{name:"Cannon Lewis",level:"G6",season:"2026",thru:6,cur:{db:338,m:[10.0,67.1,49.4,12.0]},prior:{db:null,m:[null,null,null,null]}}},
     samples:[],
-    fix:[{id:"kanye-young-missouri-state-2025",field:"db",from:600,to:757}],
     seed:[{name:"Cannon Lewis",school:"Marshall",level:"G6",season:"2026",thru:6,db:338,m:[10.0,67.1,49.4,12.0],status:"On Roster",elig:2},
+      {name:"Javae Gilmore",school:"Marshall",level:"G6",season:"2026",thru:6,db:346,m:[11.5,66.7,null,24.4],status:"On Roster",elig:0},
       {name:"Jacob Rodriguez",school:"Texas Tech",level:"P4",season:"2025",thru:"full",db:775,m:[15.3,94.8,92.5,13.9],ref:true,test:true},
       {name:"Ethan Wesloski",school:"North Texas",level:"G6",season:"2025",thru:"full",db:805,m:[8.1,86.2,91.2,9.1],ref:true,test:true},
       {name:"Jaiden Haygood",school:"UT Rio Grande Valley",level:"FCS",season:"2025",thru:"full",db:582,m:[12.2,91.3,82.9,11.1],ref:true,test:true},
       {name:"Daniel Djaborne",school:"Rutgers",level:"P4",season:"2025",thru:"full",db:659,m:[5.9,55.5,38.3,10.7],ref:true,test:true},
       {name:"Kanye Young",school:"Missouri State",level:"G6",season:"2025",thru:"full",db:757,m:[6.2,53.3,53.0,22.7],ref:true,test:true},
-      {name:"Fernando Washington",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:701,m:[7.0,38.3,56.1,27.8],ref:true,test:true}]},
-  OLB:{label:"OLB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed OLB",conf:[450,225],
-    metrics:[
-      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
-      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
-      {name:"Slot Coverage Grade",short:"Slot Cov",unit:"",dp:1,step:0.1},
-      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1}],
-    defaults:{dbPerGame:50,agreeMinDb:200,weights:[30,30,25,15],
-      anchors:{mid:{floor:[3.1,44.9,52.9,25.0],ceil:[15.3,94.8,73.0,2.2]},full:{floor:[3.1,44.9,52.9,25.0],ceil:[15.3,94.8,73.0,2.2]}},
-      line:{name:"Javae Gilmore",level:"G6",season:"2026",thru:6,cur:{db:346,m:[11.5,66.7,58.2,24.4]},prior:{db:null,m:[null,null,null,null]}}},
-    samples:[],
-    seed:[{name:"Javae Gilmore",school:"Marshall",level:"G6",season:"2026",thru:6,db:346,m:[11.5,66.7,58.2,24.4],status:"On Roster",elig:0},
-      {name:"Braydon Brus",school:"Northwestern",level:"P4",season:"2025",thru:"full",db:742,m:[6.3,66.3,53.1,17.9],ref:true,test:true},
-      {name:"Jordan Pollard",school:"San Jose State",level:"G6",season:"2025",thru:"full",db:802,m:[9.6,77.8,47.4,20.1],ref:true,test:true},
-      {name:"Douglass Franklin",school:"Mississippi Valley State",level:"FCS",season:"2025",thru:"full",db:399,m:[6.1,71.3,55.5,16.7],ref:true,test:true}]}
+      {name:"Fernando Washington",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:701,m:[7.0,38.3,56.1,27.8],ref:true,test:true}]}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -1303,7 +1289,7 @@ const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
 function tierChip(x){return x&&x.r&&x.r.tier?` <span class="chip t-${x.r.tier}" style="margin-left:6px">${TIERNAME[x.r.tier]}</span>`:""}
 function eligText(p){return p.elig===0?"Grad":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
 const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}],
-  DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],ILB:[{lbl:"ILB",n:1}],OLB:[{lbl:"OLB",n:2}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
+  DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],LB:[{lbl:"LB",n:3}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
 let OV_SIDE=null,OV_ROWS=[],OV_MODE="now";
 async function renderOverview(){
   $("overview").hidden=false;
@@ -1312,7 +1298,7 @@ async function renderOverview(){
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
-  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, ILB, 2 OLB, 2 SAF, NIC, 2 CB";
+  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, 3 LB (best two in box coverage at OLB, the third at ILB), 2 SAF, NIC, 2 CB";
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
   $("ovTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">Loading every position…</p>';
@@ -1368,10 +1354,14 @@ async function renderOverview(){
           rows.push({k,role:g.role||"",lbl:g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":why});
         }
       });
+      if(k==="LB"){/* of our three LBs, the two best in box coverage play OLB and the third plays ILB */
+        const lb=rows.filter(o=>o.k==="LB"),cov=o=>o.best&&o.best.r.m&&o.best.r.m[2]!=null?o.best.r.m[2]:-1;
+        const order=[...lb].sort((a,b)=>(b.best?1:0)-(a.best?1:0)||cov(b)-cov(a));
+        order.forEach((o,i)=>{o.fk=i<2?"OLB":"ILB";o.lbl=o.fk});}
       return rows});
   })).then(a=>a.flat());
   OV_ROWS=out;$("ovPrint").disabled=!out.length;
-  {const cnt={};out.forEach(o=>{const key=o.k+"|"+o.role;o.si=cnt[key]=(cnt[key]??-1)+1});}
+  {const cnt={};out.forEach(o=>{const key=(o.fk||o.k)+"|"+o.role;o.si=cnt[key]=(cnt[key]??-1)+1});}
   renderOvField(side,out);
   const nm=(x,html)=>x&&x.p.id?`<button type="button" class="tlink" data-ok="${o_k(x)}" data-oid="${esc(x.p.id)}">${html}</button>`:html;
   function o_k(x){return x._k}
@@ -1392,13 +1382,13 @@ const OV_FIELD={
     ["WR","Slot",0,2,2],["QB","",0,2,5],["RB","",0,3,5]]},
   def:{cols:8,los:"bottom",spots:[["SAF","",0,1,3],["SAF","",1,1,6],["OLB","",0,2,2.75],["ILB","",0,2,4.5],["OLB","",1,2,6.25],["NIC","",0,2,7.5],
     ["CB","",0,3,1],["DE","",0,3,3],["DT","",0,3,4],["DT","",1,3,5],["DE","",1,3,6],["CB","",1,3,8]]}};
-function ovSpots(side,rows){const F=OV_FIELD[side];return F.spots.map(([k,role,i,r,c,sp])=>({k,role,r,c,sp:sp||1,o:rows.find(o=>o.k===k&&(o.role||"")===role&&o.si===i)||null,
+function ovSpots(side,rows){const F=OV_FIELD[side];return F.spots.map(([k,role,i,r,c,sp])=>({k,role,r,c,sp:sp||1,o:rows.find(o=>(o.fk||o.k)===k&&(o.role||"")===role&&o.si===i)||null,
   lbl:role==="Slot"?"SLOT":k}))}
 function renderOvField(side,rows){
   const F=OV_FIELD[side],el=$("ovField");el.style.gridTemplateColumns=`repeat(${F.cols*4},minmax(0,1fr))`;
   const nm=x=>x.p.id?`<button type="button" class="tlink" data-ok="${x._k}" data-oid="${esc(x.p.id)}">${esc(x.p.name)}</button>`:esc(x.p.name);
   const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${Math.round((s.c-1)*4)+1} / span ${s.sp*4}`;
-    if(!o)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(s.lbl)}</b><span class="sub">${POSITIONS[s.k]?"No spot":"Not built yet"}</span></div>`;
+    if(!o)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(s.lbl)}</b><span class="sub">${POSITIONS[s.k]||((s.k==="ILB"||s.k==="OLB")&&POSITIONS.LB)?"No spot":"Not built yet"}</span></div>`;
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
