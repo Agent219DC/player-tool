@@ -638,8 +638,10 @@ const POSITIONS={
     /* added to the shared board once (owner's first visit); test players go in hidden */
     /* earlier placeholder entries to clear out (only if still a hidden test player) */
     unseed:["fcs-worst-dt-fcs-2025"],
+    /* one-time corrections: only applied while the field still holds the old value */
+    fix:[{id:"kenyatta-hardge-marshall-2026",field:"elig",from:3,to:2}],
     seed:[
-      {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster",elig:3},
+      {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster",elig:2},
       {name:"Kayden McDonald",school:"Ohio State",level:"P4",season:"2025",thru:"full",db:449,m:[13.8,91.0,4.0,64.44],ref:true,test:true},
       {name:"Ezra Christensen",school:"New Mexico State",level:"G6",season:"2025",thru:"full",db:494,m:[11.1,79.3,13.9,86.5],ref:true,test:true},
       {name:"John Caramanico",school:"Georgetown",level:"FCS",season:"2025",thru:"full",db:446,m:[11.9,87.5,3.6,58.9],ref:true,test:true},
@@ -1653,6 +1655,7 @@ const SEEDED={};
 function seedBoard(key,allDocs){
   const list=POSITIONS[key]&&POSITIONS[key].seed;if(!list||!DB||!OWNER||!USER||SEEDED[key])return;SEEDED[key]=true;
   const lc=key.toLowerCase();
+  (POSITIONS[key].fix||[]).forEach(f=>{const d=allDocs.find(x=>x.id===f.id);if(d&&d[f.field]===f.from)DB.collection(lc+"_players").doc(f.id).update({[f.field]:f.to}).catch(()=>{})});
   (POSITIONS[key].unseed||[]).forEach(id=>{const d=allDocs.find(x=>x.id===id);if(d&&d.test)DB.collection(lc+"_players").doc(id).delete().catch(()=>{})});
   list.forEach(sp=>{const id=slug(sp.name+"-"+sp.school+"-"+sp.season);
     const ex=allDocs.find(d=>d.id===id||((d.name||"").toLowerCase()===sp.name.toLowerCase()&&(d.season||"")===sp.season));
