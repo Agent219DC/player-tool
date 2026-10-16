@@ -462,7 +462,7 @@ window.claude={use:async n=>{
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
     <p class="note" id="ovModeNote" hidden><b>Next season:</b> players marked graduating (0 years left) drop off, every returning player counts whatever his confidence, and every target marked <b>Committed</b> joins the roster and competes for the spots. Remaining targets are paired with the new weakest starters.</p>
-    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and Pass players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
+    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the starter listed in model settings fills it (using his board entry when he has one). Targets exclude On Roster, our own school, hidden, NIP and Pass players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
   </section>
 
   <details class="editor" id="editor">
@@ -1291,7 +1291,7 @@ async function printOverview(){
   doc.setFont("helvetica","normal");
 
   doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and Pass players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
+  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the starter listed in model settings fills it (using his board entry when he has one). Targets exclude On Roster, our own school, hidden, NIP and Pass players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
@@ -1487,7 +1487,7 @@ $("impFile").addEventListener("change",async e=>{
 });
 
 /* ---------- needs overview ---------- */
-function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRICS=P.metrics;DEFAULTS=defaultsFor(k);S=Object.assign(clone(DEFAULTS),cfg?clone(cfg):{});S.mode=sv.S.mode;
+function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRICS=P.metrics;DEFAULTS=defaultsFor(k);S=Object.assign(clone(DEFAULTS),cfg?clone(cfg):{});(P.cfgFix||[]).forEach(f=>{if(S[f.field]===f.from)S[f.field]=f.to});S.mode=sv.S.mode;
   try{return fn()}finally{P=sv.P;METRICS=sv.METRICS;S=sv.S;DEFAULTS=sv.DEFAULTS}}
 function htwt(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":""].filter(Boolean).join(" · ")}
 const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
@@ -1519,7 +1519,7 @@ async function renderOverview(){
       const yr=Math.max(0,...all.map(x=>+x.p.season||0));
       const live=all.filter(x=>x.r.conf==="High"||x.r.conf==="Medium");
       const rows=[];
-      /* listed Marshall starter (model settings) fills a spot left blank by a low-confidence roster player */
+      /* listed Marshall starter fills a spot left blank by a low-confidence roster player: his own board entry when he has one, otherwise the model-settings numbers */
       const Ln=S.line;let lineX=null;
       if(Ln&&Ln.name&&Ln.cur&&Ln.cur.db){const lr=score({name:Ln.name,level:Ln.level,season:Ln.season,thru:Ln.thru,db:Ln.cur.db,m:Ln.cur.m,prior:Ln.prior&&Ln.prior.db?Ln.prior:null});
         if(lr&&lr.grade!=null)lineX={p:{name:Ln.name,school:"Marshall",season:Ln.season||"",listed:true},r:lr}}
@@ -1530,7 +1530,7 @@ async function renderOverview(){
         const match=roster.find(x=>nm(x.p.name)===ln)||roster.find(x=>nm(x.p.name).split(/\s+/).pop()===last);
         if(match){
           if(live.includes(match))lineX=null;
-          else{lineX.p.role=match.p.role;if(match.p.elig!=null)lineX.p.elig=match.p.elig;if(match.p.ht)lineX.p.ht=match.p.ht;if(match.p.wt)lineX.p.wt=match.p.wt}
+          else lineX=match; /* use his board entry (the numbers staff keep updated), not the model-settings copy */
         }
       }
       (OV_SPOTS[k]||[{lbl:k,n:1}]).forEach((g,gi)=>{
