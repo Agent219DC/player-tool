@@ -704,8 +704,9 @@ const POSITIONS={
       anchors:{mid:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]},full:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]}},
       line:{name:"Cannon Lewis",level:"G6",season:"2026",thru:6,cur:{db:338,m:[10.0,67.1,49.4,12.0]},prior:{db:null,m:[null,null,null,null]}}},
     samples:[],
+    fix:[{id:"javae-gilmore-marshall-2026",field:"m",idx:2,from:null,to:40.0}],
     seed:[{name:"Cannon Lewis",school:"Marshall",level:"G6",season:"2026",thru:6,db:338,m:[10.0,67.1,49.4,12.0],status:"On Roster",elig:2},
-      {name:"Javae Gilmore",school:"Marshall",level:"G6",season:"2026",thru:6,db:346,m:[11.5,66.7,null,24.4],status:"On Roster",elig:0},
+      {name:"Javae Gilmore",school:"Marshall",level:"G6",season:"2026",thru:6,db:346,m:[11.5,66.7,40.0,24.4],status:"On Roster",elig:0},
       {name:"Jacob Rodriguez",school:"Texas Tech",level:"P4",season:"2025",thru:"full",db:775,m:[15.3,94.8,92.5,13.9],ref:true,test:true},
       {name:"Ethan Wesloski",school:"North Texas",level:"G6",season:"2025",thru:"full",db:805,m:[8.1,86.2,91.2,9.1],ref:true,test:true},
       {name:"Jaiden Haygood",school:"UT Rio Grande Valley",level:"FCS",season:"2025",thru:"full",db:582,m:[12.2,91.3,82.9,11.1],ref:true,test:true},
@@ -1838,7 +1839,9 @@ const SEEDED={};
 function seedBoard(key,allDocs){
   const list=POSITIONS[key]&&POSITIONS[key].seed;if(!list||!DB||!OWNER||!USER||SEEDED[key])return;SEEDED[key]=true;
   const lc=key.toLowerCase();
-  (POSITIONS[key].fix||[]).forEach(f=>{const d=allDocs.find(x=>x.id===f.id);if(d&&d[f.field]===f.from)DB.collection(lc+"_players").doc(f.id).update({[f.field]:f.to}).catch(()=>{})});
+  (POSITIONS[key].fix||[]).forEach(f=>{const d=allDocs.find(x=>x.id===f.id);if(!d)return;
+    if(f.idx!=null){const a=Array.isArray(d[f.field])?d[f.field].slice():null;if(a&&(a[f.idx]??null)===f.from){a[f.idx]=f.to;DB.collection(lc+"_players").doc(f.id).update({[f.field]:a}).catch(()=>{})}return}
+    if(d[f.field]===f.from)DB.collection(lc+"_players").doc(f.id).update({[f.field]:f.to}).catch(()=>{})});
   (POSITIONS[key].unseed||[]).forEach(id=>{const d=allDocs.find(x=>x.id===id);if(d&&d.test)DB.collection(lc+"_players").doc(id).delete().catch(()=>{})});
   list.forEach(sp=>{const id=slug(sp.name+"-"+sp.school+"-"+sp.season);
     const ex=allDocs.find(d=>d.id===id||((d.name||"").toLowerCase()===sp.name.toLowerCase()&&(d.season||"")===sp.season));
