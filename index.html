@@ -492,7 +492,6 @@ window.claude={use:async n=>{
       <fieldset class="fold"><legend>Recruiting</legend><div class="grid2">
         <label>Status<select id="p-status"><option value="">—</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option></select></label>
         <label>Eligibility left<select id="p-elig"><option value="">—</option><option value="0">0 (graduating)</option><option value="1">1 year</option><option value="2">2 years</option><option value="3">3 years</option><option value="4">4 years</option><option value="5">5 years</option></select></label>
-        <label>In portal<select id="p-portal"><option value="">—</option><option>Yes</option><option>No</option></select></label>
         <label>Date entered portal<input id="p-pdate" type="date"></label>
         <label>Visit<select id="p-visit"><option value="">—</option><option>Scheduled</option><option>Completed</option><option>Canceled</option></select></label>
         <label>Visit date<input id="p-vdate" type="date"></label>
@@ -547,13 +546,7 @@ window.claude={use:async n=>{
         <button class="btn" type="button" id="pickAll">Select all</button>
         <button class="btn" type="button" id="pickNone">Clear</button>
         <button class="btn" type="button" id="cmpBtn" disabled>Compare selected</button>
-        <details class="menu" id="ioMenu"><summary class="btn">Import / Export ▾</summary><div class="menu-list">
-          <button type="button" id="csvBtn">Export this board (CSV)</button>
-          <button type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions (Excel)</button>
-          <button type="button" id="impBtn">Import players (CSV)</button>
-          <button type="button" id="tplBtn">Download CSV template</button>
-        </div></details>
-        <input type="file" id="impFile" accept=".csv,text/csv" hidden>
+        <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on this board who has them">Refresh stats</button>
         <button class="btn primary" type="button" id="printBtn" disabled>Print selected</button>
       </div>
     </div>
@@ -624,6 +617,12 @@ window.claude={use:async n=>{
         <h3 class="ot-h">Full backup</h3>
         <p class="note">Download everything (every position's players, Trash, model settings and season info) as one backup file, or restore from one. Restoring adds or replaces players by their ID; it never deletes anyone.</p>
         <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
+      </div>
+      <div>
+        <h3 class="ot-h">Import / Export</h3>
+        <p class="note">Spreadsheet export of the current board or every position, and bulk import from a CSV.</p>
+        <div class="btns"><button class="btn" type="button" id="csvBtn">Export this board (CSV)</button><button class="btn" type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions (Excel)</button><button class="btn" type="button" id="impBtn">Import players (CSV)</button><button class="btn" type="button" id="tplBtn">Download CSV template</button></div>
+        <input type="file" id="impFile" accept=".csv,text/csv" hidden>
       </div>
       <div>
         <h3 class="ot-h">Start a new season</h3>
@@ -880,17 +879,17 @@ function readForm(){
     m:METRICS.map((_,i)=>num($("c-"+i).value))};
   const ht=$("p-ht").value.trim(),wt=num($("p-wt").value),hs=$("p-hs").value.trim(),home=$("p-home").value.trim(),st=$("p-st").value;
   if(ht)p.ht=ht; if(wt)p.wt=wt; if(hs)p.hs=hs; if(home)p.home=home; if(st)p.st=st;
-  const st2=$("p-status").value,el=$("p-elig").value,po=$("p-portal").value,pd=$("p-pdate").value,vs=$("p-visit").value,vd=$("p-vdate").value;
-  if(st2)p.status=st2; if(el)p.elig=+el; if(po)p.portal=po; if(pd)p.pdate=pd; if(vs||vd)p.visit=vs||"Scheduled"; if(vd)p.vdate=vd;
+  const st2=$("p-status").value,el=$("p-elig").value,pd=$("p-pdate").value,vs=$("p-visit").value,vd=$("p-vdate").value;
+  if(st2)p.status=st2; if(el)p.elig=+el; if(pd)p.pdate=pd; else if(LEGACY_PORTAL==="Yes")p.portal="Yes"; if(vs||vd)p.visit=vs||"Scheduled"; if(vd)p.vdate=vd;
   if(P.roles) p.role=$("p-role").value;
   if($("usePrior").checked) p.prior={db:num($("pr-db").value),m:METRICS.map((_,i)=>num($("r-"+i).value))};
   Object.keys(ESPN_X).forEach(k=>{if(ESPN_X[k]!=null&&ESPN_X[k]!=="")p[k]=ESPN_X[k]});
   return p;
 }
-let LOADED_KEY=null;
+let LOADED_KEY=null,LEGACY_PORTAL=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null};espnReset();
-  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";$("p-portal").value=p.portal||"";$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
+  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
   $("pr-db").value=hp?p.prior.db??"":""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
@@ -968,6 +967,21 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
     render();
   }catch(e){box.innerHTML='<div class="sub">Couldn\'t load his stats from ESPN. Try again, or enter his numbers by hand.</div>'}
 }
+/* Refresh stats: re-pull ESPN career stats for everyone on this board who has an ESPN link */
+let ESPN_ALL_BUSY=false;
+async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
+  const list=BOARD.filter(p=>p.espnId&&p.id&&!p.deleted);
+  if(!list.length){flash(`No one on the ${P.label} board has ESPN stats yet. Open a player and click Add stats first.`,7000);return}
+  if(!DB){flash("The shared board isn't connected, so stats can't be saved right now.");return}
+  ESPN_ALL_BUSY=true;const btn=$("espnAll");btn.disabled=true;const coll0=coll();let ok=0,bad=0;
+  try{for(let i=0;i<list.length;i++){const p=list[i];btn.textContent=`Refreshing ${i+1} of ${list.length}…`;
+      try{const st=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(p.espnId)}/stats`);
+        const c=espnCareer(st);if(!c.cats.length){bad++;continue}
+        await DB.collection(coll0).doc(p.id).update({career:c});ok++}
+      catch(e){bad++;if(i===0&&!ok&&e instanceof TypeError){flash("Can't reach ESPN right now. Try again later.");return}}}
+    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"}${bad?` · ${bad} couldn't be updated`:""}.`,7000);
+  }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh stats"}}
+$("espnAll").addEventListener("click",espnRefreshAll);
 /* ESPN position vs. the board he's being added to */
 const ESPN_POS={QB:["QB"],RB:["RB","HB","FB"],WR:["WR"],TE:["TE"],IOL:["G","OG","C","OL","IOL"],OT:["T","OT","OL"],DT:["DT","NT","DL"],DE:["DE","DL","EDGE"],LB:["LB","ILB","OLB","MLB"],SAF:["S","FS","SS","DB"],NIC:["CB","S","DB","NB"],CB:["CB","DB"]};
 function espnPosNote(pos){const ok=ESPN_POS[POSKEY];if(ok&&!ok.includes(pos.toUpperCase()))flash(`Heads up: ESPN lists him as ${pos}, and you're adding him to the ${P.label} board.`,9000)}
@@ -1044,7 +1058,7 @@ function safeUrl(u){if(!u)return"";u=String(u).trim();if(!/^https?:\/\//i.test(u
 function fmtDate(d){if(!d)return"";const t=new Date(d+"T12:00:00");return isNaN(t)?d:t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
 function eligLong(p){return p.elig===0?"Graduating":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
 function eligShort(p){return p.elig===0?"Grad":p.elig?String(p.elig):"—"}
-function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.portal==="Yes")a.push("In portal"+(p.pdate?" since "+fmtDate(p.pdate):""));else if(p.portal==="No")a.push("Not in portal");else if(p.pdate)a.push("Entered portal "+fmtDate(p.pdate));if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
+function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.pdate)a.push("In portal since "+fmtDate(p.pdate));else if(p.portal==="Yes")a.push("In portal");if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
 function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
@@ -1322,8 +1336,8 @@ $("cmpClose").addEventListener("click",()=>{$("compare").hidden=true});
 $("cmpPrint").addEventListener("click",printCompare);
 function csvCell(v){v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportTable(rows){
-  const head=["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample.charAt(0).toUpperCase()+P.sample.slice(1),...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Score","Grade","Tier","Confidence","Height","Weight","Hometown","State","High school","Status","Eligibility","In portal","Portal date","Visit","Visit date","Starred","Updated"];
-  const data=rows.map(x=>[x.p.name,x.p.school,...(P.roles?[x.p.role==="Slot"?"SLOT":"WR"]:[]),x.p.level,x.p.season?+x.p.season||x.p.season:"",x.p.thru==="full"?"Full season":x.p.thru?("Game "+x.p.thru):"",x.p.db,...x.r.m.map((v,i)=>v==null?"":+(+v).toFixed(METRICS[i].dp)),x.r.grade==null?"":+x.r.grade.toFixed(1),x.r.letter==="–"?"":x.r.letter.replace("−","-"),TIERNAME[x.r.tier]||"",x.r.conf==="–"?"":x.r.conf,x.p.ht?fmtHt(x.p.ht):"",x.p.wt||"",x.p.home||"",x.p.st||"",x.p.hs||"",x.p.status||"",x.p.elig!=null?x.p.elig:"",x.p.portal||"",x.p.pdate||"",x.p.visit||"",x.p.vdate||"",x.p.star?"Yes":"",x.p.updatedAt?x.p.updatedAt.slice(0,10):""]);
+  const head=["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample.charAt(0).toUpperCase()+P.sample.slice(1),...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Score","Grade","Tier","Confidence","Height","Weight","Hometown","State","High school","Status","Eligibility","Portal date","Visit","Visit date","Starred","Updated"];
+  const data=rows.map(x=>[x.p.name,x.p.school,...(P.roles?[x.p.role==="Slot"?"SLOT":"WR"]:[]),x.p.level,x.p.season?+x.p.season||x.p.season:"",x.p.thru==="full"?"Full season":x.p.thru?("Game "+x.p.thru):"",x.p.db,...x.r.m.map((v,i)=>v==null?"":+(+v).toFixed(METRICS[i].dp)),x.r.grade==null?"":+x.r.grade.toFixed(1),x.r.letter==="–"?"":x.r.letter.replace("−","-"),TIERNAME[x.r.tier]||"",x.r.conf==="–"?"":x.r.conf,x.p.ht?fmtHt(x.p.ht):"",x.p.wt||"",x.p.home||"",x.p.st||"",x.p.hs||"",x.p.status||"",x.p.elig!=null?x.p.elig:"",x.p.pdate||"",x.p.visit||"",x.p.vdate||"",x.p.star?"Yes":"",x.p.updatedAt?x.p.updatedAt.slice(0,10):""]);
   return {head,data};
 }
 async function exportCSV(){
@@ -1370,7 +1384,7 @@ $("allBtn").addEventListener("click",exportAll);
 $("statusFilter").addEventListener("change",()=>renderBoard());
 
 /* ---------- CSV template + import ---------- */
-function csvHeaders(){return ["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample,...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Height","Weight","Hometown","State","High school","Status","Eligibility","In portal","Portal date","Visit","Visit date","Starred"]}
+function csvHeaders(){return ["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample,...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Height","Weight","Hometown","State","High school","Status","Eligibility","Portal date","Visit","Visit date","Starred"]}
 $("tplBtn").addEventListener("click",async()=>{
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view.");return}
@@ -1756,7 +1770,7 @@ async function printReport(){
   y=doc.lastAutoTable.finalY+24;
   /* bio + recruiting */
   const bio=[["Height",p.ht?fmtHt(p.ht):"–"],["Weight",p.wt?p.wt+" lbs":"–"],["Hometown",[p.home,p.st].filter(Boolean).join(", ")||"–"],["High school",p.hs||"–"]];
-  const rec=[["Status",p.status||"–"],["Eligibility left",p.elig===0?"Graduating (0)":p.elig?p.elig+(p.elig===1?" year":" years"):"–"],["In portal",p.portal?(p.portal+(p.pdate?" · since "+fmtDate(p.pdate):"")):(p.pdate?"Entered "+fmtDate(p.pdate):"–")],["Visit",p.visit?(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]];
+  const rec=[["Status",p.status||"–"],["Eligibility left",p.elig===0?"Graduating (0)":p.elig?p.elig+(p.elig===1?" year":" years"):"–"],["In portal",p.pdate?"Since "+fmtDate(p.pdate):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]];
   const half=(W-80-16)/2;
   const kv=(title,rows,x)=>{doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text(title,x,y);
     doc.autoTable({startY:y+8,theme:"plain",margin:{left:x},tableWidth:half,body:rows,styles:{font:"helvetica",fontSize:10,cellPadding:4,textColor:ink},columnStyles:{0:{fontStyle:"bold",cellWidth:100,textColor:mut}}});return doc.lastAutoTable.finalY};
@@ -1937,8 +1951,8 @@ $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;upd
 $("reset").addEventListener("click",()=>{const md=S.mode;S=clone(DEFAULTS);S.mode=md;saveConfig();fillSettings();update()});
 
 $("form").addEventListener("input",()=>{$("priorBox").hidden=!$("usePrior").checked;render()});
-let DUP_ARMED=null,ODD_ARMED=null;
-$("form").addEventListener("input",()=>{DUP_ARMED=null;ODD_ARMED=null});
+let DUP_ARMED=null,ODD_ARMED=null,XDUP_ARMED=null;
+$("form").addEventListener("input",()=>{DUP_ARMED=null;ODD_ARMED=null;XDUP_ARMED=null});
 /* stats more than a quarter of the scale beyond the usual floor-to-ceiling range */
 function oddStats(p){const A=anchors(),out=[];
   const chk=(m,tag)=>(m||[]).forEach((v,i)=>{if(v==null)return;const lo=Math.min(A.floor[i],A.ceil[i]),hi=Math.max(A.floor[i],A.ceil[i]),pad=(hi-lo)*0.25;
@@ -1959,7 +1973,11 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();const p=readFor
     try{const id=USER?await USER.id():null;if(id)p.addedBy=id;p.updatedAt=new Date().toISOString();
       const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
       if(ex&&pkey(p)!==LOADED_KEY&&DUP_ARMED!==pkey(p)){DUP_ARMED=pkey(p);flash(`${ex.name} (${ex.school||"no school"}, ${ex.season||""}) is already on the board. Click Save again to update his entry.`);$("status").scrollIntoView({block:"nearest"});return}
-      DUP_ARMED=null;withTrend(p,ex);
+      if(!ex&&XDUP_ARMED!==pkey(p)){const nm=normT(p.name),sc=normT(p.school);let others=[];
+        try{GCACHE_AT=0;others=(await gData()).filter(x=>x.k!==POSKEY&&normT(x.p.name)===nm&&(!sc||!x.p.school||normT(x.p.school)===sc))}catch(_){}
+        if(others.length){XDUP_ARMED=pkey(p);const where=[...new Set(others.map(x=>`${POSITIONS[x.k]?POSITIONS[x.k].label:x.k} board (${x.p.school||"no school"}${x.p.season?", "+x.p.season:""})`))].join(" and the ");
+          flash(`${p.name} is already on the ${where}. Click Save again to add him here too.`,12000);$("status").scrollIntoView({block:"nearest"});return}}
+      DUP_ARMED=null;XDUP_ARMED=null;withTrend(p,ex);
       await DB.collection(coll()).doc(ex&&ex.id?ex.id:slug(p.name+"-"+p.school+"-"+p.season)).set(p);LOADED_KEY=pkey(p);flash(p.name+(ex?" updated on":" saved to")+" the shared board.")}
     catch(err){flash("Couldn't save. You may have view-only access to this Player Tool.")}
   }else{const i=BOARD.findIndex(b=>b.name===p.name&&b.school===p.school&&(b.season||"")===(p.season||""));if(i>=0)BOARD[i]=p;else BOARD.push(p);renderBoard();flash(p.name+" added for this visit only (shared board unavailable).")}
