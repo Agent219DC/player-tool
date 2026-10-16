@@ -639,7 +639,7 @@ const POSITIONS={
     /* earlier placeholder entries to clear out (only if still a hidden test player) */
     unseed:["fcs-worst-dt-fcs-2025"],
     seed:[
-      {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster"},
+      {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster",elig:3},
       {name:"Kayden McDonald",school:"Ohio State",level:"P4",season:"2025",thru:"full",db:449,m:[13.8,91.0,4.0,64.44],ref:true,test:true},
       {name:"Ezra Christensen",school:"New Mexico State",level:"G6",season:"2025",thru:"full",db:494,m:[11.1,79.3,13.9,86.5],ref:true,test:true},
       {name:"John Caramanico",school:"Georgetown",level:"FCS",season:"2025",thru:"full",db:446,m:[11.9,87.5,3.6,58.9],ref:true,test:true},
@@ -1654,7 +1654,10 @@ function seedBoard(key,allDocs){
   const lc=key.toLowerCase();
   (POSITIONS[key].unseed||[]).forEach(id=>{const d=allDocs.find(x=>x.id===id);if(d&&d.test)DB.collection(lc+"_players").doc(id).delete().catch(()=>{})});
   list.forEach(sp=>{const id=slug(sp.name+"-"+sp.school+"-"+sp.season);
-    if(allDocs.some(d=>d.id===id||((d.name||"").toLowerCase()===sp.name.toLowerCase()&&(d.season||"")===sp.season)))return;
+    const ex=allDocs.find(d=>d.id===id||((d.name||"").toLowerCase()===sp.name.toLowerCase()&&(d.season||"")===sp.season));
+    if(ex){/* already there: only fill in fields that were never set, never overwrite edits */
+      const fill={};Object.keys(sp).forEach(k=>{if(ex[k]===undefined)fill[k]=sp[k]});
+      if(Object.keys(fill).length&&!ex.deleted)DB.collection(lc+"_players").doc(ex.id).update(fill).catch(()=>{});return}
     DB.collection(lc+"_players").doc(id).set(Object.assign({updatedAt:new Date().toISOString()},sp)).catch(()=>{})});
 }
 function switchPos(k){if(!$("overview").hidden&&OV_SIDE&&sideOf(k)!==OV_SIDE)setTimeout(renderOverview,0);
