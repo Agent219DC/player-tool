@@ -693,7 +693,27 @@ const POSITIONS={
       {name:"Andrew Zock",school:"Mercer",level:"FCS",season:"2025",thru:"full",db:622,m:[8.7,88.8,18.2,92.0],ref:true,test:true},
       {name:"Cody Stufflebean",school:"Kansas State",level:"P4",season:"2025",thru:"full",db:575,m:[3.1,56.0,6.2,64.1],ref:true,test:true},
       {name:"Ezra Odinjor",school:"Toledo",level:"G6",season:"2025",thru:"full",db:492,m:[2.4,64.2,8.0,60.9],ref:true,test:true},
-      {name:"Hunter Watson",school:"Monmouth",level:"FCS",season:"2025",thru:"full",db:650,m:[4.2,51.9,5.1,61.1],ref:true,test:true}]}
+      {name:"Hunter Watson",school:"Monmouth",level:"FCS",season:"2025",thru:"full",db:650,m:[4.2,51.9,5.1,61.1],ref:true,test:true}]},
+  ILB:{label:"ILB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed ILB",conf:[450,225],
+    metrics:[
+      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
+      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
+      {name:"Box Coverage Grade",short:"Box Cov",unit:"",dp:1,step:0.1},
+      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1}],
+    defaults:{dbPerGame:50,agreeMinDb:200,weights:[30,30,25,15],
+      anchors:{mid:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]},full:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]}},
+      line:{name:"",level:"G6",season:"2026",thru:6,cur:{db:null,m:[null,null,null,null]},prior:{db:null,m:[null,null,null,null]}}},
+    samples:[]},
+  OLB:{label:"OLB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed OLB",conf:[450,225],
+    metrics:[
+      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
+      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
+      {name:"Slot Coverage Grade",short:"Slot Cov",unit:"",dp:1,step:0.1},
+      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1}],
+    defaults:{dbPerGame:50,agreeMinDb:200,weights:[30,30,25,15],
+      anchors:{mid:{floor:[3.1,44.9,52.9,25.0],ceil:[15.3,94.8,73.0,2.2]},full:{floor:[3.1,44.9,52.9,25.0],ceil:[15.3,94.8,73.0,2.2]}},
+      line:{name:"",level:"G6",season:"2026",thru:6,cur:{db:null,m:[null,null,null,null]},prior:{db:null,m:[null,null,null,null]}}},
+    samples:[]}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -831,7 +851,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);
   $("v-score").innerHTML=`${fmt(r.grade)}<small> ${r.letter}</small>`;
   $("v-who").textContent=p.name||P.unnamed;
   const lg=gradeScore(L.final), d=r.grade-lg;
-  $("v-sub").textContent=`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, 2025–26 blended (${fmt(lg)} ${letterOf(lg)})`;
+  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, 2025–26 blended (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
   $("v-chips").innerHTML=`<span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>`
     +(r.split?`<span class="chip t-Pass">Seasons disagree</span>`:"")
     +(P.fcsNote&&p.level==="FCS"?`<span class="chip t-Rotation" title="${P.fcsNote.text}">Sep % vs. G6/P4 only</span>`:"")
@@ -844,7 +864,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);
 Sample               ${p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
 ${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
 Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
-  drawScale(r.grade,lg);
+  drawScale(r.grade,S.line.name?lg:null);
 }
 function drawScale(g,lg){
   const cuts=[0,60,70,80,90,100],cols=["--tPass","--tRotation","--tStarter","--tImpact","--tElite"];
@@ -1572,7 +1592,7 @@ async function printReport(){
   doc.setFontSize(11);doc.setTextColor(...cc);doc.text(`${r.conf} confidence${r.split?" · seasons disagree":""}${r.partialM?" · 3 of 4 metrics":""}`,220,188);
   doc.setFont("helvetica","normal");doc.setTextColor(...mut);doc.setFontSize(10);
   const L=lineScore(),lg=gradeScore(L.final);
-  doc.text(`${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${S.line.name} (${fmt(lg)} ${letterOf(lg).replace("−","-")})`,220,205);
+  if(S.line.name)doc.text(`${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${S.line.name} (${fmt(lg)} ${letterOf(lg).replace("−","-")})`,220,205);
   /* metrics */
   let y=246;doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text("Metrics",40,y);y+=8;
   doc.autoTable({startY:y,theme:"grid",margin:{left:40,right:40},
