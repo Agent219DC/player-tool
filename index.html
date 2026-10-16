@@ -606,7 +606,8 @@ const POSITIONS={
       {name:"Yards After Contact / Attempt",short:"YCO/A",unit:"",dp:2,step:0.01},
       {name:"Yards per Attempt",short:"YPA",unit:"",dp:2,step:0.1},
       {name:"Breakaways per Attempt",short:"BRK/A",unit:"",dp:3,step:0.01}],
-    defaults:{dbPerGame:8,agreeMinDb:40,
+    cfgFix:[{field:"dbPerGame",from:8,to:12}],
+    defaults:{dbPerGame:12,agreeMinDb:40,
       anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
       line:{name:"Jo'Shon Barbie",level:"G6",season:"2026",thru:6,cur:{db:48,m:[0.08,3.02,4.7,0.04]},prior:{db:58,m:[0.22,2.91,4.2,0.09]}}},
     samples:[]},
@@ -733,7 +734,7 @@ function saveConfig(){
   clearTimeout(cfgTimer); const path=cfgPath(), data=sharedSettings();
   cfgTimer=setTimeout(()=>{DB.doc(path).set(data).catch(e=>flash("Settings not saved: "+(e&&e.message||"try again")))},400);
 }
-function flash(msg){const el=$("status");el.textContent=msg;el.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(()=>el.hidden=true,5000)}
+function flash(msg,ms){const el=$("status");el.textContent=msg;el.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(()=>el.hidden=true,ms||5000)}
 const $=id=>document.getElementById(id);
 const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null};
 const fmt=(v,d=1)=>v==null||!isFinite(v)?"–":v.toFixed(d);
@@ -1772,8 +1773,13 @@ $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;upd
 $("reset").addEventListener("click",()=>{const md=S.mode;S=clone(DEFAULTS);S.mode=md;saveConfig();fillSettings();update()});
 
 $("form").addEventListener("input",()=>{$("priorBox").hidden=!$("usePrior").checked;render()});
-let DUP_ARMED=null;
-$("form").addEventListener("input",()=>{DUP_ARMED=null});
+let DUP_ARMED=null,ODD_ARMED=null;
+$("form").addEventListener("input",()=>{DUP_ARMED=null;ODD_ARMED=null});
+/* stats more than a quarter of the scale beyond the usual floor-to-ceiling range */
+function oddStats(p){const A=anchors(),out=[];
+  const chk=(m,tag)=>(m||[]).forEach((v,i)=>{if(v==null)return;const lo=Math.min(A.floor[i],A.ceil[i]),hi=Math.max(A.floor[i],A.ceil[i]),pad=(hi-lo)*0.25;
+    if(v<lo-pad||v>hi+pad)out.push(`${METRICS[i].short}${tag} ${fm(v,i)}${METRICS[i].unit} (usual ${fm(lo,i)}–${fm(hi,i)})`)});
+  chk(p.m,"");if(p.prior&&p.prior.db)chk(p.prior.m," last season");return out}
 function statsKey(p){return JSON.stringify([p.db,p.m,p.prior||null])}
 function withTrend(p,ex){if(!ex)return p;if(ex.marshall)p.marshall=true;if(ex.ref)p.ref=true;if(ex.star&&p.star==null)p.star=true;
   /* level/conference corrections never count as a grade change: the old stats are re-scored at the new level */
@@ -1783,6 +1789,8 @@ function withTrend(p,ex){if(!ex)return p;if(ex.marshall)p.marshall=true;if(ex.re
 $("form").addEventListener("submit",async e=>{e.preventDefault();const p=readForm();if(!score(p)){$("v-sub").textContent=`Add ${P.sample} and at least three of the four metrics before saving.`;return}
   if(!p.name)p.name=P.unnamed;
   if(!p.prior) delete p.prior;
+  {const odd=oddStats(p),key=JSON.stringify([p.m,p.prior&&p.prior.m]);
+    if(odd.length&&ODD_ARMED!==key){ODD_ARMED=key;flash(`Double-check before saving: ${odd.join("; ")}. If it's right, click Save again.`,12000);$("status").scrollIntoView({block:"nearest"});return}}
   if(DB){
     try{const id=USER?await USER.id():null;if(id)p.addedBy=id;p.updatedAt=new Date().toISOString();
       const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
