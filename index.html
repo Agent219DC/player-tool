@@ -500,7 +500,7 @@ window.claude={use:async n=>{
     <p class="note" id="boardNote" hidden></p>
     <section id="compare" hidden>
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-        <h2>Compare</h2>
+        <h2 id="cmpTitle">Compare</h2>
         <button class="btn" type="button" id="cmpClose">Close</button>
       </div>
       <div class="tablewrap"><table id="cmpTbl" class="cmp"></table></div>
@@ -1082,8 +1082,8 @@ async function printOverview(){
 }
 $("ovPrint").addEventListener("click",printOverview);
 $("boardSearch").addEventListener("input",()=>renderBoard());
-function renderCompare(){
-  let rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
+function renderCompare(given){
+  let rows=given||LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(rows.length<2){$("compare").hidden=true;return}
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
@@ -1101,7 +1101,7 @@ function renderCompare(){
   $("cmpTbl").innerHTML=head+"<tbody>"+mrows+extra.replace(/<\/td>,/g,"</td>")+"</tbody>";
   $("compare").hidden=false;
 }
-$("cmpBtn").addEventListener("click",()=>{renderCompare();$("compare").scrollIntoView({behavior:"smooth",block:"start"})});
+$("cmpBtn").addEventListener("click",()=>{$("cmpTitle").textContent="Compare";renderCompare();$("compare").scrollIntoView({behavior:"smooth",block:"start"})});
 $("cmpClose").addEventListener("click",()=>{$("compare").hidden=true});
 function csvCell(v){v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportTable(rows){
@@ -1293,7 +1293,7 @@ async function renderOverview(){
   function o_k(x){return x._k}
   out.forEach(o=>{if(o.best)o.best._k=o.k;if(o.top)o.top._k=o.k});
   $("ovTbl").innerHTML=`<thead><tr><th>Pos.</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
-    <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
+    <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
     <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
     <td class="num o-mg">${o.best?`<b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}`:"–"}</td>
     <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">Grad</b>`:eligText(o.best.p)):"–"}</td>
@@ -1316,7 +1316,7 @@ function renderOvField(side,rows){
   const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${s.c}`;
     if(!o)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(s.lbl)}</b><span class="sub">${POSITIONS[s.k]?"No spot":"Not built yet"}</span></div>`;
     const b=o.best,t=o.top;
-    return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}">
+    return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
       <div><span class="ovc-l">Ours</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">Grad</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
       <div><span class="ovc-l">Target</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
@@ -1329,7 +1329,8 @@ $("ovField").addEventListener("click",e=>ovTblClick(e));
 document.querySelectorAll("[data-ovm]").forEach(b=>b.addEventListener("click",()=>{OV_MODE=b.dataset.ovm;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOverview()}));
 $("ovBtn").addEventListener("click",()=>{renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
 $("ovClose").addEventListener("click",()=>{$("overview").hidden=true});
-function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
+function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;
+  {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
 $("ovTbl").addEventListener("click",ovTblClick);
 
 /* ---------- shared loading ---------- */
@@ -1355,6 +1356,28 @@ function openPlayer(k,id,role){
   if(k!==POSKEY)switchPos(k);
   if(role&&P.roles){ROLEF="All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"))}
   openPending();
+}
+/* overview card → side-by-side compare of our player and the best target */
+let PENDING_CMP=null;
+function openCompare(o){
+  PENDING_CMP={k:o.k,role:o.role||"",best:o.best.p.id||null,bestP:o.best.p.id?null:clone(o.best.p),top:o.top.p.id||null,topP:o.top.p.id?null:clone(o.top.p)};
+  $("overview").hidden=true;$("recruit").hidden=true;
+  if(o.k!==POSKEY)switchPos(o.k);
+  STARONLY=false;$("starOnly").checked=false;$("statusFilter").value="";$("boardSearch").value="";
+  if(P.roles){ROLEF=o.role||"All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF))}
+  renderBoard();tryCompare();
+}
+function tryCompare(){
+  const c=PENDING_CMP;if(!c||c.k!==POSKEY||boardState==="loading")return;
+  const get=(id,p)=>{if(p){/* listed starter from model settings: rebuild him from the starter line */
+      const L=S.line;return {name:L.name,school:"Marshall",level:L.level,season:L.season,thru:L.thru,db:L.cur.db,m:L.cur.m,prior:L.prior&&L.prior.db?L.prior:null}}
+    return BOARD.find(b=>b.id===id)};
+  const a=get(c.best,c.bestP),b=get(c.top,c.topP);if(!a||!b)return;
+  PENDING_CMP=null;
+  const rows=[a,b].map(p=>({p,r:score(p)})).filter(x=>x.r);
+  if(rows.length<2){flash("Couldn't score both players for a comparison.");return}
+  renderCompare(rows);($("cmpTitle").textContent=`Ours vs. target · ${c.role==="Slot"?"SLOT":c.k}`);
+  setTimeout(()=>$("compare").scrollIntoView({behavior:"smooth",block:"start"}),50);
 }
 function openPending(){
   if(!PENDING||PENDING.k!==POSKEY)return;
@@ -1733,7 +1756,7 @@ function subscribe(){
     if(key!==POSKEY)return;
     boardState="ready";
     const allDocs=q.docs.map(d=>{const p=Object.assign({id:d.id},clone(d.data()));if(p.level==="G5")p.level="G6";return fixLegacy(p)});
-    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();
+    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();tryCompare();
     seedBoard(key,allDocs);
   },()=>{boardState="local";renderBoard()}));
 }
