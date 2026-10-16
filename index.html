@@ -497,6 +497,7 @@ window.claude={use:async n=>{
       <label class="check"><input type="checkbox" id="usePrior"> Blend in last season</label>
       <fieldset id="priorBox" hidden><legend>Last season</legend>
         <div class="grid2" id="prior"></div>
+        <label id="prLvWrap" hidden>Level<select id="pr-level"><option value="">Same as this season</option><option>P4</option><option>G6</option><option>FCS</option></select></label>
         <label id="prDbWrap" hidden><span class="sw-cap">Dropbacks</span><input id="pr-db" type="number" min="0" step="1"></label>
       </fieldset>
       <fieldset class="fold"><legend>Recruiting</legend><div class="grid2">
@@ -830,7 +831,10 @@ function score(p){
   const miss=missCount(p.m);
   if(!p.m||miss>1||!p.db||!scaleReady()) return null;
   const A=anchors(); const b=blend({db:p.db,m:p.m},p.prior); const r=rawScore(b.m,A);
-  const factor=S.levels[p.level]??1; const leveled=r.raw*factor;
+  const fCur=S.levels[p.level]??1;let factor=fCur,fPrior=null;
+  /* transfers: last season counts at the level he played it, weighted the same way the stats are blended */
+  if(p.prior&&p.prior.level&&p.prior.level!==p.level&&b.eff>(p.db||0)){fPrior=S.levels[p.prior.level]??1;const wc=p.db||0,wp=b.eff-wc;factor=(fCur*wc+fPrior*wp)/(wc+wp)}
+  const leveled=r.raw*factor;
   const games=S.mode==="mid"?tg():S.seasonGames;
   const expected=S.dbPerGame*games; const part=Math.min(1,p.db/expected);
   const line=lineScore().final; const C=cuts(); const target=(C.rotation+C.starter)/2;
@@ -846,7 +850,7 @@ function score(p){
   }
   if(miss===1) conf=conf==="High"?"Medium":"Low";
   const grade=gradeScore(final);
-  return {...r,m:b.m,eff:b.eff,factor,leveled,part,expected,target,final,conf,disagree,split:disagree!=null&&disagree>=gap,partialM:miss===1,
+  return {...r,m:b.m,eff:b.eff,factor,fCur,fPrior,leveled,part,expected,target,final,conf,disagree,split:disagree!=null&&disagree>=gap,partialM:miss===1,
           tier:tierOf(final),grade,letter:letterOf(grade),line};
 }
 /* Raw score -> 0-100 grade score: tier cutoffs land on 60 / 70 / 80 / 90. */
@@ -871,7 +875,7 @@ const TIERNAME={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation
 /* ---------- form ---------- */
 function metricInputs(el,prefix,pre){el.innerHTML=METRICS.map((m,i)=>`<label>${pre||""}${m.name}${m.unit?" (%)":""}<input id="${prefix}-${i}" type="number" step="${m.step}"></label>`).join("")}
 function buildPositionUI(){
-  {const w=$("dbWrap"),w2=$("prDbWrap");metricInputs($("cur"),"c");metricInputs($("prior"),"r");w.hidden=false;w2.hidden=false;$("cur").prepend(w);$("prior").prepend(w2)}
+  {const w=$("dbWrap"),w2=$("prDbWrap"),lv=$("prLvWrap");metricInputs($("cur"),"c");metricInputs($("prior"),"r");w.hidden=false;w2.hidden=false;$("cur").prepend(w);$("prior").prepend(w2);lv.hidden=false;$("prior").prepend(lv)}
   metricInputs($("lineCur"),"lc","This season · "); metricInputs($("linePrior"),"lp","Last season · ");
   document.querySelectorAll(".sw").forEach(e=>e.textContent=P.sample);
   document.querySelectorAll(".sw-cap").forEach(e=>e.textContent=P.sample[0].toUpperCase()+P.sample.slice(1));
@@ -890,7 +894,7 @@ function readForm(){
   const st2=$("p-status").value,el=$("p-elig").value,pd=$("p-pdate").value,vs=$("p-visit").value,vd=$("p-vdate").value;
   if(st2)p.status=st2; if(el)p.elig=+el; if(pd)p.pdate=pd; else if(LEGACY_PORTAL==="Yes")p.portal="Yes"; if(vs||vd)p.visit=vs||"Scheduled"; if(vd)p.vdate=vd;
   if(P.roles) p.role=$("p-role").value;
-  if($("usePrior").checked) p.prior={db:num($("pr-db").value),m:METRICS.map((_,i)=>num($("r-"+i).value))};
+  if($("usePrior").checked){p.prior={db:num($("pr-db").value),m:METRICS.map((_,i)=>num($("r-"+i).value))};const pl=$("pr-level").value;if(pl&&pl!==p.level)p.prior.level=pl}
   Object.keys(ESPN_X).forEach(k=>{if(ESPN_X[k]!=null&&ESPN_X[k]!=="")p[k]=ESPN_X[k]});
   return p;
 }
@@ -900,7 +904,7 @@ function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
-  $("pr-db").value=hp?p.prior.db??"":""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
+  $("pr-db").value=hp?p.prior.db??"":"";$("pr-level").value=hp&&p.prior.level?p.prior.level:""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
   render();
 }
 
@@ -985,7 +989,8 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
   try{const [j,st]=await Promise.all([espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}/stats`).catch(()=>null)]);
     const a=j.athlete||j,t=a.team||{};
     if(!$("p-name").value.trim())$("p-name").value=a.displayName||a.fullName||"";
-    if(!$("p-school").value.trim()){$("p-school").value=t.location||t.displayName||"";if(t.groups)$("p-level").value=espnLevel(t)}
+    {const typed=normT($("p-school").value);if(!typed){$("p-school").value=t.location||t.displayName||"";if(t.groups)$("p-level").value=espnLevel(t)}
+      else if(t.groups&&(normT(t.location)===typed||normT(t.displayName).includes(typed)))$("p-level").value=espnLevel(t)}
     const ht=(a.displayHeight||"").match(/(\d)'\s*(\d{1,2})/);if(ht&&!$("p-ht").value)$("p-ht").value=`${ht[1]}-${ht[2]}`;
     const wt=parseInt(a.displayWeight,10);if(wt&&!$("p-wt").value)$("p-wt").value=wt;
     const bp=(a.displayBirthPlace||"").split(",").map(x=>x.trim());
@@ -994,6 +999,9 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
     const career=st?espnCareer(st):null;
     ESPN_X={espnId:String(a.id||id),espnClass:a.displayExperience||null,career:career&&career.cats.length?career:null,teamId:t.id?String(t.id):null};
     espnReset();
+    if(ESPN_X.career&&!$("pr-level").value){const yr=+$("p-season").value-1,cur=$("p-level").value;
+      const prv=ESPN_X.career.cats.flatMap(k=>k.rows).filter(r=>r.y===yr&&r.lv);const lvs=[...new Set(prv.map(r=>r.lv))];
+      if(lvs.length===1&&lvs[0]!==cur)$("pr-level").value=lvs[0]}
     if(!ESPN_X.career)flash("Found him on ESPN, but ESPN has no season stats for him.",7000);
     else flash(`Added ${ESPN_X.career.cats.length} stat tables from ESPN. Save to board to keep them.`,6000);
     const pos=a.position&&a.position.abbreviation;if(pos)espnPosNote(pos);
@@ -1048,7 +1056,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-metrics").innerHTML=METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span></div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Starter line"></u></div></div>`).join("");
   $("v-math").textContent=
 `Raw (weighted)       ${fmt(r.raw)}
-× ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}
+${r.fPrior!=null?`× level factor ${r.factor.toFixed(2)}  ${fmt(r.leveled)}  (${p.level} ${r.fCur.toFixed(2)} this season, ${p.prior.level} ${r.fPrior.toFixed(2)} last season, weighted like the stats)`:`× ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}`}
 Sample               ${p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
 ${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
 Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
@@ -1813,7 +1821,7 @@ async function printReport(){
     doc.autoTable({startY:y+8,theme:"plain",margin:{left:x},tableWidth:half,body:rows,styles:{font:"helvetica",fontSize:10,cellPadding:4,textColor:ink},columnStyles:{0:{fontStyle:"bold",cellWidth:100,textColor:mut}}});return doc.lastAutoTable.finalY};
   const y1=kv("Bio",bio,40),y2=kv("Recruiting",rec,40+half+16);
   y=Math.max(y1,y2)+22;
-  if(p.prior&&p.prior.db){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);doc.text(`Blended with last season (${p.prior.db} ${P.sample}) at ${S.priorWeight} weight.`,40,y);y+=14}
+  if(p.prior&&p.prior.db){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);doc.text(`Blended with last season (${p.prior.db} ${P.sample}${p.prior.level&&p.prior.level!==p.level?" at "+p.prior.level:""}) at ${S.priorWeight} weight.`,40,y);y+=14}
   const cr=p.career;if(cr&&cr.cats&&cr.cats.length){const PH=doc.internal.pageSize.getHeight();
     if(y>PH-160){doc.addPage();y=60}else y+=8;
     doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text("Career stats (ESPN)",40,y);y+=14;
