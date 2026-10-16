@@ -224,9 +224,17 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .espn-hit .sub{display:block}
 .espn-card{display:flex;gap:10px;align-items:center;font-size:13px}
 .espn-card img{width:64px;height:48px;object-fit:cover;border-radius:6px;background:var(--surface)}
-.espn-manual{font-size:13px;color:var(--muted)}
 .linkbtn{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
-form.espn-locked #p-name,form.espn-locked #p-school,form.espn-locked #p-level{opacity:.55}
+.espn-row{align-items:center;flex-wrap:wrap}.espn-row .sub{flex:1;min-width:180px}
+.career{margin-top:14px;min-width:0}.career h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.career .hist{font-size:13px;margin-bottom:8px}
+.career .tw{overflow-x:auto;margin-bottom:10px}
+.career table{border-collapse:collapse;font-size:12px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
+.career caption{text-align:left;font-weight:700;font-size:12px;padding:0 0 3px}
+.career th,.career td{padding:3px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+.career th{color:var(--muted);font-weight:600;font-size:11px;cursor:default}
+.career th:first-child,.career td:first-child,.career th:nth-child(2),.career td:nth-child(2){text-align:left}
+.career tr.tot td{font-weight:700;border-bottom:0}
 /* overview field view: wide screens show the formation, phones keep the list */
 .ovfieldwrap{overflow-x:auto;margin:8px 0 4px}
 .ovfield{display:grid;gap:10px 0;min-width:980px;padding:14px 10px;border-radius:10px;border:1px solid var(--line);position:relative;
@@ -446,15 +454,16 @@ window.claude={use:async n=>{
   <div class="main">
     <form class="panel" id="form" autocomplete="off">
       <h2>Player</h2>
-      <div class="espn" id="espnBox">
-        <div class="espn-row"><input id="espnQ" type="search" placeholder="Find a player on ESPN (name, school)" aria-label="Find a player on ESPN" autocomplete="off"><button class="btn primary" type="button" id="espnGo">Look up</button></div>
-        <div id="espnRes" class="espn-res" hidden></div>
-        <div class="espn-card" id="espnCard" hidden></div>
-        <label class="check espn-manual"><input type="checkbox" id="espnManual"> Not on ESPN: enter him by hand</label>
-      </div>
       <div class="grid2">
         <label>Name<input id="p-name" type="text" placeholder="Player name"></label>
         <label>School<input id="p-school" type="text" placeholder="School"></label>
+      </div>
+      <div class="espn" id="espnBox">
+        <div class="espn-row"><button class="btn primary" type="button" id="espnGo">Add stats</button><span class="sub" id="espnHint">Pulls his schools and stats for every season from ESPN, using the name above.</span></div>
+        <div id="espnRes" class="espn-res" hidden></div>
+        <div class="espn-card" id="espnCard" hidden></div>
+      </div>
+      <div class="grid2">
         <label>Level<select id="p-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
         <label id="roleWrap" hidden>Role<select id="p-role"><option value="Slot">SLOT</option><option value="Outside">WR</option></select></label>
         <label>Season<select id="p-season"></select></label>
@@ -501,6 +510,7 @@ window.claude={use:async n=>{
       <div class="scale" id="scale"></div>
       <div class="metrics" id="v-metrics"></div>
       <div class="math" id="v-math"></div>
+      <div class="career" id="v-career" hidden></div>
       <div class="btns"><button class="btn" type="button" id="reportBtn" disabled>Player report (PDF)</button></div>
     </section>
   </div>
@@ -872,7 +882,7 @@ function readForm(){
 }
 let LOADED_KEY=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
-  ESPN_X={espnId:p.espnId||null,espnStats:p.espnStats||null,espnClass:p.espnClass||null};espnReset(!!(p&&p.name));
+  ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null};espnReset();
   $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";$("p-portal").value=p.portal||"";$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
@@ -880,56 +890,79 @@ function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   render();
 }
 
-/* ---------- ESPN lookup: search a player, fill his bio, keep his box-score line ---------- */
-let ESPN_X={espnId:null,espnStats:null,espnClass:null};
+/* ---------- ESPN "Add stats": find him on ESPN, pull every season's team and stats ---------- */
+let ESPN_X={espnId:null,espnClass:null,career:null};
 const ESPN_API="https://site.web.api.espn.com/apis/common/v3";
 const P4_CONF=/\b(SEC|Southeastern|Big Ten|Big 12|ACC|Atlantic Coast)\b/i;
-function espnLock(on){["p-name","p-school","p-level"].forEach(id=>{$(id).disabled=on});$("form").classList.toggle("espn-locked",on)}
-function espnReset(editing){$("espnRes").hidden=true;$("espnRes").innerHTML="";$("espnQ").value="";$("espnManual").checked=false;
+const ESPN_SKIP=new Set(["scoring"]);
+function espnReset(){$("espnRes").hidden=true;$("espnRes").innerHTML="";
   const has=!!ESPN_X.espnId;$("espnCard").hidden=!has;if(has)$("espnCard").innerHTML=espnCardHtml();
-  espnLock(!editing&&!has)}
-function espnCardHtml(){const x=ESPN_X;return `<div><b>On ESPN</b>${x.espnClass?` · ${esc(x.espnClass)}`:""}${x.espnStats?`<div class="sub">${esc(x.espnStats)}</div>`:""}<div class="sub"><a href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(x.espnId)}" target="_blank" rel="noopener">ESPN page</a> · <button type="button" class="linkbtn" id="espnRefresh">Update from ESPN</button></div></div>`}
+  $("espnGo").textContent=has?"Refresh stats":"Add stats";$("espnHint").hidden=has}
+function espnCardHtml(){const x=ESPN_X,c=x.career;return `<div><b>Stats from ESPN</b>${x.espnClass?` · ${esc(x.espnClass)}`:""}${c&&c.at?` · pulled ${esc(fmtDate(c.at))}`:""}<div class="sub"><a href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(x.espnId)}" target="_blank" rel="noopener">ESPN page</a> · <button type="button" class="linkbtn" id="espnOther">Wrong player?</button></div></div>`}
 async function espnJSON(url){const r=await fetch(url,{mode:"cors"});if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
-async function espnSearch(){const q=$("espnQ").value.trim();if(!q){$("espnQ").focus();return}
+const normT=x=>String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+async function espnAdd(){
+  if(ESPN_X.espnId)return espnPick(ESPN_X.espnId);
+  const q=$("p-name").value.trim();if(!q){flash("Type his name first, then click Add stats.");$("p-name").focus();return}
   const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Searching ESPN…</div>';
   try{const j=await espnJSON(`${ESPN_API}/search?query=${encodeURIComponent(q)}&limit=10&type=player&sport=football&league=college-football`);
     const items=(j.items||[]).filter(it=>(it.defaultLeagueSlug||"")==="college-football"||((it.leagueRelationships||[])[0]?.core?.slug)==="college-football");
-    if(!items.length){box.innerHTML='<div class="sub">No college players found on ESPN. Check the spelling, or tick <b>Not on ESPN</b> to enter him by hand.</div>';return}
-    box.innerHTML=items.map(it=>{const t=(it.teamRelationships||[])[0];return `<button type="button" class="espn-hit" data-eid="${esc(it.id)}"><span><b>${esc(it.displayName||"")}</b><span class="sub">${esc([it.position&&it.position.displayName,t&&t.displayName].filter(Boolean).join(" · "))}</span></span></button>`}).join("");
-  }catch(e){box.innerHTML='<div class="sub">ESPN lookup isn\'t available right now. Tick <b>Not on ESPN</b> to enter him by hand.</div>'}
+    if(!items.length){box.innerHTML='<div class="sub">ESPN doesn\'t have a college player by that name. Check the spelling, or enter his numbers by hand.</div>';return}
+    const sch=normT($("p-school").value);
+    const team=it=>((it.teamRelationships||[])[0]||{}).displayName||"";
+    const sure=sch?items.filter(it=>normT(team(it)).includes(sch)):[];
+    if(sure.length===1||items.length===1)return espnPick((sure[0]||items[0]).id);
+    box.innerHTML='<div class="sub">More than one match. Pick him:</div>'+items.map(it=>`<button type="button" class="espn-hit" data-eid="${esc(it.id)}"><span><b>${esc(it.displayName||"")}</b><span class="sub">${esc([it.position&&it.position.displayName,team(it)].filter(Boolean).join(" · "))}</span></span></button>`).join("");
+  }catch(e){box.innerHTML='<div class="sub">Can\'t reach ESPN right now. Try again later, or enter his numbers by hand.</div>'}
 }
 function espnLevel(team){const g=team&&team.groups||{},par=(g.parent&&(g.parent.name||g.parent.abbreviation))||"";
   if(/FCS/i.test(par)||/FCS/i.test(g.name||""))return "FCS";
   if(P4_CONF.test(g.name||"")||/notre dame/i.test(team.location||""))return "P4";
   return "G6"}
-function espnStatLine(sum){if(!sum||!sum.statistics||!sum.statistics.length)return null;
-  return `${(sum.displayName||"").replace(/ season stats/i,"")}: ${sum.statistics.map(s=>`${s.displayValue} ${s.abbreviation||s.displayName}`).join(" · ")}`.trim()}
-async function espnPick(id,refreshOnly){const box=$("espnRes");
-  try{const j=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),a=j.athlete||j;
-    const t=a.team||{};
-    if(!refreshOnly){$("p-name").value=a.displayName||a.fullName||"";$("p-school").value=t.location||t.displayName||"";$("p-level").value=espnLevel(t)}
-    const ht=(a.displayHeight||"").match(/(\d)'\s*(\d{1,2})/);if(ht)$("p-ht").value=`${ht[1]}-${ht[2]}`;
-    const wt=parseInt(a.displayWeight,10);if(wt)$("p-wt").value=wt;
+function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl]||Object.values(teams).find(x=>x&&x.slug===sl)||{};return {n:t.location||t.displayName||sl||"",lv:t.groups?espnLevel(t):""}};
+  const zero=a=>a.every(v=>!parseFloat(String(v).replace(/,/g,"")));
+  const cats=[];const seen={};
+  (j.categories||[]).forEach(c=>{if(ESPN_SKIP.has(c.name))return;
+    const rows=(c.statistics||[]).filter(r=>r.stats&&!zero(r.stats)).map(r=>{const t=tname(r.teamSlug);const y=r.season&&r.season.year;
+      if(y)(seen[y]=seen[y]||new Set()).add(t.n+"|"+t.lv);return {y:y||null,team:t.n,lv:t.lv,s:r.stats.map(String)}});
+    if(!rows.length)return;
+    cats.push({name:c.displayName||c.name,labels:(c.labels||[]).map(String),rows,tot:rows.length>1&&c.totals?c.totals.map(String):null})});
+  return {cats,at:new Date().toISOString().slice(0,10)}}
+function careerHist(c){const by={};(c.cats||[]).forEach(k=>k.rows.forEach(r=>{if(!r.y)return;const key=r.team;(by[key]=by[key]||{lv:r.lv,ys:new Set()}).ys.add(r.y)}));
+  return Object.entries(by).map(([t,o])=>{const ys=[...o.ys].sort();return {t,lv:o.lv,a:ys[0],b:ys[ys.length-1]}}).sort((x,y)=>x.a-y.a)
+    .map(h=>`${h.t}${h.lv?` (${h.lv})`:""} ${h.a===h.b?h.a:`${h.a}–${String(h.b).slice(-2)}`}`)}
+function careerHtml(c){if(!c||!c.cats||!c.cats.length)return "";
+  const hist=careerHist(c);
+  return `<h3>Career stats · ESPN</h3>${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" → "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${k.rows.map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
+function showCareer(){const c=ESPN_X.career,el=$("v-career");const h=careerHtml(c);el.innerHTML=h;el.hidden=!h}
+async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Pulling his stats…</div>';
+  try{const [j,st]=await Promise.all([espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}/stats`).catch(()=>null)]);
+    const a=j.athlete||j,t=a.team||{};
+    if(!$("p-name").value.trim())$("p-name").value=a.displayName||a.fullName||"";
+    if(!$("p-school").value.trim()){$("p-school").value=t.location||t.displayName||"";if(t.groups)$("p-level").value=espnLevel(t)}
+    const ht=(a.displayHeight||"").match(/(\d)'\s*(\d{1,2})/);if(ht&&!$("p-ht").value)$("p-ht").value=`${ht[1]}-${ht[2]}`;
+    const wt=parseInt(a.displayWeight,10);if(wt&&!$("p-wt").value)$("p-wt").value=wt;
     const bp=(a.displayBirthPlace||"").split(",").map(x=>x.trim());
     if(bp[0]&&!$("p-home").value)$("p-home").value=bp[0];
     if(bp[1]&&/^[A-Z]{2}$/.test(bp[1])&&!$("p-st").value)$("p-st").value=bp[1];
-    ESPN_X={espnId:String(a.id||id),espnStats:espnStatLine(a.statsSummary),espnClass:a.displayExperience||null};
-    box.hidden=true;box.innerHTML="";espnLock(false);$("espnCard").hidden=false;$("espnCard").innerHTML=espnCardHtml();
-    const pos=a.position&&a.position.abbreviation;if(pos&&!refreshOnly)espnPosNote(pos);
+    const career=st?espnCareer(st):null;
+    ESPN_X={espnId:String(a.id||id),espnClass:a.displayExperience||null,career:career&&career.cats.length?career:null};
+    espnReset();
+    if(!ESPN_X.career)flash("Found him on ESPN, but ESPN has no season stats for him.",7000);
+    else flash(`Added ${ESPN_X.career.cats.length} stat tables from ESPN. Save to board to keep them.`,6000);
+    const pos=a.position&&a.position.abbreviation;if(pos)espnPosNote(pos);
     render();
-  }catch(e){flash("Couldn't load that player from ESPN. Try again, or enter him by hand.")}
+  }catch(e){box.innerHTML='<div class="sub">Couldn\'t load his stats from ESPN. Try again, or enter his numbers by hand.</div>'}
 }
 /* ESPN position vs. the board he's being added to */
 const ESPN_POS={QB:["QB"],RB:["RB","HB","FB"],WR:["WR"],TE:["TE"],IOL:["G","OG","C","OL","IOL"],OT:["T","OT","OL"],DT:["DT","NT","DL"],DE:["DE","DL","EDGE"],LB:["LB","ILB","OLB","MLB"],SAF:["S","FS","SS","DB"],NIC:["CB","S","DB","NB"],CB:["CB","DB"]};
 function espnPosNote(pos){const ok=ESPN_POS[POSKEY];if(ok&&!ok.includes(pos.toUpperCase()))flash(`Heads up: ESPN lists him as ${pos}, and you're adding him to the ${P.label} board.`,9000)}
-$("espnGo").addEventListener("click",espnSearch);
-$("espnQ").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();espnSearch()}});
+$("espnGo").addEventListener("click",espnAdd);
 $("espnRes").addEventListener("click",e=>{const b=e.target.closest("[data-eid]");if(b)espnPick(b.dataset.eid)});
-$("espnCard").addEventListener("click",e=>{if(e.target.id==="espnRefresh"&&ESPN_X.espnId)espnPick(ESPN_X.espnId,true)});
-$("espnManual").addEventListener("change",e=>{espnLock(!e.target.checked&&!ESPN_X.espnId);if(e.target.checked){$("espnRes").hidden=true;$("p-name").focus()}});
+$("espnCard").addEventListener("click",e=>{if(e.target.id==="espnOther"){ESPN_X={espnId:null,espnClass:null,career:null};espnReset();render();espnAdd()}});
 
 /* ---------- render ---------- */
-function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);
+function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCareer();
   const A=anchors();
   $("modeNote").textContent=(S.mode==="mid"
     ?`Full credit at ${S.dbPerGame*tg()} ${P.sample} (${S.dbPerGame} × ${tg()} games).`
@@ -1711,6 +1744,20 @@ async function printReport(){
   const y1=kv("Bio",bio,40),y2=kv("Recruiting",rec,40+half+16);
   y=Math.max(y1,y2)+22;
   if(p.prior&&p.prior.db){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);doc.text(`Blended with last season (${p.prior.db} ${P.sample}) at ${S.priorWeight} weight.`,40,y);y+=14}
+  const cr=p.career;if(cr&&cr.cats&&cr.cats.length){const PH=doc.internal.pageSize.getHeight();
+    if(y>PH-160){doc.addPage();y=60}else y+=8;
+    doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text("Career stats (ESPN)",40,y);y+=14;
+    const hist=careerHist(cr);if(hist.length){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);const ln=doc.splitTextToSize(hist.join("  >  "),W-80);doc.text(ln,40,y);y+=ln.length*12}
+    cr.cats.forEach(k=>{const need=(k.rows.length+(k.tot?1:0)+1)*17+24;if(y+need>PH-60){doc.addPage();y=60}
+      doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...ink);doc.text(k.name,40,y+8);
+      doc.autoTable({startY:y+12,theme:"grid",margin:{left:40,right:40,bottom:60},head:[["Year","Team",...k.labels]],
+        body:[...k.rows.map(r=>[String(r.y||""),r.team,...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
+        styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:ink,halign:"right"},
+        headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+        columnStyles:{0:{halign:"left",cellWidth:40},1:{halign:"left",cellWidth:90}},
+        didParseCell:h=>{if(h.column.index<2)h.cell.styles.halign="left";if(h.section==="body"&&k.tot&&h.row.index===k.rows.length)h.cell.styles.fontStyle="bold"}});
+      y=doc.lastAutoTable.finalY+12});
+  }
   doc.setFontSize(8);doc.setTextColor(...mut);
   doc.text(doc.splitTextToSize("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F "+TIERNAME.Pass+". Confidence reflects sample size, season-to-season agreement and missing metrics.",W-80),40,doc.internal.pageSize.getHeight()-40);
   await pdfSave(doc,`${roleTxt} report ${p.name} ${new Date().toISOString().slice(0,10)}.pdf`);
