@@ -634,7 +634,16 @@ const POSITIONS={
     defaults:{dbPerGame:30,agreeMinDb:125,weights:[40,40,10,10],
       anchors:{mid:{floor:[1.0,48.0,1.3,53.5],ceil:[13.8,91.0,15.7,91.2]},full:{floor:[1.0,48.0,1.3,53.5],ceil:[13.8,91.0,15.7,91.2]}},
       line:{name:"Kenyatta Hardge",level:"G6",season:"2026",thru:6,cur:{db:229,m:[8.8,71.8,7.9,71.3]},prior:{db:null,m:[null,null,null,null]}}},
-    samples:[]}
+    samples:[],
+    /* added to the shared board once (owner's first visit); test players go in hidden */
+    seed:[
+      {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster"},
+      {name:"Kayden McDonald",school:"Ohio State",level:"P4",season:"2025",thru:"full",db:449,m:[13.8,91.0,4.0,64.44],ref:true,test:true},
+      {name:"Ezra Christensen",school:"New Mexico State",level:"G6",season:"2025",thru:"full",db:494,m:[11.1,79.3,13.9,86.5],ref:true,test:true},
+      {name:"John Caramanico",school:"Georgetown",level:"FCS",season:"2025",thru:"full",db:446,m:[11.9,87.5,3.6,58.9],ref:true,test:true},
+      {name:"Denzel Lowry",school:"Louisville",level:"P4",season:"2025",thru:"full",db:387,m:[1.7,71.1,3.0,59.6],ref:true,test:true},
+      {name:"Olasunkonmi Agunloye",school:"FIU",level:"G6",season:"2025",thru:"full",db:489,m:[1.4,59.1,2.6,59.8],ref:true,test:true},
+      {name:"FCS Worst DT",school:"FCS",level:"FCS",season:"2025",thru:"full",db:400,m:[1.0,52.9,3.4,55.9],ref:true,test:true}]}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
@@ -1634,7 +1643,16 @@ function subscribe(){
     boardState="ready";
     const allDocs=q.docs.map(d=>{const p=Object.assign({id:d.id},clone(d.data()));if(p.level==="G5")p.level="G6";return fixLegacy(p)});
     BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();
+    seedBoard(key,allDocs);
   },()=>{boardState="local";renderBoard()}));
+}
+const SEEDED={};
+function seedBoard(key,allDocs){
+  const list=POSITIONS[key]&&POSITIONS[key].seed;if(!list||!DB||!OWNER||!USER||SEEDED[key])return;SEEDED[key]=true;
+  const lc=key.toLowerCase();
+  list.forEach(sp=>{const id=slug(sp.name+"-"+sp.school+"-"+sp.season);
+    if(allDocs.some(d=>d.id===id||((d.name||"").toLowerCase()===sp.name.toLowerCase()&&(d.season||"")===sp.season)))return;
+    DB.collection(lc+"_players").doc(id).set(Object.assign({updatedAt:new Date().toISOString()},sp)).catch(()=>{})});
 }
 function switchPos(k){if(!$("overview").hidden&&OV_SIDE&&sideOf(k)!==OV_SIDE)setTimeout(renderOverview,0);
   if(!POSITIONS[k]||k===POSKEY)return;
