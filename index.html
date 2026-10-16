@@ -1066,12 +1066,12 @@ async function printOverview(){
   /* field layout: one card per starting spot, placed where it lines up */
   const F=OV_FIELD[OV_SIDE],spots=ovSpots(OV_SIDE,rows),H=doc.internal.pageSize.getHeight();
   const T=t=>String(t).replace(/[−–]/g,"-");
-  const x0=40,fw=W-80,gx=6,cw=(fw-gx*(F.cols-1))/F.cols,ch=104,gy=12,yTop=92;
+  const x0=40,fw=W-80,gx=6,cw1=(fw-gx*(F.cols-1))/F.cols,ch=104,gy=12,yTop=92;
   const maxR=Math.max(...spots.map(s=>s.r)),losY=F.los==="top"?yTop-8:yTop+maxR*(ch+gy)-gy+8;
   doc.setDrawColor(150,160,152);doc.setLineWidth(1);doc.setLineDashPattern([4,3],0);doc.line(x0,losY,x0+fw,losY);doc.setLineDashPattern([],0);
   doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(91,102,93);doc.text("LINE OF SCRIMMAGE",x0+fw,losY+(F.los==="top"?-3:8),{align:"right"});
   const clip=(t,w,n)=>{const ls=doc.splitTextToSize(T(t),w);if(ls.length>n){ls.length=n;ls[n-1]=ls[n-1].replace(/.{0,2}$/,"…")}return ls};
-  spots.forEach(s=>{const o=s.o,x=x0+(s.c-1)*(cw+gx),y=yTop+(s.r-1)*(ch+gy),iw=cw-10;
+  spots.forEach(s=>{const o=s.o,x=x0+(s.c-1)*(cw1+gx),y=yTop+(s.r-1)*(ch+gy),cw=s.sp*cw1+(s.sp-1)*gx,iw=cw-10;
     doc.setLineWidth(.6);
     if(!o){doc.setDrawColor(190,198,190);doc.setLineDashPattern([2,2],0);doc.roundedRect(x,y,cw,ch,4,4);doc.setLineDashPattern([],0);
       doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(120,130,122);doc.text(s.lbl,x+cw/2,y+ch/2-2,{align:"center"});
@@ -1293,7 +1293,7 @@ const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
 function tierChip(x){return x&&x.r&&x.r.tier?` <span class="chip t-${x.r.tier}" style="margin-left:6px">${TIERNAME[x.r.tier]}</span>`:""}
 function eligText(p){return p.elig===0?"Grad":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
 const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}],
-  DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],ILB:[{lbl:"ILB",n:2}],OLB:[{lbl:"OLB",n:1}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
+  DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],ILB:[{lbl:"ILB",n:1}],OLB:[{lbl:"OLB",n:2}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
 let OV_SIDE=null,OV_ROWS=[],OV_MODE="now";
 async function renderOverview(){
   $("overview").hidden=false;
@@ -1302,7 +1302,7 @@ async function renderOverview(){
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
-  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, 2 ILB, OLB, 2 SAF, NIC, 2 CB";
+  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, ILB, 2 OLB, 2 SAF, NIC, 2 CB";
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
   $("ovTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">Loading every position…</p>';
@@ -1380,14 +1380,14 @@ async function renderOverview(){
 const OV_FIELD={
   off:{cols:9,los:"top",spots:[["WR","Outside",0,1,1],["OT","",0,1,3],["IOL","",0,1,4],["IOL","",1,1,5],["IOL","",2,1,6],["OT","",1,1,7],["TE","",0,1,8],["WR","Outside",1,1,9],
     ["WR","Slot",0,2,2],["QB","",0,2,5],["RB","",0,3,5]]},
-  def:{cols:8,los:"bottom",spots:[["SAF","",0,1,3],["SAF","",1,1,6],["OLB","",0,2,2],["ILB","",0,2,4],["ILB","",1,2,5],["NIC","",0,2,7],
+  def:{cols:8,los:"bottom",spots:[["SAF","",0,1,3],["SAF","",1,1,6],["OLB","",0,2,2],["ILB","",0,2,4,2],["OLB","",1,2,7],["NIC","",0,2,8],
     ["CB","",0,3,1],["DE","",0,3,3],["DT","",0,3,4],["DT","",1,3,5],["DE","",1,3,6],["CB","",1,3,8]]}};
-function ovSpots(side,rows){const F=OV_FIELD[side];return F.spots.map(([k,role,i,r,c])=>({k,role,r,c,o:rows.find(o=>o.k===k&&(o.role||"")===role&&o.si===i)||null,
+function ovSpots(side,rows){const F=OV_FIELD[side];return F.spots.map(([k,role,i,r,c,sp])=>({k,role,r,c,sp:sp||1,o:rows.find(o=>o.k===k&&(o.role||"")===role&&o.si===i)||null,
   lbl:role==="Slot"?"SLOT":k}))}
 function renderOvField(side,rows){
   const F=OV_FIELD[side],el=$("ovField");el.style.gridTemplateColumns=`repeat(${F.cols},minmax(0,1fr))`;
   const nm=x=>x.p.id?`<button type="button" class="tlink" data-ok="${x._k}" data-oid="${esc(x.p.id)}">${esc(x.p.name)}</button>`:esc(x.p.name);
-  const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${s.c}`;
+  const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${s.c} / span ${s.sp}`;
     if(!o)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(s.lbl)}</b><span class="sub">${POSITIONS[s.k]?"No spot":"Not built yet"}</span></div>`;
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
