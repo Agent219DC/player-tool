@@ -938,6 +938,12 @@ function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl
 function careerHist(c){const by={};(c.cats||[]).forEach(k=>k.rows.forEach(r=>{if(!r.y)return;const key=r.team;(by[key]=by[key]||{lv:r.lv,ys:new Set()}).ys.add(r.y)}));
   return Object.entries(by).map(([t,o])=>{const ys=[...o.ys].sort();return {t,lv:o.lv,a:ys[0],b:ys[ys.length-1]}}).sort((x,y)=>x.a-y.a)
     .reverse().map(h=>`${h.t}${h.lv?` (${h.lv})`:""} ${h.a===h.b?h.a:`${h.a}–${String(h.b).slice(-2)}`}`)}
+/* the one ESPN stat table that matters for each board (compare printout) */
+const POS_CAT={QB:{re:/^passing/i,label:"Passing"},RB:{re:/^rushing/i,label:"Rushing"},WR:{re:/^receiving/i,label:"Receiving"},TE:{re:/^receiving/i,label:"Receiving"},
+  DT:{re:/^defens/i,label:"Defense"},DE:{re:/^defens/i,label:"Defense"},LB:{re:/^defens/i,label:"Defense"},SAF:{re:/^defens/i,label:"Defense"},NIC:{re:/^defens/i,label:"Defense"},CB:{re:/^defens/i,label:"Defense"}};
+function latestLine(p){const pc=POS_CAT[POSKEY],c=p&&p.career;if(!pc||!c||!c.cats)return "";
+  const k=c.cats.find(k=>pc.re.test(k.name));if(!k||!k.rows.length)return "No "+pc.label.toLowerCase()+" stats";
+  const r=newestFirst(k.rows)[0];return `${r.y||""} ${r.team}: ${k.labels.map((l,i)=>`${r.s[i]} ${l}`).join(" · ")}`.trim()}
 const newestFirst=rows=>[...rows].sort((a,b)=>(b.y||0)-(a.y||0));
 function careerHtml(c,title){if(!c||!c.cats||!c.cats.length)return "";
   const hist=careerHist(c);
@@ -1295,6 +1301,7 @@ async function printCompare(){
   body.push(["Bio",...rows.map(x=>T(bioLine(x.p))||"-")]);
   body.push(["Status",...rows.map(x=>x.p.status||"-")]);
   body.push(["Eligibility / portal / visit",...rows.map(x=>T(recruitLine(x.p))||"-")]);
+  if(POS_CAT[POSKEY]&&rows.some(x=>x.p.career))body.push([POS_CAT[POSKEY].label+" · latest season",...rows.map(x=>x.p.career?T(latestLine(x.p))||"-":"No ESPN stats")]);
   if(rows.some(x=>x.p.career))body.push(["Schools",...rows.map(x=>x.p.career?T(careerHist(x.p.career).join("  <  "))||"-":"No ESPN stats")]);
   const nM=METRICS.length;
   doc.autoTable({head,body,startY:y,theme:"grid",
@@ -1308,24 +1315,6 @@ async function printCompare(){
   const fy=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);
   doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text("Shaded = best of this group on that metric. Red = weakest. (x/100) = the player's score on that metric's scale.",40,fy);
-  const withC=rows.filter(x=>x.p.career&&x.p.career.cats&&x.p.career.cats.length);
-  if(withC.length){const PH=doc.internal.pageSize.getHeight();doc.addPage();let cy=60;
-    doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(24,32,26);doc.text("Career stats (ESPN)",40,cy);cy+=10;
-    withC.forEach(x=>{const cr=x.p.career;if(cy>PH-140){doc.addPage();cy=50}
-      cy+=18;doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text(T(x.p.name),40,cy);
-      const hist=careerHist(cr);if(hist.length){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);doc.text(T(hist.join("  <  ")),40+doc.getTextWidth(T(x.p.name))*12/9.5+12,cy)}
-      cy+=6;
-      cr.cats.forEach(k=>{const need=(k.rows.length+(k.tot?1:0)+1)*16+22;if(cy+need>PH-40){doc.addPage();cy=50}
-        doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(24,32,26);doc.text(k.name,40,cy+12);
-        doc.autoTable({startY:cy+16,theme:"grid",margin:{left:40,right:40,bottom:40},head:[["Year","Team",...k.labels]],
-          body:[...newestFirst(k.rows).map(r=>[String(r.y||""),T(r.team),...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
-          styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"right"},
-          headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
-          columnStyles:{0:{cellWidth:44},1:{cellWidth:120}},
-          didParseCell:h=>{if(h.column.index<2)h.cell.styles.halign="left";if(h.section==="body"&&k.tot&&h.row.index===k.rows.length)h.cell.styles.fontStyle="bold"}});
-        cy=doc.lastAutoTable.finalY+4});
-      cy+=6});
-  }
   await pdfSave(doc,T(`${CMP_CTX?"Ours vs target":"Compare"} ${role} ${rows.map(x=>x.p.name.replace(/[,.]?\s+(jr|sr|ii|iii|iv|v)\.?$/i,"").split(" ").pop()).join(" vs ")} ${new Date().toISOString().slice(0,10)}.pdf`));
 }
 $("cmpBtn").addEventListener("click",()=>{$("cmpTitle").textContent="Compare";renderCompare();$("compare").scrollIntoView({behavior:"smooth",block:"start"})});
