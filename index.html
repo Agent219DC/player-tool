@@ -930,10 +930,11 @@ function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl
   return {cats,at:new Date().toISOString().slice(0,10)}}
 function careerHist(c){const by={};(c.cats||[]).forEach(k=>k.rows.forEach(r=>{if(!r.y)return;const key=r.team;(by[key]=by[key]||{lv:r.lv,ys:new Set()}).ys.add(r.y)}));
   return Object.entries(by).map(([t,o])=>{const ys=[...o.ys].sort();return {t,lv:o.lv,a:ys[0],b:ys[ys.length-1]}}).sort((x,y)=>x.a-y.a)
-    .map(h=>`${h.t}${h.lv?` (${h.lv})`:""} ${h.a===h.b?h.a:`${h.a}–${String(h.b).slice(-2)}`}`)}
+    .reverse().map(h=>`${h.t}${h.lv?` (${h.lv})`:""} ${h.a===h.b?h.a:`${h.a}–${String(h.b).slice(-2)}`}`)}
+const newestFirst=rows=>[...rows].sort((a,b)=>(b.y||0)-(a.y||0));
 function careerHtml(c){if(!c||!c.cats||!c.cats.length)return "";
   const hist=careerHist(c);
-  return `<h3>Career stats · ESPN</h3>${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" → "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${k.rows.map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
+  return `<h3>Career stats · ESPN</h3>${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" ← "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${newestFirst(k.rows).map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
 function showCareer(){const c=ESPN_X.career,el=$("v-career");const h=careerHtml(c);el.innerHTML=h;el.hidden=!h}
 async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Pulling his stats…</div>';
   try{const [j,st]=await Promise.all([espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}/stats`).catch(()=>null)]);
@@ -1747,11 +1748,11 @@ async function printReport(){
   const cr=p.career;if(cr&&cr.cats&&cr.cats.length){const PH=doc.internal.pageSize.getHeight();
     if(y>PH-160){doc.addPage();y=60}else y+=8;
     doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text("Career stats (ESPN)",40,y);y+=14;
-    const hist=careerHist(cr);if(hist.length){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);const ln=doc.splitTextToSize(hist.join("  >  "),W-80);doc.text(ln,40,y);y+=ln.length*12}
+    const hist=careerHist(cr);if(hist.length){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(...mut);const ln=doc.splitTextToSize(hist.join("  <  "),W-80);doc.text(ln,40,y);y+=ln.length*12}
     cr.cats.forEach(k=>{const need=(k.rows.length+(k.tot?1:0)+1)*17+24;if(y+need>PH-60){doc.addPage();y=60}
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...ink);doc.text(k.name,40,y+8);
       doc.autoTable({startY:y+12,theme:"grid",margin:{left:40,right:40,bottom:60},head:[["Year","Team",...k.labels]],
-        body:[...k.rows.map(r=>[String(r.y||""),r.team,...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
+        body:[...newestFirst(k.rows).map(r=>[String(r.y||""),r.team,...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
         styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:ink,halign:"right"},
         headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
         columnStyles:{0:{halign:"left",cellWidth:40},1:{halign:"left",cellWidth:90}},
