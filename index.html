@@ -192,6 +192,8 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .trow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border:1px solid var(--line);border-radius:6px;margin-bottom:6px}
 .nsbox{border:1px solid var(--rotation);border-radius:6px;padding:12px;display:grid;gap:8px;background:var(--bg)}
 .nsbox ul{margin:0;padding-left:18px}
+.cmpverdict{margin:6px 0 10px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--surface);font-size:15px}
+.cmpverdict b{font-family:var(--display);font-size:18px;letter-spacing:.02em}
 /* overview field view: wide screens show the formation, phones keep the list */
 .ovfieldwrap{overflow-x:auto;margin:8px 0 4px}
 .ovfield{display:grid;gap:10px 8px;min-width:980px;padding:14px 10px;border-radius:10px;border:1px solid var(--line);position:relative;
@@ -501,8 +503,9 @@ window.claude={use:async n=>{
     <section id="compare" hidden>
       <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
         <h2 id="cmpTitle">Compare</h2>
-        <button class="btn" type="button" id="cmpClose">Close</button>
+        <span style="display:flex;gap:8px"><button class="btn" type="button" id="cmpPrint">Print</button><button class="btn" type="button" id="cmpClose">Close</button></span>
       </div>
+      <p id="cmpVerdict" class="cmpverdict" hidden></p>
       <div class="tablewrap"><table id="cmpTbl" class="cmp"></table></div>
       <p class="note">Green = best of this group on that metric. Red = weakest. Bars show each player's 0–100 score on the metric.</p>
     </section>
@@ -1082,8 +1085,9 @@ async function printOverview(){
 }
 $("ovPrint").addEventListener("click",printOverview);
 $("boardSearch").addEventListener("input",()=>renderBoard());
-function renderCompare(given){
-  let rows=given||LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
+let CMP_ROWS=[],CMP_CTX=null;
+function renderCompare(given,ctx){
+  let rows=given||LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));CMP_CTX=ctx||null;
   if(rows.length<2){$("compare").hidden=true;return}
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
@@ -1099,10 +1103,58 @@ function renderCompare(given){
    <tr><td><b>Status</b></td>${rows.map(x=>cell(x,x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:"–")).join("")}</tr>
    <tr><td><b>Eligibility / portal / visit</b></td>${rows.map(x=>cell(x,esc(recruitLine(x.p))||"–")).join("")}</tr>`;
   $("cmpTbl").innerHTML=head+"<tbody>"+mrows+extra.replace(/<\/td>,/g,"</td>")+"</tbody>";
-  $("compare").hidden=false;
+  $("compare").hidden=false;CMP_ROWS=rows;
+  const v=cmpVerdict(rows);$("cmpVerdict").hidden=!v;$("cmpVerdict").innerHTML=v?v.html:"";
+}
+/* one-line verdict: ours vs. target, or best vs. the rest */
+function cmpVerdict(rows){
+  if(rows.length<2||rows.some(x=>x.r.grade==null))return null;
+  if(CMP_CTX){const [a,b]=rows,d=b.r.grade-a.r.grade,need=d>=10?"Upgrade":d>0?"Slight upgrade":d>-0.05?"Even":"Keep ours";
+    const txt=d>0?`${b.p.name} grades ${fmt(d)} higher than ${a.p.name}`:d<0?`${a.p.name} grades ${fmt(-d)} higher than ${b.p.name}`:"Both grade the same";
+    return {html:`<b>${need}</b> · ${esc(txt)} (${fmt(b.r.grade)} ${b.r.letter} vs. ${fmt(a.r.grade)} ${a.r.letter}).`,text:`${need}: ${txt} (${fmt(b.r.grade)} ${b.r.letter} vs. ${fmt(a.r.grade)} ${a.r.letter}).`}}
+  const s=[...rows].sort((x,y)=>y.r.grade-x.r.grade),d=s[0].r.grade-s[1].r.grade;
+  const txt=`grades highest, ${fmt(d)} ahead of ${s[1].p.name}`;
+  return {html:`<b>Top: ${esc(s[0].p.name)}</b> · ${esc(txt)} (${fmt(s[0].r.grade)} ${s[0].r.letter} vs. ${fmt(s[1].r.grade)} ${s[1].r.letter}).`,text:`Top: ${s[0].p.name} ${txt}.`};
+}
+async function printCompare(){
+  const rows=CMP_ROWS;if(rows.length<2)return;
+  if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+  const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  const role=CMP_CTX&&CMP_CTX.role==="Slot"?"SLOT":P.label;
+  const W=pdfHeader(doc,T(`Player Tool · ${CMP_CTX?"Ours vs. Target":"Compare"} · ${role}`),"");
+  let y=80;const v=cmpVerdict(rows);
+  if(v){doc.setFont("helvetica","bold");doc.setFontSize(10.5);const ls=doc.splitTextToSize(T(v.text),W-100),bh=12+ls.length*12;
+    doc.setFillColor(243,245,242);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(0,177,64);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
+    doc.setTextColor(24,32,26);doc.text(ls,52,y+16);y+=bh+12}
+  const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · ")))]];
+  const best=METRICS.map((_,i)=>{const n=rows.map(x=>x.r.n?x.r.n[i]:null),ok=n.filter(z=>z!=null);if(ok.length<2)return n.map(()=>0);const mx=Math.max(...ok),mn=Math.min(...ok);return n.map(z=>z==null||mx===mn?0:z===mx?1:z===mn?-1:0)});
+  const body=METRICS.map((m,i)=>[`${m.name} (${S.weights[i]}%)`,...rows.map(x=>`${T(fm(x.r.m[i],i))}${m.unit}${x.r.n&&x.r.n[i]!=null?`   (${Math.round(x.r.n[i])}/100)`:""}`)]);
+  const gs=rows.map(x=>x.r.grade),gmx=Math.max(...gs),gmn=Math.min(...gs);
+  body.push(["Score",...rows.map(x=>`${fmt(x.r.grade)} ${T(x.r.letter)}`)]);
+  body.push(["Tier",...rows.map(x=>x.r.tier?TIERNAME[x.r.tier]:"-")]);
+  body.push(["Confidence",...rows.map(x=>`${x.r.conf||"-"}${x.r.partialM?" · 3 of 4":""}`)]);
+  body.push([P.sample[0].toUpperCase()+P.sample.slice(1),...rows.map(x=>String(x.p.db??"-"))]);
+  body.push(["Bio",...rows.map(x=>T(bioLine(x.p))||"-")]);
+  body.push(["Status",...rows.map(x=>x.p.status||"-")]);
+  body.push(["Eligibility / portal / visit",...rows.map(x=>T(recruitLine(x.p))||"-")]);
+  const nM=METRICS.length;
+  doc.autoTable({head,body,startY:y,theme:"grid",
+    styles:{font:"helvetica",fontSize:9,cellPadding:6,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
+    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},
+    columnStyles:{0:{fontStyle:"bold",cellWidth:170}},
+    didParseCell:h=>{if(h.section!=="body"||h.column.index===0)return;const c=h.column.index-1,r=h.row.index;
+      if(r<nM){const b=best[r][c];if(b===1){h.cell.styles.fillColor=[220,239,226]}else if(b===-1){h.cell.styles.textColor=[198,40,40]}}
+      if(r===nM){h.cell.styles.fontStyle="bold";if(gmx!==gmn){if(gs[c]===gmx)h.cell.styles.fillColor=[220,239,226];else if(gs[c]===gmn)h.cell.styles.textColor=[198,40,40]}}
+      if(r===nM+1){const t=rows[c].r.tier;if(t){h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}}}});
+  const fy=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);
+  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.text("Shaded = best of this group on that metric. Red = weakest. (x/100) = the player's score on that metric's scale.",40,fy);
+  await pdfSave(doc,T(`${CMP_CTX?"Ours vs target":"Compare"} ${role} ${rows.map(x=>x.p.name.replace(/[,.]?\s+(jr|sr|ii|iii|iv|v)\.?$/i,"").split(" ").pop()).join(" vs ")} ${new Date().toISOString().slice(0,10)}.pdf`));
 }
 $("cmpBtn").addEventListener("click",()=>{$("cmpTitle").textContent="Compare";renderCompare();$("compare").scrollIntoView({behavior:"smooth",block:"start"})});
 $("cmpClose").addEventListener("click",()=>{$("compare").hidden=true});
+$("cmpPrint").addEventListener("click",printCompare);
 function csvCell(v){v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportTable(rows){
   const head=["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample.charAt(0).toUpperCase()+P.sample.slice(1),...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Score","Grade","Tier","Confidence","Height","Weight","Hometown","State","High school","Status","Eligibility","In portal","Portal date","Visit","Visit date","Starred","Updated"];
@@ -1376,7 +1428,7 @@ function tryCompare(){
   PENDING_CMP=null;
   const rows=[a,b].map(p=>({p,r:score(p)})).filter(x=>x.r);
   if(rows.length<2){flash("Couldn't score both players for a comparison.");return}
-  renderCompare(rows);($("cmpTitle").textContent=`Ours vs. target · ${c.role==="Slot"?"SLOT":c.k}`);
+  renderCompare(rows,{role:c.role});($("cmpTitle").textContent=`Ours vs. target · ${c.role==="Slot"?"SLOT":c.k}`);
   setTimeout(()=>$("compare").scrollIntoView({behavior:"smooth",block:"start"}),50);
 }
 function openPending(){
