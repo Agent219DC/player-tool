@@ -120,13 +120,13 @@ table .chip{font-size:10.5px;padding:2px 7px}
 .bio{font-size:12px;margin-top:2px;white-space:normal}
 .notes{font-size:12px;font-style:italic;margin-top:2px;white-space:normal;max-width:46ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .stag{display:inline-block;font:600 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px;border:1px solid currentColor}
-.st-OnRoster{color:#fff;background:var(--accent);border-color:var(--accent)} .st-Target{color:var(--starter)} .st-Contacted{color:var(--muted)} .st-Offered{color:var(--offer)} .st-Committed{color:var(--impact);background:var(--accent-soft)} .st-NIP{color:var(--muted);opacity:.85} .st-NGE{color:#fff;background:var(--tPass);border-color:var(--tPass)}
+.st-OnRoster{color:#fff;background:var(--accent);border-color:var(--accent)} .st-Target{color:var(--starter)} .st-Contacted{color:var(--muted)} .st-Offered{color:var(--offer)} .st-Committed{color:var(--impact);background:var(--accent-soft)} .st-NIP{color:var(--muted);opacity:.85} .st-Pass{color:#fff;background:var(--tPass);border-color:var(--tPass)}
 .trend{font:600 11px var(--mono);margin-left:4px}
 .star{border:0;background:transparent;padding:0 6px 0 0;font-size:17px;line-height:1;color:var(--muted);cursor:pointer;vertical-align:-1px}
 .star.on{color:#e0a100}
 .star:hover{color:#e0a100}
 button.stag{cursor:pointer;font-family:var(--body);background:transparent}
-button.stag.st-OnRoster{background:var(--accent)} button.stag.st-Committed{background:var(--accent-soft)} button.stag.st-NGE{background:var(--tPass)}
+button.stag.st-OnRoster{background:var(--accent)} button.stag.st-Committed{background:var(--accent-soft)} button.stag.st-Pass{background:var(--tPass)}
 .qs-empty{color:var(--muted);border-style:dashed!important;opacity:.6;padding:0 6px!important;font-size:12px!important;letter-spacing:0!important}
 .qs-empty:hover{opacity:1}
 select.qsel{width:auto;display:inline-block;font:500 12px var(--body);padding:2px 6px;margin-left:6px;vertical-align:1px}
@@ -405,7 +405,7 @@ window.claude={use:async n=>{
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
     <p class="note" id="ovModeNote" hidden><b>Next season:</b> players marked graduating (0 years left) drop off, every returning player counts whatever his confidence, and every target marked <b>Committed</b> joins the roster and competes for the spots. Remaining targets are paired with the new weakest starters.</p>
-    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and NGE players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
+    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and Pass players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
   </section>
 
   <div class="main">
@@ -434,7 +434,7 @@ window.claude={use:async n=>{
         <div class="grid2" id="prior"></div>
       </fieldset>
       <fieldset class="fold"><legend>Recruiting</legend><div class="grid2">
-        <label>Status<select id="p-status"><option value="">—</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>NGE</option></select></label>
+        <label>Status<select id="p-status"><option value="">—</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option></select></label>
         <label>Eligibility left<select id="p-elig"><option value="">—</option><option value="0">0 (graduating)</option><option value="1">1 year</option><option value="2">2 years</option><option value="3">3 years</option><option value="4">4 years</option><option value="5">5 years</option></select></label>
         <label>In portal<select id="p-portal"><option value="">—</option><option>Yes</option><option>No</option></select></label>
         <label>Date entered portal<input id="p-pdate" type="date"></label>
@@ -469,7 +469,7 @@ window.claude={use:async n=>{
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
         <h2 id="boardTitle">QB Board</h2>
-        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>NGE</option><option value="none">No status</option></select>
+        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option><option value="none">No status</option></select>
         <input id="boardSearch" type="search" placeholder="Search players" aria-label="Search the board" style="width:220px;max-width:100%;font-family:var(--body)">
         <div class="seg" role="group" aria-label="Filter by role" id="roleFilter" hidden>
           <button type="button" data-rf="All" aria-pressed="true">All</button>
@@ -779,7 +779,7 @@ function letterOf(g){
   return L+(d>=7?"+":d>=3?"":"−");
 }
 function tierOf(s){const C=cuts();return s>=(S.eliteCut??80)?"Elite":s>=C.impact?"Impact":s>=C.starter?"Starter":s>=C.rotation?"Rotation":"Pass"}
-const TIERNAME={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"Below"};
+const TIERNAME={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"NGE"};
 
 /* ---------- form ---------- */
 function metricInputs(el,prefix,pre){el.innerHTML=METRICS.map((m,i)=>`<label>${pre||""}${m.name}${m.unit?" (%)":""}<input id="${prefix}-${i}" type="number" step="${m.step}"></label>`).join("")}
@@ -878,8 +878,8 @@ function renderBoard(){
    ${empty?`<tr><td colspan="15" class="sub">${boardState==="loading"?"Loading the shared board…":filtersOn()&&BOARD.length?`No players match these filters. <button type="button" class="btn" id="clearFilters" style="margin-left:8px;padding:4px 10px;font-size:13px">Clear filters</button>`:`No ${P.label}s on the board yet. Score one above and save him.`}</td></tr>`:""}</tbody>`;
 }
 const isOurs=p=>p.status==="On Roster"||(!!p.marshall&&!p.status);
-function fixLegacy(p){if(p.status==="Passed")p.status="NGE";if(p.status==="Visit"){delete p.status;if(!p.visit)p.visit="Scheduled"}return p}
-const STATUSES=["On Roster","Target","Contacted","Offered","Committed","NIP","NGE"];
+function fixLegacy(p){if(p.status==="Passed"||p.status==="NGE")p.status="Pass";if(p.status==="Visit"){delete p.status;if(!p.visit)p.visit="Scheduled"}return p}
+const STATUSES=["On Roster","Target","Contacted","Offered","Committed","NIP","Pass"];
 function safeUrl(u){if(!u)return"";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return""}}
 function fmtDate(d){if(!d)return"";const t=new Date(d+"T12:00:00");return isNaN(t)?d:t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
 function eligLong(p){return p.elig===0?"Graduating":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
@@ -1018,7 +1018,7 @@ async function printSelected(){
     doc.text("·   * next to a flag = seasons disagree or only 3 of 4 metrics",lx,y)}
   const y2=rows.some(hasFlag)?y+14:y;
   doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F Below.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,y2);
+  doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F NGE.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,y2);
   const fname=`${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
@@ -1076,7 +1076,7 @@ async function printOverview(){
   doc.setFont("helvetica","normal");
 
   doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and NGE players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
+  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and Pass players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
@@ -1232,7 +1232,7 @@ function rowToPlayer(h,r){
   const ht=g("height"),wt=num(g("weight")),home=g("hometown"),st=g("state").toUpperCase().slice(0,2),hs=g("high school"),
     status=g("status"),el=/grad/i.test(g("eligibility"))?0:parseInt(g("eligibility")),po=g("in portal"),pd=g("portal date"),vis=g("visit"),vdt=g("visit date"),starv=g("starred");
   if(ht)p.ht=ht;if(wt)p.wt=wt;if(home)p.home=home;if(st)p.st=st;if(hs)p.hs=hs;
-  const stx=/^passed?$/i.test(status)?"NGE":status;const sm=STATUSES.find(x=>x.toLowerCase()===stx.toLowerCase());if(sm)p.status=sm;
+  const stx=/^(passed?|nge)$/i.test(status)?"Pass":status;const sm=STATUSES.find(x=>x.toLowerCase()===stx.toLowerCase());if(sm)p.status=sm;
   if(el>=0&&el<=5)p.elig=el;
   if(/^y/i.test(po))p.portal="Yes";else if(/^n/i.test(po))p.portal="No";
   if(pd){const d=new Date(pd);if(!isNaN(d))p.pdate=d.toISOString().slice(0,10)}
@@ -1318,7 +1318,7 @@ async function renderOverview(){
         let mine=(NEXT?all:live).filter(x=>inRole(x)&&isOurs(x.p)&&(+x.p.season||0)===yr&&stays(x));
         if(!NEXT&&lineX&&(!g.role||!lineX.p.role||lineX.p.role===g.role)&&mine.length<g.n&&ourAll.filter(stays).length>mine.length&&!mine.some(x=>x.p.name.toLowerCase()===lineX.p.name.toLowerCase())){
           if(stays(lineX)){mine.push(lineX);lineX=null}}
-        const isTarget=x=>inRole(x)&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="NGE"&&x.p.status!=="NIP";
+        const isTarget=x=>inRole(x)&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="Pass"&&x.p.status!=="NIP";
         const commits=all.filter(x=>isTarget(x)&&x.p.status==="Committed");
         if(NEXT)mine=mine.concat(commits.map(x=>({p:x.p,r:x.r,commit:true})));
         mine=mine.sort((a,b)=>b.r.grade-a.r.grade).slice(0,g.n);
@@ -1326,7 +1326,7 @@ async function renderOverview(){
         const committed=commits.length;
         /* when a spot ends up with no target, say why: red-flag (low confidence) targets or WRs with no role */
         const lowN=all.filter(x=>isTarget(x)&&!live.includes(x)&&!(NEXT&&x.p.status==="Committed")).length;
-        const noRoleN=g.role?all.filter(x=>!x.p.role&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="NGE"&&x.p.status!=="NIP").length:0;
+        const noRoleN=g.role?all.filter(x=>!x.p.role&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="Pass"&&x.p.status!=="NIP").length:0;
         const why=[lowN?`${lowN} red-flag target${lowN>1?"s":""} left out`:"",noRoleN?`${noRoleN} ${k} with no role set`:""].filter(Boolean).join(" · ");
         for(let i=0;i<g.n;i++){
           const best=mine[i]||null;
@@ -1464,7 +1464,7 @@ document.addEventListener("click",e=>{if(!e.target.closest(".gsearch"))$("gResul
 $("gSearch").addEventListener("keydown",e=>{if(e.key==="Escape"){$("gResults").hidden=true;$("gSearch").blur()}if(e.key==="Enter"){e.preventDefault();const f=$("gResults").querySelector("[data-gi]");if(f)f.click()}});
 
 /* ---------- recruiting summary + visit calendar ---------- */
-const REC_COLS=["Target","Contacted","Offered","Committed","NIP","NGE"];
+const REC_COLS=["Target","Contacted","Offered","Committed","NIP","Pass"];
 let REC=null,VMODE="up";
 async function renderRecruit(){
   $("recruit").hidden=false;$("recPrint").disabled=true;
