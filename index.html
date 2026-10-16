@@ -235,6 +235,12 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .career th{color:var(--muted);font-weight:600;font-size:11px;cursor:default}
 .career th:first-child,.career td:first-child,.career th:nth-child(2),.career td:nth-child(2){text-align:left}
 .career tr.tot td{font-weight:700;border-bottom:0}
+.cmpcareer{display:grid;gap:18px;margin-top:14px}
+.cmpcareer>h3{margin:0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmpcareer .career{margin:0;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.cmpcareer .career h4{margin:0 0 4px;font-size:15px}
+@media (min-width:1000px){.cmpcareer .cgrid{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:12px}}
+@media (max-width:999px){.cmpcareer .cgrid{display:grid;gap:12px}}
 /* overview field view: wide screens show the formation, phones keep the list */
 .ovfieldwrap{overflow-x:auto;margin:8px 0 4px}
 .ovfield{display:grid;gap:10px 0;min-width:980px;padding:14px 10px;border-radius:10px;border:1px solid var(--line);position:relative;
@@ -560,6 +566,7 @@ window.claude={use:async n=>{
       </div>
       <p id="cmpVerdict" class="cmpverdict" hidden></p>
       <div class="tablewrap"><table id="cmpTbl" class="cmp"></table></div>
+      <div id="cmpCareer" class="cmpcareer" hidden></div>
       <p class="note">Green = best of this group on that metric. Red = weakest. Bars show each player's 0–100 score on the metric.</p>
     </section>
   </section>
@@ -932,9 +939,9 @@ function careerHist(c){const by={};(c.cats||[]).forEach(k=>k.rows.forEach(r=>{if
   return Object.entries(by).map(([t,o])=>{const ys=[...o.ys].sort();return {t,lv:o.lv,a:ys[0],b:ys[ys.length-1]}}).sort((x,y)=>x.a-y.a)
     .reverse().map(h=>`${h.t}${h.lv?` (${h.lv})`:""} ${h.a===h.b?h.a:`${h.a}–${String(h.b).slice(-2)}`}`)}
 const newestFirst=rows=>[...rows].sort((a,b)=>(b.y||0)-(a.y||0));
-function careerHtml(c){if(!c||!c.cats||!c.cats.length)return "";
+function careerHtml(c,title){if(!c||!c.cats||!c.cats.length)return "";
   const hist=careerHist(c);
-  return `<h3>Career stats · ESPN</h3>${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" ← "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${newestFirst(k.rows).map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
+  return `${title!=null?title:"<h3>Career stats · ESPN</h3>"}${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" ← "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${newestFirst(k.rows).map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
 function showCareer(){const c=ESPN_X.career,el=$("v-career");const h=careerHtml(c);el.innerHTML=h;el.hidden=!h}
 async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Pulling his stats…</div>';
   try{const [j,st]=await Promise.all([espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}/stats`).catch(()=>null)]);
@@ -1248,8 +1255,11 @@ function renderCompare(given,ctx){
    <tr><td><b>${P.sample[0].toUpperCase()+P.sample.slice(1)}</b></td>${rows.map(x=>cell(x,String(x.p.db??"–"))).join("")}</tr>
    <tr><td><b>Bio</b></td>${rows.map(x=>cell(x,esc(bioLine(x.p))||"–")).join("")}</tr>
    <tr><td><b>Status</b></td>${rows.map(x=>cell(x,x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:"–")).join("")}</tr>
-   <tr><td><b>Eligibility / portal / visit</b></td>${rows.map(x=>cell(x,esc(recruitLine(x.p))||"–")).join("")}</tr>`;
+   <tr><td><b>Eligibility / portal / visit</b></td>${rows.map(x=>cell(x,esc(recruitLine(x.p))||"–")).join("")}</tr>`
+   +(rows.some(x=>x.p.career)?`<tr><td><b>Schools</b></td>${rows.map(x=>cell(x,x.p.career?esc(careerHist(x.p.career).join(" ← "))||"–":"No ESPN stats")).join("")}</tr>`:"");
   $("cmpTbl").innerHTML=head+"<tbody>"+mrows+extra.replace(/<\/td>,/g,"</td>")+"</tbody>";
+  const withC=rows.filter(x=>x.p.career&&x.p.career.cats&&x.p.career.cats.length);const cc=$("cmpCareer");
+  cc.hidden=!withC.length;cc.innerHTML=withC.length?`<h3>Career stats · ESPN</h3><div class="cgrid" style="--n:${rows.length}">${rows.map(x=>`<div class="career">${careerHtml(x.p.career,`<h4>${esc(x.p.name)}</h4>`)||`<h4>${esc(x.p.name)}</h4><div class="sub">No ESPN stats added. Open him and click Add stats.</div>`}</div>`).join("")}</div>`:"";
   $("compare").hidden=false;CMP_ROWS=rows;
   const v=cmpVerdict(rows);$("cmpVerdict").hidden=!v;$("cmpVerdict").innerHTML=v?v.html:"";
 }
@@ -1285,6 +1295,7 @@ async function printCompare(){
   body.push(["Bio",...rows.map(x=>T(bioLine(x.p))||"-")]);
   body.push(["Status",...rows.map(x=>x.p.status||"-")]);
   body.push(["Eligibility / portal / visit",...rows.map(x=>T(recruitLine(x.p))||"-")]);
+  if(rows.some(x=>x.p.career))body.push(["Schools",...rows.map(x=>x.p.career?T(careerHist(x.p.career).join("  <  "))||"-":"No ESPN stats")]);
   const nM=METRICS.length;
   doc.autoTable({head,body,startY:y,theme:"grid",
     styles:{font:"helvetica",fontSize:9,cellPadding:6,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
@@ -1297,6 +1308,24 @@ async function printCompare(){
   const fy=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);
   doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text("Shaded = best of this group on that metric. Red = weakest. (x/100) = the player's score on that metric's scale.",40,fy);
+  const withC=rows.filter(x=>x.p.career&&x.p.career.cats&&x.p.career.cats.length);
+  if(withC.length){const PH=doc.internal.pageSize.getHeight();doc.addPage();let cy=60;
+    doc.setFont("helvetica","bold");doc.setFontSize(14);doc.setTextColor(24,32,26);doc.text("Career stats (ESPN)",40,cy);cy+=10;
+    withC.forEach(x=>{const cr=x.p.career;if(cy>PH-140){doc.addPage();cy=50}
+      cy+=18;doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text(T(x.p.name),40,cy);
+      const hist=careerHist(cr);if(hist.length){doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);doc.text(T(hist.join("  <  ")),40+doc.getTextWidth(T(x.p.name))*12/9.5+12,cy)}
+      cy+=6;
+      cr.cats.forEach(k=>{const need=(k.rows.length+(k.tot?1:0)+1)*16+22;if(cy+need>PH-40){doc.addPage();cy=50}
+        doc.setFont("helvetica","bold");doc.setFontSize(9.5);doc.setTextColor(24,32,26);doc.text(k.name,40,cy+12);
+        doc.autoTable({startY:cy+16,theme:"grid",margin:{left:40,right:40,bottom:40},head:[["Year","Team",...k.labels]],
+          body:[...newestFirst(k.rows).map(r=>[String(r.y||""),T(r.team),...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
+          styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"right"},
+          headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+          columnStyles:{0:{cellWidth:44},1:{cellWidth:120}},
+          didParseCell:h=>{if(h.column.index<2)h.cell.styles.halign="left";if(h.section==="body"&&k.tot&&h.row.index===k.rows.length)h.cell.styles.fontStyle="bold"}});
+        cy=doc.lastAutoTable.finalY+4});
+      cy+=6});
+  }
   await pdfSave(doc,T(`${CMP_CTX?"Ours vs target":"Compare"} ${role} ${rows.map(x=>x.p.name.replace(/[,.]?\s+(jr|sr|ii|iii|iv|v)\.?$/i,"").split(" ").pop()).join(" vs ")} ${new Date().toISOString().slice(0,10)}.pdf`));
 }
 $("cmpBtn").addEventListener("click",()=>{$("cmpTitle").textContent="Compare";renderCompare();$("compare").scrollIntoView({behavior:"smooth",block:"start"})});
