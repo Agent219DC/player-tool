@@ -55,7 +55,7 @@ header{position:relative;display:flex;flex-wrap:wrap;align-items:end;justify-con
 h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 h1 span{color:var(--accent-text)}
 h2{font-family:var(--display);font-weight:600;font-size:22px;text-transform:uppercase;letter-spacing:.04em;margin:0}
-header>.brand{order:1;flex:1 1 0;min-width:0} header>.pos{order:3;flex-basis:100%} .themeBtn{font:600 13px var(--body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:100%;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px} .themeBtn{font:600 13px var(--body);padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 .themeBtn:hover{border-color:var(--accent)}
 @media (max-width:480px){.themeBtn{padding:4px 10px;font-size:12px}}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -153,7 +153,8 @@ table{border-collapse:collapse;width:100%;min-width:720px;font-variant-numeric:t
 th,td{padding:8px 7px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
 th{font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--sunk);cursor:pointer}
 td.num{font-family:var(--mono);text-align:right}
-#board td.cn{white-space:normal;min-width:210px}
+#board td.cn{white-space:normal;min-width:270px}
+#board th,#board td{padding-left:5px;padding-right:5px}
 #board td.ca .x{font-size:12px;padding:0 2px}
 .mob-hw{display:none}
 th.num{text-align:right}
@@ -194,6 +195,27 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .nsbox ul{margin:0;padding-left:18px}
 .cmpverdict{margin:6px 0 10px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--surface);font-size:15px}
 .cmpverdict b{font-family:var(--display);font-size:18px;letter-spacing:.02em}
+.hnav{display:flex;gap:8px}
+.hnav .btn{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:6px 14px}
+.editor{display:block}
+.editor>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:12px;cursor:pointer;padding:2px 0}
+.editor>summary::-webkit-details-marker{display:none}
+.editor[open]>summary{margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:80;margin:0;max-width:min(620px,92vw);padding:11px 16px;border-radius:8px;
+  background:var(--fg);color:var(--bg);font-size:14px;box-shadow:0 6px 24px rgba(0,0,0,.25)}
+.menu,.rowmenu{position:relative;display:inline-block}
+.menu>summary,.rowmenu>summary{list-style:none;cursor:pointer}
+.menu>summary::-webkit-details-marker,.rowmenu>summary::-webkit-details-marker{display:none}
+.menu-list{position:absolute;z-index:40;top:calc(100% + 4px);left:0;min-width:230px;display:grid;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.menu-list button{text-align:left;border:0;background:transparent;color:var(--fg);font:500 14px var(--body);padding:8px 10px;border-radius:6px;cursor:pointer}
+.menu-list button:hover{background:var(--sunk)}
+.rowmenu>summary{font:700 18px/1 var(--body);color:var(--muted);padding:2px 8px;border-radius:6px}
+.rowmenu>summary:hover,.rowmenu[open]>summary{background:var(--sunk);color:var(--fg)}
+.rowmenu-list{position:absolute;z-index:30;right:calc(100% + 4px);top:50%;transform:translateY(-50%);display:flex;gap:2px;padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 6px 18px rgba(0,0,0,.14);white-space:nowrap}
+.rowmenu-list .x{font-size:13px;padding:5px 10px;border-radius:6px}
+.rowmenu-list .x:hover{background:var(--sunk);color:var(--fg)}
+#board td.ca{width:1%;white-space:nowrap}
+#board .sub.bio{max-width:420px}
 /* overview field view: wide screens show the formation, phones keep the list */
 .ovfieldwrap{overflow-x:auto;margin:8px 0 4px}
 .ovfield{display:grid;gap:10px 0;min-width:980px;padding:14px 10px;border-radius:10px;border:1px solid var(--line);position:relative;
@@ -213,6 +235,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .ovcard.ovc-empty b{font:700 15px var(--display);letter-spacing:.04em}
 .ovlist{display:none}
 @media (max-width:760px){.ovfieldwrap{display:none}.ovlist{display:block}}
+@media (min-width:641px) and (max-width:1180px){#board td.chw,#board th[data-k="ht"],#board th[data-k="wt"]{display:none}#board .mob-hw{display:inline}#board td.cn{min-width:190px}}
 .tlink{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 /* phone: board rows become cards */
 @media (max-width:640px){
@@ -352,7 +375,8 @@ window.claude={use:async n=>{
         <h1>Player <span>Tool</span></h1>
       </div>
     </div>
-    <div class="pos" role="group" aria-label="Position" id="posBar"></div>
+    <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
+      <div class="hnav"><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
   <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -378,8 +402,6 @@ window.claude={use:async n=>{
     <span id="modeNote" class="note"></span>
     <span style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span>
-      <button class="btn" type="button" id="recBtn">Recruiting</button>
-      <button class="btn" type="button" id="ovBtn">Overview</button>
     </span>
   </div>
 
@@ -408,6 +430,8 @@ window.claude={use:async n=>{
     <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the listed starter from model settings fills it. Targets exclude On Roster, our own school, hidden, NIP and Pass players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
   </section>
 
+  <details class="editor" id="editor">
+  <summary class="editor-sum"><span class="btn primary" id="editorBtn">+ Add player</span><span class="note" id="editorNote">Enter a player's numbers to grade him, or click a name on the board to edit him.</span></summary>
   <div class="main">
     <form class="panel" id="form" autocomplete="off">
       <h2>Player</h2>
@@ -445,7 +469,6 @@ window.claude={use:async n=>{
         <button class="btn primary" type="submit">Save to board</button>
         <button class="btn" type="button" id="clear">Clear form</button>
       </div>
-      <p class="note" id="status" role="status" hidden></p>
     </form>
 
     <section class="panel vpanel" aria-live="polite">
@@ -464,6 +487,7 @@ window.claude={use:async n=>{
       <div class="btns"><button class="btn" type="button" id="reportBtn" disabled>Player report (PDF)</button></div>
     </section>
   </div>
+  </details>
 
   <section style="display:grid;gap:10px">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
@@ -490,10 +514,12 @@ window.claude={use:async n=>{
         <button class="btn" type="button" id="pickAll">Select all</button>
         <button class="btn" type="button" id="pickNone">Clear</button>
         <button class="btn" type="button" id="cmpBtn" disabled>Compare selected</button>
-        <button class="btn" type="button" id="csvBtn">Export CSV</button>
-        <button class="btn" type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions</button>
-        <button class="btn" type="button" id="impBtn">Import CSV</button>
-        <button class="btn" type="button" id="tplBtn">CSV template</button>
+        <details class="menu" id="ioMenu"><summary class="btn">Import / Export ▾</summary><div class="menu-list">
+          <button type="button" id="csvBtn">Export this board (CSV)</button>
+          <button type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions (Excel)</button>
+          <button type="button" id="impBtn">Import players (CSV)</button>
+          <button type="button" id="tplBtn">Download CSV template</button>
+        </div></details>
         <input type="file" id="impFile" accept=".csv,text/csv" hidden>
         <button class="btn primary" type="button" id="printBtn" disabled>Print selected</button>
       </div>
@@ -890,11 +916,11 @@ function renderBoard(){
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
   $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
-   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600">${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");return (l||hw)?`<div class="sub bio">${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}</div>`:""})()}${(()=>{const rl=recruitLine(x.p,true),el=eligLong(x.p);return rl||el?`<div class="sub recruit">${el?`<span class="mob-hw">${esc(el)}${rl?" · ":""}</span>`:""}${esc(rl)}</div>`:""})()}${metaLine(x.p)?`<div class="sub meta">${esc(metaLine(x.p))}</div>`:""}`}</td>
+   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
    <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td><td class="num cel">${x.line?"—":esc(eligShort(x.p))}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
    <td class="num cg" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter">${x.r.letter}</span></td>
    <td class="ct" >${x.r.tier?`<span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span>`:'<span class="sub">Scale not set</span>'}</td>
-   <td class="ca" style="white-space:nowrap">${x.line?"":`<button class="x" data-hide="${x.idx}" aria-label="${x.p.ref?"Unhide":"Hide"} ${esc(x.p.name)}">${x.p.ref?"Unhide":"Hide"}</button> <button class="x" data-del="${x.idx}" aria-label="Delete ${esc(x.p.name)}">Delete</button>`}</td></tr>`).join("")}
+   <td class="ca">${x.line?"":`<details class="rowmenu"><summary aria-label="More actions for ${esc(x.p.name)}" title="Hide or delete">⋯</summary><div class="rowmenu-list"><button class="x" data-hide="${x.idx}" aria-label="${x.p.ref?"Unhide":"Hide"} ${esc(x.p.name)}">${x.p.ref?"Unhide":"Hide"}</button><button class="x" data-del="${x.idx}" aria-label="Delete ${esc(x.p.name)}">Delete</button></div></details>`}</td></tr>`).join("")}
    ${empty?`<tr><td colspan="15" class="sub">${boardState==="loading"?"Loading the shared board…":filtersOn()&&BOARD.length?`No players match these filters. <button type="button" class="btn" id="clearFilters" style="margin-left:8px;padding:4px 10px;font-size:13px">Clear filters</button>`:`No ${P.label}s on the board yet. Score one above and save him.`}</td></tr>`:""}</tbody>`;
 }
 const isOurs=p=>p.status==="On Roster"||(!!p.marshall&&!p.status);
@@ -937,7 +963,7 @@ $("board").addEventListener("click",e=>{
   if(e.target.closest(".pick"))return;
   if(e.target.id==="clearFilters"){STARONLY=false;$("starOnly").checked=false;$("statusFilter").value="";$("boardSearch").value="";ROLEF="All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"));renderBoard();return}
   const th=e.target.closest("th");if(th&&th.dataset.k){const k=th.dataset.k;sortDir=k===sortKey?-sortDir:-1;sortKey=k;renderBoard();return}
-  const ld=e.target.closest("[data-load]");if(ld){e.preventDefault();fillForm(clone(BOARD[+ld.dataset.load]));window.scrollTo({top:0,behavior:"smooth"});return}
+  const ld=e.target.closest("[data-load]");if(ld){e.preventDefault();fillForm(clone(BOARD[+ld.dataset.load]));openEditor();return}
   const stb=e.target.closest("[data-star]");
   if(stb){const p=BOARD[+stb.dataset.star];const v=!p.star;
     if(DB&&p.id){DB.collection(coll()).doc(p.id).update({star:v}).catch(()=>flash("Couldn't change that player. You may not have edit access."))}
@@ -1451,10 +1477,15 @@ function tryCompare(){
   renderCompare(rows,{role:c.role});($("cmpTitle").textContent=`Ours vs. target · ${c.role==="Slot"?"SLOT":c.k}`);
   setTimeout(()=>$("compare").scrollIntoView({behavior:"smooth",block:"start"}),50);
 }
+document.addEventListener("click",e=>{document.querySelectorAll("details.menu[open],details.rowmenu[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".menu-list button"))d.open=false})});
+document.addEventListener("toggle",e=>{const d=e.target;if(d.open&&d.matches&&d.matches("details.rowmenu"))document.querySelectorAll("details.rowmenu[open]").forEach(x=>{if(x!==d)x.open=false})},true);
+let EDIT_OPEN=false;
+function openEditor(){const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeout(()=>ed.scrollIntoView({behavior:"smooth",block:"start"}),30)}
+$("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o});
 function openPending(){
   if(!PENDING||PENDING.k!==POSKEY)return;
   const p=BOARD.find(b=>b.id===PENDING.id);if(!p)return;
-  PENDING=null;fillForm(clone(p));render();window.scrollTo({top:0,behavior:"smooth"});
+  PENDING=null;fillForm(clone(p));render();openEditor();
 }
 
 /* ---------- search all positions ---------- */
@@ -1877,5 +1908,6 @@ renderBoard();
 if(window.claude&&claude.use) connect(); else subscribe();
 </script>
 
+<p id="status" class="toast" role="status" hidden></p>
 </body>
 </html>
