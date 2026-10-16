@@ -640,6 +640,8 @@ const POSITIONS={
     unseed:["fcs-worst-dt-fcs-2025"],
     /* one-time corrections: only applied while the field still holds the old value */
     fix:[{id:"kenyatta-hardge-marshall-2026",field:"elig",from:3,to:2}],
+    /* one-time corrections to saved Model settings (only while they still hold the old value) */
+    cfgFix:[{field:"eliteCut",from:80,to:65},{field:"dbPerGame",from:30,to:35}],
     seed:[
       {name:"Kenyatta Hardge",school:"Marshall",level:"G6",season:"2026",thru:6,db:229,m:[8.8,71.8,7.9,71.3],status:"On Roster",elig:2},
       {name:"Kayden McDonald",school:"Ohio State",level:"P4",season:"2025",thru:"full",db:449,m:[13.8,91.0,4.0,64.44],ref:true,test:true},
@@ -1657,6 +1659,8 @@ function subscribe(){
   const key=POSKEY;
   unsubs.push(DB.doc(cfgPath()).onSnapshot(s=>{
     if(key!==POSKEY||!s.exists)return;
+    {const fx=POSITIONS[key].cfgFix,d=s.data(),up={};if(fx&&OWNER&&USER&&DB)fx.forEach(f=>{if(d[f.field]===f.from)up[f.field]=f.to});
+      if(Object.keys(up).length){DB.doc(cfgPath()).update(up).catch(()=>{});return}}
     const md=S.mode;S=Object.assign(clone(DEFAULTS),clone(s.data()));S.mode=md;
     if(S.levels&&S.levels.G5!=null){if(S.levels.G6==null)S.levels.G6=S.levels.G5;delete S.levels.G5}
     if(S.line&&S.line.level==="G5")S.line.level="G6";
