@@ -221,15 +221,12 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .espn-res{display:grid;gap:4px;max-height:300px;overflow:auto}
 .espn-hit{display:flex;gap:10px;align-items:center;text-align:left;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);cursor:pointer;font:inherit}
 .espn-hit:hover{border-color:var(--accent)}
-.espn-hit img,.espn-hit .ph{width:40px;height:30px;object-fit:cover;border-radius:4px;background:var(--sunk);flex:none}
 .espn-hit .sub{display:block}
 .espn-card{display:flex;gap:10px;align-items:center;font-size:13px}
 .espn-card img{width:64px;height:48px;object-fit:cover;border-radius:6px;background:var(--surface)}
 .espn-manual{font-size:13px;color:var(--muted)}
 .linkbtn{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}
 form.espn-locked #p-name,form.espn-locked #p-school,form.espn-locked #p-level{opacity:.55}
-.vphoto{width:56px;height:42px;object-fit:cover;border-radius:6px;margin-right:10px;vertical-align:middle;background:var(--sunk)}
-.cmpphoto{display:block;width:72px;height:54px;object-fit:cover;border-radius:6px;margin-bottom:6px;background:var(--sunk)}
 /* overview field view: wide screens show the formation, phones keep the list */
 .ovfieldwrap{overflow-x:auto;margin:8px 0 4px}
 .ovfield{display:grid;gap:10px 0;min-width:980px;padding:14px 10px;border-radius:10px;border:1px solid var(--line);position:relative;
@@ -496,7 +493,7 @@ window.claude={use:async n=>{
       <div class="verdict">
         <div class="score" id="v-score">–</div>
         <div>
-          <div class="who" id="v-who"><img id="v-photo" class="vphoto" alt="" hidden><span id="v-name">Enter a player</span></div>
+          <div class="who" id="v-who"><span id="v-name">Enter a player</span></div>
           <div class="sub" id="v-sub"></div>
           <div class="chips" id="v-chips"></div>
         </div>
@@ -875,7 +872,7 @@ function readForm(){
 }
 let LOADED_KEY=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
-  ESPN_X={espnId:p.espnId||null,photo:p.photo||null,espnStats:p.espnStats||null,espnClass:p.espnClass||null};espnReset(!!(p&&p.name));
+  ESPN_X={espnId:p.espnId||null,espnStats:p.espnStats||null,espnClass:p.espnClass||null};espnReset(!!(p&&p.name));
   $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";$("p-portal").value=p.portal||"";$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
@@ -883,23 +880,22 @@ function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   render();
 }
 
-/* ---------- ESPN lookup: search a player, fill his bio, keep his photo and box-score line ---------- */
-let ESPN_X={espnId:null,photo:null,espnStats:null,espnClass:null};
+/* ---------- ESPN lookup: search a player, fill his bio, keep his box-score line ---------- */
+let ESPN_X={espnId:null,espnStats:null,espnClass:null};
 const ESPN_API="https://site.web.api.espn.com/apis/common/v3";
 const P4_CONF=/\b(SEC|Southeastern|Big Ten|Big 12|ACC|Atlantic Coast)\b/i;
-function setPhoto(p){const im=$("v-photo");const src=(p&&p.photo)||ESPN_X.photo;if(src){im.src=src;im.hidden=false;im.onerror=()=>{im.hidden=true}}else{im.hidden=true;im.removeAttribute("src")}}
 function espnLock(on){["p-name","p-school","p-level"].forEach(id=>{$(id).disabled=on});$("form").classList.toggle("espn-locked",on)}
 function espnReset(editing){$("espnRes").hidden=true;$("espnRes").innerHTML="";$("espnQ").value="";$("espnManual").checked=false;
   const has=!!ESPN_X.espnId;$("espnCard").hidden=!has;if(has)$("espnCard").innerHTML=espnCardHtml();
   espnLock(!editing&&!has)}
-function espnCardHtml(){const x=ESPN_X;return `${x.photo?`<img src="${esc(x.photo)}" alt="" onerror="this.remove()">`:""}<div><b>On ESPN</b>${x.espnClass?` · ${esc(x.espnClass)}`:""}${x.espnStats?`<div class="sub">${esc(x.espnStats)}</div>`:""}<div class="sub"><a href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(x.espnId)}" target="_blank" rel="noopener">ESPN page</a> · <button type="button" class="linkbtn" id="espnRefresh">Update from ESPN</button></div></div>`}
+function espnCardHtml(){const x=ESPN_X;return `<div><b>On ESPN</b>${x.espnClass?` · ${esc(x.espnClass)}`:""}${x.espnStats?`<div class="sub">${esc(x.espnStats)}</div>`:""}<div class="sub"><a href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(x.espnId)}" target="_blank" rel="noopener">ESPN page</a> · <button type="button" class="linkbtn" id="espnRefresh">Update from ESPN</button></div></div>`}
 async function espnJSON(url){const r=await fetch(url,{mode:"cors"});if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}
 async function espnSearch(){const q=$("espnQ").value.trim();if(!q){$("espnQ").focus();return}
   const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Searching ESPN…</div>';
   try{const j=await espnJSON(`${ESPN_API}/search?query=${encodeURIComponent(q)}&limit=10&type=player&sport=football&league=college-football`);
     const items=(j.items||[]).filter(it=>(it.defaultLeagueSlug||"")==="college-football"||((it.leagueRelationships||[])[0]?.core?.slug)==="college-football");
     if(!items.length){box.innerHTML='<div class="sub">No college players found on ESPN. Check the spelling, or tick <b>Not on ESPN</b> to enter him by hand.</div>';return}
-    box.innerHTML=items.map(it=>{const t=(it.teamRelationships||[])[0];return `<button type="button" class="espn-hit" data-eid="${esc(it.id)}">${it.headshot&&it.headshot.href?`<img src="${esc(it.headshot.href)}" alt="" onerror="this.style.visibility='hidden'">`:'<span class="ph"></span>'}<span><b>${esc(it.displayName||"")}</b><span class="sub">${esc([it.position&&it.position.displayName,t&&t.displayName].filter(Boolean).join(" · "))}</span></span></button>`}).join("");
+    box.innerHTML=items.map(it=>{const t=(it.teamRelationships||[])[0];return `<button type="button" class="espn-hit" data-eid="${esc(it.id)}"><span><b>${esc(it.displayName||"")}</b><span class="sub">${esc([it.position&&it.position.displayName,t&&t.displayName].filter(Boolean).join(" · "))}</span></span></button>`}).join("");
   }catch(e){box.innerHTML='<div class="sub">ESPN lookup isn\'t available right now. Tick <b>Not on ESPN</b> to enter him by hand.</div>'}
 }
 function espnLevel(team){const g=team&&team.groups||{},par=(g.parent&&(g.parent.name||g.parent.abbreviation))||"";
@@ -917,7 +913,7 @@ async function espnPick(id,refreshOnly){const box=$("espnRes");
     const bp=(a.displayBirthPlace||"").split(",").map(x=>x.trim());
     if(bp[0]&&!$("p-home").value)$("p-home").value=bp[0];
     if(bp[1]&&/^[A-Z]{2}$/.test(bp[1])&&!$("p-st").value)$("p-st").value=bp[1];
-    ESPN_X={espnId:String(a.id||id),photo:(a.headshot&&a.headshot.href)||null,espnStats:espnStatLine(a.statsSummary),espnClass:a.displayExperience||null};
+    ESPN_X={espnId:String(a.id||id),espnStats:espnStatLine(a.statsSummary),espnClass:a.displayExperience||null};
     box.hidden=true;box.innerHTML="";espnLock(false);$("espnCard").hidden=false;$("espnCard").innerHTML=espnCardHtml();
     const pos=a.position&&a.position.abbreviation;if(pos&&!refreshOnly)espnPosNote(pos);
     render();
@@ -941,12 +937,12 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);
   $("teamGames").disabled=S.mode==="full";
   const p=readForm(), r=score(p), L=lineScore();
   if(!r){
-    $("v-score").innerHTML="–";$("v-name").textContent=p.name||"Enter a player";setPhoto(p);
+    $("v-score").innerHTML="–";$("v-name").textContent=p.name||"Enter a player";
     $("v-sub").textContent=scaleReady()?`Fill in ${P.sample} and at least three of the four metrics to score.`:`The ${P.label} scale isn't set yet. Add the 2025 top and bottom values in Model settings.`;$("v-chips").innerHTML="";
     $("v-metrics").innerHTML="";$("v-math").textContent="";drawScale(null,gradeScore(L.final));return;
   }
   $("v-score").innerHTML=`${fmt(r.grade)}<small> ${r.letter}</small>`;
-  $("v-name").textContent=p.name||P.unnamed;setPhoto(p);
+  $("v-name").textContent=p.name||P.unnamed;
   const lg=gradeScore(L.final), d=r.grade-lg;
   $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, 2025–26 blended (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
   $("v-chips").innerHTML=`<span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>`
@@ -1209,7 +1205,7 @@ function renderCompare(given,ctx){
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
   const hi=(vals,i)=>{const v=vals.map(r=>r.r.n?r.r.n[i]:null);const ok=v.filter(x=>x!=null);if(ok.length<2)return v.map(()=>"");const mx=Math.max(...ok),mn=Math.min(...ok);if(mx===mn)return v.map(()=>"");return v.map(x=>x==null?"":x===mx?"best":x===mn?"worst":"")};
-  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${x.p.photo?`<img class="cmpphoto" src="${esc(x.p.photo)}" alt="" onerror="this.remove()">`:""}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
+  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
   const mrows=METRICS.map((m,i)=>{const c=hi(rows,i);return `<tr><td><b>${m.name}</b> <span class="sub">(${S.weights[i]}%)</span></td>${rows.map((x,k)=>{const n=x.r.n?x.r.n[i]:null;return cell(x,`${fm(x.r.m[i],i)}${m.unit}${n!=null?`<div class="mini"><i style="width:${n}%"></i></div>`:""}`,c[k])}).join("")}</tr>`}).join("");
   const gs=rows.map(x=>x.r.grade);const okg=gs.filter(g=>g!=null);const gmx=okg.length?Math.max(...okg):null,gmn=okg.length?Math.min(...okg):null;
   const extra=`<tr><td><b>Score</b></td>${rows.map(x=>cell(x,`<b>${fmt(x.r.grade)}</b> ${x.r.letter}`,okg.length>1&&gmx!==gmn?(x.r.grade===gmx?"best":x.r.grade===gmn?"worst":""):""))}</tr>
