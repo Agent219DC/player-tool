@@ -70,6 +70,12 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 .hnav{align-items:center;flex-wrap:wrap}
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
+.slogo{width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px}
+.vlogo{width:34px;height:34px;object-fit:contain;vertical-align:-6px;margin-right:8px}
+.cmp th .slogo{width:20px;height:20px;vertical-align:-5px;margin-right:6px}
+.ovlogo{width:13px;height:13px;margin:0 0 0 5px;vertical-align:-2px}
+.career td .slogo{width:14px;height:14px;vertical-align:-3px}
+.cg.tc-Elite,.letter.tc-Elite{color:var(--tElite)} .cg.tc-Impact,.letter.tc-Impact{color:var(--tImpact)} .cg.tc-Starter,.letter.tc-Starter{color:var(--tStarter)} .cg.tc-Rotation,.letter.tc-Rotation{color:var(--tRotation)} .cg.tc-Pass,.letter.tc-Pass{color:var(--tPass)}
 @media (max-width:640px){.tbsep{display:none}.hnav{width:100%}.hnav .gsearch{flex:1 1 100%}.hnav .gsearch input{width:100%;max-width:none}}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .seg button{border:0;background:transparent;color:var(--fg);padding:6px 12px;font:500 14px var(--body)}
@@ -511,7 +517,7 @@ window.claude={use:async n=>{
       <div class="verdict">
         <div class="score" id="v-score">–</div>
         <div>
-          <div class="who" id="v-who"><span id="v-name">Enter a player</span></div>
+          <div class="who" id="v-who"><span id="v-logo"></span><span id="v-name">Enter a player</span></div>
           <div class="sub" id="v-sub"></div>
           <div class="chips" id="v-chips"></div>
         </div>
@@ -890,7 +896,7 @@ function readForm(){
 }
 let LOADED_KEY=null,LEGACY_PORTAL=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
-  ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null};espnReset();
+  ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null,teamId:p.teamId||null};espnReset();
   $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
@@ -898,8 +904,33 @@ function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   render();
 }
 
+/* ---------- school logos (ESPN team list, cached a week in this browser) ---------- */
+const TEAMS_KEY="pt_espn_teams_v1",LOGO_ALIAS={miamifl:"miami",miamiflorida:"miami",miamioh:"miamioh",olemiss:"olemiss",pitt:"pittsburgh",umass:"massachusetts",ulmonroe:"ulmonroe",louisianamonroe:"ulmonroe",ullafayette:"louisiana",louisianalafayette:"louisiana",southernmississippi:"southernmiss",usc:"usc",lsu:"lsu",tcu:"tcu",smu:"smu",byu:"byu",utep:"utep",utsa:"utsa",fiu:"fiu",fau:"floridaatlantic",appalachianstate:"appstate",ncstate:"ncstate",northcarolinastate:"ncstate",uconn:"uconn",connecticut:"uconn"};
+let TEAMS=null;
+function teamsIndex(list){const m=new Map();list.forEach(t=>{[t[1],t[2],t[3],t[4]].forEach(k=>{const n=normT(k);if(n&&!m.has(n))m.set(n,t[0])})});return m}
+async function teamsLoad(){
+  try{const c=JSON.parse(localStorage.getItem(TEAMS_KEY)||"null");if(c&&c.list&&Date.now()-c.at<7*864e5){TEAMS=teamsIndex(c.list);return}}catch(e){}
+  try{const j=await espnJSON("https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?limit=2000");
+    const list=(((j.sports||[])[0]||{}).leagues||[{}])[0].teams.map(x=>x.team).filter(t=>t&&t.id).map(t=>[String(t.id),t.location||"",t.shortDisplayName||"",t.displayName||"",t.abbreviation||""]);
+    if(!list.length)return;TEAMS=teamsIndex(list);try{localStorage.setItem(TEAMS_KEY,JSON.stringify({at:Date.now(),list}))}catch(e){}
+    renderBoard();
+  }catch(e){}
+}
+function teamIdFor(p,school){if(p&&p.teamId&&(school==null||normT(school)===normT(p.school)))return p.teamId;const n=normT(school!=null?school:p&&p.school);if(!n||!TEAMS)return null;
+  return TEAMS.get(n)||TEAMS.get(LOGO_ALIAS[n]||"")||TEAMS.get(n.replace(/university$|universityof|^universityof/,""))||null}
+const logoUrl=id=>`https://a.espncdn.com/i/teamlogos/ncaa/500/${encodeURIComponent(id)}.png`;
+function logoImg(p,cls,school){const id=teamIdFor(p,school);return id?`<img class="${cls||"slogo"}" src="${logoUrl(id)}" alt="" loading="lazy" onerror="this.remove()">`:""}
+/* logos for PDFs: fetched once as data URLs; skipped quietly if ESPN won't share them */
+const LOGO_DATA=new Map();
+async function logoData(id){if(!id)return null;if(LOGO_DATA.has(id))return LOGO_DATA.get(id);
+  const pr=(async()=>{try{const r=await fetch(logoUrl(id),{mode:"cors"});if(!r.ok)return null;const b=await r.blob();
+      return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=()=>res(null);fr.readAsDataURL(b)})}catch(e){return null}})();
+  LOGO_DATA.set(id,pr);return pr}
+async function logosFor(ids){const out={};await Promise.race([Promise.all([...new Set(ids.filter(Boolean))].map(async id=>{out[id]=await logoData(id)})),new Promise(r=>setTimeout(r,4000))]);return out}
+function pdfLogo(doc,data,x,y,sz){if(!data)return;try{doc.addImage(data,"PNG",x,y,sz,sz)}catch(e){}}
+
 /* ---------- ESPN "Add stats": find him on ESPN, pull every season's team and stats ---------- */
-let ESPN_X={espnId:null,espnClass:null,career:null};
+let ESPN_X={espnId:null,espnClass:null,career:null,teamId:null};
 const ESPN_API="https://site.web.api.espn.com/apis/common/v3";
 const P4_CONF=/\b(SEC|Southeastern|Big Ten|Big 12|ACC|Atlantic Coast)\b/i;
 const ESPN_SKIP=new Set(["scoring"]);
@@ -932,7 +963,7 @@ function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl
   const cats=[];const seen={};
   (j.categories||[]).forEach(c=>{if(ESPN_SKIP.has(c.name))return;
     const rows=(c.statistics||[]).filter(r=>r.stats&&!zero(r.stats)).map(r=>{const t=tname(r.teamSlug);const y=r.season&&r.season.year;
-      if(y)(seen[y]=seen[y]||new Set()).add(t.n+"|"+t.lv);return {y:y||null,team:t.n,lv:t.lv,s:r.stats.map(String)}});
+      if(y)(seen[y]=seen[y]||new Set()).add(t.n+"|"+t.lv);return {y:y||null,team:t.n,lv:t.lv,tid:r.teamId?String(r.teamId):null,s:r.stats.map(String)}});
     if(!rows.length)return;
     cats.push({name:c.displayName||c.name,labels:(c.labels||[]).map(String),rows,tot:rows.length>1&&c.totals?c.totals.map(String):null})});
   return {cats,at:new Date().toISOString().slice(0,10)}}
@@ -948,7 +979,7 @@ function latestLine(p){const pc=POS_CAT[POSKEY],c=p&&p.career;if(!pc||!c||!c.cat
 const newestFirst=rows=>[...rows].sort((a,b)=>(b.y||0)-(a.y||0));
 function careerHtml(c,title){if(!c||!c.cats||!c.cats.length)return "";
   const hist=careerHist(c);
-  return `${title!=null?title:"<h3>Career stats · ESPN</h3>"}${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" ← "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${newestFirst(k.rows).map(r=>`<tr><td>${esc(r.y||"")}</td><td>${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
+  return `${title!=null?title:"<h3>Career stats · ESPN</h3>"}${hist.length?`<div class="hist"><b>History:</b> ${esc(hist.join(" ← "))}</div>`:""}`+c.cats.map(k=>`<div class="tw"><table><caption>${esc(k.name)}</caption><thead><tr><th>Year</th><th>Team</th>${k.labels.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${newestFirst(k.rows).map(r=>`<tr><td>${esc(r.y||"")}</td><td>${r.tid?`<img class="slogo" src="${logoUrl(r.tid)}" alt="" loading="lazy" onerror="this.remove()">`:logoImg(null,"slogo",r.team)}${esc(r.team)}</td>${r.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${k.tot?`<tr class="tot"><td>Career</td><td></td>${k.tot.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`:""}</tbody></table></div>`).join("")}
 function showCareer(){const c=ESPN_X.career,el=$("v-career");const h=careerHtml(c);el.innerHTML=h;el.hidden=!h}
 async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTML='<div class="sub">Pulling his stats…</div>';
   try{const [j,st]=await Promise.all([espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`),espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}/stats`).catch(()=>null)]);
@@ -961,7 +992,7 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
     if(bp[0]&&!$("p-home").value)$("p-home").value=bp[0];
     if(bp[1]&&/^[A-Z]{2}$/.test(bp[1])&&!$("p-st").value)$("p-st").value=bp[1];
     const career=st?espnCareer(st):null;
-    ESPN_X={espnId:String(a.id||id),espnClass:a.displayExperience||null,career:career&&career.cats.length?career:null};
+    ESPN_X={espnId:String(a.id||id),espnClass:a.displayExperience||null,career:career&&career.cats.length?career:null,teamId:t.id?String(t.id):null};
     espnReset();
     if(!ESPN_X.career)flash("Found him on ESPN, but ESPN has no season stats for him.",7000);
     else flash(`Added ${ESPN_X.career.cats.length} stat tables from ESPN. Save to board to keep them.`,6000);
@@ -984,15 +1015,16 @@ async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
     flash(`Stats refreshed for ${ok} player${ok===1?"":"s"}${bad?` · ${bad} couldn't be updated`:""}.`,7000);
   }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh stats"}}
 $("espnAll").addEventListener("click",espnRefreshAll);
+teamsLoad();
 /* ESPN position vs. the board he's being added to */
 const ESPN_POS={QB:["QB"],RB:["RB","HB","FB"],WR:["WR"],TE:["TE"],IOL:["G","OG","C","OL","IOL"],OT:["T","OT","OL"],DT:["DT","NT","DL"],DE:["DE","DL","EDGE"],LB:["LB","ILB","OLB","MLB"],SAF:["S","FS","SS","DB"],NIC:["CB","S","DB","NB"],CB:["CB","DB"]};
 function espnPosNote(pos){const ok=ESPN_POS[POSKEY];if(ok&&!ok.includes(pos.toUpperCase()))flash(`Heads up: ESPN lists him as ${pos}, and you're adding him to the ${P.label} board.`,9000)}
 $("espnGo").addEventListener("click",espnAdd);
 $("espnRes").addEventListener("click",e=>{const b=e.target.closest("[data-eid]");if(b)espnPick(b.dataset.eid)});
-$("espnCard").addEventListener("click",e=>{if(e.target.id==="espnOther"){ESPN_X={espnId:null,espnClass:null,career:null};espnReset();render();espnAdd()}});
+$("espnCard").addEventListener("click",e=>{if(e.target.id==="espnOther"){ESPN_X={espnId:null,espnClass:null,career:null,teamId:null};espnReset();render();espnAdd()}});
 
 /* ---------- render ---------- */
-function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCareer();
+function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCareer();{const fp=readForm();$("v-logo").innerHTML=fp.school?logoImg(fp,"vlogo"):""}
   const A=anchors();
   $("modeNote").textContent=(S.mode==="mid"
     ?`Full credit at ${S.dbPerGame*tg()} ${P.sample} (${S.dbPerGame} × ${tg()} games).`
@@ -1046,9 +1078,9 @@ function renderBoard(){
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
   $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
-   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
+   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${logoImg(x.p)}${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
    <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td><td class="num cel">${x.line?"—":esc(eligShort(x.p))}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
-   <td class="num cg" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter">${x.r.letter}</span></td>
+   <td class="num cg${x.r.tier?" tc-"+x.r.tier:""}" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter${x.r.tier?" tc-"+x.r.tier:""}">${x.r.letter}</span></td>
    <td class="ct" >${x.r.tier?`<span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span>`:'<span class="sub">Scale not set</span>'}</td>
    <td class="ca">${x.line?"":`<details class="rowmenu"><summary aria-label="More actions for ${esc(x.p.name)}" title="Hide or delete">⋯</summary><div class="rowmenu-list"><button class="x" data-hide="${x.idx}" aria-label="${x.p.ref?"Unhide":"Hide"} ${esc(x.p.name)}">${x.p.ref?"Unhide":"Hide"}</button><button class="x" data-del="${x.idx}" aria-label="Delete ${esc(x.p.name)}">Delete</button></div></details>`}</td></tr>`).join("")}
    ${empty?`<tr><td colspan="15" class="sub">${boardState==="loading"?"Loading the shared board…":filtersOn()&&BOARD.length?`No players match these filters. <button type="button" class="btn" id="clearFilters" style="margin-left:8px;padding:4px 10px;font-size:13px">Clear filters</button>`:`No ${P.label}s on the board yet. Score one above and save him.`}</td></tr>`:""}</tbody>`;
@@ -1169,15 +1201,17 @@ async function printSelected(){
     x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · Gm "+x.p.thru:""}`:"-",pdfTxt(eligShort(x.p)).replace("—","-"),
     ...x.r.m.map((v,i)=>v==null?"-":pdfTxt(fm(v,i)+fcsMark(x.p,i))),fmt(x.r.grade)+trendTxt(x),pdfTxt(x.r.letter),TIERNAME[x.r.tier]||""]);
   const nm=METRICS.length, cEl=5, cM=6, cScore=cM+nm, cTier=cScore+2;
+  const LG=await logosFor(rows.map(x=>teamIdFor(x.p))),lgOf=x=>LG[teamIdFor(x.p)],anyLg=rows.some(lgOf);
   doc.autoTable({head,body,startY:76,theme:"grid",
     styles:{font:"helvetica",fontSize:8.5,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
     columnStyles:Object.fromEntries([[0,{cellWidth:"auto",valign:"top"}],[1,{halign:"right"}],[2,{halign:"right"}],[cEl,{halign:"right"}]].concat([...Array(nm).keys()].map(i=>[cM+i,{halign:"right"}])).concat([[cScore,{halign:"right",fontStyle:"bold"}],[cScore+1,{halign:"center",fontStyle:"bold"}]])),
-    didParseCell:h=>{if(h.section==="body"&&h.column.index===cTier){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}
+    didParseCell:h=>{if(h.section==="body"&&(h.column.index===cTier||h.column.index===cScore||h.column.index===cScore+1)){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}
+      if(anyLg&&h.column.index===0)h.cell.styles.cellPadding={top:4.5,bottom:4.5,right:4.5,left:22};
       if(h.section==="head"&&(h.column.index===1||h.column.index===2||h.column.index===cEl||(h.column.index>=cM&&h.column.index<=cScore)))h.cell.styles.halign="right";
       if(h.section==="head"&&h.column.index===cScore+1)h.cell.styles.halign="center";
       if(h.section==="body"&&isOurs(rows[h.row.index].p))h.cell.styles.fillColor=[220,239,226]},
-    didDrawCell:h=>{if(h.section!=="body"||h.column.index!==0)return;const x=rows[h.row.index];if(!hasFlag(x))return;
+    didDrawCell:h=>{if(h.section!=="body"||h.column.index!==0)return;const x=rows[h.row.index];pdfLogo(doc,lgOf(x),h.cell.x+5,h.cell.y+4.5,13);if(!hasFlag(x))return;
       const first=(h.cell.text&&h.cell.text[0])||"",nmTxt=pdfTxt(x.p.name);if(!first.startsWith(nmTxt+FLAGGAP))return;
       doc.setFont("helvetica","normal");doc.setFontSize(8.5);
       const px=h.cell.x+h.cell.padding("left")+doc.getTextWidth(nmTxt)+3,py=h.cell.y+h.cell.padding("top")+.2,rgb=CONFRGB[x.r.conf];
@@ -1265,7 +1299,7 @@ function renderCompare(given,ctx){
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
   const hi=(vals,i)=>{const v=vals.map(r=>r.r.n?r.r.n[i]:null);const ok=v.filter(x=>x!=null);if(ok.length<2)return v.map(()=>"");const mx=Math.max(...ok),mn=Math.min(...ok);if(mx===mn)return v.map(()=>"");return v.map(x=>x==null?"":x===mx?"best":x===mn?"worst":"")};
-  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
+  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${logoImg(x.p)}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
   const mrows=METRICS.map((m,i)=>{const c=hi(rows,i);return `<tr><td><b>${m.name}</b> <span class="sub">(${S.weights[i]}%)</span></td>${rows.map((x,k)=>{const n=x.r.n?x.r.n[i]:null;return cell(x,`${fm(x.r.m[i],i)}${m.unit}${n!=null?`<div class="mini"><i style="width:${n}%"></i></div>`:""}`,c[k])}).join("")}</tr>`}).join("");
   const gs=rows.map(x=>x.r.grade);const okg=gs.filter(g=>g!=null);const gmx=okg.length?Math.max(...okg):null,gmn=okg.length?Math.min(...okg):null;
   const extra=`<tr><td><b>Score</b></td>${rows.map(x=>cell(x,`<b>${fmt(x.r.grade)}</b> ${x.r.letter}`,okg.length>1&&gmx!==gmn?(x.r.grade===gmx?"best":x.r.grade===gmn?"worst":""):""))}</tr>
@@ -1317,11 +1351,14 @@ async function printCompare(){
   if(POS_CAT[POSKEY]&&rows.some(x=>x.p.career))body.push([POS_CAT[POSKEY].label+" · latest season",...rows.map(x=>x.p.career?T(latestLine(x.p))||"-":"No ESPN stats")]);
   if(rows.some(x=>x.p.career))body.push(["Schools",...rows.map(x=>x.p.career?T(careerHist(x.p.career).join("  <  "))||"-":"No ESPN stats")]);
   const nM=METRICS.length;
+  const CL=await logosFor(rows.map(x=>teamIdFor(x.p)));
   doc.autoTable({head,body,startY:y,theme:"grid",
     styles:{font:"helvetica",fontSize:9,cellPadding:6,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},
     columnStyles:{0:{fontStyle:"bold",cellWidth:170}},
-    didParseCell:h=>{if(h.section!=="body"||h.column.index===0)return;const c=h.column.index-1,r=h.row.index;
+    didDrawCell:h=>{if(h.section==="head"&&h.column.index>0){const lg=CL[teamIdFor(rows[h.column.index-1].p)];pdfLogo(doc,lg,h.cell.x+h.cell.width-24,h.cell.y+(h.cell.height-18)/2,18)}},
+    didParseCell:h=>{if(h.section==="head"&&h.column.index>0)h.cell.styles.cellPadding={top:6,bottom:6,left:6,right:28};
+      if(h.section!=="body"||h.column.index===0)return;const c=h.column.index-1,r=h.row.index;
       if(r<nM){const b=best[r][c];if(b===1){h.cell.styles.fillColor=[220,239,226]}else if(b===-1){h.cell.styles.textColor=[198,40,40]}}
       if(r===nM){h.cell.styles.fontStyle="bold";if(gmx!==gmn){if(gs[c]===gmx)h.cell.styles.fillColor=[220,239,226];else if(gs[c]===gmn)h.cell.styles.textColor=[198,40,40]}}
       if(r===nM+1){const t=rows[c].r.tier;if(t){h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}}}});
@@ -1548,8 +1585,8 @@ function renderOvField(side,rows){
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
-      <div><span class="ovc-l">Ours</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">Grad</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
-      <div><span class="ovc-l">Target</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
+      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">Grad</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
+      <div><span class="ovc-l">Target${t?logoImg(t.p,"slogo ovlogo"):""}</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
       ${t&&t.r.tier?`<span class="chip t-${t.r.tier}">${TIERNAME[t.r.tier]}</span>`:""}</div>`};
   const spots=ovSpots(side,rows);const maxR=Math.max(...spots.map(s=>s.r));
   const los=`<div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>`;
@@ -1741,6 +1778,7 @@ async function printReport(){
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});
   const W=pdfHeader(doc,"Player Tool · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
   const ink=[24,32,26],mut=[91,102,93];
+  {const id=teamIdFor(p),lg=id?(await logosFor([id]))[id]:null;if(lg)pdfLogo(doc,lg,W-40-46,74,46)}
   doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(...ink);doc.text(p.name,40,100);
   doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(...mut);
   const roleTxt=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
