@@ -1380,14 +1380,14 @@ async function renderOverview(){
 const OV_FIELD={
   off:{cols:9,los:"top",spots:[["WR","Outside",0,1,1],["OT","",0,1,3],["IOL","",0,1,4],["IOL","",1,1,5],["IOL","",2,1,6],["OT","",1,1,7],["TE","",0,1,8],["WR","Outside",1,1,9],
     ["WR","Slot",0,2,2],["QB","",0,2,5],["RB","",0,3,5]]},
-  def:{cols:8,los:"bottom",spots:[["SAF","",0,1,3],["SAF","",1,1,6],["OLB","",0,2,2],["ILB","",0,2,4,2],["OLB","",1,2,7],["NIC","",0,2,8],
+  def:{cols:8,los:"bottom",spots:[["SAF","",0,1,3],["SAF","",1,1,6],["OLB","",0,2,2],["ILB","",0,2,4.5],["OLB","",1,2,7],["NIC","",0,2,8],
     ["CB","",0,3,1],["DE","",0,3,3],["DT","",0,3,4],["DT","",1,3,5],["DE","",1,3,6],["CB","",1,3,8]]}};
 function ovSpots(side,rows){const F=OV_FIELD[side];return F.spots.map(([k,role,i,r,c,sp])=>({k,role,r,c,sp:sp||1,o:rows.find(o=>o.k===k&&(o.role||"")===role&&o.si===i)||null,
   lbl:role==="Slot"?"SLOT":k}))}
 function renderOvField(side,rows){
-  const F=OV_FIELD[side],el=$("ovField");el.style.gridTemplateColumns=`repeat(${F.cols},minmax(0,1fr))`;
+  const F=OV_FIELD[side],el=$("ovField");el.style.gridTemplateColumns=`repeat(${F.cols*2},minmax(0,1fr))`;
   const nm=x=>x.p.id?`<button type="button" class="tlink" data-ok="${x._k}" data-oid="${esc(x.p.id)}">${esc(x.p.name)}</button>`:esc(x.p.name);
-  const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${s.c} / span ${s.sp}`;
+  const card=s=>{const o=s.o,pos=`grid-row:${s.r+(F.los==="top"?1:0)};grid-column:${Math.round((s.c-1)*2)+1} / span ${s.sp*2}`;
     if(!o)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(s.lbl)}</b><span class="sub">${POSITIONS[s.k]?"No spot":"Not built yet"}</span></div>`;
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
