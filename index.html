@@ -1159,7 +1159,8 @@ function htwt(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":""].filter(Boolean
 const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
 function tierChip(x){return x&&x.r&&x.r.tier?` <span class="chip t-${x.r.tier}" style="margin-left:6px">${TIERNAME[x.r.tier]}</span>`:""}
 function eligText(p){return p.elig===0?"Grad":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
-const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}]};
+const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}],
+  DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],ILB:[{lbl:"ILB",n:2}],OLB:[{lbl:"OLB",n:1}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
 let OV_SIDE=null,OV_ROWS=[],OV_MODE="now";
 async function renderOverview(){
   $("overview").hidden=false;
@@ -1168,7 +1169,7 @@ async function renderOverview(){
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
-  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": "+ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)==="def").map(k=>{const n=(OV_SPOTS[k]||[{n:1}]).reduce((a,g)=>a+g.n,0);return (n>1?n+" ":"")+k}).join(", ");
+  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, 2 ILB, OLB, 2 SAF, NIC, 2 CB";
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';return}
   $("ovTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';
