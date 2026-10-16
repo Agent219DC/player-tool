@@ -446,7 +446,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button> <button class="btn" type="button" id="recClose">Close</button></span>
     </div>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note">Counts each player once (his most recent season) and leaves out our own players, hidden players and Trash. Tap a number to open that board filtered to that status.</p>
+    <p class="note">One entry per player (his latest season). Leaves out our own players, hidden players and Trash. Tap a number to open that list.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
       <h2 style="font-size:19px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
@@ -461,8 +461,8 @@ window.claude={use:async n=>{
     </div>
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
-    <p class="note" id="ovModeNote" hidden><b>Next season:</b> players marked graduating (0 years left) drop off, every returning player counts whatever his confidence, and every target marked <b>Committed</b> joins the roster and competes for the spots. Remaining targets are paired with the new weakest starters.</p>
-    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each spot shows your current-season players marked <b>On Roster</b>, best first, and your weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the starter listed in model settings fills it (using his board entry when he has one). Targets exclude On Roster, our own school, hidden, NIP and Pass players. Need: <b>Upgrade</b> when the spot is empty or its player grades below 70 (C−), <b>Solid</b> at 70–79, <b>Great</b> at 80+. Tap a card to open that position (on phones, a row).</p>
+    <p class="note" id="ovModeNote" hidden><b>Next season:</b> graduating players drop off, every returning player counts, and Committed targets join the roster.</p>
+    <p class="note">One card per starting spot<span id="ovSpots"></span>. Each shows our best On Roster players (Medium or High confidence) and the best target for the weakest one. Need: <b>Upgrade</b> below 70, <b>Solid</b> 70–79, <b>Great</b> 80+. Tap a card (a row on phones) to compare ours with the target.</p>
   </section>
 
   <details class="editor" id="editor">
@@ -475,7 +475,7 @@ window.claude={use:async n=>{
         <label>School<input id="p-school" type="text" placeholder="School"></label>
       </div>
       <div class="espn" id="espnBox">
-        <div class="espn-row"><button class="btn primary" type="button" id="espnGo">Add stats</button><span class="sub" id="espnHint">Pulls his schools and stats for every season from ESPN, using the name above.</span></div>
+        <div class="espn-row"><button class="btn primary" type="button" id="espnGo">Add stats</button><span class="sub" id="espnHint">Pulls his schools and season stats from ESPN.</span></div>
         <div id="espnRes" class="espn-res" hidden></div>
         <div class="espn-card" id="espnCard" hidden></div>
       </div>
@@ -569,15 +569,15 @@ window.claude={use:async n=>{
       <p id="cmpVerdict" class="cmpverdict" hidden></p>
       <div class="tablewrap"><table id="cmpTbl" class="cmp"></table></div>
       <div id="cmpCareer" class="cmpcareer" hidden></div>
-      <p class="note">Green = best of this group on that metric. Red = weakest. Bars show each player's 0–100 score on the metric.</p>
+      <p class="note">Green = best in this group, red = weakest. Bars show the 0–100 score on each metric.</p>
     </section>
   </section>
 
   <details class="settings">
     <summary>Model settings</summary>
     <div class="setbody">
-      <p class="note" id="lockNote" hidden style="color:var(--rotation);font-weight:600">Only the Player Tool's owner can change these settings. You can view them here.</p>
-      <p class="note">Changes here apply for everyone using the Player Tool. Ceilings are the FBS leader at each metric among players with a real sample. Floors are the "pass" mark. Full-season ceilings left blank fall back to the mid-season ones.</p>
+      <p class="note" id="lockNote" hidden style="color:var(--rotation);font-weight:600">Only the owner can change these settings.</p>
+      <p class="note">Changes apply for everyone. Ceilings = the FBS leader with a real sample; floors = the pass mark. Blank full-season ceilings use the mid-season ones.</p>
       <div class="anchors"><table id="anchorTbl"></table></div>
       <div class="grid2">
         <label>Full-credit <span class="sw">dropbacks</span> per game<input id="s-dbpg" type="number" step="1"></label>
@@ -613,29 +613,29 @@ window.claude={use:async n=>{
     <div class="setbody">
       <div>
         <h3 class="ot-h">Trash · <span id="trashPos">QB</span></h3>
-        <p class="note">Deleted players land here instead of disappearing. Restore puts them back on the board; Delete forever can't be undone.</p>
+        <p class="note">Deleted players land here. Restore puts them back; Delete forever can't be undone.</p>
         <div id="trashList"></div>
       </div>
       <div id="staffBox" hidden>
         <h3 class="ot-h">Staff access</h3>
-        <p class="note">Only these email addresses can sign in and use the board. You (the owner) always have access.</p>
+        <p class="note">Only these emails can sign in. You always have access.</p>
         <div id="staffList"></div>
         <div class="btns"><input id="staffEmail" type="email" placeholder="coach@email.com" style="width:260px;max-width:100%;font-family:var(--body)"><button class="btn" type="button" id="staffAdd">Add</button></div>
       </div>
       <div>
         <h3 class="ot-h">Full backup</h3>
-        <p class="note">Download everything (every position's players, Trash, model settings and season info) as one backup file, or restore from one. Restoring adds or replaces players by their ID; it never deletes anyone.</p>
+        <p class="note">Download every position, Trash and settings as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
         <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Import / Export</h3>
-        <p class="note">Spreadsheet export of the current board or every position, and bulk import from a CSV.</p>
+        <p class="note">Export this board or every position, or import players from a CSV.</p>
         <div class="btns"><button class="btn" type="button" id="csvBtn">Export this board (CSV)</button><button class="btn" type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions (Excel)</button><button class="btn" type="button" id="impBtn">Import players (CSV)</button><button class="btn" type="button" id="tplBtn">Download CSV template</button></div>
         <input type="file" id="impFile" accept=".csv,text/csv" hidden>
       </div>
       <div>
         <h3 class="ot-h">Start a new season</h3>
-        <p class="note">Run this once when the season turns over. At every position it: takes players marked graduating (0 years left) off the roster and hides them, moves every <b>Committed</b> player to <b>On Roster</b>, takes one year off everyone's eligibility, and moves the default season forward. Export all positions first if you want a backup; you can also undo it here.</p>
+        <p class="note">Run once when the season turns over. At every position, graduating players come off the roster and are hidden, Committed players move to On Roster, everyone loses a year of eligibility, and the season moves forward. You can undo it here.</p>
         <div class="btns"><button class="btn" type="button" id="nsPreview">Start new season…</button><button class="btn" type="button" id="nsUndo" hidden>Undo last new season</button></div>
         <div id="nsBox" class="nsbox" hidden></div>
       </div>
@@ -1056,7 +1056,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-metrics").innerHTML=METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span></div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Starter line"></u></div></div>`).join("");
   $("v-math").textContent=
 `Raw (weighted)       ${fmt(r.raw)}
-${r.fPrior!=null?`× level factor ${r.factor.toFixed(2)}  ${fmt(r.leveled)}  (${p.level} ${r.fCur.toFixed(2)} this season, ${p.prior.level} ${r.fPrior.toFixed(2)} last season, weighted like the stats)`:`× ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}`}
+${r.fPrior!=null?`× level factor ${r.factor.toFixed(2)}  ${fmt(r.leveled)}  (${p.level} ${r.fCur.toFixed(2)} this season, ${p.prior.level} ${r.fPrior.toFixed(2)} last, by sample)`:`× ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}`}
 Sample               ${p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
 ${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
 Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
@@ -1291,7 +1291,7 @@ async function printOverview(){
   doc.setFont("helvetica","normal");
 
   doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text(doc.splitTextToSize("Need: Upgrade = empty spot or below 70 · Solid = 70–79 · Great = 80+. Weakest starter is paired with the best target. Only players with Medium or High confidence are listed; if that leaves a spot blank, the starter listed in model settings fills it (using his board entry when he has one). Targets exclude On Roster, our own school, hidden, NIP and Pass players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
+  doc.text(doc.splitTextToSize("Need: Upgrade = below 70 · Solid = 70–79 · Great = 80+. Our weakest starter is paired with the best target. Medium and High confidence only; targets leave out NIP, Pass and hidden players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
@@ -1927,7 +1927,7 @@ async function planNewSeason(){
   return {plan,grads,commits,eligs};
 }
 $("nsPreview").addEventListener("click",async()=>{
-  if(!OWNER||!DB){flash("Only the Player Tool's owner can start a new season.");return}
+  if(!OWNER||!DB){flash("Only the owner can start a new season.");return}
   const box=$("nsBox");box.hidden=false;box.innerHTML='<span class="sub">Checking every position…</span>';
   const pl=await planNewSeason();
   box.innerHTML=`<b>Start the ${CUR_SEASON+1} season?</b><ul><li>${pl.grads} graduating player${pl.grads===1?" comes":"s come"} off the roster (hidden, not deleted)</li><li>${pl.commits} committed player${pl.commits===1?" moves":"s move"} to On Roster</li><li>${pl.eligs} player${pl.eligs===1?" loses":"s lose"} one year of eligibility</li><li>The default season on the player form becomes ${CUR_SEASON+1}</li></ul>
