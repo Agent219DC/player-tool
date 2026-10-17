@@ -781,7 +781,20 @@ const POSITIONS={
       {name:"Jaiden Haygood",school:"UT Rio Grande Valley",level:"FCS",season:"2025",thru:"full",db:582,m:[12.2,91.3,82.9,11.1],ref:true,test:true},
       {name:"Daniel Djaborne",school:"Rutgers",level:"P4",season:"2025",thru:"full",db:659,m:[5.9,55.5,38.3,10.7],ref:true,test:true},
       {name:"Kanye Young",school:"Missouri State",level:"G6",season:"2025",thru:"full",db:757,m:[6.2,53.3,53.0,22.7],ref:true,test:true},
-      {name:"Fernando Washington",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:701,m:[7.0,38.3,56.1,27.8],ref:true,test:true}]}
+      {name:"Fernando Washington",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:701,m:[7.0,38.3,56.1,27.8],ref:true,test:true}]},
+  SAF:{label:"SAF",sample:"snaps",abbr:"snaps",unnamed:"Unnamed SAF",conf:[400,200],
+    metrics:[
+      {name:"Coverage Grade",short:"Cov",unit:"",dp:1,step:0.1},
+      {name:"Coverage Grade on passes over 3 seconds",short:"Cov 3s+",unit:"",dp:1,step:0.1},
+      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1},
+      {name:"Completion % Against",short:"Cmp %",unit:"%",dp:1,step:0.1}],
+    defaults:{dbPerGame:45,agreeMinDb:180,weights:[40,25,20,15],
+      anchors:{mid:{floor:[38.7,34.2,29.5,82.1],ceil:[90.2,92.7,4.9,51.4]},full:{floor:[38.7,34.2,29.5,82.1],ceil:[90.2,92.7,4.9,51.4]}},
+      line:{name:"Daytione Smith",level:"G6",season:"2026",thru:6,cur:{db:301,m:[64.0,63.3,5.7,83.3]},prior:{db:641,m:[73.5,73.1,10.0,50.0]}}},
+    samples:[],
+    seed:[{name:"Daytione Smith",school:"Marshall",level:"G6",season:"2026",thru:6,db:301,m:[64.0,63.3,5.7,83.3],prior:{db:641,m:[73.5,73.1,10.0,50.0]},status:"On Roster",elig:0},
+      {name:"Caleb Clark-Glover",school:"Marshall",level:"G6",season:"2026",thru:6,db:293,m:[47.9,48.9,16.7,78.9],prior:{db:333,m:[55.7,66.7,18.8,57.1]},status:"On Roster",elig:1},
+      {name:"Terrente Hinton",school:"Marshall",level:"G6",season:"2026",thru:6,db:206,m:[62.6,75.8,13.8,77.8],status:"On Roster",elig:0}]}
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
