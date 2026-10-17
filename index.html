@@ -1134,8 +1134,8 @@ function fixLegacy(p){if(p.status==="Passed"||p.status==="NGE")p.status="Pass";i
 const STATUSES=["On Roster","Target","Contacted","Offered","Committed","NIP","Pass"];
 function safeUrl(u){if(!u)return"";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return""}}
 function fmtDate(d){if(!d)return"";const t=new Date(d+"T12:00:00");return isNaN(t)?d:t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
-function eligLong(p){return p.elig===0?"Graduating":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
-function eligShort(p){return p.elig===0?"Grad":p.elig?String(p.elig):"—"}
+function eligLong(p){return p.elig===0?"0 yrs left":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
+function eligShort(p){return p.elig===0?"0":p.elig?String(p.elig):"—"}
 function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.pdate)a.push("In portal since "+fmtDate(p.pdate));else if(p.portal==="Yes")a.push("In portal");if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
 function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
@@ -1316,7 +1316,7 @@ async function printOverview(){
     lab("OURS");
     if(b){line(b.p.name+(b.commit?" (Committed)":""),true);
       const g=`${fmt(b.r.grade)} ${T(b.r.letter)}  ·  `;doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(24,32,26);doc.text(g,x+5,yy);
-      const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("Grad",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
+      const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("0 yrs",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
     else line(OV_MODE==="next"?"None available":"None entered",false,[120,130,122]);
     yy+=2;lab("TARGET");
     if(t){line(t.p.name+(t.p.level?` (${t.p.level})`:""),true);
@@ -1533,7 +1533,7 @@ function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRIC
 function htwt(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":""].filter(Boolean).join(" · ")}
 const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
 function tierChip(x){return x&&x.r&&x.r.tier?` <span class="chip t-${x.r.tier}" style="margin-left:6px">${TIERNAME[x.r.tier]}</span>`:""}
-function eligText(p){return p.elig===0?"Grad":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
+function eligText(p){return p.elig===0?"0 yrs":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
 const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}],
   DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],LB:[{lbl:"LB",n:3}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
 let OV_SIDE=null,OV_ROWS=[],OV_MODE="now";
@@ -1612,7 +1612,7 @@ async function renderOverview(){
     <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
     <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
     <td class="num o-mg">${o.best?`<b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}`:"–"}</td>
-    <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">Grad</b>`:eligText(o.best.p)):"–"}</td>
+    <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">0 yrs</b>`:eligText(o.best.p)):"–"}</td>
     <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</td>
     <td class="num o-tg">${o.top?`<b>${fmt(o.top.r.grade)}</b> ${o.top.r.letter}`:"–"}</td>
     <td class="num o-gap">${o.best&&o.top?((o.top.r.grade-o.best.r.grade>=0?"+":"")+fmt(o.top.r.grade-o.best.r.grade)):"–"}</td>
@@ -1634,7 +1634,7 @@ function renderOvField(side,rows){
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
-      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">Grad</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
+      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">0 yrs</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
       <div><span class="ovc-l">Target${t?logoImg(t.p,"slogo ovlogo"):""}</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
       ${t&&t.r.tier?`<span class="chip t-${t.r.tier}">${TIERNAME[t.r.tier]}</span>`:""}</div>`};
   const spots=ovSpots(side,rows);const maxR=Math.max(...spots.map(s=>s.r));
@@ -1771,7 +1771,7 @@ function renderVisits(){
   const days=new Map();v.forEach(x=>{const d=x.p.vdate||"";if(!days.has(d))days.set(d,[]);days.get(d).push(x)});
   $("visitList").innerHTML=[...days.entries()].map(([d,list])=>`<div class="vday"><h3>${d?new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}):"Date not set"}</h3>${list.map(x=>`
     <div class="vrow" data-vk="${x.k}" data-vid="${esc(x.p.id||"")}" role="button" tabindex="0"><span class="vp">${x.k}${x.k==="WR"&&x.p.role?(x.p.role==="Slot"?" · SLOT":""):""}</span>
-    <span><b>${esc(x.p.name)}</b> · ${esc(x.p.school||"")}${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}">${esc(x.p.status)}</span>`:""}<span class="sub"> · ${vLabel(x.p)}${x.p.elig!=null?" · "+(x.p.elig===0?"Grad":x.p.elig+(x.p.elig===1?" yr":" yrs")):""}</span></span>
+    <span><b>${esc(x.p.name)}</b> · ${esc(x.p.school||"")}${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}">${esc(x.p.status)}</span>`:""}<span class="sub"> · ${vLabel(x.p)}${x.p.elig!=null?" · "+(x.p.elig===0?"0 yrs":x.p.elig+(x.p.elig===1?" yr":" yrs")):""}</span></span>
     <span class="vg">${x.r&&x.r.grade!=null?fmt(x.r.grade)+" "+x.r.letter:"–"}</span></div>`).join("")}</div>`).join("");
 }
 $("recBtn").addEventListener("click",()=>{$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
@@ -1803,7 +1803,7 @@ async function printRecruit(){
   const W=pdfHeader(doc,"Player Tool · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
   doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos.","Player","School","Status","Visit","Elig.","Grade","Tier"]],
-    body:v.length?v.map(x=>[x.p.vdate?new Date(x.p.vdate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Not set",x.k+(x.k==="WR"&&x.p.role==="Slot"?" (SLOT)":""),x.p.name,x.p.school||"",x.p.status||"",vLabel(x.p),x.p.elig===0?"Grad":x.p.elig!=null?String(x.p.elig):"",x.r&&x.r.grade!=null?`${fmt(x.r.grade)} ${x.r.letter.replace("−","-")}`:"-",x.r&&x.r.tier?TIERNAME[x.r.tier]:""]):[["No visits","","","","","","","",""]],
+    body:v.length?v.map(x=>[x.p.vdate?new Date(x.p.vdate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Not set",x.k+(x.k==="WR"&&x.p.role==="Slot"?" (SLOT)":""),x.p.name,x.p.school||"",x.p.status||"",vLabel(x.p),x.p.elig!=null?String(x.p.elig):"",x.r&&x.r.grade!=null?`${fmt(x.r.grade)} ${x.r.letter.replace("−","-")}`:"-",x.r&&x.r.tier?TIERNAME[x.r.tier]:""]):[["No visits","","","","","","","",""]],
     styles:{font:"helvetica",fontSize:9,cellPadding:5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},alternateRowStyles:{fillColor:[243,245,242]},
     columnStyles:{0:{fontStyle:"bold",cellWidth:110},1:{cellWidth:60},6:{halign:"center"},7:{halign:"right",fontStyle:"bold"},8:{fontStyle:"bold"}},
@@ -1856,7 +1856,7 @@ async function printReport(){
   y=doc.lastAutoTable.finalY+24;
   /* bio + recruiting */
   const bio=[["Height",p.ht?fmtHt(p.ht):"–"],["Weight",p.wt?p.wt+" lbs":"–"],["Hometown",[p.home,p.st].filter(Boolean).join(", ")||"–"],["High school",p.hs||"–"]];
-  const rec=[["Status",p.status||"–"],["Eligibility left",p.elig===0?"Graduating (0)":p.elig?p.elig+(p.elig===1?" year":" years"):"–"],["In portal",p.pdate?"Since "+fmtDate(p.pdate):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]];
+  const rec=[["Status",p.status||"–"],["Eligibility left",p.elig===0?"0":p.elig?p.elig+(p.elig===1?" year":" years"):"–"],["In portal",p.pdate?"Since "+fmtDate(p.pdate):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]];
   const half=(W-80-16)/2;
   const kv=(title,rows,x)=>{doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text(title,x,y);
     doc.autoTable({startY:y+8,theme:"plain",margin:{left:x},tableWidth:half,body:rows,styles:{font:"helvetica",fontSize:10,cellPadding:4,textColor:ink},columnStyles:{0:{fontStyle:"bold",cellWidth:100,textColor:mut}}});return doc.lastAutoTable.finalY};
