@@ -268,6 +268,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .ovcard .ovc-l{display:block;font:600 9.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .ovcard .ovc-n{overflow-wrap:anywhere}.ovcard .tlink{text-align:left}
 .ovcard .ovc-g{font-family:var(--mono,monospace);font-weight:600;white-space:nowrap}
+.gtc-Elite{color:var(--tElite)} .gtc-Impact{color:var(--tImpact)} .gtc-Starter{color:var(--tStarter)} .gtc-Rotation{color:var(--tRotation)} .gtc-Pass{color:var(--tPass)}
 .ovcard .chip{font-size:9px;padding:1px 4px;letter-spacing:.01em;white-space:nowrap;justify-self:start;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .ovcard.ovc-empty{cursor:default;background:transparent;border-style:dashed;color:var(--muted);text-align:center;align-content:center}
 .ovcard.ovc-empty b{font:700 15px var(--display);letter-spacing:.04em}
@@ -1322,12 +1323,12 @@ async function printOverview(){
     const line=(t2,bold,rgb)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(7.5);doc.setTextColor(...(rgb||[24,32,26]));clip(t2,iw,2).forEach(l=>{doc.text(l,x+5,yy);yy+=8.5})};
     lab("OURS");
     if(b){line(b.p.name+(b.commit?" (Committed)":""),true);
-      const g=`${fmt(b.r.grade)} ${T(b.r.letter)}  ·  `;doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(24,32,26);doc.text(g,x+5,yy);
+      const g0=`${fmt(b.r.grade)} ${T(b.r.letter)}`,g=g0+"  ·  ";doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[b.r.tier]||[24,32,26]));doc.text(g0,x+5,yy);doc.setFont("helvetica","normal");doc.setTextColor(24,32,26);doc.text("  ·  ",x+5+doc.getTextWidth(g0),yy);
       const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("0 yrs",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
     else line(OV_MODE==="next"?"None available":"None entered",false,[120,130,122]);
     yy+=2;lab("TARGET");
     if(t){line(t.p.name+(t.p.level?` (${t.p.level})`:""),true);
-      line(`${fmt(t.r.grade)} ${T(t.r.letter)}${b?`  ·  ${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}`:""}`);
+      {const g0=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[24,32,26]));doc.text(g0,x+5,yy);if(b){const w0=doc.getTextWidth(g0);doc.setFont("helvetica","normal");doc.setTextColor(24,32,26);doc.text(`  ·  ${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}`,x+5+w0,yy)}yy+=8.5}
       if(t.r.tier){doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[24,32,26]));doc.text(TIERNAME[t.r.tier].toUpperCase(),x+5,Math.min(yy+1,y+ch-5))}}
     else line(o.why?"- "+o.why:"-",false,[120,130,122]);
   });
@@ -1618,10 +1619,10 @@ async function renderOverview(){
   $("ovTbl").innerHTML=`<thead><tr><th>Pos.</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
     <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
     <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
-    <td class="num o-mg">${o.best?`<b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}`:"–"}</td>
+    <td class="num o-mg">${o.best?`<span class="gtc-${o.best.r.tier}"><b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}</span>`:"–"}</td>
     <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">0 yrs</b>`:eligText(o.best.p)):"–"}</td>
     <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</td>
-    <td class="num o-tg">${o.top?`<b>${fmt(o.top.r.grade)}</b> ${o.top.r.letter}`:"–"}</td>
+    <td class="num o-tg">${o.top?`<span class="gtc-${o.top.r.tier}"><b>${fmt(o.top.r.grade)}</b> ${o.top.r.letter}</span>`:"–"}</td>
     <td class="num o-gap">${o.best&&o.top?((o.top.r.grade-o.best.r.grade>=0?"+":"")+fmt(o.top.r.grade-o.best.r.grade)):"–"}</td>
     <td class="ctr o-tt">${o.top&&o.top.r.tier?`<span class="chip t-${o.top.r.tier}">${TIERNAME[o.top.r.tier]}</span>`:"–"}</td></tr>`).join("")}</tbody>`;
 }
@@ -1641,8 +1642,8 @@ function renderOvField(side,rows){
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
-      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">0 yrs</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
-      <div><span class="ovc-l">Target${t?logoImg(t.p,"slogo ovlogo"):""}</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
+      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g gtc-${b.r.tier}">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">0 yrs</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
+      <div><span class="ovc-l">Target${t?logoImg(t.p,"slogo ovlogo"):""}</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g gtc-${t.r.tier}">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
       ${t&&t.r.tier?`<span class="chip t-${t.r.tier}">${TIERNAME[t.r.tier]}</span>`:""}</div>`};
   const spots=ovSpots(side,rows);const maxR=Math.max(...spots.map(s=>s.r));
   const los=`<div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>`;
