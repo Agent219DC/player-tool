@@ -867,7 +867,15 @@ function blend(cur,prior){
 function norm(v,i,A){return Math.max(0,Math.min(100,(v-A.floor[i])/(A.ceil[i]-A.floor[i])*100))}
 function rawScore(m,A){const W=S.weights;let tw=0,sum=0;const n=m.map((v,i)=>v==null?null:norm(v,i,A));n.forEach((x,i)=>{if(x!=null){tw+=W[i];sum+=x*W[i]}});return {n,raw:tw?sum/tw:0}}
 function missCount(m){return m?m.filter(v=>v==null).length:99}
+/* our reference starter = his own board entry when he's on the board (one player, one grade);
+   the Model settings copy is only a fallback */
+function lineEntry(){const L=S.line;if(!L||!L.name||!Array.isArray(BOARD))return null;const nm=String(L.name).toLowerCase().trim();
+  const c=BOARD.filter(p=>!p.deleted&&String(p.name||"").toLowerCase().trim()===nm&&isOurs(p)&&p.m&&p.db);
+  if(!c.length)return null;return c.find(p=>String(p.season)===String(L.season))||c.slice().sort((a,b)=>(+b.season||0)-(+a.season||0))[0]}
 function lineScore(){
+  {const e=lineEntry(),L0=S.line;
+    const lp=e||(L0&&L0.cur&&L0.cur.db?{level:L0.level,season:L0.season,thru:L0.thru==null||L0.thru===""?"full":L0.thru,db:L0.cur.db,m:L0.cur.m,prior:L0.prior&&L0.prior.db?L0.prior:null}:null);
+    const r=lp&&score(lp);if(r&&r.final!=null)return {n:r.n,raw:r.raw,m:r.m,final:r.final,entry:e||null,blended:!!(lp.prior&&lp.prior.db)}}
   const L=S.line,A=anchors(modeFor(L.thru==null||L.thru===""?"full":L.thru)); const b=blend(L.cur,L.prior); const r=rawScore(b.m,A);
   return {...r,m:b.m,final:r.raw*(S.levels[L.level]??1)};
 }
@@ -882,7 +890,7 @@ function score(p){
   const leveled=r.raw*factor;
   const games=S.mode==="mid"?tg():S.seasonGames;
   const expected=S.dbPerGame*games; const part=Math.min(1,p.db/expected);
-  const line=lineScore().final; const C=cuts(); const target=(C.rotation+C.starter)/2;
+  const C=cuts(); const target=(C.rotation+C.starter)/2;
   const final=part>=1?leveled:target+(leveled-target)*part;
   const [hi,mid]=P.conf;
   let conf=b.eff>=hi?"High":b.eff>=mid?"Medium":"Low", disagree=null;
@@ -896,7 +904,7 @@ function score(p){
   if(miss===1) conf=conf==="High"?"Medium":"Low";
   const grade=gradeScore(final);
   return {...r,m:b.m,eff:b.eff,factor,fCur,fPrior,leveled,part,expected,target,final,conf,disagree,split:disagree!=null&&disagree>=gap,partialM:miss===1,
-          tier:tierOf(final),grade,letter:letterOf(grade),line};
+          tier:tierOf(final),grade,letter:letterOf(grade)};
 }
 /* Raw score -> 0-100 grade score: tier cutoffs land on 60 / 70 / 80 / 90. */
 function cuts(){return Object.assign({impact:60,starter:45,rotation:30},S.cuts||{})}
@@ -1092,7 +1100,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-score").innerHTML=`${fmt(r.grade)}<small> ${r.letter}</small>`;
   $("v-name").textContent=p.name||P.unnamed;
   const lg=gradeScore(L.final), d=r.grade-lg;
-  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, ${S.line.prior&&S.line.prior.db?(Number(S.line.season)-1)+"–"+String(S.line.season).slice(-2)+" blended":S.line.season} (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
+  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, ${L.blended?(Number(S.line.season)-1)+"–"+String(S.line.season).slice(-2)+" blended":S.line.season} (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
   $("v-chips").innerHTML=`<span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>`
     +(r.split?`<span class="chip t-Pass">Seasons disagree</span>`:"")
     +(P.fcsNote&&p.level==="FCS"?`<span class="chip t-Rotation" title="${P.fcsNote.text}">Sep % vs. G6/P4 only</span>`:"")
@@ -2106,16 +2114,22 @@ function subscribe(){
     const md=S.mode;S=Object.assign(clone(DEFAULTS),clone(s.data()));Object.entries(up).forEach(([f,v])=>setPath(S,f,v));S.mode=md;
     if(S.levels&&S.levels.G5!=null){if(S.levels.G6==null)S.levels.G6=S.levels.G5;delete S.levels.G5}
     if(S.line&&S.line.level==="G5")S.line.level="G6";
-    fillSettings();update();
+    fillSettings();update();linkStarterPrior(key);
   },()=>{}));
   unsubs.push(DB.collection(coll()).onSnapshot(q=>{
     if(key!==POSKEY)return;
     boardState="ready";
     const allDocs=q.docs.map(d=>{const p=Object.assign({id:d.id},clone(d.data()));if(p.level==="G5")p.level="G6";return fixLegacy(p)});
     BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();tryCompare();
-    seedBoard(key,allDocs);
+    seedBoard(key,allDocs);linkStarterPrior(key);
   },()=>{boardState="local";renderBoard()}));
 }
+/* one time per position: if the starter's board entry has no last season but Model settings does, copy it over */
+const LINKED={};
+function linkStarterPrior(key){if(LINKED[key]||!DB||!OWNER||!USER||key!==POSKEY)return;const L=S.line,e=lineEntry();
+  if(!e||!e.id||!L||!L.prior||!(L.prior.db>0)||!Array.isArray(L.prior.m)||L.prior.m.every(v=>v==null))return;LINKED[key]=true;
+  if(e.prior&&e.prior.db)return;
+  DB.collection(key.toLowerCase()+"_players").doc(e.id).update({prior:{db:L.prior.db,m:L.prior.m.slice()}}).catch(()=>{})}
 const SEEDED={};
 function seedBoard(key,allDocs){
   const list=POSITIONS[key]&&POSITIONS[key].seed;if(!list||!DB||!OWNER||!USER||SEEDED[key])return;SEEDED[key]=true;
