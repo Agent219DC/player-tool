@@ -85,7 +85,7 @@ dialog#pcard::backdrop{background:rgba(10,16,12,.5)}
 .pc h3{margin:0 0 6px;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .pc details.career{margin:0}.pc details.career>summary{cursor:pointer;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .pc-btns{display:flex;flex-wrap:wrap;gap:8px}
-@media (max-width:640px){dialog#pcard{width:100%;max-width:100%;max-height:100dvh;height:100dvh;margin:0;border-radius:0}.pc{padding:16px}.pc-kv{grid-template-columns:1fr}.pc-grade{grid-template-columns:1fr;gap:6px}.pc-top h2{font-size:26px}}
+@media (max-width:640px){.pc .grid2{grid-template-columns:1fr}dialog#pcard{width:100%;max-width:100%;max-height:100dvh;height:100dvh;margin:0;border-radius:0}.pc{padding:16px}.pc-kv{grid-template-columns:1fr}.pc-grade{grid-template-columns:1fr;gap:6px}.pc-top h2{font-size:26px}}
 #board td.cel,#board th[data-k="elig"]{padding-right:16px}
 .slogo{width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px}
 .vlogo{width:34px;height:34px;object-fit:contain;vertical-align:-6px;margin-right:8px}
@@ -1758,14 +1758,23 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div><h3>Contacts</h3>${contacts}</div>${car}
+    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
 $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){closeCard();return}const b=e.target.closest("[data-pc]");if(!b)return;const a=b.dataset.pc;
   if(a==="close")closeCard();
   if(a==="edit"){closeCard();fillForm(clone(CARD_P));openEditor()}
-  if(a==="report"){fillForm(clone(CARD_P));printReport()}});
+  if(a==="report"){fillForm(clone(CARD_P));printReport()}
+  if(a==="cedit"){const box=d.querySelector(".pc-contacts"),q=CARD_P;
+    box.innerHTML=`<h3>Contacts</h3><div class="grid2"><label>Agency<input id="pc-agency" type="text" value="${esc(q.agency||"")}" placeholder="Agency name"></label><label>Agent contact<input id="pc-agent" type="text" value="${esc(q.agent||"")}" placeholder="Name, phone or email"></label><label>Player contact<input id="pc-pcontact" type="text" value="${esc(q.pcontact||"")}" placeholder="Phone or email"></label></div><div class="pc-btns" style="margin-top:10px"><button type="button" class="btn primary" data-pc="csave">Save contacts</button><button type="button" class="btn" data-pc="ccancel">Cancel</button></div>`;
+    $("pc-agency").focus()}
+  if(a==="ccancel")openCard(CARD_P);
+  if(a==="csave")saveContacts()});
+async function saveContacts(){const q=CARD_P;const up={agency:$("pc-agency").value.trim()||null,agent:$("pc-agent").value.trim()||null,pcontact:$("pc-pcontact").value.trim()||null};
+  if(DB&&q.id){try{await DB.collection(coll()).doc(q.id).update(up)}catch(e){flash("Couldn't save the contacts. You may not have edit access.");return}}
+  else{const b=BOARD.find(x=>pkey(x)===pkey(q));if(b)Object.assign(b,up)}
+  Object.assign(CARD_P,up);Object.keys(up).forEach(k=>{if(up[k]==null)delete CARD_P[k]});openCard(CARD_P);flash(`Contacts saved for ${q.name}.`)}
 function openPending(){
   if(!PENDING||PENDING.k!==POSKEY)return;
   const p=BOARD.find(b=>b.id===PENDING.id);if(!p)return;
