@@ -659,10 +659,10 @@ const POSITIONS={
       {name:"Clean Pocket Grade",short:"Clean",unit:"",dp:1,step:0.1},
       {name:"Adjusted Completion %",short:"Adj %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:20,agreeMinDb:75,
-      anchors:{mid:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]},full:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]}},
+      anchors:{mid:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,35.1,95.4,81.2]},full:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]}},
       line:{name:"Carlos Del Rio-Wilson",level:"G6",season:"2026",thru:6,cur:{db:104,m:[16.3,23.8,87.9,68.5]},prior:{db:188,m:[17.2,22.5,78.6,70.3]}}},
     /* saved Model settings had 15; move to 20 once, only while still 15 */
-    cfgFix:[{field:"dbPerGame",from:15,to:20}],
+    cfgFix:[{field:"dbPerGame",from:15,to:20},{field:"anchors.mid.ceil",from:[10.1,30.1,95.4,81.2],to:[10.1,35.1,95.4,81.2]}],
     samples:[
       {name:"Gunner Stockton",school:"Georgia",level:"P4",db:106,m:[6.2,25.6,93.5,80.6],test:true},
       {name:"CJ Carr",school:"Notre Dame",level:"P4",db:119,m:[8.2,30.1,93.5,70.4],test:true},
@@ -674,9 +674,9 @@ const POSITIONS={
       {name:"Yards After Contact / Attempt",short:"YCO/A",unit:"",dp:2,step:0.01},
       {name:"Yards per Attempt",short:"YPA",unit:"",dp:2,step:0.1},
       {name:"Breakaways per Attempt",short:"BRK/A",unit:"",dp:3,step:0.01}],
-    cfgFix:[{field:"dbPerGame",from:8,to:12}],
+    cfgFix:[{field:"dbPerGame",from:8,to:12},{field:"anchors.mid.ceil",from:[0.38,4.59,6.9,0.12],to:[0.46,5.32,7.7,0.14]}],
     defaults:{dbPerGame:12,agreeMinDb:40,
-      anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
+      anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.46,5.32,7.7,0.14]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
       line:{name:"Jo'Shon Barbie",level:"G6",season:"2026",thru:6,cur:{db:48,m:[0.08,3.02,4.7,0.04]},prior:{db:58,m:[0.22,2.91,4.2,0.09]}}},
     samples:[]},
   TE:{label:"TE",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed TE",conf:[250,125],
@@ -1487,7 +1487,11 @@ $("impFile").addEventListener("change",async e=>{
 });
 
 /* ---------- needs overview ---------- */
-function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRICS=P.metrics;DEFAULTS=defaultsFor(k);S=Object.assign(clone(DEFAULTS),cfg?clone(cfg):{});(P.cfgFix||[]).forEach(f=>{if(S[f.field]===f.from)S[f.field]=f.to});S.mode=sv.S.mode;
+/* one-time settings corrections: field may be a dotted path; applies only while the saved value still equals "from" */
+const getPath=(o,path)=>path.split(".").reduce((a,k)=>a==null?a:a[k],o);
+function setPath(o,path,v){const ks=path.split(".");let a=o;for(let i=0;i<ks.length-1;i++){if(a[ks[i]]==null||typeof a[ks[i]]!=="object")a[ks[i]]={};a=a[ks[i]]}a[ks[ks.length-1]]=clone(v)}
+function cfgFixes(k,o){const up={};(POSITIONS[k].cfgFix||[]).forEach(f=>{if(JSON.stringify(getPath(o,f.field))===JSON.stringify(f.from))up[f.field]=f.to});return up}
+function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRICS=P.metrics;DEFAULTS=defaultsFor(k);S=Object.assign(clone(DEFAULTS),cfg?clone(cfg):{});Object.entries(cfgFixes(k,S)).forEach(([f,v])=>setPath(S,f,v));S.mode=sv.S.mode;
   try{return fn()}finally{P=sv.P;METRICS=sv.METRICS;S=sv.S;DEFAULTS=sv.DEFAULTS}}
 function htwt(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":""].filter(Boolean).join(" · ")}
 const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
@@ -2051,9 +2055,9 @@ function subscribe(){
   const key=POSKEY;
   unsubs.push(DB.doc(cfgPath()).onSnapshot(s=>{
     if(key!==POSKEY||!s.exists)return;
-    {const fx=POSITIONS[key].cfgFix,d=s.data(),up={};if(fx&&OWNER&&USER&&DB)fx.forEach(f=>{if(d[f.field]===f.from)up[f.field]=f.to});
-      if(Object.keys(up).length){DB.doc(cfgPath()).update(up).catch(()=>{});return}}
-    const md=S.mode;S=Object.assign(clone(DEFAULTS),clone(s.data()));S.mode=md;
+    const up=cfgFixes(key,s.data());
+    if(Object.keys(up).length&&OWNER&&USER&&DB){DB.doc(cfgPath()).update(up).catch(()=>{});return}
+    const md=S.mode;S=Object.assign(clone(DEFAULTS),clone(s.data()));Object.entries(up).forEach(([f,v])=>setPath(S,f,v));S.mode=md;
     if(S.levels&&S.levels.G5!=null){if(S.levels.G6==null)S.levels.G6=S.levels.G5;delete S.levels.G5}
     if(S.line&&S.line.level==="G5")S.line.level="G6";
     fillSettings();update();
