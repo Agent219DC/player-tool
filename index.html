@@ -1119,7 +1119,8 @@ function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLon
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
 function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
-function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}</span>`}
+const blendYr=p=>p.prior&&p.prior.db?(Number(p.season)?Number(p.season)-1:"last"):null;
+function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';const by=blendYr(p);return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}${by?` + ${by}${p.prior.level&&p.prior.level!==p.level?" ("+esc(p.prior.level)+")":""}`:""}</span>`}
 function fcsMark(p,i){return P.fcsNote&&p.level==="FCS"&&i===P.fcsNote.idx?"*":""}
 function htIn(h){if(!h)return null;const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?(+m[1])*12+(+(m[2]||0)):null}
 function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?`${m[1]}'${m[2]??0}"`:String(h)}
@@ -1221,7 +1222,7 @@ async function printSelected(){
   const trendTxt=x=>{if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;return Math.abs(d)<0.1?"":(d>0?" (+":" (-")+fmt(Math.abs(d))+")"};
   const body=rows.map(x=>[pdfTxt([x.p.name+(hasFlag(x)?FLAGGAP+(x.r.split||x.r.partialM?"  ":""):""),schoolLine(x.p)].filter(Boolean).join("\n")),
     x.p.ht?pdfTxt(fmtHt(x.p.ht)):"-",x.p.wt?String(x.p.wt):"-",x.p.level||"",
-    x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · Gm "+x.p.thru:""}`:"-",pdfTxt(eligShort(x.p)).replace("—","-"),
+    x.p.season?`${x.p.season}${x.p.thru==="full"?" · Full":x.p.thru?" · Gm "+x.p.thru:""}${blendYr(x.p)?" + "+blendYr(x.p):""}`:"-",pdfTxt(eligShort(x.p)).replace("—","-"),
     ...x.r.m.map((v,i)=>v==null?"-":pdfTxt(fm(v,i)+fcsMark(x.p,i))),fmt(x.r.grade)+trendTxt(x),pdfTxt(x.r.letter),TIERNAME[x.r.tier]||""]);
   const nm=METRICS.length, cEl=5, cM=6, cScore=cM+nm, cTier=cScore+2;
   const LG=await logosFor(rows.map(x=>teamIdFor(x.p))),lgOf=x=>LG[teamIdFor(x.p)],anyLg=rows.some(lgOf);
@@ -1322,7 +1323,7 @@ function renderCompare(given,ctx){
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
   const hi=(vals,i)=>{const v=vals.map(r=>r.r.n?r.r.n[i]:null);const ok=v.filter(x=>x!=null);if(ok.length<2)return v.map(()=>"");const mx=Math.max(...ok),mn=Math.min(...ok);if(mx===mn)return v.map(()=>"");return v.map(x=>x==null?"":x===mx?"best":x===mn?"worst":"")};
-  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${logoImg(x.p)}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
+  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${logoImg(x.p)}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
   const mrows=METRICS.map((m,i)=>{const c=hi(rows,i);return `<tr><td><b>${m.name}</b> <span class="sub">(${S.weights[i]}%)</span></td>${rows.map((x,k)=>{const n=x.r.n?x.r.n[i]:null;return cell(x,`${fm(x.r.m[i],i)}${m.unit}${n!=null?`<div class="mini"><i style="width:${n}%"></i></div>`:""}`,c[k])}).join("")}</tr>`}).join("");
   const gs=rows.map(x=>x.r.grade);const okg=gs.filter(g=>g!=null);const gmx=okg.length?Math.max(...okg):null,gmn=okg.length?Math.min(...okg):null;
   const extra=`<tr><td><b>Score</b></td>${rows.map(x=>cell(x,`<b>${fmt(x.r.grade)}</b> ${x.r.letter}`,okg.length>1&&gmx!==gmn?(x.r.grade===gmx?"best":x.r.grade===gmn?"worst":""):""))}</tr>
@@ -1360,7 +1361,7 @@ async function printCompare(){
   if(v){doc.setFont("helvetica","bold");doc.setFontSize(10.5);const ls=doc.splitTextToSize(T(v.text),W-100),bh=12+ls.length*12;
     doc.setFillColor(243,245,242);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(0,177,64);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
     doc.setTextColor(24,32,26);doc.text(ls,52,y+16);y+=bh+12}
-  const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season,P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · ")))]];
+  const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · ")))]];
   const best=METRICS.map((_,i)=>{const n=rows.map(x=>x.r.n?x.r.n[i]:null),ok=n.filter(z=>z!=null);if(ok.length<2)return n.map(()=>0);const mx=Math.max(...ok),mn=Math.min(...ok);return n.map(z=>z==null||mx===mn?0:z===mx?1:z===mn?-1:0)});
   const body=METRICS.map((m,i)=>[`${m.name} (${S.weights[i]}%)`,...rows.map(x=>`${T(fm(x.r.m[i],i))}${m.unit}${x.r.n&&x.r.n[i]!=null?`   (${Math.round(x.r.n[i])}/100)`:""}`)]);
   const gs=rows.map(x=>x.r.grade),gmx=Math.max(...gs),gmn=Math.min(...gs);
