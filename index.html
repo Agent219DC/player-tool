@@ -70,6 +70,7 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 .hnav{align-items:center;flex-wrap:wrap}
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
+#board td.cel,#board th[data-k="elig"]{padding-right:16px}
 .slogo{width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px}
 .vlogo{width:34px;height:34px;object-fit:contain;vertical-align:-6px;margin-right:8px}
 .cmp th .slogo{width:20px;height:20px;vertical-align:-5px;margin-right:6px}
@@ -1091,7 +1092,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-score").innerHTML=`${fmt(r.grade)}<small> ${r.letter}</small>`;
   $("v-name").textContent=p.name||P.unnamed;
   const lg=gradeScore(L.final), d=r.grade-lg;
-  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, 2025–26 blended (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
+  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, ${S.line.prior&&S.line.prior.db?(Number(S.line.season)-1)+"–"+String(S.line.season).slice(-2)+" blended":S.line.season} (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
   $("v-chips").innerHTML=`<span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>`
     +(r.split?`<span class="chip t-Pass">Seasons disagree</span>`:"")
     +(P.fcsNote&&p.level==="FCS"?`<span class="chip t-Rotation" title="${P.fcsNote.text}">Sep % vs. G6/P4 only</span>`:"")
