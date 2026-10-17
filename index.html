@@ -70,6 +70,22 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 .hnav{align-items:center;flex-wrap:wrap}
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
+dialog#pcard{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog#pcard::backdrop{background:rgba(10,16,12,.5)}
+.pc{display:grid;gap:16px;padding:20px 22px 22px}
+.pc-top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.pc-top h2{margin:0;font:700 30px/1.05 var(--display);letter-spacing:.01em;text-transform:none}
+.pc-top .sub{margin-top:4px}
+.pc-x{border:0;background:transparent;color:var(--muted);font-size:26px;line-height:1;cursor:pointer;padding:0 4px}
+.pc-grade{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;padding:14px 16px;border-radius:10px;background:var(--sunk)}
+.pc-grade .score{font-size:64px}
+.pc-kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px;font-size:14px}
+.pc-kv div{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+.pc-kv dt{color:var(--muted)} .pc-kv dd{margin:0;text-align:right;font-weight:600}
+.pc h3{margin:0 0 6px;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pc details.career{margin:0}.pc details.career>summary{cursor:pointer;font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pc-btns{display:flex;flex-wrap:wrap;gap:8px}
+@media (max-width:640px){dialog#pcard{width:100%;max-width:100%;max-height:100dvh;height:100dvh;margin:0;border-radius:0}.pc{padding:16px}.pc-kv{grid-template-columns:1fr}.pc-grade{grid-template-columns:1fr;gap:6px}.pc-top h2{font-size:26px}}
 #board td.cel,#board th[data-k="elig"]{padding-right:16px}
 .slogo{width:16px;height:16px;object-fit:contain;vertical-align:-3px;margin-right:4px}
 .vlogo{width:34px;height:34px;object-fit:contain;vertical-align:-6px;margin-right:8px}
@@ -645,6 +661,7 @@ window.claude={use:async n=>{
   </details>
 </div>
 
+<dialog id="pcard" aria-label="Player card"></dialog>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
@@ -1188,7 +1205,7 @@ $("board").addEventListener("click",e=>{
   if(e.target.closest(".pick"))return;
   if(e.target.id==="clearFilters"){STARONLY=false;$("starOnly").checked=false;$("statusFilter").value="";$("boardSearch").value="";ROLEF="All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"));renderBoard();return}
   const th=e.target.closest("th");if(th&&th.dataset.k){const k=th.dataset.k;sortDir=k===sortKey?-sortDir:-1;sortKey=k;renderBoard();return}
-  const ld=e.target.closest("[data-load]");if(ld){e.preventDefault();fillForm(clone(BOARD[+ld.dataset.load]));openEditor();return}
+  const ld=e.target.closest("[data-load]");if(ld){e.preventDefault();openCard(BOARD[+ld.dataset.load]);return}
   const stb=e.target.closest("[data-star]");
   if(stb){const p=BOARD[+stb.dataset.star];const v=!p.star;
     if(DB&&p.id){DB.collection(coll()).doc(p.id).update({star:v}).catch(()=>flash("Couldn't change that player. You may not have edit access."))}
@@ -1718,10 +1735,34 @@ document.addEventListener("toggle",e=>{const d=e.target;if(d.open&&d.matches&&d.
 let EDIT_OPEN=false;
 function openEditor(){const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeout(()=>ed.scrollIntoView({behavior:"smooth",block:"start"}),30)}
 $("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o});
+/* ---------- player card: read-only view of a player; Edit opens the player panel ---------- */
+let CARD_P=null;
+function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
+  const role=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
+  const top=[p.school,p.level,role].filter(Boolean).join(" · ");
+  const st=p.status?`<span class="stag st-${esc(p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(p.status)}</span>`:"";
+  const grade=r&&r.grade!=null?`<div class="pc-grade"><div class="score gtc-${r.tier}">${fmt(r.grade)}<small> ${r.letter}</small></div><div>
+      <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
+      ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
+      <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div></div></div>`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
+  const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span></div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
+  const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+  const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
+    ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
+  const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
+  return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
+    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div>${car}
+    <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
+function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
+function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
+$("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){closeCard();return}const b=e.target.closest("[data-pc]");if(!b)return;const a=b.dataset.pc;
+  if(a==="close")closeCard();
+  if(a==="edit"){closeCard();fillForm(clone(CARD_P));openEditor()}
+  if(a==="report"){fillForm(clone(CARD_P));printReport()}});
 function openPending(){
   if(!PENDING||PENDING.k!==POSKEY)return;
   const p=BOARD.find(b=>b.id===PENDING.id);if(!p)return;
-  PENDING=null;fillForm(clone(p));render();openEditor();
+  PENDING=null;openCard(p);
 }
 
 /* ---------- search all positions ---------- */
@@ -2082,7 +2123,9 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();const p=readFor
         if(others.length){XDUP_ARMED=pkey(p);const where=[...new Set(others.map(x=>`${POSITIONS[x.k]?POSITIONS[x.k].label:x.k} board (${x.p.school||"no school"}${x.p.season?", "+x.p.season:""})`))].join(" and the ");
           flash(`${p.name} is already on the ${where}. Click Save again to add him here too.`,12000);$("status").scrollIntoView({block:"nearest"});return}}
       DUP_ARMED=null;XDUP_ARMED=null;withTrend(p,ex);
-      await DB.collection(coll()).doc(ex&&ex.id?ex.id:slug(p.name+"-"+p.school+"-"+p.season)).set(p);LOADED_KEY=pkey(p);flash(p.name+(ex?" updated on":" saved to")+" the shared board.")}
+      const sid=ex&&ex.id?ex.id:slug(p.name+"-"+p.school+"-"+p.season);
+      await DB.collection(coll()).doc(sid).set(p);LOADED_KEY=pkey(p);flash(p.name+(ex?" updated on":" saved to")+" the shared board.");
+      $("editor").open=false;openCard(Object.assign({id:sid},p))}
     catch(err){flash("Couldn't save. You may have view-only access to this Player Tool.")}
   }else{const i=BOARD.findIndex(b=>b.name===p.name&&b.school===p.school&&(b.season||"")===(p.season||""));if(i>=0)BOARD[i]=p;else BOARD.push(p);renderBoard();flash(p.name+" added for this visit only (shared board unavailable).")}
 });
