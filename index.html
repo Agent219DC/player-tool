@@ -524,6 +524,9 @@ window.claude={use:async n=>{
         <label>Date entered portal<input id="p-pdate" type="date"></label>
         <label>Visit<select id="p-visit"><option value="">—</option><option>Scheduled</option><option>Completed</option><option>Canceled</option></select></label>
         <label>Visit date<input id="p-vdate" type="date"></label>
+        <label>Agency<input id="p-agency" type="text" placeholder="Agency name"></label>
+        <label>Agent contact<input id="p-agent" type="text" placeholder="Name, phone or email"></label>
+        <label>Player contact<input id="p-pcontact" type="text" placeholder="Phone or email"></label>
       </div></fieldset>
       <div class="btns">
         <button class="btn primary" type="submit">Save to board</button>
@@ -963,6 +966,7 @@ function readForm(){
   const ht=$("p-ht").value.trim(),wt=num($("p-wt").value),hs=$("p-hs").value.trim(),home=$("p-home").value.trim(),st=$("p-st").value;
   if(ht)p.ht=ht; if(wt)p.wt=wt; if(hs)p.hs=hs; if(home)p.home=home; if(st)p.st=st;
   const st2=$("p-status").value,el=$("p-elig").value,pd=$("p-pdate").value,vs=$("p-visit").value,vd=$("p-vdate").value;
+  {const ag=$("p-agency").value.trim(),an=$("p-agent").value.trim(),pc=$("p-pcontact").value.trim();if(ag)p.agency=ag;if(an)p.agent=an;if(pc)p.pcontact=pc}
   if(st2)p.status=st2; if(el)p.elig=+el; if(pd)p.pdate=pd; else if(LEGACY_PORTAL==="Yes")p.portal="Yes"; if(vs||vd)p.visit=vs||"Scheduled"; if(vd)p.vdate=vd;
   if(P.roles) p.role=$("p-role").value;
   if($("usePrior").checked){p.prior={db:num($("pr-db").value),m:METRICS.map((_,i)=>num($("r-"+i).value))};const pl=$("pr-level").value;if(pl&&pl!==p.level)p.prior.level=pl}
@@ -972,7 +976,7 @@ function readForm(){
 let LOADED_KEY=null,LEGACY_PORTAL=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null,teamId:p.teamId||null};espnReset();
-  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
+  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-agency").value=p.agency||"";$("p-agent").value=p.agent||"";$("p-pcontact").value=p.pcontact||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
   $("pr-db").value=hp?p.prior.db??"":"";$("pr-level").value=hp&&p.prior.level?p.prior.level:""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
@@ -1737,6 +1741,8 @@ function openEditor(){const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeou
 $("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o});
 /* ---------- player card: read-only view of a player; Edit opens the player panel ---------- */
 let CARD_P=null;
+/* phone numbers and emails inside contact text become tap-to-call / tap-to-email links */
+function contactHtml(t){if(!t)return "–";return esc(t).replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g,m=>`<a href="mailto:${m}">${m}</a>`).replace(/(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g,m=>`<a href="tel:${m.replace(/[^\d+]/g,"")}">${m}</a>`)}
 function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const role=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
   const top=[p.school,p.level,role].filter(Boolean).join(" · ");
@@ -1749,9 +1755,10 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
     ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
+  const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div>${car}
+    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div><h3>Contacts</h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
