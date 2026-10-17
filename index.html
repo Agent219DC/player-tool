@@ -659,10 +659,10 @@ const POSITIONS={
       {name:"Clean Pocket Grade",short:"Clean",unit:"",dp:1,step:0.1},
       {name:"Adjusted Completion %",short:"Adj %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:20,agreeMinDb:75,
-      anchors:{mid:{floor:[22.9,14.6,76.7,60.7],ceil:[6.2,35.1,95.4,81.2]},full:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]}},
+      anchors:{mid:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]},full:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]}},
       line:{name:"Carlos Del Rio-Wilson",level:"G6",season:"2026",thru:6,cur:{db:104,m:[16.3,23.8,87.9,68.5]},prior:{db:188,m:[17.2,22.5,78.6,70.3]}}},
     /* saved Model settings had 15; move to 20 once, only while still 15 */
-    cfgFix:[{field:"dbPerGame",from:15,to:20},{field:"anchors.mid.ceil",from:[10.1,30.1,95.4,81.2],to:[6.2,35.1,95.4,81.2]},{field:"anchors.mid.ceil",from:[10.1,35.1,95.4,81.2],to:[6.2,35.1,95.4,81.2]},{field:"anchors.mid.ceil",from:[9.8,35.1,95.4,81.2],to:[6.2,35.1,95.4,81.2]}],
+    cfgFix:[{field:"dbPerGame",from:15,to:20},{field:"anchors.mid.ceil",from:[6.2,35.1,95.4,81.2],to:[10.1,30.1,95.4,81.2]},{field:"anchors.mid.ceil",from:[9.8,35.1,95.4,81.2],to:[10.1,30.1,95.4,81.2]},{field:"anchors.mid.ceil",from:[10.1,35.1,95.4,81.2],to:[10.1,30.1,95.4,81.2]}],
     samples:[
       {name:"Gunner Stockton",school:"Georgia",level:"P4",db:106,m:[6.2,25.6,93.5,80.6],test:true},
       {name:"CJ Carr",school:"Notre Dame",level:"P4",db:119,m:[8.2,30.1,93.5,70.4],test:true},
@@ -674,9 +674,9 @@ const POSITIONS={
       {name:"Yards After Contact / Attempt",short:"YCO/A",unit:"",dp:2,step:0.01},
       {name:"Yards per Attempt",short:"YPA",unit:"",dp:2,step:0.1},
       {name:"Breakaways per Attempt",short:"BRK/A",unit:"",dp:3,step:0.01}],
-    cfgFix:[{field:"dbPerGame",from:8,to:12},{field:"anchors.mid.ceil",from:[0.38,4.59,6.9,0.12],to:[0.46,5.32,7.7,0.14]}],
+    cfgFix:[{field:"dbPerGame",from:8,to:12},{field:"anchors.mid.ceil",from:[0.46,5.32,7.7,0.14],to:[0.38,4.59,6.9,0.12]}],
     defaults:{dbPerGame:12,agreeMinDb:40,
-      anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.46,5.32,7.7,0.14]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
+      anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
       line:{name:"Jo'Shon Barbie",level:"G6",season:"2026",thru:6,cur:{db:48,m:[0.08,3.02,4.7,0.04]},prior:{db:58,m:[0.22,2.91,4.2,0.09]}}},
     samples:[]},
   TE:{label:"TE",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed TE",conf:[250,125],
@@ -809,8 +809,10 @@ const fmt=(v,d=1)=>v==null||!isFinite(v)?"–":v.toFixed(d);
 const fm=(v,i)=>fmt(v,METRICS[i].dp);
 
 /* ---------- model ---------- */
-function anchors(){
-  const a=S.anchors[S.mode], m=S.anchors.mid;
+/* the scale follows each player's own numbers: full-season rows use full-season ceilings, partial seasons use mid-season */
+const modeFor=thru=>thru==="full"?"full":thru?"mid":S.mode;
+function anchors(mode){
+  const a=S.anchors[mode||S.mode], m=S.anchors.mid;
   return {floor:a.floor.map((f,i)=>f??m.floor[i]), ceil:a.ceil.map((c,i)=>c??m.ceil[i]),
           fallback:S.mode==="full"&&a.ceil.some(c=>c==null)};
 }
@@ -823,14 +825,14 @@ function norm(v,i,A){return Math.max(0,Math.min(100,(v-A.floor[i])/(A.ceil[i]-A.
 function rawScore(m,A){const W=S.weights;let tw=0,sum=0;const n=m.map((v,i)=>v==null?null:norm(v,i,A));n.forEach((x,i)=>{if(x!=null){tw+=W[i];sum+=x*W[i]}});return {n,raw:tw?sum/tw:0}}
 function missCount(m){return m?m.filter(v=>v==null).length:99}
 function lineScore(){
-  const L=S.line,A=anchors(); const b=blend(L.cur,L.prior); const r=rawScore(b.m,A);
+  const L=S.line,A=anchors(modeFor(L.thru==null||L.thru===""?"full":L.thru)); const b=blend(L.cur,L.prior); const r=rawScore(b.m,A);
   return {...r,m:b.m,final:r.raw*(S.levels[L.level]??1)};
 }
 function scaleReady(){const A=anchors();return !A.floor.some(v=>v==null)&&!A.ceil.some(v=>v==null)}
 function score(p){
   const miss=missCount(p.m);
   if(!p.m||miss>1||!p.db||!scaleReady()) return null;
-  const A=anchors(); const b=blend({db:p.db,m:p.m},p.prior); const r=rawScore(b.m,A);
+  const A=anchors(modeFor(p.thru)); const b=blend({db:p.db,m:p.m},p.prior); const r=rawScore(b.m,A);
   const fCur=S.levels[p.level]??1;let factor=fCur,fPrior=null;
   /* transfers: last season counts at the level he played it, weighted the same way the stats are blended */
   if(p.prior&&p.prior.level&&p.prior.level!==p.level&&b.eff>(p.db||0)){fPrior=S.levels[p.prior.level]??1;const wc=p.db||0,wp=b.eff-wc;factor=(fCur*wc+fPrior*wp)/(wc+wp)}
@@ -2003,7 +2005,7 @@ $("form").addEventListener("input",()=>{$("priorBox").hidden=!$("usePrior").chec
 let DUP_ARMED=null,ODD_ARMED=null,XDUP_ARMED=null;
 $("form").addEventListener("input",()=>{DUP_ARMED=null;ODD_ARMED=null;XDUP_ARMED=null});
 /* stats more than a quarter of the scale beyond the usual floor-to-ceiling range */
-function oddStats(p){const A=anchors(),out=[];
+function oddStats(p){const A=anchors(modeFor(p.thru)),out=[];
   const chk=(m,tag)=>(m||[]).forEach((v,i)=>{if(v==null)return;const lo=Math.min(A.floor[i],A.ceil[i]),hi=Math.max(A.floor[i],A.ceil[i]),pad=(hi-lo)*0.25;
     if(v<lo-pad||v>hi+pad)out.push(`${METRICS[i].short}${tag} ${fm(v,i)}${METRICS[i].unit} (usual ${fm(lo,i)}–${fm(hi,i)})`)});
   chk(p.m,"");if(p.prior&&p.prior.db)chk(p.prior.m," last season");return out}
