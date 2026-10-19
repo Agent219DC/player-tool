@@ -743,8 +743,8 @@ window.claude={use:async n=>{
       </div>
       <div>
         <h3 class="ot-h">Budget</h3>
-        <p class="note" id="budNote">Load the budget file to see the Budget page and our slot values on player cards. Only your account can read it.</p>
-        <div class="btns"><button class="btn" type="button" id="budUp">Load budget file (.json)…</button><input type="file" id="budFile" accept=".json,application/json" hidden></div>
+        <p class="note" id="budNote">Load the NIL budget workbook (it reads the <b>Download</b> tab) to see the Budget page and our slot values on player cards. Only your account can read it.</p>
+        <div class="btns"><button class="btn" type="button" id="budUp">Load budget sheet (.xlsx)…</button><input type="file" id="budFile" accept=".xlsx,.xls,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Import / Export</h3>
@@ -2181,7 +2181,11 @@ $("budBtn").addEventListener("click",()=>{hideViews("budget");$("budget").hidden
 $("budClose").addEventListener("click",()=>{$("budget").hidden=true});
 $("budUp").addEventListener("click",()=>$("budFile").click());
 $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;let d;
-  try{d=JSON.parse(await f.text());if(d.format!=="player-tool-budget"||!Array.isArray(d.groups))throw 0}catch(err){flash("That file isn't a budget file.");return}
+  try{if(/\.json$/i.test(f.name)){d=JSON.parse(await f.text());if(d.format!=="player-tool-budget"||!Array.isArray(d.groups))throw 0}
+    else{let XL;try{XL=await loadXLSX()}catch(e){flash("The spreadsheet tool didn't load. Refresh the page and try again.");return}
+      const wb=XL.read(await f.arrayBuffer(),{type:"array"});const ws=wb.Sheets["Download"]||wb.Sheets[wb.SheetNames.find(n=>/download/i.test(n))];
+      if(!ws){flash("That workbook has no Download tab.");return}d=parseBudgetSheet(XL.utils.sheet_to_json(ws,{header:1,raw:true,defval:null}));if(!d)throw 0}}
+  catch(err){flash("Couldn't read a budget from that file.");return}
   try{await DB.doc("owner/budget").set({title:d.title||"",total:+d.total||0,groups:d.groups,goals:d.goals||{},at:new Date().toISOString()})}
   catch(err){flash("Couldn't save the budget. Publish the updated database rules first (Firebase → Firestore → Rules).",9000);return}
   /* our players' names (no money) go onto the depth chart if they aren't there yet */
@@ -2191,6 +2195,23 @@ $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.tar
     (DC.groups[k]=DC.groups[k]||[]).push({id:dcId(),n:x.name});have.add(normName(x.name));added++}));
   if(added)await dcSave();
   flash(`Budget loaded.${added?` Added ${added} roster player${added===1?"":"s"} to the depth chart (names only).`:""}`,7000)});
+/* reads the Download tab: group blocks of NAME/TOTAL/% columns; "QB 1" style rows are open spots, "Last, First" rows are our players */
+function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==null?"":String(v).trim();
+  const heads=[];R.forEach((row,r)=>{if(/^quarterback$/i.test(txt(cell(r,0)))||/^defensive line$/i.test(txt(cell(r,0))))heads.push(r)});if(!heads.length)return null;
+  const FIRST={"WIDE RECEIVER":"WR","DEFENSIVE LINE":"DE","SPECIALISTS":"ST","QUARTERBACK":"QB","RUNNING BACK":"RB","LINEBACKERS":"LB","TIGHT END":"TE","OFFENSIVE LINE":"OT","SECONDARY":"SAF"};
+  const groups=[];let total=null;
+  heads.forEach(hr=>{for(let c=0;c<15;c+=3){const title=txt(cell(hr,c)).toUpperCase();if(!title||title==="BREAKDOWN"||!FIRST[title])continue;
+    const rows=[],cnt={};let last=null;
+    for(let r=hr+2;r<R.length;r++){const n=txt(cell(r,c));if(/^total$/i.test(n))break;if(!n)continue;if(heads.includes(r))break;
+      const amt=+cell(r,c+1)||0;const m=n.match(/^([A-Za-z]+)\s*(\d+)$/);let pos,name=null;
+      if(m)pos=m[1].toUpperCase();else{pos=last||FIRST[title];const i=n.indexOf(",");name=i>0?(n.slice(i+1).trim()+" "+n.slice(0,i).trim()):n}
+      last=pos;cnt[pos]=(cnt[pos]||0)+1;rows.push({slot:pos+cnt[pos],pos,name,amt})}
+    if(rows.length)groups.push({name:title.toLowerCase().replace(/\b\w/g,x=>x.toUpperCase()),rows})}});
+  R.forEach(row=>(row||[]).forEach(v=>{if(typeof v==="number"&&v>=100000&&(total==null||v>total))total=v}));
+  const goals={};const bc=4*3;R.forEach((row,r)=>{if(r<=heads[heads.length-1])return;const g=txt(cell(r,bc)),v=cell(r,bc+2);if(g&&typeof v==="number"&&v<=1)goals[g.replace(/SPEACIALISTS/i,"SPECIALISTS").toLowerCase().replace(/\b\w/g,x=>x.toUpperCase())]=v});
+  const order=["Quarterback","Running Back","Wide Receiver","Offensive Line","Tight End","Defensive Line","Linebackers","Secondary","Specialists"];
+  groups.sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
+  return groups.length?{format:"player-tool-budget",title:"NIL budget",total:total||groups.reduce((a,g)=>a+g.rows.reduce((x,y)=>x+y.amt,0),0),groups,goals}:null}
 /* owner-only line on a player card: our slot value at the spot he projects to, and his own number if he's on the sheet */
 function budgetCardHtml(p,r){if(!OWNER||!BUDGET)return "";const rows=budRows();const nm=normName(p.name);
   const his=rows.find(x=>x.name&&normName(x.name)===nm);const g=r?marketRange(p,r,"g6"):null;
