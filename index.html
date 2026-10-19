@@ -2148,9 +2148,9 @@ $("tbPrint").addEventListener("click",printTagBoard);
 const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK"],["LBA","LBB","NIC"],["SAFA","SAFB","CBA","CBB"]],st:[["ST"]]};
 const DC_POOLS=["WRP","OLP","DLP","LBP","DBP"];
 const DC_SIDES=Object.fromEntries(Object.entries(DC_ROWS).map(([k,r])=>[k,r.flat()]));
-const DC_LABEL={ST:"Specialists",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"};
+const DC_LABEL={ST:"Specialists",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"MIKE",LBB:"WILL",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"};
 /* names for the Position menu, where the two DT / LB / SAF / CB spots need telling apart */
-const DC_OPT=k=>({DTA:"DT (1st)",DTB:"DT (2nd)",LBA:"LB (1st)",LBB:"LB (2nd)",SAFA:"SAF (1st)",SAFB:"SAF (2nd)",CBA:"CB (1st)",CBB:"CB (2nd)"})[k]||DC_LABEL[k]||k;
+const DC_OPT=k=>({DTA:"DT (1st)",DTB:"DT (2nd)",LBA:"MIKE",LBB:"WILL",SAFA:"SAF (1st)",SAFB:"SAF (2nd)",CBA:"CB (1st)",CBB:"CB (2nd)"})[k]||DC_LABEL[k]||k;
 const DC_FAM=k=>({X:"WR",Z:"WR",SLOT:"WR",WRP:"WR",WR:"WR",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",OL:"OL",OT:"OL",IOL:"OL",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"})[k]||k;
 const DC_DOC={now:"shared/depth",next:"shared/depth_next"};
 const DC_TYPE={ret:"Returning",tr:"Transfer",fr:"Freshman"};
