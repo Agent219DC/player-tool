@@ -584,7 +584,7 @@ window.claude={use:async n=>{
     </div>
     <div class="dc-rows" id="dcCols"></div>
     <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcsw fr"></span> Freshman</span><span><span class="dcsw wo"></span> Walk-on</span><span><span class="dcm cut">Potential cut</span></span><span class="sub" id="dcCount"></span></div>
-    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Receivers and linemen start in the <b>To place</b> boxes; drag them to X, Slot, Z or LT–RT. Tap a player to edit his tags. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
+    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Players from the roster grid start in the <b>To place</b> boxes; drag each one to his spot. Tap a player to edit his tags. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
   </section>
 
   <section id="budget" hidden>
@@ -2145,11 +2145,13 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
 $("tbPrint").addEventListener("click",printTagBoard);
 /* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
 /* each side is rows of spots; WRP / OLP hold receivers and linemen not placed at a spot yet (shown only when someone is in them) */
-const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DE","DT","LB","SAF","NIC","CB"]],st:[["ST"]]};
-const DC_POOLS=["WRP","OLP"];
+const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK"],["LBA","LBB","NIC"],["SAFA","SAFB","CBA","CBB"]],st:[["ST"]]};
+const DC_POOLS=["WRP","OLP","DLP","LBP","DBP"];
 const DC_SIDES=Object.fromEntries(Object.entries(DC_ROWS).map(([k,r])=>[k,r.flat()]));
-const DC_LABEL={ST:"Specialists",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place"};
-const DC_FAM=k=>({X:"WR",Z:"WR",SLOT:"WR",WRP:"WR",WR:"WR",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",OL:"OL",OT:"OL",IOL:"OL"})[k]||k;
+const DC_LABEL={ST:"Specialists",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"};
+/* names for the Position menu, where the two DT / LB / SAF / CB spots need telling apart */
+const DC_OPT=k=>({DTA:"DT (1st)",DTB:"DT (2nd)",LBA:"LB (1st)",LBB:"LB (2nd)",SAFA:"SAF (1st)",SAFB:"SAF (2nd)",CBA:"CB (1st)",CBB:"CB (2nd)"})[k]||DC_LABEL[k]||k;
+const DC_FAM=k=>({X:"WR",Z:"WR",SLOT:"WR",WRP:"WR",WR:"WR",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",OL:"OL",OT:"OL",IOL:"OL",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"})[k]||k;
 const DC_DOC={now:"shared/depth",next:"shared/depth_next"};
 const DC_TYPE={ret:"Returning",tr:"Transfer",fr:"Freshman"};
 let DCS={now:{groups:{}},next:{groups:{}}},DC_SZN="next",DC_SIDE="off",DC_SORT=[],DC_DRAG_AT=0,DC_GRADES=null,DC_OURS=[],DC_DIRTY=0,DC_EDIT=null;
@@ -2158,7 +2160,7 @@ const normName=n=>String(n||"").toLowerCase().replace(/[.'’]/g,"").replace(/\b
 const dcId=()=>"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function dcAll(){return Object.values(DCG()).flat()}
 /* older charts split OL into OT/IOL; fold them into OL */
-function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});return g}
+function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]],["DLP",["DE","DT"]],["LBP",["LB"]],["DBP",["SAF","CB"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});return g}
 function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups)};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
 async function dcSave(z){z=z||DC_SZN;DC_DIRTY=Date.now();if(!DB)return;
   try{await DB.doc(DC_DOC[z]).set({groups:DCS[z].groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
@@ -2175,7 +2177,9 @@ function dcGrade(x){if(!DC_GRADES||!x)return null;if(x.link==="none")return null
   if(x.link){const h=[...DC_GRADES.values()].find(c=>c.id===x.link);if(h)return h}
   const ex=DC_GRADES.get(normName(x.n));if(ex)return ex;
   const t=normName(x.n).split(" ");if(t.length<2)return null;const last=t[t.length-1],first=t[0];
-  const hit=DC_OURS.filter(c=>{const b=normName(c.name).split(" ");return b.length>1&&b.slice(1).includes(last)&&b[0][0]===first[0]});
+  const onChart=new Set(["now","next"].flatMap(z=>dcAllZ(z)).map(y=>normName(y.n)));
+  const hit=DC_OURS.filter(c=>{const nn=normName(c.name),b=nn.split(" ");if(b.length<2||onChart.has(nn))return false;
+    return (b[0]===first&&b.slice(1).includes(last))||(b[b.length-1]===last&&b[0][0]===first[0]&&b[0].length<=3)});
   return hit.length===1?hit[0]:null}
 function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.cut?'<span class="dcm cut">Potential cut</span>':""].join("")}
 function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;
@@ -2202,7 +2206,7 @@ function dcFromDom(){const G=DCG();const by=new Map(dcAll().map(x=>[x.id,x]));
 function dcFind(id){const G=DCG();for(const k in G){const i=G[k].findIndex(x=>x.id===id);if(i>=0)return {k,i,x:G[k][i]}}return null}
 function dcOpenEdit(id){const f=dcFind(id);if(!f)return;DC_EDIT=f;const x=f.x,g=dcGrade(x);
   $("dcdName").value=x.n;$("dcdYr").value=x.yr||"";$("dcdType").value=x.t||"ret";$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdRole").value=x.role||"";
-  $("dcdPos").innerHTML=[].concat(...Object.values(DC_SIDES)).map(k=>`<option value="${k}"${k===f.k?" selected":""}>${DC_LABEL[k]||k}</option>`).join("");
+  $("dcdPos").innerHTML=[].concat(...Object.values(DC_SIDES)).map(k=>`<option value="${k}"${k===f.k?" selected":""}>${DC_OPT(k)}</option>`).join("");
   $("dcdLink").innerHTML=`<option value="">Auto: ${g?esc(g.name)+" ("+g.k+")":"no match"}</option>`+DC_OURS.map(c=>`<option value="${esc(c.id)}"${x.link===c.id?" selected":""}>${esc(c.name)} · ${c.k} · ${fmt(c.grade)} ${c.letter}</option>`).join("")+`<option value="none"${x.link==="none"?" selected":""}>Not on a board</option>`;
   $("dcdLinkWrap").hidden=!DC_GRADES;
   $("dcdCard").hidden=!(g&&g.id);$("dcdCard").dataset.k=g?g.k:"";$("dcdCard").dataset.id=g?g.id:"";
@@ -2236,7 +2240,7 @@ async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=si
 $("dcBtn").addEventListener("click",openDepth);
 $("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
 /* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = potential cut */
-const GRID_POS={QB:"QB",RB:"RB",OL:"OLP",WR:"WRP",TE:"TE",SPEC:"ST",DE:"DE",DT:"DT",LB:"LB",SAF:"SAF",CB:"CB",NIC:"NIC",DB:"SAF",K:"ST",P:"ST",LS:"ST",OT:"OLP",IOL:"OLP",OG:"OLP",C:"OLP",S:"SAF",DL:"DT"};
+const GRID_POS={QB:"QB",RB:"RB",OL:"OLP",WR:"WRP",TE:"TE",SPEC:"ST",DE:"DLP",DT:"DLP",LB:"LBP",SAF:"DBP",CB:"DBP",NIC:"NIC",DB:"DBP",K:"ST",P:"ST",LS:"ST",OT:"OLP",IOL:"OLP",OG:"OLP",C:"OLP",S:"DBP",DL:"DLP"};
 function gridFill(c){const s=c&&c.s;if(!s||s.patternType==="none"||!s.fgColor)return "";const f=s.fgColor;const rgb=String(f.rgb||"").toUpperCase().slice(-6);
   if(f.theme===9||/^46BDC6$/.test(rgb)||/^(0070C0|00B0F0|4472C4|5B9BD5|9DC3E6|BDD7EE|DDEBF7|9BC2E6|6FA8DC|A4C2F4|CFE2F3|3C78D8)$/.test(rgb))return "tr";
   if(/^(FFFF00|FFFF99|FFF2CC|FFE599|FFD966|FFC000|FFEB9C|FFFF66)$/.test(rgb))return "fr";
