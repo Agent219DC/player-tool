@@ -479,7 +479,7 @@ window.claude={use:async n=>{
 
   <section id="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">Tag board</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">Portal board</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button> <button class="btn" type="button" id="bbClose">Close</button></span>
     </div>
     <div class="bbctl">
@@ -494,7 +494,7 @@ window.claude={use:async n=>{
 
   <section id="tagboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">Tag board</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">Portal board</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button> <button class="btn" type="button" id="tbClose">Close</button></span>
     </div>
     <div class="tb-cols" id="tbCols"></div>
@@ -1961,7 +1961,7 @@ let TB=null,TB_SIDE="off",TB_SORT=[],TB_DRAG_AT=0;
 const OFF_KEYS=["QB","RB","WR","TE","IOL","OT"],DEF_KEYS=["DT","DE","LB","SAF","NIC","CB"];
 async function renderTagBoard(){
   $("tagboard").hidden=false;$("tbPrint").disabled=true;
-  if(!DB&&!BOARD.length){$("tbCols").innerHTML='<p class="sub">The tag board needs the shared board.</p>';return}
+  if(!DB&&!BOARD.length){$("tbCols").innerHTML='<p class="sub">The portal board needs the shared board.</p>';return}
   $("tbCols").innerHTML='<p class="sub">Loading every position…</p>';
   const all=await loadAllPositions();const cols={};
   all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
@@ -1998,7 +1998,7 @@ $("tbClose").addEventListener("click",()=>{$("tagboard").hidden=true});
 async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
-    const W=pdfHeader(doc,"Player Tool · Tag Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
+    const W=pdfHeader(doc,"Player Tool · Portal Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
       const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
       list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[24,32,26];
@@ -2007,7 +2007,7 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
         doc.setTextColor(24,32,26);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
         const g=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
-  await pdfSave(doc,`Tag board ${new Date().toISOString().slice(0,10)}.pdf`)}
+  await pdfSave(doc,`Portal board ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("tbPrint").addEventListener("click",printTagBoard);
 $("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
 $("recClose").addEventListener("click",()=>{$("recruit").hidden=true});
