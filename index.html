@@ -215,6 +215,24 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .gresults .gnone{padding:10px;color:var(--muted);font-size:13px}
 #recruit{display:grid;gap:10px}
 #bigboard{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+#tagboard{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.tb-cols{display:grid;grid-template-columns:repeat(6,minmax(175px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x proximity}
+.tb-col{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;min-width:0;scroll-snap-align:start}
+.tb-col h3{margin:0 2px 2px;font:700 15px var(--display);letter-spacing:.06em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:baseline}
+.tb-col h3 .sub{font:400 11px var(--body);letter-spacing:0;text-transform:none}
+.tb-list{display:flex;flex-direction:column;gap:6px;min-height:40px}
+.tag{position:relative;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--line);border-radius:6px;padding:6px 8px 6px 8px;cursor:grab;display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:1px 6px;align-items:baseline;font-size:12.5px;line-height:1.25;user-select:none;-webkit-user-select:none}
+.tag:active{cursor:grabbing}
+.tag .rk{font:600 12px var(--mono);color:var(--muted)}
+.tag .nm{grid-column:2/4;grid-row:1;font-weight:700;overflow-wrap:break-word}.tag .rk{grid-row:1}
+.tag .g{grid-column:2/3;grid-row:2;font:700 12.5px var(--mono);white-space:nowrap}
+.tag .ln2{grid-column:2/4;grid-row:3;color:var(--muted);font-size:11.5px;overflow-wrap:break-word}
+.tag .mv{grid-column:3/4;grid-row:2;display:flex;gap:3px;justify-content:flex-end;align-self:center}
+.tag .mv button{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px;font-size:9px;line-height:1;padding:3px 5px;cursor:pointer}
+.tag.tb-Elite{border-left-color:var(--tElite)} .tag.tb-Impact{border-left-color:var(--tImpact)} .tag.tb-Starter{border-left-color:var(--tStarter)} .tag.tb-Rotation{border-left-color:var(--tRotation)} .tag.tb-Pass{border-left-color:var(--tPass)}
+.tag.sortable-ghost{opacity:.35} .tag.sortable-chosen{box-shadow:0 6px 18px rgba(0,0,0,.18)}
+.tb-empty{color:var(--muted);font-size:12px;padding:6px 2px}
+@media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
@@ -437,7 +455,7 @@ window.claude={use:async n=>{
       </div>
     </div>
     <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
+      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="tbBtn">Tag Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
   <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -476,6 +494,15 @@ window.claude={use:async n=>{
     </div>
     <div class="tablewrap"><table id="bbTbl"></table></div>
     <p class="note">This season's targets at every position (Medium or High confidence; no NIP, Pass, hidden or our own players). <b>Priority</b> lists positions marked Upgrade first, then Solid, then Great, best grade first within each. <b>vs. ours</b> = his grade minus our weakest starter at that spot. Tap a player to open his card.</p>
+  </section>
+
+  <section id="tagboard" hidden>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
+      <h2>Tag board</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button> <button class="btn" type="button" id="tbClose">Close</button></span>
+    </div>
+    <div class="tb-cols" id="tbCols"></div>
+    <p class="note">Drag tags (or use the arrows) to rank targets at each position; everyone on staff sees the same order. Only this season's targets with Medium or High confidence (no On Roster, NIP, Pass or hidden). New targets start at the bottom of their column in grade order. Tap a tag to open his card.</p>
   </section>
 
   <section id="recruit" hidden>
@@ -687,6 +714,7 @@ window.claude={use:async n=>{
 
 <dialog id="pcard" aria-label="Player card"></dialog>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 /* ---------- positions ---------- */
@@ -1706,7 +1734,7 @@ function renderOvField(side,rows){
 }
 $("ovField").addEventListener("click",e=>ovTblClick(e));
 document.querySelectorAll("[data-ovm]").forEach(b=>b.addEventListener("click",()=>{OV_MODE=b.dataset.ovm;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOverview()}));
-$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
+$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
 $("ovClose").addEventListener("click",()=>{$("overview").hidden=true});
 function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;
   {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
@@ -1909,7 +1937,7 @@ function drawBigBoard(){const v=bbRows();
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
     <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td></tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
-$("bbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})});
+$("bbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;$("tagboard").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})});
 $("bbClose").addEventListener("click",()=>{$("bigboard").hidden=true});
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
@@ -1931,7 +1959,59 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   doc.text("This season's targets, Medium or High confidence. vs. ours = his grade minus our weakest starter at that spot.",40,y);
   await pdfSave(doc,T(`Big board ${new Date().toISOString().slice(0,10)}.pdf`))}
 $("bbPrint").addEventListener("click",printBigBoard);
-$("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
+/* ---------- tag board: staff ranking by position (drag to order; saved as tagRank on each player) ---------- */
+let TB=null,TB_SIDE="off",TB_SORT=[],TB_DRAG_AT=0;
+const OFF_KEYS=["QB","RB","WR","TE","IOL","OT"],DEF_KEYS=["DT","DE","LB","SAF","NIC","CB"];
+async function renderTagBoard(){
+  $("tagboard").hidden=false;$("tbPrint").disabled=true;
+  if(!DB&&!BOARD.length){$("tbCols").innerHTML='<p class="sub">The tag board needs the shared board.</p>';return}
+  $("tbCols").innerHTML='<p class="sub">Loading every position…</p>';
+  const all=await loadAllPositions();const cols={};
+  all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
+    const live=latestByPlayer(docs.filter(p=>!p.ref).map(p=>({p,r:score(p)})).filter(x=>x.r&&x.r.grade!=null));
+    const yr=Math.max(0,...live.map(x=>+x.p.season||0));
+    cols[k]=live.filter(x=>(+x.p.season||0)===yr&&(x.r.conf==="High"||x.r.conf==="Medium")&&!isMarshallP(x.p)&&!isOurs(x.p)&&x.p.status!=="Pass"&&x.p.status!=="NIP"&&x.p.id)
+      .sort((a,b)=>{const ra=a.p.tagRank,rb=b.p.tagRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return b.r.grade-a.r.grade})}));
+  TB=cols;drawTagBoard();$("tbPrint").disabled=false;
+}
+function tagHtml(k,x,i){const p=x.p,r=x.r;const role=k==="WR"&&p.role?(p.role==="Slot"?"SLOT · ":"WR · "):"";
+  return `<div class="tag tb-${r.tier}" data-tk="${k}" data-tid="${esc(p.id)}" title="${esc(p.name)} · ${esc(p.school||"")}"><span class="rk">${i+1}</span><span class="nm">${esc(p.name)}</span><span class="g gtc-${r.tier}">${fmt(r.grade)} ${r.letter}</span>
+    <span class="ln2">${esc(role)}${esc([p.school,p.level,p.elig!=null?p.elig+" yr"+(p.elig===1?"":"s"):"",p.status||""].filter(Boolean).join(" · "))}</span>
+    <span class="mv"><button type="button" data-mv="-1" aria-label="Move ${esc(p.name)} up">▲</button><button type="button" data-mv="1" aria-label="Move ${esc(p.name)} down">▼</button></span></div>`}
+function drawTagBoard(){if(!TB)return;TB_SORT.forEach(s=>{try{s.destroy()}catch(e){}});TB_SORT=[];
+  const keys=TB_SIDE==="off"?OFF_KEYS:DEF_KEYS;
+  $("tbCols").innerHTML=keys.map(k=>{const list=TB[k];const built=!!POSITIONS[k];
+    return `<div class="tb-col"><h3>${k}<span class="sub">${built?(list?list.length:0)+((list&&list.length===1)?" target":" targets"):"not built yet"}</span></h3><div class="tb-list" data-tbk="${k}">${list&&list.length?list.map((x,i)=>tagHtml(k,x,i)).join(""):`<div class="tb-empty">${built?"No targets yet":"–"}</div>`}</div></div>`}).join("");
+  if(window.Sortable)document.querySelectorAll(".tb-list").forEach(el=>{if(!el.querySelector(".tag"))return;
+    TB_SORT.push(Sortable.create(el,{animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,
+      onEnd:ev=>{TB_DRAG_AT=Date.now();if(ev.oldIndex===ev.newIndex)return;const k=el.dataset.tbk;const ids=[...el.querySelectorAll(".tag")].map(t=>t.dataset.tid);saveTagOrder(k,ids)}}))});
+}
+async function saveTagOrder(k,ids){const list=TB[k];if(!list)return;const by=new Map(list.map(x=>[x.p.id,x]));
+  TB[k]=ids.map(id=>by.get(id)).filter(Boolean);const ups=[];
+  TB[k].forEach((x,i)=>{if(x.p.tagRank!==i+1){x.p.tagRank=i+1;if(DB)ups.push(DB.collection(k.toLowerCase()+"_players").doc(x.p.id).update({tagRank:i+1}))}});
+  drawTagBoard();
+  try{await Promise.all(ups)}catch(e){flash("Couldn't save the new order. You may not have edit access.")}}
+$("tbCols").addEventListener("click",e=>{const mv=e.target.closest("[data-mv]");const tag=e.target.closest(".tag");if(!tag)return;const k=tag.dataset.tk;
+  if(mv){e.stopPropagation();const ids=TB[k].map(x=>x.p.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTagOrder(k,ids);return}
+  if(Date.now()-TB_DRAG_AT<400)return;openPlayer(k,tag.dataset.tid)});
+document.querySelectorAll("[data-tbside]").forEach(b=>b.addEventListener("click",()=>{TB_SIDE=b.dataset.tbside;document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawTagBoard()}));
+$("tbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;$("bigboard").hidden=true;TB_SIDE=sideOf(POSKEY)==="def"?"def":"off";document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.tbside===TB_SIDE));renderTagBoard();$("tagboard").scrollIntoView({behavior:"smooth",block:"start"})});
+$("tbClose").addEventListener("click",()=>{$("tagboard").hidden=true});
+async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
+    const W=pdfHeader(doc,"Player Tool · Tag Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
+    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
+      const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
+      list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[24,32,26];
+        doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.p.name)}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
+        doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
+        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
+        const g=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
+        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
+  await pdfSave(doc,`Tag board ${new Date().toISOString().slice(0,10)}.pdf`)}
+$("tbPrint").addEventListener("click",printTagBoard);
+$("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
 $("recClose").addEventListener("click",()=>{$("recruit").hidden=true});
 document.querySelectorAll("[data-vm]").forEach(b=>b.addEventListener("click",()=>{VMODE=b.dataset.vm;document.querySelectorAll("[data-vm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderVisits()}));
 $("recTbl").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;$("recruit").hidden=true;switchPos(b.dataset.rk);$("statusFilter").value=b.dataset.rs;renderBoard();$("boardTitle").scrollIntoView({behavior:"smooth",block:"start"})});
