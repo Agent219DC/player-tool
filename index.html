@@ -240,6 +240,20 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 #depth,#budget{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 .dc-cols{grid-template-columns:repeat(6,minmax(165px,1fr))}
 .dc-cols.n1{grid-template-columns:minmax(200px,340px)}
+.dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
+.dcm{display:inline-block;font:700 9.5px var(--body);letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);margin-right:3px;vertical-align:1px}
+.dcm.tr{background:rgba(70,189,198,.22);border-color:rgba(70,189,198,.7);color:var(--fg)}
+.dcm.fr{background:rgba(255,214,0,.3);border-color:rgba(214,170,0,.8);color:var(--fg)}
+.dcm.cut{background:rgba(198,40,40,.14);border-color:rgba(198,40,40,.6);color:#c62828}
+[data-theme=dark] .dcm.cut{color:#ff8a80}
+.tag.dc-cut{border-left-color:#c62828;background:linear-gradient(90deg,rgba(198,40,40,.07),transparent 60%),var(--surface)}
+.dc-legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12.5px;color:var(--muted)}
+dialog#dcDlg{width:min(420px,calc(100% - 32px));padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
+.dcd{display:grid;gap:10px;padding:18px}.dcd h3{margin:0;font:700 18px var(--display)}
+.dcd label{display:grid;gap:4px;font-size:13px;color:var(--muted)}.dcd label.check{display:flex;gap:8px;align-items:center;color:var(--fg)}
+.dcd input:not([type=checkbox]),.dcd select{font-family:var(--body);font-size:15px}
+.dcd2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tag.dc .x{position:absolute;top:3px;right:4px;border:0;background:none;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;padding:2px 4px}
 .tag.dc .nm{padding-right:14px}
 .tag.dc .g.none{color:var(--muted);font:400 11px var(--body)}
@@ -555,11 +569,12 @@ window.claude={use:async n=>{
 
   <section id="depth" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
     </div>
     <div class="tb-cols dc-cols" id="dcCols"></div>
-    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
+    <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcm fr">FR</span> Freshman</span><span><span class="dcm">WO</span> Walk-on</span><span><span class="dcm cut">Bubble</span> Thinking about cutting</span><span class="sub" id="dcCount"></span></div>
+    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Tap a player to edit his tags. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
   </section>
 
   <section id="budget" hidden>
@@ -754,6 +769,11 @@ window.claude={use:async n=>{
         <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
+        <h3 class="ot-h">Roster for depth chart</h3>
+        <p class="note">Load the roster grid workbook. The <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, red = on the bubble. Replaces both charts.</p>
+        <div class="btns"><button class="btn" type="button" id="gridUp">Load roster grid (.xlsx)…</button><input type="file" id="gridFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
+      </div>
+      <div>
         <h3 class="ot-h">Budget</h3>
         <p class="note" id="budNote">Load the NIL budget workbook (it reads the <b>Download</b> tab) to see the Budget page and our slot values on player cards. Only your account can read it.</p>
         <div class="btns"><button class="btn" type="button" id="budUp">Load budget sheet (.xlsx)…</button><input type="file" id="budFile" accept=".xlsx,.xls,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
@@ -775,6 +795,15 @@ window.claude={use:async n=>{
 </div>
 
 <dialog id="pcard" aria-label="Player card"></dialog>
+<dialog id="dcDlg" aria-label="Edit depth chart player"><form class="dcd" method="dialog">
+  <h3>Depth chart player</h3>
+  <label>Name<input id="dcdName" maxlength="60" required></label>
+  <div class="dcd2"><label>Position<select id="dcdPos"></select></label><label>Class<input id="dcdYr" maxlength="12" placeholder="RS-SO"></label></div>
+  <div class="dcd2"><label>Type<select id="dcdType"><option value="ret">Returning</option><option value="tr">Transfer</option><option value="fr">Freshman</option></select></label><label>Role<input id="dcdRole" maxlength="6" placeholder="K, P, LS"></label></div>
+  <label class="check"><input type="checkbox" id="dcdWo"> Walk-on</label>
+  <label class="check"><input type="checkbox" id="dcdCut"> On the bubble (thinking about cutting)</label>
+  <div class="btns" style="justify-content:space-between"><span style="display:flex;gap:8px"><button class="btn" type="button" id="dcdRemove">Remove</button><button class="btn" type="button" id="dcdCard">Player card</button></span><span style="display:flex;gap:8px"><button class="btn" type="button" id="dcdCancel">Cancel</button><button class="btn primary" type="submit">Save</button></span></div>
+</form></dialog>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -2103,16 +2132,21 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`Portal board ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("tbPrint").addEventListener("click",printTagBoard);
-/* ---------- depth chart: staff rank our own players by position group (saved in shared/depth; names only, never money) ---------- */
-const DC_SIDES={off:["QB","RB","WR","TE","OT","IOL"],def:["DE","DT","LB","SAF","NIC","CB"],st:["ST"]};
+/* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
+const DC_SIDES={off:["QB","RB","WR","TE","OL"],def:["DE","DT","LB","SAF","NIC","CB"],st:["ST"]};
 const DC_LABEL={ST:"Specialists"};
-let DC={groups:{}},DC_SIDE="off",DC_SORT=[],DC_DRAG_AT=0,DC_GRADES=null,DC_DIRTY=0;
+const DC_DOC={now:"shared/depth",next:"shared/depth_next"};
+const DC_TYPE={ret:"Returning",tr:"Transfer",fr:"Freshman"};
+let DCS={now:{groups:{}},next:{groups:{}}},DC_SZN="next",DC_SIDE="off",DC_SORT=[],DC_DRAG_AT=0,DC_GRADES=null,DC_DIRTY=0,DC_EDIT=null;
+const DCG=()=>DCS[DC_SZN].groups;
 const normName=n=>String(n||"").toLowerCase().replace(/[.'’]/g,"").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").replace(/[^a-z0-9]+/g," ").trim();
 const dcId=()=>"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-function dcAll(){return Object.values(DC.groups||{}).flat()}
-function watchDepth(db){db.doc("shared/depth").onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DC={groups:d.groups||{}};if(!$("depth").hidden)drawDepth()},()=>{})}
-async function dcSave(){DC_DIRTY=Date.now();if(!DB)return;
-  try{await DB.doc("shared/depth").set({groups:DC.groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
+function dcAll(){return Object.values(DCG()).flat()}
+/* older charts split OL into OT/IOL; fold them into OL */
+function dcFix(g){g=g||{};if(g.OT||g.IOL){g.OL=[...(g.OL||[]),...(g.OT||[]),...(g.IOL||[])];delete g.OT;delete g.IOL}return g}
+function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups)};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
+async function dcSave(z){z=z||DC_SZN;DC_DIRTY=Date.now();if(!DB)return;
+  try{await DB.doc(DC_DOC[z]).set({groups:DCS[z].groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
 /* this season's board grades for our players, by name (any position board) */
 async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map();
   all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
@@ -2121,35 +2155,52 @@ async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map
       const cand={k,id:x.p.id,grade:x.r.grade,letter:x.r.letter,tier:x.r.tier,season:+x.p.season||0,mine};
       if(!o||cand.mine>o.mine||(cand.mine===o.mine&&cand.season>o.season))m.set(key,cand)})}));
   DC_GRADES=m}
+function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.t==="fr"?'<span class="dcm fr">FR</span>':"",x.wo?'<span class="dcm">WO</span>':"",x.cut?'<span class="dcm cut">Bubble</span>':""].join("")}
 function dcTag(k,x,i){const g=DC_GRADES&&DC_GRADES.get(normName(x.n));
-  return `<div class="tag dc${g?" tb-"+g.tier:""}" data-dk="${k}" data-did="${esc(x.id)}"><span class="rk">${i+1}</span><span class="nm">${esc(x.n)}</span>
-    ${g?`<span class="g gtc-${g.tier}">${fmt(g.grade)} ${g.letter}${g.k!==k&&!(k==="ST")?` <span class="sub" style="font-weight:400">${g.k}</span>`:""}</span>`:`<span class="g none">${DC_GRADES?"No grade":""}</span>`}
+  return `<div class="tag dc${x.cut?" dc-cut":g?" tb-"+g.tier:""}" data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="rk">${i+1}</span><span class="nm">${esc(x.n)}</span>
+    ${g?`<span class="g gtc-${g.tier}">${fmt(g.grade)} ${g.letter}${g.k!==k&&k!=="ST"?` <span class="sub" style="font-weight:400">${g.k}</span>`:""}</span>`:`<span class="g none">${esc(x.yr||"")}</span>`}
     <span class="mv"><button type="button" data-dmv="-1" aria-label="Move ${esc(x.n)} up">▲</button><button type="button" data-dmv="1" aria-label="Move ${esc(x.n)} down">▼</button></span>
-    <button type="button" class="x" data-drm aria-label="Remove ${esc(x.n)}">×</button></div>`}
+    <span class="ln2">${g&&x.yr?esc(x.yr)+" ":""}${dcMarks(x)}</span></div>`}
 function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[];
-  const keys=DC_SIDES[DC_SIDE];$("dcCols").classList.toggle("n1",keys.length===1);
-  $("dcCols").innerHTML=keys.map(k=>{const list=DC.groups[k]||[];
-    return `<div class="tb-col"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length} ${list.length===1?"player":"players"}</span></h3>
+  const keys=DC_SIDES[DC_SIDE],G=DCG();$("dcCols").classList.toggle("n1",keys.length===1);$("dcCols").classList.toggle("n5",keys.length===5);
+  $("dcCols").innerHTML=keys.map(k=>{const list=G[k]||[];const nb=list.filter(x=>x.cut).length;
+    return `<div class="tb-col"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length}${nb?` · ${nb} bubble`:""}</span></h3>
       <div class="tb-list" data-dck="${k}">${list.map((x,i)=>dcTag(k,x,i)).join("")||`<div class="tb-empty">No players yet</div>`}</div>
       <form class="dc-add" data-dca="${k}"><input type="text" placeholder="Add a player" aria-label="Add a player to ${DC_LABEL[k]||k}" maxlength="60"><button class="btn" type="submit">Add</button></form></div>`}).join("");
+  const all=Object.values(G).flat();$("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} on the bubble`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
-    DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button,.x",preventOnFilter:false,draggable:".tag",
+    DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,draggable:".tag",
       onEnd:ev=>{DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex)return;dcFromDom()}}))});
 }
-function dcFromDom(){const by=new Map(dcAll().map(x=>[x.id,x]));
-  document.querySelectorAll("#dcCols .tb-list").forEach(el=>{DC.groups[el.dataset.dck]=[...el.querySelectorAll(".tag")].map(t=>by.get(t.dataset.did)).filter(Boolean)});
+function dcFromDom(){const G=DCG();const by=new Map(dcAll().map(x=>[x.id,x]));
+  document.querySelectorAll("#dcCols .tb-list").forEach(el=>{G[el.dataset.dck]=[...el.querySelectorAll(".tag")].map(t=>by.get(t.dataset.did)).filter(Boolean)});
   drawDepth();dcSave()}
-$("dcCols").addEventListener("click",e=>{const tag=e.target.closest(".tag");if(!tag)return;const k=tag.dataset.dk,list=DC.groups[k]||[],i=list.findIndex(x=>x.id===tag.dataset.did);if(i<0)return;
+function dcFind(id){const G=DCG();for(const k in G){const i=G[k].findIndex(x=>x.id===id);if(i>=0)return {k,i,x:G[k][i]}}return null}
+function dcOpenEdit(id){const f=dcFind(id);if(!f)return;DC_EDIT=f;const x=f.x,g=DC_GRADES&&DC_GRADES.get(normName(x.n));
+  $("dcdName").value=x.n;$("dcdYr").value=x.yr||"";$("dcdType").value=x.t||"ret";$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdRole").value=x.role||"";
+  $("dcdPos").innerHTML=[].concat(...Object.values(DC_SIDES)).map(k=>`<option value="${k}"${k===f.k?" selected":""}>${DC_LABEL[k]||k}</option>`).join("");
+  $("dcdCard").hidden=!(g&&g.id);$("dcdCard").dataset.k=g?g.k:"";$("dcdCard").dataset.id=g?g.id:"";
+  const d=$("dcDlg");try{d.showModal()}catch(e){d.setAttribute("open","")}}
+$("dcDlg").addEventListener("submit",e=>{e.preventDefault();const f=DC_EDIT;if(!f)return;const x=f.x,G=DCG();
+  x.n=$("dcdName").value.trim().replace(/\s+/g," ")||x.n;x.yr=$("dcdYr").value.trim();x.t=$("dcdType").value;x.wo=$("dcdWo").checked;x.cut=$("dcdCut").checked;x.role=$("dcdRole").value.trim().toUpperCase();
+  ["yr","role"].forEach(k=>{if(!x[k])delete x[k]});if(!x.wo)delete x.wo;if(!x.cut)delete x.cut;
+  const to=$("dcdPos").value;if(to!==f.k){G[f.k].splice(f.i,1);(G[to]=G[to]||[]).push(x)}
+  $("dcDlg").close();drawDepth();dcSave()});
+$("dcdCancel").addEventListener("click",()=>$("dcDlg").close());
+$("dcdRemove").addEventListener("click",()=>{const f=DC_EDIT;if(!f||!confirm(`Take ${f.x.n} off the depth chart?`))return;DCG()[f.k].splice(f.i,1);$("dcDlg").close();drawDepth();dcSave()});
+$("dcdCard").addEventListener("click",()=>{const b=$("dcdCard");$("dcDlg").close();if(b.dataset.id)openPlayer(b.dataset.k,b.dataset.id)});
+$("dcCols").addEventListener("click",e=>{const tag=e.target.closest(".tag");if(!tag)return;const G=DCG(),k=tag.dataset.dk,list=G[k]||[],i=list.findIndex(x=>x.id===tag.dataset.did);if(i<0)return;
   const mv=e.target.closest("[data-dmv]");
   if(mv){const j=i+(+mv.dataset.dmv);if(j<0||j>=list.length)return;[list[i],list[j]]=[list[j],list[i]];drawDepth();dcSave();return}
-  if(e.target.closest("[data-drm]")){if(!confirm(`Take ${list[i].n} off the depth chart?`))return;list.splice(i,1);drawDepth();dcSave();return}
-  if(Date.now()-DC_DRAG_AT<400)return;const g=DC_GRADES&&DC_GRADES.get(normName(list[i].n));if(g&&g.id)openPlayer(g.k,g.id)});
+  if(Date.now()-DC_DRAG_AT<400)return;dcOpenEdit(list[i].id)});
+$("dcCols").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("tag"))dcOpenEdit(e.target.dataset.did)});
 $("dcCols").addEventListener("submit",e=>{const f=e.target.closest("[data-dca]");if(!f)return;e.preventDefault();const inp=f.querySelector("input");const n=inp.value.trim().replace(/\s+/g," ");if(!n)return;
-  const dup=Object.entries(DC.groups).find(([,l])=>l.some(x=>normName(x.n)===normName(n)));
+  const dup=Object.entries(DCG()).find(([,l])=>l.some(x=>normName(x.n)===normName(n)));
   if(dup&&!confirm(`${n} is already on the chart at ${DC_LABEL[dup[0]]||dup[0]}. Add him here too?`))return;
-  const k=f.dataset.dca;(DC.groups[k]=DC.groups[k]||[]).push({id:dcId(),n});drawDepth();dcSave();
+  const k=f.dataset.dca,G=DCG();(G[k]=G[k]||[]).push({id:dcId(),n,t:"ret"});drawDepth();dcSave();
   const again=document.querySelector(`#dcCols [data-dca="${k}"] input`);if(again)again.focus()});
 document.querySelectorAll("[data-dcside]").forEach(b=>b.addEventListener("click",()=>{DC_SIDE=b.dataset.dcside;document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
+document.querySelectorAll("[data-dcszn]").forEach(b=>b.addEventListener("click",()=>{DC_SZN=b.dataset.dcszn;document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 function hideViews(except){["overview","bigboard","tagboard","recruit","depth","budget"].forEach(id=>{if(id!==except)$(id).hidden=true})}
 ["ovBtn","bbBtn","recBtn"].forEach(id=>$(id).addEventListener("click",()=>{$("depth").hidden=true;$("budget").hidden=true}));
 async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=sideOf(POSKEY)==="def"?"def":"off";
@@ -2158,18 +2209,58 @@ async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=si
   try{await dcLoadGrades()}catch(e){DC_GRADES=new Map()}if(!$("depth").hidden)drawDepth()}
 $("dcBtn").addEventListener("click",openDepth);
 $("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
+/* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = on the bubble */
+const GRID_POS={QB:"QB",RB:"RB",OL:"OL",WR:"WR",TE:"TE",SPEC:"ST",DE:"DE",DT:"DT",LB:"LB",SAF:"SAF",CB:"CB",NIC:"NIC",DB:"SAF",K:"ST",P:"ST",LS:"ST",OT:"OL",IOL:"OL",OG:"OL",C:"OL",S:"SAF",DL:"DT"};
+function gridFill(c){const s=c&&c.s;if(!s||s.patternType==="none"||!s.fgColor)return "";const f=s.fgColor;const rgb=String(f.rgb||"").toUpperCase().slice(-6);
+  if(f.theme===9||/^46BDC6$/.test(rgb)||/^(0070C0|00B0F0|4472C4|5B9BD5|9DC3E6|BDD7EE|DDEBF7|9BC2E6|6FA8DC|A4C2F4|CFE2F3|3C78D8)$/.test(rgb))return "tr";
+  if(/^(FFFF00|FFFF99|FFF2CC|FFE599|FFD966|FFC000|FFEB9C|FFFF66)$/.test(rgb))return "fr";
+  if(/^(FF0000|F4CCCC|EA9999|E06666|FFC7CE|FF9999|FFCCCC|C00000|CC0000|E6B8AF|DD7E6B)$/.test(rgb))return "cut";
+  return ""}
+function parseGridSheet(XL,ws){const ref=XL.utils.decode_range(ws["!ref"]);const at=(r,c)=>ws[XL.utils.encode_cell({r,c})];const tx=(r,c)=>{const x=at(r,c);return x&&x.v!=null?String(x.v).trim():""};
+  let hdrs=[],end=ref.e.r;
+  for(let r=0;r<=ref.e.r;r++){let years=0;for(let c=0;c<=ref.e.c;c++)if(/^year$/i.test(tx(r,c)))years++;if(years>=3)hdrs.push(r);
+    if(r>(hdrs[1]||1e9)&&end===ref.e.r){for(let c=0;c<=ref.e.c;c++)if(/grad|attrition/i.test(tx(r,c))){end=r;break}}}
+  if(hdrs.length<2)return null;const out={};
+  hdrs.forEach((h,hi)=>{const last=hi===0?hdrs[1]-1:end-1;
+    for(let c=0;c<=ref.e.c;c++){const head=tx(h,c);if(!/^year$/i.test(tx(h,c+1))&&!/walk/i.test(head))continue;const m=head.toUpperCase().replace(/'S\b/,"").match(/^([A-Z]+)/);const walk=/walk/i.test(head);
+      const gk=walk?null:GRID_POS[m&&m[1]];
+      for(let r=h+1;r<=last;r++){const raw=tx(r,c);if(!raw||raw.indexOf(",")<0)continue;
+        let name=raw,role="";const pm=raw.match(/\(([^)]+)\)\s*$/);if(pm){role=pm[1].trim().toUpperCase();name=raw.slice(0,pm.index).trim()}
+        const i=name.indexOf(",");name=(name.slice(i+1).trim()+" "+name.slice(0,i).trim()).replace(/\s+/g," ");
+        const k=walk?(GRID_POS[role]||null):gk;if(!k)continue;
+        const fill=gridFill(at(r,c)),yr=tx(r,c+1);
+        const x={id:dcId(),n:name,yr,t:fill==="tr"?"tr":fill==="fr"?"fr":(/^FR$/i.test(yr)?"fr":"ret")};
+        if(fill==="cut")x.cut=true;if(walk)x.wo=true;if(k==="ST"&&role)x.role=role;else if(walk&&role&&!["QB","RB","WR","TE","OL","DE","DT","LB","SAF","CB","NIC"].includes(role))x.role=role;
+        (out[k]=out[k]||[]).push(x)}}});
+  return out}
+async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The spreadsheet tool didn't load. Refresh the page and try again.");return}
+  let wb;try{wb=XL.read(await f.arrayBuffer(),{type:"array",cellStyles:true})}catch(e){flash("Couldn't read that workbook.");return}
+  const now=wb.Sheets["105"],next=wb.Sheets["Fall"]||wb.Sheets[wb.SheetNames.find(n=>/^fall/i.test(n.trim()))];
+  if(!now&&!next){flash("That workbook needs a 105 tab and a Fall tab.");return}
+  const gN=now?parseGridSheet(XL,now):null,gF=next?parseGridSheet(XL,next):null;
+  const cnt=g=>g?Object.values(g).flat().length:0;
+  if(!cnt(gN)&&!cnt(gF)){flash("Couldn't find any players on the 105 or Fall tabs.");return}
+  if((dcAllZ("now").length||dcAllZ("next").length)&&!confirm(`Replace both depth charts with this roster? This season: ${cnt(gN)} players (105 tab). Next season: ${cnt(gF)} players (Fall tab). Any order you've set will be lost.`))return;
+  if(gN){DCS.now={groups:gN};await dcSave("now")}if(gF){DCS.next={groups:gF};await dcSave("next")}
+  if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
+function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
+$("gridUp").addEventListener("click",()=>$("gridFile").click());
+$("gridFile").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)importGrid(f)});
 async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  const G=DCG(),zn=DC_SZN==="now"?"This season":"Next season";
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{if(pi)doc.addPage();const keys=DC_SIDES[sd];
-    const W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
+    const W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm,zn);const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(DC_LABEL[k]||k,x+5,y+11);y+=22;
-      const list=DC.groups[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No players",x+5,y+6);return}
-      list.forEach((t,i)=>{if(y>PH-40)return;const g=DC_GRADES&&DC_GRADES.get(normName(t.n));const rgb=g?(TIERRGB[g.tier]||[24,32,26]):[207,214,205];
-        doc.setFont("helvetica","bold");doc.setFontSize(8.5);const nl=doc.splitTextToSize(`${i+1}. ${T(t.n)}`,cw-12).slice(0,2);const h=8+nl.length*9.5+(g?9:0)+3;
+      const list=G[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No players",x+5,y+6);return}
+      const fs=list.length>16?7:8;
+      list.forEach((t,i)=>{if(y>PH-30)return;const g=DC_GRADES&&DC_GRADES.get(normName(t.n));const rgb=t.cut?[198,40,40]:g?(TIERRGB[g.tier]||[24,32,26]):[207,214,205];
+        const sub=[t.yr,t.role,t.t==="tr"?"TR":t.t==="fr"?"FR":"",t.wo?"WO":"",t.cut?"Bubble":"",g?`${fmt(g.grade)} ${g.letter}`:""].filter(Boolean).join(" · ");
+        doc.setFont("helvetica","bold");doc.setFontSize(fs);const nl=doc.splitTextToSize(`${i+1}. ${T(t.n)}`,cw-12).slice(0,1);const h=fs*2.5+4;
         doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
-        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+10);
-        if(g){doc.setFontSize(7.5);doc.setTextColor(...rgb);doc.text(T(`${fmt(g.grade)} ${g.letter}`),x+7,y+10+nl.length*9.5)}y+=h+3})})});
-  await pdfSave(doc,`Depth chart ${new Date().toISOString().slice(0,10)}.pdf`)}
+        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+fs+2);
+        doc.setFont("helvetica","normal");doc.setFontSize(fs-1.2);doc.setTextColor(91,102,93);doc.text(T(sub),x+7,y+fs*2.2+2);y+=h+2})})});
+  await pdfSave(doc,`Depth chart ${zn.toLowerCase()} ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("dcPrint").addEventListener("click",async()=>{if(!DC_GRADES){try{await dcLoadGrades()}catch(e){}}printDepth()});
 
 /* ---------- budget: owner only. Lives at owner/budget, which the database rules let only the owner read ---------- */
@@ -2239,13 +2330,7 @@ $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.tar
   catch(err){flash("Couldn't read a budget from that file.");return}
   try{await DB.doc("owner/budget").set({title:d.title||"",total:+d.total||0,groups:d.groups,goals:d.goals||{},at:new Date().toISOString()})}
   catch(err){flash("Couldn't save the budget. Publish the updated database rules first (Firebase → Firestore → Rules).",9000);return}
-  /* our players' names (no money) go onto the depth chart if they aren't there yet */
-  try{const s=await DB.doc("shared/depth").get();if(s.exists&&s.data().groups)DC={groups:s.data().groups}}catch(_){}
-  const have=new Set(dcAll().map(x=>normName(x.n)));let added=0;
-  d.groups.forEach(g=>(g.rows||[]).forEach(x=>{if(!x.name||have.has(normName(x.name)))return;const k=x.pos==="IDL"?"DT":x.pos;if(![].concat(...Object.values(DC_SIDES)).includes(k))return;
-    (DC.groups[k]=DC.groups[k]||[]).push({id:dcId(),n:x.name});have.add(normName(x.name));added++}));
-  if(added)await dcSave();
-  flash(`Budget loaded.${added?` Added ${added} roster player${added===1?"":"s"} to the depth chart (names only).`:""}`,7000)});
+  flash("Budget loaded.")});
 /* reads the Download tab: group blocks of NAME/TOTAL/% columns; "QB 1" style rows are open spots, "Last, First" rows are our players */
 function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==null?"":String(v).trim();
   const heads=[];R.forEach((row,r)=>{if(/^quarterback$/i.test(txt(cell(r,0)))||/^defensive line$/i.test(txt(cell(r,0))))heads.push(r)});if(!heads.length)return null;
