@@ -573,7 +573,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
     </div>
     <div class="tb-cols dc-cols" id="dcCols"></div>
-    <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcm fr">FR</span> Freshman</span><span><span class="dcm">WO</span> Walk-on</span><span><span class="dcm cut">Bubble</span> Thinking about cutting</span><span class="sub" id="dcCount"></span></div>
+    <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcm fr">FR</span> Freshman</span><span><span class="dcm">WO</span> Walk-on</span><span><span class="dcm cut">Potential cut</span></span><span class="sub" id="dcCount"></span></div>
     <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Tap a player to edit his tags. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
   </section>
 
@@ -770,7 +770,7 @@ window.claude={use:async n=>{
       </div>
       <div>
         <h3 class="ot-h">Roster for depth chart</h3>
-        <p class="note">Load the roster grid workbook. The <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, red = on the bubble. Replaces both charts.</p>
+        <p class="note">Load the roster grid workbook. The <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, red = potential cut. Replaces both charts.</p>
         <div class="btns"><button class="btn" type="button" id="gridUp">Load roster grid (.xlsx)…</button><input type="file" id="gridFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
@@ -801,7 +801,7 @@ window.claude={use:async n=>{
   <div class="dcd2"><label>Position<select id="dcdPos"></select></label><label>Class<input id="dcdYr" maxlength="12" placeholder="RS-SO"></label></div>
   <div class="dcd2"><label>Type<select id="dcdType"><option value="ret">Returning</option><option value="tr">Transfer</option><option value="fr">Freshman</option></select></label><label>Role<input id="dcdRole" maxlength="6" placeholder="K, P, LS"></label></div>
   <label class="check"><input type="checkbox" id="dcdWo"> Walk-on</label>
-  <label class="check"><input type="checkbox" id="dcdCut"> On the bubble (thinking about cutting)</label>
+  <label class="check"><input type="checkbox" id="dcdCut"> Potential cut</label>
   <div class="btns" style="justify-content:space-between"><span style="display:flex;gap:8px"><button class="btn" type="button" id="dcdRemove">Remove</button><button class="btn" type="button" id="dcdCard">Player card</button></span><span style="display:flex;gap:8px"><button class="btn" type="button" id="dcdCancel">Cancel</button><button class="btn primary" type="submit">Save</button></span></div>
 </form></dialog>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -2155,7 +2155,7 @@ async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map
       const cand={k,id:x.p.id,grade:x.r.grade,letter:x.r.letter,tier:x.r.tier,season:+x.p.season||0,mine};
       if(!o||cand.mine>o.mine||(cand.mine===o.mine&&cand.season>o.season))m.set(key,cand)})}));
   DC_GRADES=m}
-function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.t==="fr"?'<span class="dcm fr">FR</span>':"",x.wo?'<span class="dcm">WO</span>':"",x.cut?'<span class="dcm cut">Bubble</span>':""].join("")}
+function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.t==="fr"?'<span class="dcm fr">FR</span>':"",x.wo?'<span class="dcm">WO</span>':"",x.cut?'<span class="dcm cut">Potential cut</span>':""].join("")}
 function dcTag(k,x,i){const g=DC_GRADES&&DC_GRADES.get(normName(x.n));
   return `<div class="tag dc${x.cut?" dc-cut":g?" tb-"+g.tier:""}" data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="rk">${i+1}</span><span class="nm">${esc(x.n)}</span>
     ${g?`<span class="g gtc-${g.tier}">${fmt(g.grade)} ${g.letter}${g.k!==k&&k!=="ST"?` <span class="sub" style="font-weight:400">${g.k}</span>`:""}</span>`:`<span class="g none">${esc(x.yr||"")}</span>`}
@@ -2164,10 +2164,10 @@ function dcTag(k,x,i){const g=DC_GRADES&&DC_GRADES.get(normName(x.n));
 function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[];
   const keys=DC_SIDES[DC_SIDE],G=DCG();$("dcCols").classList.toggle("n1",keys.length===1);$("dcCols").classList.toggle("n5",keys.length===5);
   $("dcCols").innerHTML=keys.map(k=>{const list=G[k]||[];const nb=list.filter(x=>x.cut).length;
-    return `<div class="tb-col"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length}${nb?` · ${nb} bubble`:""}</span></h3>
+    return `<div class="tb-col"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length}${nb?` · ${nb} potential cut${nb===1?"":"s"}`:""}</span></h3>
       <div class="tb-list" data-dck="${k}">${list.map((x,i)=>dcTag(k,x,i)).join("")||`<div class="tb-empty">No players yet</div>`}</div>
       <form class="dc-add" data-dca="${k}"><input type="text" placeholder="Add a player" aria-label="Add a player to ${DC_LABEL[k]||k}" maxlength="60"><button class="btn" type="submit">Add</button></form></div>`}).join("");
-  const all=Object.values(G).flat();$("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} on the bubble`:""}`:"";
+  const all=Object.values(G).flat();$("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
     DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,draggable:".tag",
       onEnd:ev=>{DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex)return;dcFromDom()}}))});
@@ -2209,7 +2209,7 @@ async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=si
   try{await dcLoadGrades()}catch(e){DC_GRADES=new Map()}if(!$("depth").hidden)drawDepth()}
 $("dcBtn").addEventListener("click",openDepth);
 $("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
-/* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = on the bubble */
+/* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = potential cut */
 const GRID_POS={QB:"QB",RB:"RB",OL:"OL",WR:"WR",TE:"TE",SPEC:"ST",DE:"DE",DT:"DT",LB:"LB",SAF:"SAF",CB:"CB",NIC:"NIC",DB:"SAF",K:"ST",P:"ST",LS:"ST",OT:"OL",IOL:"OL",OG:"OL",C:"OL",S:"SAF",DL:"DT"};
 function gridFill(c){const s=c&&c.s;if(!s||s.patternType==="none"||!s.fgColor)return "";const f=s.fgColor;const rgb=String(f.rgb||"").toUpperCase().slice(-6);
   if(f.theme===9||/^46BDC6$/.test(rgb)||/^(0070C0|00B0F0|4472C4|5B9BD5|9DC3E6|BDD7EE|DDEBF7|9BC2E6|6FA8DC|A4C2F4|CFE2F3|3C78D8)$/.test(rgb))return "tr";
@@ -2255,7 +2255,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       const list=G[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No players",x+5,y+6);return}
       const fs=list.length>16?7:8;
       list.forEach((t,i)=>{if(y>PH-30)return;const g=DC_GRADES&&DC_GRADES.get(normName(t.n));const rgb=t.cut?[198,40,40]:g?(TIERRGB[g.tier]||[24,32,26]):[207,214,205];
-        const sub=[t.yr,t.role,t.t==="tr"?"TR":t.t==="fr"?"FR":"",t.wo?"WO":"",t.cut?"Bubble":"",g?`${fmt(g.grade)} ${g.letter}`:""].filter(Boolean).join(" · ");
+        const sub=[t.yr,t.role,t.t==="tr"?"TR":t.t==="fr"?"FR":"",t.wo?"WO":"",t.cut?"Potential cut":"",g?`${fmt(g.grade)} ${g.letter}`:""].filter(Boolean).join(" · ");
         doc.setFont("helvetica","bold");doc.setFontSize(fs);const nl=doc.splitTextToSize(`${i+1}. ${T(t.n)}`,cw-12).slice(0,1);const h=fs*2.5+4;
         doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
         doc.setTextColor(24,32,26);doc.text(nl,x+7,y+fs+2);
