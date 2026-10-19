@@ -2172,14 +2172,14 @@ async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map
       const cand={k,id:x.p.id,name:x.p.name,grade:x.r.grade,letter:x.r.letter,tier:x.r.tier,season:+x.p.season||0,mine};
       if(!o||cand.mine>o.mine||(cand.mine===o.mine&&cand.season>o.season))m.set(key,cand)})}));
   DC_GRADES=m;DC_OURS=[...m.values()].filter(c=>c.mine).sort((a,b)=>a.name.localeCompare(b.name))}
-/* board entry for a depth chart player: one picked by hand, else same name, else one of ours with the same last name and first initial (Xayvion Bradshaw = Xayvion Turner-Bradshaw) */
+/* board entry for a depth chart player: one picked by hand, else same name, else one of ours with the same last name and a matching first name (Xayvion Bradshaw = Xayvion Turner-Bradshaw, De'Andre = DD Tamarez, Rente = Terrente Hinton) */
 function dcGrade(x){if(!DC_GRADES||!x)return null;if(x.link==="none")return null;
   if(x.link){const h=[...DC_GRADES.values()].find(c=>c.id===x.link);if(h)return h}
   const ex=DC_GRADES.get(normName(x.n));if(ex)return ex;
   const t=normName(x.n).split(" ");if(t.length<2)return null;const last=t[t.length-1],first=t[0];
   const onChart=new Set(["now","next"].flatMap(z=>dcAllZ(z)).map(y=>normName(y.n)));
   const hit=DC_OURS.filter(c=>{const nn=normName(c.name),b=nn.split(" ");if(b.length<2||onChart.has(nn))return false;
-    return (b[0]===first&&b.slice(1).includes(last))||(b[b.length-1]===last&&b[0][0]===first[0]&&b[0].length<=3)});
+    const bf=b[0];return (bf===first&&b.slice(1).includes(last))||(b[b.length-1]===last&&((bf[0]===first[0]&&bf.length<=3)||(first.length>=4&&bf.length>=4&&(bf.includes(first)||first.includes(bf)))))});
   return hit.length===1?hit[0]:null}
 function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.cut?'<span class="dcm cut">Potential cut</span>':""].join("")}
 function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;
