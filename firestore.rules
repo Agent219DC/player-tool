@@ -29,6 +29,10 @@ service cloud.firestore {
       allow read: if isStaff();
       allow write: if isStaff() && request.auth.uid == uid;
     }
+    // Budget and what we pay our players: owner only, nobody else can read it
+    match /owner/{doc} {
+      allow read, write: if isOwner();
+    }
     // Every position's board (qb_players, rb_players, ...)
     match /{coll}/{doc} {
       allow read, write: if isStaff() && coll.matches('[a-z]+_players');

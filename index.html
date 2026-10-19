@@ -237,6 +237,27 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .tag.tb-Elite{border-left-color:var(--tElite)} .tag.tb-Impact{border-left-color:var(--tImpact)} .tag.tb-Starter{border-left-color:var(--tStarter)} .tag.tb-Rotation{border-left-color:var(--tRotation)} .tag.tb-Pass{border-left-color:var(--tPass)}
 .tag.sortable-ghost{opacity:.35} .tag.sortable-chosen{box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .tb-empty{color:var(--muted);font-size:12px;padding:6px 2px}
+#depth,#budget{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
+.dc-cols{grid-template-columns:repeat(6,minmax(165px,1fr))}
+.dc-cols.n1{grid-template-columns:minmax(200px,340px)}
+.tag.dc .x{position:absolute;top:3px;right:4px;border:0;background:none;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;padding:2px 4px}
+.tag.dc .nm{padding-right:14px}
+.tag.dc .g.none{color:var(--muted);font:400 11px var(--body)}
+.dc-add{display:flex;gap:4px}.dc-add input{flex:1;min-width:0;font-family:var(--body);font-size:13px;padding:5px 7px}.dc-add .btn{padding:4px 9px;font-size:13px}
+.bud-sum{display:flex;flex-wrap:wrap;gap:10px}
+.bud-sum div{border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:150px}
+.bud-sum b{display:block;font:700 22px var(--display)}
+.bud-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.bud-g{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.bud-g h3{margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline;font:700 15px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.bud-g h3 .sub{font:400 12px var(--body);letter-spacing:0;text-transform:none}
+.bud-g table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.bud-g td{padding:3px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
+.bud-g td.num{width:62px}
+.bud-g td.num{text-align:right;font-family:var(--mono);white-space:nowrap}
+.bud-g tr.open td{color:var(--muted)}
+.bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
+.pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
 @media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
@@ -460,7 +481,7 @@ window.claude={use:async n=>{
       </div>
     </div>
     <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
+      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button><button class="btn" type="button" id="dcBtn">Depth Chart</button><button class="btn" type="button" id="budBtn" hidden>Budget</button></div></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
   <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -518,6 +539,23 @@ window.claude={use:async n=>{
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
     </div>
     <div id="visitList"></div>
+  </section>
+
+  <section id="depth" hidden>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
+    </div>
+    <div class="tb-cols dc-cols" id="dcCols"></div>
+    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
+  </section>
+
+  <section id="budget" hidden>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="budClose">Close</button></span>
+    </div>
+    <div id="budBody"></div>
   </section>
 
   <section id="overview" hidden>
@@ -702,6 +740,11 @@ window.claude={use:async n=>{
         <h3 class="ot-h">Market data</h3>
         <p class="note" id="mktNote">Load the G6 and P4 market survey file to show market price ranges on player cards.</p>
         <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
+      </div>
+      <div>
+        <h3 class="ot-h">Budget</h3>
+        <p class="note" id="budNote">Load the budget file to see the Budget page and our slot values on player cards. Only your account can read it.</p>
+        <div class="btns"><button class="btn" type="button" id="budUp">Load budget file (.json)…</button><input type="file" id="budFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Import / Export</h3>
@@ -1846,7 +1889,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${r?marketHtml(p,r):""}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${r?marketHtml(p,r):""}${budgetCardHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
@@ -2048,6 +2091,115 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`Portal board ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("tbPrint").addEventListener("click",printTagBoard);
+/* ---------- depth chart: staff rank our own players by position group (saved in shared/depth; names only, never money) ---------- */
+const DC_SIDES={off:["QB","RB","WR","TE","OT","IOL"],def:["DE","DT","LB","SAF","NIC","CB"],st:["ST"]};
+const DC_LABEL={ST:"Specialists"};
+let DC={groups:{}},DC_SIDE="off",DC_SORT=[],DC_DRAG_AT=0,DC_GRADES=null,DC_DIRTY=0;
+const normName=n=>String(n||"").toLowerCase().replace(/[.'’]/g,"").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").replace(/[^a-z0-9]+/g," ").trim();
+const dcId=()=>"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function dcAll(){return Object.values(DC.groups||{}).flat()}
+function watchDepth(db){db.doc("shared/depth").onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DC={groups:d.groups||{}};if(!$("depth").hidden)drawDepth()},()=>{})}
+async function dcSave(){DC_DIRTY=Date.now();if(!DB)return;
+  try{await DB.doc("shared/depth").set({groups:DC.groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
+/* this season's board grades for our players, by name (any position board) */
+async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map();
+  all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
+    latestByPlayer(docs.filter(p=>!p.deleted&&p.name).map(p=>({p,r:score(p)})).filter(x=>x.r&&x.r.grade!=null)).forEach(x=>{
+      const key=normName(x.p.name);const o=m.get(key);const mine=isMarshallP(x.p)?1:0;
+      const cand={k,id:x.p.id,grade:x.r.grade,letter:x.r.letter,tier:x.r.tier,season:+x.p.season||0,mine};
+      if(!o||cand.mine>o.mine||(cand.mine===o.mine&&cand.season>o.season))m.set(key,cand)})}));
+  DC_GRADES=m}
+function dcTag(k,x,i){const g=DC_GRADES&&DC_GRADES.get(normName(x.n));
+  return `<div class="tag dc${g?" tb-"+g.tier:""}" data-dk="${k}" data-did="${esc(x.id)}"><span class="rk">${i+1}</span><span class="nm">${esc(x.n)}</span>
+    ${g?`<span class="g gtc-${g.tier}">${fmt(g.grade)} ${g.letter}${g.k!==k&&!(k==="ST")?` <span class="sub" style="font-weight:400">${g.k}</span>`:""}</span>`:`<span class="g none">${DC_GRADES?"No grade":""}</span>`}
+    <span class="mv"><button type="button" data-dmv="-1" aria-label="Move ${esc(x.n)} up">▲</button><button type="button" data-dmv="1" aria-label="Move ${esc(x.n)} down">▼</button></span>
+    <button type="button" class="x" data-drm aria-label="Remove ${esc(x.n)}">×</button></div>`}
+function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[];
+  const keys=DC_SIDES[DC_SIDE];$("dcCols").classList.toggle("n1",keys.length===1);
+  $("dcCols").innerHTML=keys.map(k=>{const list=DC.groups[k]||[];
+    return `<div class="tb-col"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length} ${list.length===1?"player":"players"}</span></h3>
+      <div class="tb-list" data-dck="${k}">${list.map((x,i)=>dcTag(k,x,i)).join("")||`<div class="tb-empty">No players yet</div>`}</div>
+      <form class="dc-add" data-dca="${k}"><input type="text" placeholder="Add a player" aria-label="Add a player to ${DC_LABEL[k]||k}" maxlength="60"><button class="btn" type="submit">Add</button></form></div>`}).join("");
+  if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
+    DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button,.x",preventOnFilter:false,draggable:".tag",
+      onEnd:ev=>{DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex)return;dcFromDom()}}))});
+}
+function dcFromDom(){const by=new Map(dcAll().map(x=>[x.id,x]));
+  document.querySelectorAll("#dcCols .tb-list").forEach(el=>{DC.groups[el.dataset.dck]=[...el.querySelectorAll(".tag")].map(t=>by.get(t.dataset.did)).filter(Boolean)});
+  drawDepth();dcSave()}
+$("dcCols").addEventListener("click",e=>{const tag=e.target.closest(".tag");if(!tag)return;const k=tag.dataset.dk,list=DC.groups[k]||[],i=list.findIndex(x=>x.id===tag.dataset.did);if(i<0)return;
+  const mv=e.target.closest("[data-dmv]");
+  if(mv){const j=i+(+mv.dataset.dmv);if(j<0||j>=list.length)return;[list[i],list[j]]=[list[j],list[i]];drawDepth();dcSave();return}
+  if(e.target.closest("[data-drm]")){if(!confirm(`Take ${list[i].n} off the depth chart?`))return;list.splice(i,1);drawDepth();dcSave();return}
+  if(Date.now()-DC_DRAG_AT<400)return;const g=DC_GRADES&&DC_GRADES.get(normName(list[i].n));if(g&&g.id)openPlayer(g.k,g.id)});
+$("dcCols").addEventListener("submit",e=>{const f=e.target.closest("[data-dca]");if(!f)return;e.preventDefault();const inp=f.querySelector("input");const n=inp.value.trim().replace(/\s+/g," ");if(!n)return;
+  const dup=Object.entries(DC.groups).find(([,l])=>l.some(x=>normName(x.n)===normName(n)));
+  if(dup&&!confirm(`${n} is already on the chart at ${DC_LABEL[dup[0]]||dup[0]}. Add him here too?`))return;
+  const k=f.dataset.dca;(DC.groups[k]=DC.groups[k]||[]).push({id:dcId(),n});drawDepth();dcSave();
+  const again=document.querySelector(`#dcCols [data-dca="${k}"] input`);if(again)again.focus()});
+document.querySelectorAll("[data-dcside]").forEach(b=>b.addEventListener("click",()=>{DC_SIDE=b.dataset.dcside;document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
+function hideViews(except){["overview","bigboard","tagboard","recruit","depth","budget"].forEach(id=>{if(id!==except)$(id).hidden=true})}
+["ovBtn","bbBtn","recBtn"].forEach(id=>$(id).addEventListener("click",()=>{$("depth").hidden=true;$("budget").hidden=true}));
+async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=sideOf(POSKEY)==="def"?"def":"off";
+  document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcside===DC_SIDE));
+  drawDepth();$("depth").scrollIntoView({behavior:"smooth",block:"start"});
+  try{await dcLoadGrades()}catch(e){DC_GRADES=new Map()}if(!$("depth").hidden)drawDepth()}
+$("dcBtn").addEventListener("click",openDepth);
+$("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
+async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{if(pi)doc.addPage();const keys=DC_SIDES[sd];
+    const W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
+    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(DC_LABEL[k]||k,x+5,y+11);y+=22;
+      const list=DC.groups[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No players",x+5,y+6);return}
+      list.forEach((t,i)=>{if(y>PH-40)return;const g=DC_GRADES&&DC_GRADES.get(normName(t.n));const rgb=g?(TIERRGB[g.tier]||[24,32,26]):[207,214,205];
+        doc.setFont("helvetica","bold");doc.setFontSize(8.5);const nl=doc.splitTextToSize(`${i+1}. ${T(t.n)}`,cw-12).slice(0,2);const h=8+nl.length*9.5+(g?9:0)+3;
+        doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
+        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+10);
+        if(g){doc.setFontSize(7.5);doc.setTextColor(...rgb);doc.text(T(`${fmt(g.grade)} ${g.letter}`),x+7,y+10+nl.length*9.5)}y+=h+3})})});
+  await pdfSave(doc,`Depth chart ${new Date().toISOString().slice(0,10)}.pdf`)}
+$("dcPrint").addEventListener("click",async()=>{if(!DC_GRADES){try{await dcLoadGrades()}catch(e){}}printDepth()});
+
+/* ---------- budget: owner only. Lives at owner/budget, which the database rules let only the owner read ---------- */
+let BUDGET=null;
+const BUD_POS={DT:"IDL"};
+function watchBudget(db){db.doc("owner/budget").onSnapshot(s=>{BUDGET=s.exists?s.data():null;
+  $("budNote").textContent=BUDGET?`Loaded: ${BUDGET.title||"budget"}, ${money(BUDGET.total)} total${BUDGET.at?" ("+fmtDate(String(BUDGET.at).slice(0,10))+")":""}. Only your account can read it. Load a new file to replace it.`:"Load the budget file to see the Budget page and our slot values on player cards. Only your account can read it.";
+  if(!$("budget").hidden)renderBudget();if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
+function budRows(){return BUDGET?(BUDGET.groups||[]).flatMap(g=>g.rows||[]):[]}
+function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="sub">No budget loaded yet. Load the budget file in Owner tools.</p>';return}
+  const rows=budRows(),sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0);
+  const held=sum(x=>x.name),open=sum(x=>!x.name),alloc=held+open,left=(+b.total||0)-alloc;
+  const nH=rows.filter(x=>x.name).length,nO=rows.length-nH;
+  const goals=b.goals||{};
+  $("budBody").innerHTML=`<div class="bud-sum"><div>Total budget<b>${money(b.total)}</b></div><div>Roster players (${nH})<b>${money(held)}</b></div><div>Open spots (${nO})<b>${money(open)}</b></div><div>${left>=0?"Not allocated":"Over budget"}<b style="color:${left<0?"var(--cLow)":"inherit"}">${money(Math.abs(left))}</b></div></div>
+    <div class="bud-groups">${(b.groups||[]).map(g=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0),pc=b.total?t/b.total:0,goal=goals[g.name];
+      return `<div class="bud-g"><h3>${esc(g.name)}<span class="sub">${money(t)}</span></h3><table><tbody>${(g.rows||[]).map(x=>`<tr class="${x.name?"":"open"}"><td style="width:46px">${esc(x.slot)}</td><td>${x.name?esc(x.name):"Open"}</td><td class="num">${money(x.amt)}</td></tr>`).join("")}</tbody></table>
+        <div class="ft">${(pc*100).toFixed(1)}% of budget${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""} · ${(g.rows||[]).filter(x=>!x.name).length} open</div></div>`}).join("")}</div>
+    <p class="note">Slot values come from your budget sheet. Player cards show you which slot a target projects to and what we have there; staff see only the market range.</p>`}
+$("budBtn").addEventListener("click",()=>{hideViews("budget");$("budget").hidden=false;renderBudget();$("budget").scrollIntoView({behavior:"smooth",block:"start"})});
+$("budClose").addEventListener("click",()=>{$("budget").hidden=true});
+$("budUp").addEventListener("click",()=>$("budFile").click());
+$("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;let d;
+  try{d=JSON.parse(await f.text());if(d.format!=="player-tool-budget"||!Array.isArray(d.groups))throw 0}catch(err){flash("That file isn't a budget file.");return}
+  try{await DB.doc("owner/budget").set({title:d.title||"",total:+d.total||0,groups:d.groups,goals:d.goals||{},at:new Date().toISOString()})}
+  catch(err){flash("Couldn't save the budget. Publish the updated database rules first (Firebase → Firestore → Rules).",9000);return}
+  /* our players' names (no money) go onto the depth chart if they aren't there yet */
+  try{const s=await DB.doc("shared/depth").get();if(s.exists&&s.data().groups)DC={groups:s.data().groups}}catch(_){}
+  const have=new Set(dcAll().map(x=>normName(x.n)));let added=0;
+  d.groups.forEach(g=>(g.rows||[]).forEach(x=>{if(!x.name||have.has(normName(x.name)))return;const k=x.pos==="IDL"?"DT":x.pos;if(![].concat(...Object.values(DC_SIDES)).includes(k))return;
+    (DC.groups[k]=DC.groups[k]||[]).push({id:dcId(),n:x.name});have.add(normName(x.name));added++}));
+  if(added)await dcSave();
+  flash(`Budget loaded.${added?` Added ${added} roster player${added===1?"":"s"} to the depth chart (names only).`:""}`,7000)});
+/* owner-only line on a player card: our slot value at the spot he projects to, and his own number if he's on the sheet */
+function budgetCardHtml(p,r){if(!OWNER||!BUDGET)return "";const rows=budRows();const nm=normName(p.name);
+  const his=rows.find(x=>x.name&&normName(x.name)===nm);const g=r?marketRange(p,r,"g6"):null;
+  let slotLine="";if(g&&!his){const key=g.slotLbl.replace(/^DT/,"IDL");const pos=key.replace(/\d+$/,"");let n=+key.replace(/^\D+/,"");let row=rows.find(x=>x.slot===key);
+    while(!row&&n>1){n--;row=rows.find(x=>x.slot===pos+n)}
+    if(row)slotLine=`Our budget for <b>${esc(row.slot)}</b>: <b>${money(row.amt)}</b> · ${row.name?"now "+esc(row.name):"open spot"}${g.mid!=null?` · market center ${money(g.mid)}`:""}`}
+  if(!his&&!slotLine)return "";
+  return `<div class="pc-mkt pc-bud"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Our budget<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
+    ${his?`<div class="sub">On our sheet at <b>${esc(his.slot)}</b>: <b>${money(his.amt)}</b></div>`:""}${slotLine?`<div class="sub">${slotLine}</div>`:""}</div>`}
 $("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
 $("recClose").addEventListener("click",()=>{$("recruit").hidden=true});
 document.querySelectorAll("[data-vm]").forEach(b=>b.addEventListener("click",()=>{VMODE=b.dataset.vm;document.querySelectorAll("[data-vm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderVisits()}));
@@ -2417,7 +2569,7 @@ async function connect(){
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db&&OWNER&&USER)watchBackup(db);
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);$("budBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();return}
   DB=db;subscribe();
 }
