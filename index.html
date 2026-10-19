@@ -247,15 +247,27 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .bud-sum{display:flex;flex-wrap:wrap;gap:10px}
 .bud-sum div{border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:150px}
 .bud-sum b{display:block;font:700 22px var(--display)}
-.bud-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px}
+.bud-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:10px}
 .bud-g{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
 .bud-g h3{margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline;font:700 15px var(--display);letter-spacing:.06em;text-transform:uppercase}
 .bud-g h3 .sub{font:400 12px var(--body);letter-spacing:0;text-transform:none}
 .bud-g table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
-.bud-g td{padding:3px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
-.bud-g td.num{width:62px}
-.bud-g td.num{text-align:right;font-family:var(--mono);white-space:nowrap}
-.bud-g tr.open td{color:var(--muted)}
+.bud-g td{vertical-align:middle;padding:3px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
+.bud-g td.sl{width:40px;color:var(--muted);font:600 12px var(--mono)}
+.bud-g td.am{width:88px;font-family:var(--mono);white-space:nowrap;color:var(--muted)}
+.bud-g td.bp{width:44px;text-align:right;font:12px var(--mono);color:var(--muted)}
+.bud-g td.rm{width:22px;text-align:right}.bud-g td.rm button{border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
+.bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:3px 4px;border-radius:4px}
+.bud-g input:hover{border-color:var(--line)}.bud-g input:focus{border-color:var(--accent,#00b140);background:var(--surface);outline:none}
+.bud-g .ba{width:76px;text-align:right;font-family:var(--mono)}
+.bud-g tr.open .bn::placeholder{color:var(--muted);font-style:italic}
+.bud-add{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.bud-add .linkbtn{font-size:12.5px}
+.bud-sum .sub{display:block;font-size:12px}
+.bud-tot{display:flex;align-items:center;font:700 22px var(--display);margin-top:2px}
+.bud-tot input{width:150px;font:700 22px var(--display);padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);margin-left:2px}
+.bud-bar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
+@media (max-width:420px){.bud-g td.bp{display:none}}
+.bud-bar span:first-child{background:var(--accent-fill,#00873a)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
 .bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
 @media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
@@ -2165,18 +2177,57 @@ let BUDGET=null;
 const BUD_POS={DT:"IDL"};
 function watchBudget(db){db.doc("owner/budget").onSnapshot(s=>{BUDGET=s.exists?s.data():null;
   $("budNote").textContent=BUDGET?`Loaded: ${BUDGET.title||"budget"}, ${money(BUDGET.total)} total${BUDGET.at?" ("+fmtDate(String(BUDGET.at).slice(0,10))+")":""}. Only your account can read it. Load a new file to replace it.`:"Load the budget file to see the Budget page and our slot values on player cards. Only your account can read it.";
-  if(!$("budget").hidden)renderBudget();if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
+  if(!$("budget").hidden&&!$("budget").contains(document.activeElement))renderBudget();if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
 function budRows(){return BUDGET?(BUDGET.groups||[]).flatMap(g=>g.rows||[]):[]}
-function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="sub">No budget loaded yet. Load the budget file in Owner tools.</p>';return}
-  const rows=budRows(),sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0);
-  const held=sum(x=>x.name),open=sum(x=>!x.name),alloc=held+open,left=(+b.total||0)-alloc;
-  const nH=rows.filter(x=>x.name).length,nO=rows.length-nH;
+const n0=v=>Math.round(+String(v==null?"":v).replace(/[^\d.]/g,"")||0);
+const commas=v=>Math.round(+v||0).toLocaleString("en-US");
+const pct=(v,t)=>t?(v/t*100).toFixed(1)+"%":"–";
+function budRenumber(){(BUDGET.groups||[]).forEach(g=>{const c={};(g.rows||[]).forEach(x=>{c[x.pos]=(c[x.pos]||0)+1;x.slot=x.pos+c[x.pos]})})}
+function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="sub">No budget loaded yet. Load the budget sheet in Owner tools.</p>';return}
   const goals=b.goals||{};
-  $("budBody").innerHTML=`<div class="bud-sum"><div>Total budget<b>${money(b.total)}</b></div><div>Roster players (${nH})<b>${money(held)}</b></div><div>Open spots (${nO})<b>${money(open)}</b></div><div>${left>=0?"Not allocated":"Over budget"}<b style="color:${left<0?"var(--cLow)":"inherit"}">${money(Math.abs(left))}</b></div></div>
-    <div class="bud-groups">${(b.groups||[]).map(g=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0),pc=b.total?t/b.total:0,goal=goals[g.name];
-      return `<div class="bud-g"><h3>${esc(g.name)}<span class="sub">${money(t)}</span></h3><table><tbody>${(g.rows||[]).map(x=>`<tr class="${x.name?"":"open"}"><td style="width:46px">${esc(x.slot)}</td><td>${x.name?esc(x.name):"Open"}</td><td class="num">${money(x.amt)}</td></tr>`).join("")}</tbody></table>
-        <div class="ft">${(pc*100).toFixed(1)}% of budget${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""} · ${(g.rows||[]).filter(x=>!x.name).length} open</div></div>`}).join("")}</div>
-    <p class="note">Slot values come from your budget sheet. Player cards show you which slot a target projects to and what we have there; staff see only the market range.</p>`}
+  $("budBody").innerHTML=`<div class="bud-sum"><div><label for="budTotal">Total budget</label><span class="bud-tot">$<input id="budTotal" inputmode="numeric" value="${commas(b.total)}" aria-label="Total budget"></span></div>
+      <div>Roster players (<span data-bs="nH"></span>)<b data-bs="held"></b><span class="sub" data-bs="heldPc"></span></div>
+      <div>Open spots (<span data-bs="nO"></span>)<b data-bs="open"></b><span class="sub" data-bs="openPc"></span></div>
+      <div><span data-bs="leftLbl"></span><b data-bs="left"></b><span class="sub" data-bs="usedPc"></span></div></div>
+    <div class="bud-bar" aria-hidden="true"><span data-bs="barH"></span><span data-bs="barO"></span></div>
+    <div class="bud-groups">${(b.groups||[]).map((g,gi)=>{const goal=goals[g.name];const kinds=[...new Set((g.rows||[]).map(x=>x.pos))];
+      return `<div class="bud-g" data-g="${gi}"><h3>${esc(g.name)}<span class="sub" data-gt="${gi}"></span></h3><table><tbody>${(g.rows||[]).map((x,ri)=>`<tr class="${x.name?"":"open"}" data-r="${gi}.${ri}">
+          <td class="sl">${esc(x.slot)}</td><td><input class="bn" value="${esc(x.name||"")}" placeholder="Open" aria-label="${esc(x.slot)} player" maxlength="60"></td>
+          <td class="am">$<input class="ba" inputmode="numeric" value="${commas(x.amt)}" aria-label="${esc(x.slot)} amount"></td><td class="bp" data-rp="${gi}.${ri}"></td>
+          <td class="rm"><button type="button" data-brm aria-label="Remove ${esc(x.slot)}">×</button></td></tr>`).join("")}</tbody></table>
+        <div class="ft"><span data-gf="${gi}"></span>${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""}</div>
+        <div class="bud-add">${kinds.map(k=>`<button type="button" class="linkbtn" data-badd="${gi}" data-pos="${esc(k)}">+ ${esc(k)} spot</button>`).join("")}</div></div>`}).join("")}</div>
+    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget.</p>`;
+  budRecalc()}
+function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=budRows();const sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0);
+  const held=sum(x=>x.name),open=sum(x=>!x.name),left=T-held-open,nH=rows.filter(x=>x.name).length;
+  const set=(k,v)=>{const el=document.querySelector(`[data-bs="${k}"]`);if(el)el.textContent=v};
+  set("nH",nH);set("nO",rows.length-nH);set("held",money(held));set("open",money(open));set("heldPc",pct(held,T)+" of budget");set("openPc",pct(open,T)+" of budget");
+  set("leftLbl",left>=0?"Left to allocate":"Over budget");set("left",money(Math.abs(left)));set("usedPc",pct(held+open,T)+" allocated");
+  const L=document.querySelector('[data-bs="left"]');if(L)L.style.color=left<0?"var(--cLow)":"";
+  const bh=document.querySelector('[data-bs="barH"]'),bo=document.querySelector('[data-bs="barO"]'),cap=Math.max(T,held+open)||1;
+  if(bh)bh.style.width=(held/cap*100)+"%";if(bo)bo.style.width=(open/cap*100)+"%";
+  (b.groups||[]).forEach((g,gi)=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0);const gt=document.querySelector(`[data-gt="${gi}"]`);if(gt)gt.textContent=money(t);
+    const gf=document.querySelector(`[data-gf="${gi}"]`);if(gf)gf.textContent=`${pct(t,T)} of budget · ${(g.rows||[]).filter(x=>!x.name).length} open`;
+    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c)c.textContent=pct(+x.amt||0,T)})})}
+let BUD_T=null;
+function budSaveSoon(){clearTimeout(BUD_T);BUD_T=setTimeout(budSave,700)}
+async function budSave(){clearTimeout(BUD_T);if(!DB||!BUDGET)return;BUDGET.at=new Date().toISOString();
+  try{await DB.doc("owner/budget").set(JSON.parse(JSON.stringify(BUDGET)))}catch(e){flash("Couldn't save the budget.")}}
+$("budBody").addEventListener("input",e=>{const t=e.target;if(!BUDGET)return;
+  if(t.id==="budTotal"){BUDGET.total=n0(t.value)}
+  else{const tr=t.closest("[data-r]");if(!tr)return;const [gi,ri]=tr.dataset.r.split(".").map(Number);const x=BUDGET.groups[gi].rows[ri];
+    if(t.classList.contains("bn")){x.name=t.value.trim()||null;tr.classList.toggle("open",!x.name)}
+    else if(t.classList.contains("ba"))x.amt=n0(t.value)}
+  budRecalc();budSaveSoon()});
+$("budBody").addEventListener("focusout",e=>{const t=e.target;if(t.id==="budTotal"||t.classList.contains("ba"))t.value=commas(n0(t.value))});
+$("budBody").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT")e.target.blur()});
+$("budBody").addEventListener("click",e=>{if(!BUDGET)return;const rm=e.target.closest("[data-brm]"),add=e.target.closest("[data-badd]");
+  if(rm){const [gi,ri]=rm.closest("[data-r]").dataset.r.split(".").map(Number);const x=BUDGET.groups[gi].rows[ri];
+    if(!confirm(`Remove the ${x.slot} spot${x.name?" ("+x.name+")":""}, ${money(x.amt)}?`))return;BUDGET.groups[gi].rows.splice(ri,1);budRenumber();renderBudget();budSave();return}
+  if(add){const g=BUDGET.groups[+add.dataset.badd],pos=add.dataset.pos;let at=-1;g.rows.forEach((x,i)=>{if(x.pos===pos)at=i});
+    g.rows.splice(at+1,0,{slot:"",pos,name:null,amt:0});budRenumber();renderBudget();budSave();
+    const inp=document.querySelector(`[data-r="${+add.dataset.badd}.${at+1}"] .bn`);if(inp)inp.focus()}});
 $("budBtn").addEventListener("click",()=>{hideViews("budget");$("budget").hidden=false;renderBudget();$("budget").scrollIntoView({behavior:"smooth",block:"start"})});
 $("budClose").addEventListener("click",()=>{$("budget").hidden=true});
 $("budUp").addEventListener("click",()=>$("budFile").click());
