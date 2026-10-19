@@ -769,26 +769,11 @@ window.claude={use:async n=>{
   <details class="settings" id="ownerTools" hidden>
     <summary>Owner tools</summary>
     <div class="setbody">
-      <div>
-        <h3 class="ot-h">Trash · <span id="trashPos">QB</span></h3>
-        <p class="note">Deleted players land here. Restore puts them back; Delete forever can't be undone.</p>
-        <div id="trashList"></div>
-      </div>
       <div id="staffBox" hidden>
         <h3 class="ot-h">Staff access</h3>
         <p class="note">Only these emails can sign in. You always have access.</p>
         <div id="staffList"></div>
         <div class="btns"><input id="staffEmail" type="email" placeholder="coach@email.com" style="width:260px;max-width:100%;font-family:var(--body)"><button class="btn" type="button" id="staffAdd">Add</button></div>
-      </div>
-      <div>
-        <h3 class="ot-h">Full backup</h3>
-        <p class="note">Download every position, Trash and settings as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
-        <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
-      </div>
-      <div>
-        <h3 class="ot-h">Market data</h3>
-        <p class="note" id="mktNote">Load the G6 and P4 market survey file to show market price ranges on player cards.</p>
-        <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Roster for depth chart</h3>
@@ -801,6 +786,16 @@ window.claude={use:async n=>{
         <div class="btns"><button class="btn" type="button" id="budUp">Load budget sheet (.xlsx)…</button><input type="file" id="budFile" accept=".xlsx,.xls,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
+        <h3 class="ot-h">Market data</h3>
+        <p class="note" id="mktNote">Load the G6 and P4 market survey file to show market price ranges on player cards.</p>
+        <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
+      </div>
+      <div>
+        <h3 class="ot-h">Full backup</h3>
+        <p class="note">Download every position, Trash, settings and both depth charts as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
+        <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
+      </div>
+      <div>
         <h3 class="ot-h">Import / Export</h3>
         <p class="note">Export this board or every position, or import players from a CSV.</p>
         <div class="btns"><button class="btn" type="button" id="csvBtn">Export this board (CSV)</button><button class="btn" type="button" id="allBtn" title="One spreadsheet with a tab for every position">Export all positions (Excel)</button><button class="btn" type="button" id="impBtn">Import players (CSV)</button><button class="btn" type="button" id="tplBtn">Download CSV template</button></div>
@@ -811,6 +806,11 @@ window.claude={use:async n=>{
         <p class="note">Run once when the season turns over. At every position, graduating players come off the roster and are hidden, Committed players move to On Roster, everyone loses a year of eligibility, and the season moves forward. You can undo it here.</p>
         <div class="btns"><button class="btn" type="button" id="nsPreview">Start new season…</button><button class="btn" type="button" id="nsUndo" hidden>Undo last new season</button></div>
         <div id="nsBox" class="nsbox" hidden></div>
+      </div>
+      <div>
+        <h3 class="ot-h">Trash · <span id="trashPos">QB</span></h3>
+        <p class="note">Deleted players land here. Restore puts them back; Delete forever can't be undone.</p>
+        <div id="trashList"></div>
       </div>
     </div>
   </details>
@@ -2343,7 +2343,7 @@ $("dcPrint").addEventListener("click",async()=>{if(!DC_GRADES){try{await dcLoadG
 let BUDGET=null;
 const BUD_POS={DT:"IDL"};
 function watchBudget(db){db.doc("owner/budget").onSnapshot(s=>{BUDGET=s.exists?s.data():null;
-  $("budNote").textContent=BUDGET?`Loaded: ${BUDGET.title||"budget"}, ${money(BUDGET.total)} total${BUDGET.at?" ("+fmtDate(String(BUDGET.at).slice(0,10))+")":""}. Only your account can read it. Load a new file to replace it.`:"Load the budget file to see the Budget page and our slot values on player cards. Only your account can read it.";
+  $("budNote").textContent=BUDGET?`Loaded: ${BUDGET.title||"budget"}, ${money(BUDGET.total)} total${BUDGET.at?" ("+fmtDate(String(BUDGET.at).slice(0,10))+")":""}. Only your account can read it. Load a new file to replace it.`:"Load the NIL budget workbook (it reads the Download tab) to see the Budget page and our slot values on player cards. Only your account can read it.";
   if(!$("budget").hidden&&!$("budget").contains(document.activeElement))renderBudget();if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
 function budRows(){return BUDGET?(BUDGET.groups||[]).flatMap(g=>g.rows||[]):[]}
 const n0=v=>Math.round(+String(v==null?"":v).replace(/[^\d.]/g,"")||0);
@@ -2583,7 +2583,7 @@ async function backupData(){
   const out={};const keys=ALL_POS.filter(k=>POSITIONS[k]);
   for(const k of keys){const lc=k.toLowerCase();const qs=await DB.collection(lc+"_players").get().catch(()=>null);out[lc+"_players"]={};if(qs)qs.docs.forEach(d=>out[lc+"_players"][d.id]=d.data());
     const cs=await DB.doc("config/"+lc).get().catch(()=>null);if(cs&&cs.exists){out.config=out.config||{};out.config[lc]=cs.data()}}
-  for(const p of ["shared/season","config/rollover"]){const d=await DB.doc(p).get().catch(()=>null);if(d&&d.exists){const [c,id]=p.split("/");out[c]=out[c]||{};out[c][id]=d.data()}}
+  for(const p of ["shared/season","shared/depth","shared/depth_next","config/rollover"]){const d=await DB.doc(p).get().catch(()=>null);if(d&&d.exists){const [c,id]=p.split("/");out[c]=out[c]||{};out[c][id]=d.data()}}
   return {format:"marshall-player-tool-backup",version:1,exported:new Date().toISOString(),collections:out};
 }
 $("bkDown").addEventListener("click",async()=>{
