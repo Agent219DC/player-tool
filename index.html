@@ -570,7 +570,7 @@ window.claude={use:async n=>{
   <section id="depth" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary" type="button" id="dcLoad" hidden>Load roster grid…</button><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
     </div>
     <div class="tb-cols dc-cols" id="dcCols"></div>
     <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcm fr">FR</span> Freshman</span><span><span class="dcm">WO</span> Walk-on</span><span><span class="dcm cut">Potential cut</span></span><span class="sub" id="dcCount"></span></div>
@@ -2244,7 +2244,7 @@ async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The 
   if(gN){DCS.now={groups:gN};await dcSave("now")}if(gF){DCS.next={groups:gF};await dcSave("next")}
   if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
 function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
-$("gridUp").addEventListener("click",()=>$("gridFile").click());
+$("gridUp").addEventListener("click",()=>$("gridFile").click());$("dcLoad").addEventListener("click",()=>$("gridFile").click());
 $("gridFile").addEventListener("change",e=>{const f=e.target.files[0];e.target.value="";if(f)importGrid(f)});
 async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
@@ -2726,7 +2726,7 @@ async function connect(){
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);$("budBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);$("budBtn").hidden=false;$("dcLoad").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();return}
   DB=db;subscribe();
 }
