@@ -70,6 +70,9 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 .hnav{align-items:center;flex-wrap:wrap}
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
+.pc-mkt{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
+.pc-mkt .big{font:700 22px var(--display);letter-spacing:.01em}
+.pc-mkt .sub b{color:var(--fg)}
 .behind{display:inline-block;font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--tRotation);border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
 #bbTbl td.bbp{white-space:normal;min-width:200px} #bbTbl tbody tr{cursor:pointer} #bbTbl tbody tr:hover td{background:var(--sunk)}
 #bbTbl .rk{font:600 13px var(--mono);color:var(--muted)} #bbTbl .gtc{font:600 14px var(--mono)}
@@ -694,6 +697,11 @@ window.claude={use:async n=>{
         <h3 class="ot-h">Full backup</h3>
         <p class="note">Download every position, Trash and settings as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
         <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
+      </div>
+      <div>
+        <h3 class="ot-h">Market data</h3>
+        <p class="note" id="mktNote">Load the G6 and P4 market survey file to show market price ranges on player cards.</p>
+        <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Import / Export</h3>
@@ -1791,6 +1799,35 @@ let EDIT_OPEN=false;
 function openEditor(){const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeout(()=>ed.scrollIntoView({behavior:"smooth",block:"start"}),30)}
 $("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o});
 /* ---------- player card: read-only view of a player; Edit opens the player panel ---------- */
+/* ---------- market price range (survey data in config/market; staff can read, owner loads it) ---------- */
+let MARKET=null;
+const MKT_POS={QB:"QB",RB:"RB",WR:"WR",TE:"TE",IOL:"IOL",OT:"OT",DT:"IDL",DE:"DE",LB:"LB",SAF:"SAF",CB:"CB",NIC:"CB"};
+const money=v=>v==null?"–":v>=1e6?"$"+(v/1e6).toFixed(v>=1e7?0:2).replace(/\.?0+$/,"")+"M":v>=1000?"$"+Math.round(v/1000)+"k":"$"+Math.round(v);
+/* grade -> market percentile: 60 = 5th, 75 = 50th, 90+ = 95th */
+function gradePct(g){if(g==null)return null;if(g<=60)return 5;if(g>=90)return 95;return g<75?5+(g-60)/15*45:50+(g-75)/15*45}
+function pctValue(row,pc){const [,p5,p50,p95]=row;if(pc<=5)return p5;if(pc>=95)return p95;return pc<50?p5+(p50-p5)*(pc-5)/45:p50+(p95-p50)*(pc-50)/45}
+/* his projected slot among our players at this position (targets: vs our returning players; ours: his rank among us) */
+function projSlot(p,r){if(!r||r.grade==null)return null;const me=pkey(p);const yr=String(p.season||CUR_SEASON);
+  const ours=BOARD.filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr&&pkey(b)!==me).map(b=>({b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null);
+  const pool=isOurs(p)?ours:ours.filter(x=>x.b.elig!==0);
+  return pool.filter(x=>x.r.grade>r.grade).length+1}
+function marketRange(p,r,lvl){if(!MARKET||!r||r.grade==null)return null;const tbl=MARKET[lvl]&&MARKET[lvl].apy;if(!tbl)return null;
+  const base=MKT_POS[POSKEY];if(!base)return null;let slot=projSlot(p,r);if(!slot)return null;
+  const shown=POSKEY==="NIC"?slot+1:slot;let n=shown,row=tbl[base+n];while(!row&&n>1){n--;row=tbl[base+n]}if(!row)return null;
+  const lo=pctValue(row,gradePct(r.grade-5)),hi=pctValue(row,gradePct(r.grade+5)),mid=pctValue(row,gradePct(r.grade));
+  return {lo,hi,mid,slotLbl:(POSKEY==="NIC"?"NIC"+slot:POSKEY+slot),rowLbl:base+n}}
+function marketHtml(p,r){const g=marketRange(p,r,"g6");if(!g)return "";const p4=marketRange(p,r,"p4");
+  return `<div class="pc-mkt"><h3 style="margin:0">Market price range</h3><div class="big">${money(g.lo)} – ${money(g.hi)}</div>
+    <div class="sub">Projects <b>${esc(g.slotLbl)}</b> for us · G6 market for ${esc(g.rowLbl)}, centered near <b>${money(g.mid)}</b></div>
+    ${p4?`<div class="sub">P4 market for the same spot: ${money(p4.lo)} – ${money(p4.hi)}</div>`:""}</div>`}
+function watchMarket(db){db.doc("config/market").onSnapshot(s=>{MARKET=s.exists?s.data():null;
+  if($("mktNote"))$("mktNote").textContent=MARKET?`Loaded: ${MARKET.g6?"G6":""}${MARKET.g6&&MARKET.p4?" and ":""}${MARKET.p4?"P4":""} market data${MARKET.at?" ("+fmtDate(String(MARKET.at).slice(0,10))+")":""}. Load a new file to replace it.`:"Load the G6 and P4 market survey file to show market price ranges on player cards.";
+  if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
+$("mktUp").addEventListener("click",()=>$("mktFile").click());
+$("mktFile").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{const d=JSON.parse(await f.text());if(!d.g6||!d.g6.apy)throw new Error("no g6");
+    await DB.doc("config/market").set({g6:{apy:d.g6.apy,guarantee:d.g6.guarantee||null},p4:d.p4?{apy:d.p4.apy,guarantee:d.p4.guarantee||null}:null,at:new Date().toISOString()});flash("Market data loaded.")}
+  catch(err){flash("That file isn't a market data file.")}});
 let CARD_P=null;
 /* phone numbers and emails inside contact text become tap-to-call / tap-to-email links */
 function contactHtml(t){if(!t)return "–";return esc(t).replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g,m=>`<a href="mailto:${m}">${m}</a>`).replace(/(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g,m=>`<a href="tel:${m.replace(/[^\d+]/g,"")}">${m}</a>`)}
@@ -1809,7 +1846,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${r?marketHtml(p,r):""}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
@@ -2380,7 +2417,7 @@ async function connect(){
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db&&OWNER&&USER)watchBackup(db);
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();return}
   DB=db;subscribe();
 }
