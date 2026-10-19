@@ -470,11 +470,7 @@ window.claude={use:async n=>{
   </script>
 
   <div class="modebar">
-    <span class="eyebrow">Evaluation</span>
-    <div class="seg" role="group" aria-label="Evaluation mode">
-      <button id="m-mid" aria-pressed="true">Mid-season</button>
-      <button id="m-full" aria-pressed="false">Full season</button>
-    </div>
+    <span class="eyebrow">This season</span>
     <label style="display:flex;align-items:center;gap:6px;color:var(--fg)">Team games played
       <input id="teamGames" type="number" min="1" max="15" style="width:70px">
     </label>
@@ -905,7 +901,7 @@ let POSKEY=POSITIONS[load(POS_KEY,"QB")]?load(POS_KEY,"QB"):"QB";
 let P=POSITIONS[POSKEY], METRICS=P.metrics;
 const defaultsFor=k=>Object.assign(clone(BASE),clone(POSITIONS[k].defaults));
 let DEFAULTS=defaultsFor(POSKEY);
-let S=clone(DEFAULTS); S.mode=load(MODE_KEY,"mid");
+let S=clone(DEFAULTS); S.mode="mid"; /* each player is graded on his own "Numbers through"; no global switch */
 let BOARD=[], DB=null, USER=null, NAMES={}, boardState="loading", unsubs=[];
 const coll=()=>POSKEY.toLowerCase()+"_players", cfgPath=()=>"config/"+POSKEY.toLowerCase();
 const slug=s=>(s||"player").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,120)||"player";
@@ -2256,7 +2252,6 @@ function fillSettings(){
   $("l-name").value=S.line.name;$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
   METRICS.forEach((_,i)=>{$("lc-"+i).value=S.line.cur.m[i]??"";$("lp-"+i).value=S.line.prior.m[i]??""});
   $("teamGames").value=tg();
-  $("m-mid").setAttribute("aria-pressed",S.mode==="mid");$("m-full").setAttribute("aria-pressed",S.mode==="full");
   if(typeof applyLock==="function")applyLock();
 }
 function readSettings(){
@@ -2273,7 +2268,7 @@ function readSettings(){
 document.querySelector(".setbody").addEventListener("change",readSettings);
 $("teamGames").addEventListener("change",()=>{TG=num($("teamGames").value)||1;if(DB)DB.doc("shared/season").set({teamGames:TG}).catch(()=>flash("Couldn't save team games. You may have view-only access."));update()});
 $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;update()});
-["mid","full"].forEach(m=>$("m-"+m).addEventListener("click",()=>{S.mode=m;save(MODE_KEY,m);fillSettings();update()}));
+
 $("reset").addEventListener("click",()=>{const md=S.mode;S=clone(DEFAULTS);S.mode=md;saveConfig();fillSettings();update()});
 
 $("form").addEventListener("input",()=>{$("priorBox").hidden=!$("usePrior").checked;render()});
