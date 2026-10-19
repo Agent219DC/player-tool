@@ -70,6 +70,10 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 .hnav{align-items:center;flex-wrap:wrap}
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
+.behind{display:inline-block;font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--tRotation);border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+#bbTbl td.bbp{white-space:normal;min-width:200px} #bbTbl tbody tr{cursor:pointer} #bbTbl tbody tr:hover td{background:var(--sunk)}
+#bbTbl .rk{font:600 13px var(--mono);color:var(--muted)} #bbTbl .gtc{font:600 14px var(--mono)}
+.bbctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
 dialog#pcard{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#pcard::backdrop{background:rgba(10,16,12,.5)}
 .pc{display:grid;gap:16px;padding:20px 22px 22px}
@@ -210,6 +214,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .gresults .gg{font:600 13px var(--mono)}
 .gresults .gnone{padding:10px;color:var(--muted);font-size:13px}
 #recruit{display:grid;gap:10px}
+#bigboard{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
@@ -432,7 +437,7 @@ window.claude={use:async n=>{
       </div>
     </div>
     <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
+      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
   <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -457,6 +462,21 @@ window.claude={use:async n=>{
     </label>
     <span id="modeNote" class="note"></span>
   </div>
+
+  <section id="bigboard" hidden>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
+      <h2>Big board</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button> <button class="btn" type="button" id="bbClose">Close</button></span>
+    </div>
+    <div class="bbctl">
+      <span class="seg" role="group" aria-label="Sort"><button type="button" data-bbs="priority" aria-pressed="true">Priority</button><button type="button" data-bbs="grade" aria-pressed="false">Grade</button><button type="button" data-bbs="gain" aria-pressed="false">Biggest upgrade</button></span>
+      <span class="seg" role="group" aria-label="Side"><button type="button" data-bbside="all" aria-pressed="true">All</button><button type="button" data-bbside="off" aria-pressed="false">Offense</button><button type="button" data-bbside="def" aria-pressed="false">Defense</button></span>
+      <label class="check" style="font-size:13px"><input type="checkbox" id="bbNeed"> Upgrade spots only</label>
+      <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
+    </div>
+    <div class="tablewrap"><table id="bbTbl"></table></div>
+    <p class="note">This season's targets at every position (Medium or High confidence; no NIP, Pass, hidden or our own players). <b>Priority</b> lists positions marked Upgrade first, then Solid, then Great, best grade first within each. <b>vs. ours</b> = his grade minus our weakest starter at that spot. Tap a player to open his card.</p>
+  </section>
 
   <section id="recruit" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
@@ -1183,7 +1203,8 @@ function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x
 function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
 const blendYr=p=>p.prior&&p.prior.db?(Number(p.season)?Number(p.season)-1:"last"):null;
-function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';const by=blendYr(p);return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}${by?` + ${by}${p.prior.level&&p.prior.level!==p.level?" ("+esc(p.prior.level)+")":""}`:""}</span>`}
+function behindBy(p){const g=Number(p.thru);return S.mode==="mid"&&g&&String(p.season)===String(CUR_SEASON)&&tg()-g>=2?tg()-g:0}
+function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';const by=blendYr(p),bh=behindBy(p);return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}${by?` + ${by}${p.prior.level&&p.prior.level!==p.level?" ("+esc(p.prior.level)+")":""}`:""}</span>${bh?` <span class="behind" title="His numbers are through game ${esc(String(p.thru))}; we've played ${tg()}. Update his PFF numbers.">${bh} behind</span>`:""}`}
 function fcsMark(p,i){return P.fcsNote&&p.level==="FCS"&&i===P.fcsNote.idx?"*":""}
 function htIn(h){if(!h)return null;const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?(+m[1])*12+(+(m[2]||0)):null}
 function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?`${m[1]}'${m[2]??0}"`:String(h)}
@@ -1685,7 +1706,7 @@ function renderOvField(side,rows){
 }
 $("ovField").addEventListener("click",e=>ovTblClick(e));
 document.querySelectorAll("[data-ovm]").forEach(b=>b.addEventListener("click",()=>{OV_MODE=b.dataset.ovm;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOverview()}));
-$("ovBtn").addEventListener("click",()=>{renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
+$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
 $("ovClose").addEventListener("click",()=>{$("overview").hidden=true});
 function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;
   {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
@@ -1852,7 +1873,65 @@ function renderVisits(){
     <span><b>${esc(x.p.name)}</b> · ${esc(x.p.school||"")}${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}">${esc(x.p.status)}</span>`:""}<span class="sub"> · ${vLabel(x.p)}${x.p.elig!=null?" · "+(x.p.elig===0?"0 yrs":x.p.elig+(x.p.elig===1?" yr":" yrs")):""}</span></span>
     <span class="vg">${x.r&&x.r.grade!=null?fmt(x.r.grade)+" "+x.r.letter:"–"}</span></div>`).join("")}</div>`).join("");
 }
-$("recBtn").addEventListener("click",()=>{$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
+/* ---------- big board: top targets across every position ---------- */
+let BB=null,BBS={sort:"priority",side:"all"};
+const NEEDRANK={High:0,Upgrade:1,Set:2};
+async function renderBigBoard(){
+  $("bigboard").hidden=false;$("bbPrint").disabled=true;
+  if(!DB&&!BOARD.length){$("bbTbl").innerHTML='<tbody><tr><td class="sub">The big board needs the shared board.</td></tr></tbody>';return}
+  $("bbTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';
+  const all=await loadAllPositions();const rows=[];
+  all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
+    const live=latestByPlayer(docs.filter(p=>!p.ref).map(p=>({p,r:score(p)})).filter(x=>x.r&&x.r.grade!=null));
+    const yr=Math.max(0,...live.map(x=>+x.p.season||0));
+    const ok=x=>(x.r.conf==="High"||x.r.conf==="Medium")&&(+x.p.season||0)===yr;
+    (OV_SPOTS[k]||[{lbl:k,n:1}]).forEach(g=>{
+      const inRole=x=>!g.role||x.p.role===g.role;
+      const ours=live.filter(x=>inRole(x)&&isOurs(x.p)&&ok(x)).sort((a,b)=>b.r.grade-a.r.grade).slice(0,g.n);
+      const weak=ours.length<g.n?null:ours[ours.length-1];
+      const need=!weak||weak.r.grade<70?"High":weak.r.grade<80?"Upgrade":"Set";
+      live.filter(x=>inRole(x)&&ok(x)&&!isMarshallP(x.p)&&x.p.status!=="Pass"&&x.p.status!=="NIP").forEach(x=>
+        rows.push({k,side:sideOf(k),spot:g.lbl,p:x.p,r:x.r,need,weak:weak?weak.r.grade:null,gain:x.r.grade-(weak?weak.r.grade:0)}))})}));
+  BB=rows;drawBigBoard();$("bbPrint").disabled=!rows.length;
+}
+function bbRows(){if(!BB)return [];let v=BB.filter(x=>BBS.side==="all"||x.side===BBS.side);
+  if($("bbNeed").checked)v=v.filter(x=>x.need==="High");
+  v.sort(BBS.sort==="grade"?(a,b)=>b.r.grade-a.r.grade:BBS.sort==="gain"?(a,b)=>b.gain-a.gain||b.r.grade-a.r.grade:(a,b)=>NEEDRANK[a.need]-NEEDRANK[b.need]||b.r.grade-a.r.grade);
+  const n=+$("bbTop").value;return n?v.slice(0,n):v}
+function drawBigBoard(){const v=bbRows();
+  if(!v.length){$("bbTbl").innerHTML=`<tbody><tr><td class="sub">${BB&&BB.length?"No targets match these filters.":"No graded targets yet. Add targets on the position boards and they'll show up here."}</td></tr></tbody>`;return}
+  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th></tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
+    <td class="num rk">${i+1}</td><td><b>${esc(x.spot)}</b></td>
+    <td class="bbp">${logoImg(x.p)}<b>${esc(x.p.name)}</b>${confFlag(x.r)}<div class="sub">${esc([x.p.school,seasonPlain(x.p)].filter(Boolean).join(" · "))}</div></td>
+    <td>${esc(x.p.level||"")}</td><td class="num">${x.p.elig!=null?esc(String(x.p.elig)):"–"}</td>
+    <td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:'<span class="sub">–</span>'}</td>
+    <td class="num gtc gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</td><td><span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span></td>
+    <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
+    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td></tr>`).join("")}</tbody>`}
+function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
+$("bbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})});
+$("bbClose").addEventListener("click",()=>{$("bigboard").hidden=true});
+document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
+document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
+$("bbNeed").addEventListener("change",drawBigBoard);$("bbTop").addEventListener("change",drawBigBoard);
+$("bbTbl").addEventListener("click",e=>{const tr=e.target.closest("[data-bbid]");if(tr&&tr.dataset.bbid)openPlayer(tr.dataset.bbk,tr.dataset.bbid)});
+async function printBigBoard(){const v=bbRows();if(!v.length)return;
+  if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+  const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
+  pdfHeader(doc,"Player Tool · Big Board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
+  const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[0,122,51]};
+  doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
+    body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
+    styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+    columnStyles:{0:{halign:"right",cellWidth:24},2:{fontStyle:"bold"},6:{halign:"right"},8:{halign:"right",fontStyle:"bold"},11:{halign:"right"}},
+    didParseCell:h=>{if(h.section!=="body")return;const x=v[h.row.index];if(h.column.index===8||h.column.index===9){h.cell.styles.textColor=TIERRGB[x.r.tier]||[24,32,26];h.cell.styles.fontStyle="bold"}if(h.column.index===10){h.cell.styles.textColor=NEEDRGB[x.need];h.cell.styles.fontStyle="bold"}}});
+  const y=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.text("This season's targets, Medium or High confidence. vs. ours = his grade minus our weakest starter at that spot.",40,y);
+  await pdfSave(doc,T(`Big board ${new Date().toISOString().slice(0,10)}.pdf`))}
+$("bbPrint").addEventListener("click",printBigBoard);
+$("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
 $("recClose").addEventListener("click",()=>{$("recruit").hidden=true});
 document.querySelectorAll("[data-vm]").forEach(b=>b.addEventListener("click",()=>{VMODE=b.dataset.vm;document.querySelectorAll("[data-vm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderVisits()}));
 $("recTbl").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;$("recruit").hidden=true;switchPos(b.dataset.rk);$("statusFilter").value=b.dataset.rs;renderBoard();$("boardTitle").scrollIntoView({behavior:"smooth",block:"start"})});
