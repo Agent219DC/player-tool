@@ -242,7 +242,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dc-rows{display:grid;gap:10px;min-width:0}
 .tb-col.dc-pool{border-style:dashed}
 @media (max-width:700px){.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(var(--n),200px)!important;grid-auto-flow:row}.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
-.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
+.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:5px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
 .dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
 .dcm{display:inline-block;font:700 9.5px var(--body);letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);margin-right:3px;vertical-align:1px}
 .dcm.tr{background:rgba(70,189,198,.22);border-color:rgba(70,189,198,.7);color:var(--fg)}
@@ -266,10 +266,11 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcd2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tag.dc .x{position:absolute;top:3px;right:4px;border:0;background:none;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;padding:2px 4px}
 .tag.dc .nm{padding-right:0}
-.tag.dc:not(.dcchip){grid-template-columns:16px minmax(0,1fr) auto;cursor:pointer}.tag.dc:not(.dcchip) .nm{grid-column:2/3}.tag.dc .gr{grid-column:3;grid-row:1;font:700 12.5px var(--mono);white-space:nowrap;align-self:baseline}
-.tag.dc .meta{grid-column:2/4;grid-row:2;font-size:11.5px;color:var(--muted);align-self:center}
-.tag.dc .meta b{font:700 12px var(--mono)}.tag.dc.dcchip .gr{font:700 11.5px var(--mono)}.tag.dc .meta .bp{font-size:10.5px}.tag.dc .meta .dot{opacity:.6}
+.tag.dc:not(.dcchip){grid-template-columns:16px minmax(0,1fr) auto;cursor:pointer}.tag.dc:not(.dcchip) .nm{grid-column:2/4}.tag.dc .gr{grid-column:3;grid-row:2;font:700 12px var(--mono);white-space:nowrap;align-self:center;margin-left:6px}
+.tag.dc .meta{grid-column:2/3;grid-row:2;min-width:0;font-size:11.5px;color:var(--muted);align-self:center}
+.tag.dc .meta b{font:700 12px var(--mono)}.tag.dc .gr small.bp{display:block;text-align:right;font:500 9.5px var(--body);color:var(--muted);letter-spacing:.04em}.tag.dc.dcchip .gr small.bp{display:inline;margin-left:4px}.tag.dc.dcchip .gr{font:700 11.5px var(--mono)}.tag.dc .meta .bp{font-size:10.5px}.tag.dc .meta .dot{opacity:.6}
 .tag.dc .ln2{grid-column:2/3;grid-row:3;margin-top:2px}
+.tag.dc .nm{overflow-wrap:normal;word-break:normal;line-height:1.2}
 .tag.dc.dcchip{display:block;padding:5px 8px;cursor:grab}.tag.dc.dcchip .nm{display:block;padding:0}.tag.dc.dcchip .meta{display:block}
 .dcc{display:inline-block;margin-left:4px;font:700 10px var(--body);padding:0 5px;border-radius:8px;background:rgba(198,40,40,.14);color:#c62828;border:1px solid rgba(198,40,40,.45)}
 [data-theme=dark] .dcc{color:#ff8a80}
@@ -2205,8 +2206,8 @@ function dcHtWt(g){if(!g)return "";const h=String(g.ht||"").replace(/^(\d)\s*[-'
 function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;const pool=DC_POOLS.includes(k);
   const cls=`tag dc${pool?" dcchip":""}${g?" tb-"+g.tier:""}`;const bg=dcBg(x);const st=bg?` style="background:${bg}"`:"";
   const bp=g&&DC_FAM(g.k)!==DC_FAM(k)&&!["K","P","LS","STP"].includes(k)?g.k:"";
-  const info=[x.yr,bp?"graded at "+bp:"",dcHtWt(g)].filter(Boolean).map(esc).join(' <span class="dot">·</span> ');
-  const gr=g?`<b class="gr gtc-${g.tier}">${fmt(g.grade)} ${g.letter}</b>`:"";
+  const info=[x.yr,dcHtWt(g)].filter(Boolean).map(esc).join(' <span class="dot">·</span> ');
+  const gr=g?`<b class="gr gtc-${g.tier}"${bp?` title="His grade on the ${bp} board"`:""}>${fmt(g.grade)} ${g.letter}${bp?`<small class="bp">${bp}</small>`:""}</b>`:"";
   const marks=dcMarks(x,k);
   if(pool)return `<div class="${cls}"${st} data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="nm">${esc(shown)}</span><span class="meta">${gr?gr+' <span class="dot">·</span> ':""}${info}${marks?" "+marks:""}</span></div>`;
   return `<div class="${cls}"${st} data-dk="${k}" data-did="${esc(x.id)}" tabindex="0" title="Tap to edit · drag to reorder"><span class="rk">${i+1}</span><span class="nm">${esc(shown)}</span>${gr}
