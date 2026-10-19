@@ -241,8 +241,8 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dc-cols{grid-template-columns:repeat(6,minmax(165px,1fr))}
 .dc-rows{display:grid;gap:10px;min-width:0}
 .tb-col.dc-pool{border-style:dashed}
-@media (max-width:700px){.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
-.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));align-content:start}.dc-pool .dc-add{max-width:340px}
+@media (max-width:700px){.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(var(--n),200px)!important;grid-auto-flow:row}.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
+.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:5px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
 .dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
 .dcm{display:inline-block;font:700 9.5px var(--body);letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);margin-right:3px;vertical-align:1px}
 .dcm.tr{background:rgba(70,189,198,.22);border-color:rgba(70,189,198,.7);color:var(--fg)}
@@ -265,8 +265,18 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcd input:not([type=checkbox]),.dcd select{font-family:var(--body);font-size:15px}
 .dcd2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tag.dc .x{position:absolute;top:3px;right:4px;border:0;background:none;color:var(--muted);font-size:14px;line-height:1;cursor:pointer;padding:2px 4px}
-.tag.dc .nm{padding-right:14px}
-.tag.dc .g.none{color:var(--muted);font:400 11px var(--body)}
+.tag.dc .nm{padding-right:0}
+.tag.dc:not(.dcchip){grid-template-columns:16px minmax(0,1fr) auto}.tag.dc:not(.dcchip) .nm{grid-column:2/3}.tag.dc:not(.dcchip) .mv{grid-column:3;grid-row:1/3;flex-direction:column;gap:2px;align-self:start}.tag.dc:not(.dcchip) .mv button{padding:1px 4px;font-size:8px}
+.tag.dc .meta{grid-column:2/3;grid-row:2;font-size:11.5px;color:var(--muted);align-self:center}
+.tag.dc .meta b{font:700 12px var(--mono)}.tag.dc .meta .bp{font-size:10.5px}.tag.dc .meta .dot{opacity:.6}
+.tag.dc .ln2{grid-column:2/3;grid-row:3;margin-top:2px}
+.tag.dc.dcchip{display:block;padding:5px 8px;cursor:grab}.tag.dc.dcchip .nm{display:block;padding:0}.tag.dc.dcchip .meta{display:block}
+.dcc{display:inline-block;margin-left:4px;font:700 10px var(--body);padding:0 5px;border-radius:8px;background:rgba(198,40,40,.14);color:#c62828;border:1px solid rgba(198,40,40,.45)}
+[data-theme=dark] .dcc{color:#ff8a80}
+.dc-rowlbl{font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
+.dc-rowlbl .sub{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
+.dc-addbtn{border:1px dashed var(--line);background:none;color:var(--muted);border-radius:6px;padding:5px 8px;font:500 12.5px var(--body);cursor:pointer;text-align:left}
+.dc-addbtn:hover{color:var(--fg);border-color:var(--muted)}
 .dc-add{display:flex;gap:4px}.dc-add input{flex:1;min-width:0;font-family:var(--body);font-size:13px;padding:5px 7px}.dc-add .btn{padding:4px 9px;font-size:13px}
 .bud-sum{display:flex;flex-wrap:wrap;gap:10px}
 .bud-sum div{border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:150px}
@@ -584,7 +594,7 @@ window.claude={use:async n=>{
     </div>
     <div class="dc-rows" id="dcCols"></div>
     <div class="dc-legend"><span><span class="dcm tr">TR</span> Transfer</span><span><span class="dcsw fr"></span> Freshman</span><span><span class="dcsw wo"></span> Walk-on</span><span><span class="dcm cut">Potential cut</span></span><span class="sub" id="dcCount"></span></div>
-    <p class="note" id="dcNote">Drag players or use the arrows to set the order; drag into another column to move him. Players from the roster grid start in the <b>To place</b> boxes; drag each one to his spot. Tap a player to edit his tags. Everyone on staff sees the same chart. Grades come from his board entry this season.</p>
+    <p class="note" id="dcNote">Drag players (or use the arrows) to set the order and move them between spots. Tap a player to edit his tags. Everyone on staff sees the same chart; grades come from his board entry this season.</p>
   </section>
 
   <section id="budget" hidden>
@@ -2145,10 +2155,10 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
 $("tbPrint").addEventListener("click",printTagBoard);
 /* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
 /* each side is rows of spots; WRP / OLP hold receivers and linemen not placed at a spot yet (shown only when someone is in them) */
-const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK"],["LBA","LBB","NIC"],["SAFA","SAFB","CBA","CBB"]],st:[["ST"]]};
-const DC_POOLS=["WRP","OLP","DLP","LBP","DBP"];
+const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK"],["LBA","LBB","NIC"],["SAFA","SAFB","CBA","CBB"]],st:[["STP"],["K","P","LS"]]};
+const DC_POOLS=["WRP","OLP","DLP","LBP","DBP","STP"];
 const DC_SIDES=Object.fromEntries(Object.entries(DC_ROWS).map(([k,r])=>[k,r.flat()]));
-const DC_LABEL={ST:"Specialists",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"MIKE",LBB:"WILL",SAFA:"FSAF",SAFB:"BSAF",CBA:"FCB",CBB:"BCB"};
+const DC_LABEL={STP:"ST · to place",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"MIKE",LBB:"WILL",SAFA:"FSAF",SAFB:"BSAF",CBA:"FCB",CBB:"BCB"};
 /* names for the Position menu, where the two DT / LB / SAF / CB spots need telling apart */
 const DC_OPT=k=>({DTA:"DT (1st)",DTB:"DT (2nd)",LBA:"MIKE",LBB:"WILL",SAFA:"FSAF",SAFB:"BSAF",CBA:"FCB",CBB:"BCB"})[k]||DC_LABEL[k]||k;
 const DC_FAM=k=>({X:"WR",Z:"WR",SLOT:"WR",WRP:"WR",WR:"WR",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",OL:"OL",OT:"OL",IOL:"OL",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"})[k]||k;
@@ -2160,7 +2170,8 @@ const normName=n=>String(n||"").toLowerCase().replace(/[.'’]/g,"").replace(/\b
 const dcId=()=>"d"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 function dcAll(){return Object.values(DCG()).flat()}
 /* older charts split OL into OT/IOL; fold them into OL */
-function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]],["DLP",["DE","DT"]],["LBP",["LB"]],["DBP",["SAF","CB"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});return g}
+function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]],["DLP",["DE","DT"]],["LBP",["LB"]],["DBP",["SAF","CB"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});
+  if(g.ST){g.ST.forEach(x=>{const k=["K","P","LS"].includes(x.role)?x.role:"STP";(g[k]=g[k]||[]).push(x)});delete g.ST}return g}
 function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups)};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
 async function dcSave(z){z=z||DC_SZN;DC_DIRTY=Date.now();if(!DB)return;
   try{await DB.doc(DC_DOC[z]).set({groups:DCS[z].groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
@@ -2181,20 +2192,31 @@ function dcGrade(x){if(!DC_GRADES||!x)return null;if(x.link==="none")return null
   const hit=DC_OURS.filter(c=>{const nn=normName(c.name),b=nn.split(" ");if(b.length<2||onChart.has(nn))return false;
     const bf=b[0];return (bf===first&&b.slice(1).includes(last))||(b[b.length-1]===last&&((bf[0]===first[0]&&bf.length<=3)||(first.length>=4&&bf.length>=4&&(bf.includes(first)||first.includes(bf)))))});
   return hit.length===1?hit[0]:null}
-function dcMarks(x){return [x.role?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.cut?'<span class="dcm cut">Potential cut</span>':""].join("")}
-function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;
-  return `<div class="tag dc${x.cut?" dc-cut":g?" tb-"+g.tier:""}${x.t==="fr"?" dc-fr":""}${x.wo?" dc-wo":""}" data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="rk">${i+1}</span><span class="nm">${esc(shown)}</span>
-    ${g?`<span class="g gtc-${g.tier}">${fmt(g.grade)} ${g.letter}${DC_FAM(g.k)!==DC_FAM(k)&&k!=="ST"?` <span class="sub" style="font-weight:400">${g.k}</span>`:""}</span>`:`<span class="g none">${esc(x.yr||"")}</span>`}
+function dcMarks(x,k){return [x.role&&x.role!==k?`<span class="dcm">${esc(x.role)}</span>`:"",x.t==="tr"?'<span class="dcm tr">TR</span>':"",x.cut?'<span class="dcm cut">Potential cut</span>':""].join("")}
+const DC_ROWLBL={off:["","Skill","Offensive line"],def:["","Front","Linebackers","Secondary"],st:["","Specialists"]};
+let DC_ADDOPEN=null;
+function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;const pool=DC_POOLS.includes(k);
+  const cls=`tag dc${pool?" dcchip":""}${x.cut?" dc-cut":g?" tb-"+g.tier:""}${x.t==="fr"?" dc-fr":""}${x.wo?" dc-wo":""}`;
+  const grade=g?`<b class="gtc-${g.tier}">${fmt(g.grade)} ${g.letter}</b>${DC_FAM(g.k)!==DC_FAM(k)&&!["K","P","LS","STP"].includes(k)?` <span class="bp">${g.k}</span>`:""}`:"";
+  const meta=[grade,x.yr?`<span class="yr">${esc(x.yr)}</span>`:""].filter(Boolean).join(' <span class="dot">·</span> ');
+  const marks=dcMarks(x,k);
+  if(pool)return `<div class="${cls}" data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="nm">${esc(shown)}</span><span class="meta">${meta}${marks?" "+marks:""}</span></div>`;
+  return `<div class="${cls}" data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="rk">${i+1}</span><span class="nm">${esc(shown)}</span>
+    <span class="meta">${meta}</span>
     <span class="mv"><button type="button" data-dmv="-1" aria-label="Move ${esc(x.n)} up">▲</button><button type="button" data-dmv="1" aria-label="Move ${esc(x.n)} down">▼</button></span>
-    <span class="ln2">${g&&x.yr?esc(x.yr)+" ":""}${dcMarks(x)}</span></div>`}
+    ${marks?`<span class="ln2">${marks}</span>`:""}</div>`}
+function dcCol(k,G){const list=G[k]||[];const nb=list.filter(x=>x.cut).length;const pool=DC_POOLS.includes(k);const open=DC_ADDOPEN===k;
+  return `<div class="tb-col${pool?" dc-pool":""}"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length}${nb?` <span class="dcc" title="${nb} potential cut${nb===1?"":"s"}">${nb} cut</span>`:""}</span></h3>
+    <div class="tb-list" data-dck="${k}">${list.map((x,i)=>dcTag(k,x,i)).join("")||`<div class="tb-empty">${pool?"Everyone's placed":"Open"}</div>`}</div>
+    ${open?`<form class="dc-add" data-dca="${k}"><input type="text" placeholder="Player name" aria-label="Add a player to ${DC_LABEL[k]||k}" maxlength="60"><button class="btn" type="submit">Add</button></form>`:`<button type="button" class="dc-addbtn" data-dcopen="${k}">+ Add player</button>`}</div>`}
 function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[];
   const G=DCG();
-  $("dcCols").innerHTML=DC_ROWS[DC_SIDE].map(row=>{const keys=row.filter(k=>!DC_POOLS.includes(k)||(G[k]||[]).length);
-    const pool=keys.length&&keys.every(k=>DC_POOLS.includes(k));if(!keys.length)return "";
-    return `<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${pool?`repeat(${keys.length},minmax(0,1fr))`:`repeat(${keys.length},minmax(${keys.length===1?"200px":"150px"},${keys.length===1?"340px":"1fr"}))`}">${keys.map(k=>{const list=G[k]||[];const nb=list.filter(x=>x.cut).length;
-    return `<div class="tb-col${DC_POOLS.includes(k)?" dc-pool":""}"><h3>${DC_LABEL[k]||k}<span class="sub">${list.length}${nb?` · ${nb} potential cut${nb===1?"":"s"}`:""}</span></h3>
-      <div class="tb-list" data-dck="${k}">${list.map((x,i)=>dcTag(k,x,i)).join("")||`<div class="tb-empty">No players yet</div>`}</div>
-      <form class="dc-add" data-dca="${k}"><input type="text" placeholder="Add a player" aria-label="Add a player to ${DC_LABEL[k]||k}" maxlength="60"><button class="btn" type="submit">Add</button></form></div>`}).join("")}</div>`}).join("");
+  $("dcCols").innerHTML=DC_ROWS[DC_SIDE].map((row,ri)=>{const keys=row.filter(k=>!DC_POOLS.includes(k)||(G[k]||[]).length);if(!keys.length)return "";
+    const pool=keys.every(k=>DC_POOLS.includes(k));const lbl=DC_ROWLBL[DC_SIDE][ri];
+    const cols=pool?`repeat(${keys.length},minmax(0,1fr))`:keys.length===1?"minmax(220px,340px)":"repeat(6,minmax(150px,1fr))";
+    const n=pool?keys.length:keys.length===1?1:6;
+    return `${pool?'<div class="dc-rowlbl">To place <span class="sub">drag each player to his spot</span></div>':lbl?`<div class="dc-rowlbl">${lbl}</div>`:""}<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${cols};--n:${n}">${keys.map(k=>dcCol(k,G)).join("")}</div>`}).join("");
+  if(DC_ADDOPEN){const inp=document.querySelector(`#dcCols [data-dca="${DC_ADDOPEN}"] input`);if(inp)inp.focus()}
   const all=Object.values(G).flat();$("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
     DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,draggable:".tag",
@@ -2219,7 +2241,8 @@ $("dcDlg").addEventListener("submit",e=>{e.preventDefault();const f=DC_EDIT;if(!
 $("dcdCancel").addEventListener("click",()=>$("dcDlg").close());
 $("dcdRemove").addEventListener("click",()=>{const f=DC_EDIT;if(!f||!confirm(`Take ${f.x.n} off the depth chart?`))return;DCG()[f.k].splice(f.i,1);$("dcDlg").close();drawDepth();dcSave()});
 $("dcdCard").addEventListener("click",()=>{const b=$("dcdCard");$("dcDlg").close();if(b.dataset.id)openPlayer(b.dataset.k,b.dataset.id)});
-$("dcCols").addEventListener("click",e=>{const tag=e.target.closest(".tag");if(!tag)return;const G=DCG(),k=tag.dataset.dk,list=G[k]||[],i=list.findIndex(x=>x.id===tag.dataset.did);if(i<0)return;
+$("dcCols").addEventListener("click",e=>{const ob=e.target.closest("[data-dcopen]");if(ob){DC_ADDOPEN=ob.dataset.dcopen;drawDepth();return}
+  const tag=e.target.closest(".tag");if(!tag)return;const G=DCG(),k=tag.dataset.dk,list=G[k]||[],i=list.findIndex(x=>x.id===tag.dataset.did);if(i<0)return;
   const mv=e.target.closest("[data-dmv]");
   if(mv){const j=i+(+mv.dataset.dmv);if(j<0||j>=list.length)return;[list[i],list[j]]=[list[j],list[i]];drawDepth();dcSave();return}
   if(Date.now()-DC_DRAG_AT<400)return;dcOpenEdit(list[i].id)});
@@ -2228,7 +2251,9 @@ $("dcCols").addEventListener("submit",e=>{const f=e.target.closest("[data-dca]")
   const dup=Object.entries(DCG()).find(([,l])=>l.some(x=>normName(x.n)===normName(n)));
   if(dup&&!confirm(`${n} is already on the chart at ${DC_LABEL[dup[0]]||dup[0]}. Add him here too?`))return;
   const k=f.dataset.dca,G=DCG();(G[k]=G[k]||[]).push({id:dcId(),n,t:"ret"});drawDepth();dcSave();
-  const again=document.querySelector(`#dcCols [data-dca="${k}"] input`);if(again)again.focus()});
+});
+$("dcCols").addEventListener("keydown",e=>{if(e.key==="Escape"&&e.target.closest("[data-dca]")){DC_ADDOPEN=null;drawDepth()}});
+$("dcCols").addEventListener("focusout",e=>{const f=e.target.closest("[data-dca]");if(!f)return;setTimeout(()=>{if(DC_ADDOPEN===f.dataset.dca&&!f.contains(document.activeElement)&&!f.querySelector("input").value.trim()){DC_ADDOPEN=null;drawDepth()}},150)});
 document.querySelectorAll("[data-dcside]").forEach(b=>b.addEventListener("click",()=>{DC_SIDE=b.dataset.dcside;document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 document.querySelectorAll("[data-dcszn]").forEach(b=>b.addEventListener("click",()=>{DC_SZN=b.dataset.dcszn;document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 function hideViews(except){["overview","bigboard","tagboard","recruit","depth","budget"].forEach(id=>{if(id!==except)$(id).hidden=true})}
@@ -2257,10 +2282,10 @@ function parseGridSheet(XL,ws){const ref=XL.utils.decode_range(ws["!ref"]);const
       for(let r=h+1;r<=last;r++){const raw=tx(r,c);if(!raw||raw.indexOf(",")<0)continue;
         let name=raw,role="";const pm=raw.match(/\(([^)]+)\)\s*$/);if(pm){role=pm[1].trim().toUpperCase();name=raw.slice(0,pm.index).trim()}
         const i=name.indexOf(",");name=(name.slice(i+1).trim()+" "+name.slice(0,i).trim()).replace(/\s+/g," ");
-        const k=walk?(GRID_POS[role]||null):gk;if(!k)continue;
+        let k=walk?(GRID_POS[role]||null):gk;if(!k)continue;
         const fill=gridFill(at(r,c)),yr=tx(r,c+1);
         const x={id:dcId(),n:name,yr,t:fill==="tr"?"tr":fill==="fr"?"fr":(/^FR$/i.test(yr)?"fr":"ret")};
-        if(fill==="cut")x.cut=true;if(walk)x.wo=true;if(k==="ST"&&role)x.role=role;else if(walk&&role&&!["QB","RB","WR","TE","OL","DE","DT","LB","SAF","CB","NIC","DB"].includes(role))x.role=role;
+        if(fill==="cut")x.cut=true;if(walk)x.wo=true;if(k==="ST"){if(role)x.role=role;k=["K","P","LS"].includes(role)?role:"STP"}else if(walk&&role&&!["QB","RB","WR","TE","OL","DE","DT","LB","SAF","CB","NIC","DB"].includes(role))x.role=role;
         (out[k]=out[k]||[]).push(x)}}});
   return out}
 async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The spreadsheet tool didn't load. Refresh the page and try again.");return}
@@ -2271,6 +2296,9 @@ async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The 
   const cnt=g=>g?Object.values(g).flat().length:0;
   if(!cnt(gN)&&!cnt(gF)){flash("Couldn't find any players on the 105 or Fall tabs.");return}
   if((dcAllZ("now").length||dcAllZ("next").length)&&!confirm(`Replace both depth charts with this roster? This season: ${cnt(gN)} players (105 tab). Next season: ${cnt(gF)} players (Fall tab). Any order you've set will be lost.`))return;
+  [[gN,gF],[gF,gN]].forEach(([a,b])=>{if(!a||!b||!a.STP)return;const roles=new Map(["K","P","LS"].flatMap(r=>(b[r]||[]).map(x=>[normName(x.n),r])));
+    const moved={};a.STP=a.STP.filter(x=>{const r=roles.get(normName(x.n));if(!r)return true;x.role=r;(moved[r]=moved[r]||[]).push(x);return false});
+    Object.entries(moved).forEach(([r,l])=>{a[r]=[...l,...(a[r]||[])]});if(!a.STP.length)delete a.STP});
   if(gN){DCS.now={groups:gN};await dcSave("now")}if(gF){DCS.next={groups:gF};await dcSave("next")}
   if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
 function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
