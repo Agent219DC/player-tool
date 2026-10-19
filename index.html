@@ -277,6 +277,17 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcthin{display:inline-block;vertical-align:2px;margin-left:4px;font:700 9.5px var(--body);letter-spacing:.05em;padding:1px 6px;border-radius:8px;background:rgba(214,150,0,.18);color:#8a5a00;border:1px solid rgba(214,150,0,.6)}
 [data-theme=dark] .dcthin{color:#ffc65c}
 .tb-col.dc-thin{border-color:rgba(214,150,0,.6);box-shadow:inset 0 3px 0 rgba(214,150,0,.7)}
+.dc-roster{border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:10px 12px;display:grid;gap:8px}
+.rc-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.rc-big{font:700 26px var(--display)}.rc-big small{font-size:16px;color:var(--muted)}.rc-big.over,.rc-sub .over{color:#c62828}
+.rc-sub{font-size:13px;color:var(--muted)}.rc-sub b{color:var(--fg)}.rc-edit{margin-left:auto;font-size:12.5px}
+.rc-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
+@media (max-width:1000px){.rc-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}}
+.rc{border:1px solid var(--line);border-radius:6px;padding:5px 8px;display:grid;gap:1px;font-size:12px}
+.rc b{font:700 12px var(--display);letter-spacing:.06em}.rc-n{font:600 14px var(--mono);white-space:nowrap}
+.rc-d{font-size:11px;font-weight:600}.rc-d.open{color:#00873a}.rc-d.over{color:#c62828}.rc-d.even{color:var(--muted)}
+[data-theme=dark] .rc-d.open{color:#5fd38a}[data-theme=dark] .rc-d.over,[data-theme=dark] .rc-big.over{color:#ff8a80}
+.rc-in{width:34px;font:600 13px var(--mono);padding:1px 4px}.rc-in.big{width:64px;font-size:16px}
 .dc-rowlbl{font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
 .dc-rowlbl .sub{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
 .dc-addbtn{border:1px dashed var(--line);background:none;color:var(--muted);border-radius:6px;padding:5px 8px;font:500 12.5px var(--body);cursor:pointer;text-align:left}
@@ -597,6 +608,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
     </div>
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-cut),var(--dc-cut)),var(--surface)"></i></span><span>Potential cut</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(90deg,var(--dc-fr) 50%,var(--dc-cut) 50%),var(--surface)"></i></span><span>Two colors = both apply</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
+    <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <div class="dc-rows" id="dcCols"></div>
     
     <p class="note" id="dcNote">Drag players to set the order or move them between spots, or tap a player to edit his spot, depth and tags. Everyone on staff sees the same chart; grades come from his board entry this season.</p>
@@ -1756,7 +1768,7 @@ async function renderOverview(){
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
-  $("ovSpots").textContent=side==="off"?": QB, RB, SLOT, 2 WR, TE, 3 IOL, 2 OT":": 2 DT, 2 DE, 2 LB, 2 SAF, NIC, 2 CB";
+  $("ovSpots").textContent=side==="off"?": QB, RB, X, SLOT, Z, TE, LT, LG, OC, RG, RT":": FE, DT, DT, JACK, MIKE, WILL, NIC, FSAF, BSAF, FCB, BCB";
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
   $("ovTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">Loading every position…</p>';
@@ -1798,10 +1810,14 @@ async function renderOverview(){
         const commits=all.filter(x=>isTarget(x)&&x.p.status==="Committed");
         if(NEXT)mine=mine.concat(commits.map(x=>({p:x.p,r:x.r,commit:true})));
         /* depth chart starters (#1 at each matching spot) take the spot first; any spot left open falls back to the highest grade */
-        const dcG=(DCS[NEXT?"next":"now"]||{}).groups||{};const picks=[];
-        (OV_DC[k+"|"+(g.role||"")]||[]).forEach(sp=>{const x0=(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,all);if(e&&!picks.includes(e)&&(!NEXT||e.p.elig!==0))picks.push(Object.assign({},e,{dc:true}))});
-        const pickIds=new Set(picks.map(e=>e.p.id));
-        mine=picks.concat(mine.filter(x=>!pickIds.has(x.p.id)).sort((a,b)=>b.r.grade-a.r.grade)).slice(0,g.n).sort((a,b)=>b.r.grade-a.r.grade);
+        const dcG=(DCS[NEXT?"next":"now"]||{}).groups||{};const sps=OV_DC[k+"|"+(g.role||"")]||[];const used=new Set();
+        const slots=Array.from({length:g.n},(_,i)=>{const sp=sps[i];const x0=sp&&(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,all);
+          if(e&&!used.has(e.p.id)&&(!NEXT||e.p.elig!==0)){used.add(e.p.id);return Object.assign({},e,{dc:true})}return null});
+        const fill=mine.filter(x=>!used.has(x.p.id)).sort((a,b)=>b.r.grade-a.r.grade);
+        mine=slots.map(x=>x||fill.shift()||null);
+        /* each card is one depth chart spot (LT, RT, FE, JACK…); targets still go to the weakest of ours first */
+        const order=mine.map((x,i)=>i).sort((a,b)=>(mine[b]?mine[b].r.grade:-1)-(mine[a]?mine[a].r.grade:-1));const rankOf={};order.forEach((ix,r)=>rankOf[ix]=r);
+        g._sps=sps;g._rank=rankOf;
         const tg2=live.filter(x=>isTarget(x)&&!(NEXT&&x.p.status==="Committed")).sort((a,b)=>b.r.grade-a.r.grade);
         const committed=commits.length;
         /* when a spot ends up with no target, say why: red-flag (low confidence) targets or WRs with no role */
@@ -1811,9 +1827,9 @@ async function renderOverview(){
         for(let i=0;i<g.n;i++){
           const best=mine[i]||null;
           /* weakest spot is paired with the best target */
-          const top=tg2[g.n-1-i]||null;
+          const top=tg2[g.n-1-(g._rank?g._rank[i]:i)]||null;
           const need=!best?"High":best.r.grade<70?"High":best.r.grade<80?"Upgrade":"Set";
-          rows.push({k,role:g.role||"",lbl:g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":why});
+          rows.push({k,role:g.role||"",lbl:(g._sps&&g._sps[i]&&(DC_LABEL[g._sps[i]]||g._sps[i]).toUpperCase())||g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":why});
         }
       });
       return rows});
@@ -2185,9 +2201,9 @@ function dcAll(){return Object.values(DCG()).flat()}
 /* older charts split OL into OT/IOL; fold them into OL */
 function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]],["DLP",["DE","DT"]],["LBP",["LB"]],["DBP",["SAF","CB"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});
   if(g.ST){g.ST.forEach(x=>{const k=["K","P","LS"].includes(x.role)?x.role:"STP";(g[k]=g[k]||[]).push(x)});delete g.ST}return g}
-function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups)};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
+function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups),limits:d.limits||null};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
 async function dcSave(z){z=z||DC_SZN;DC_DIRTY=Date.now();if(!DB)return;
-  try{await DB.doc(DC_DOC[z]).set({groups:DCS[z].groups,updatedAt:new Date().toISOString()})}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
+  try{await DB.doc(DC_DOC[z]).set(Object.assign({groups:DCS[z].groups,updatedAt:new Date().toISOString()},DCS[z].limits?{limits:DCS[z].limits}:{}))}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
 /* this season's board grades for our players, by name (any position board) */
 async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map();
   all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
@@ -2212,6 +2228,30 @@ function dcFindIn(x,list){if(!x||x.link==="none")return null;
   if(x.link){const h=list.find(e=>e.p.id===x.link);if(h)return h}
   const n=normName(x.n);const ex=list.filter(e=>normName(e.p.name)===n);if(ex.length)return ex.find(e=>isOurs(e.p))||ex[0];
   const hit=list.filter(e=>isMarshallP(e.p)&&dcLike(x.n,e.p.name));return hit.length===1?hit[0]:null}
+/* roster count: every player once (by name); position group from his spot, or from the roster grid while he's still in a To place box */
+const DC_SPOTGRP={QB:"QB",RB:"RB",X:"WR",SLOT:"WR",Z:"WR",WRP:"WR",TE:"TE",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",K:"ST",P:"ST",LS:"ST",STP:"ST",
+  FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",LBP:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB",NIC:"NIC"};
+const DC_GRPS=["QB","RB","WR","TE","OL","ST","DE","DT","LB","SAF","CB","NIC"],DC_GRPLBL={ST:"Spec"};
+let DC_LIMEDIT=false;
+function dcCounts(z){const G=(DCS[z]||{}).groups||{},seen=new Set(),c={},wo={};let total=0,woN=0,unk=0;
+  Object.entries(G).forEach(([k,list])=>list.forEach(x=>{const key=normName(x.n);if(seen.has(key))return;seen.add(key);total++;
+    const g=DC_SPOTGRP[k]||x.g||"";if(x.wo){woN++;return}if(!g){unk++;return}c[g]=(c[g]||0)+1}));
+  return {c,total,woN,unk}}
+function drawRoster(){const el=$("dcRoster");if(!el)return;const z=DC_SZN,L=(DCS[z]||{}).limits||{},lim=+L.limit||105,T=L.targets||{};const {c,total,woN,unk}=dcCounts(z);
+  const left=lim-total,sch=Object.values(c).reduce((a,b)=>a+b,0),schT=DC_GRPS.reduce((a,g)=>a+(+T[g]||0),0);
+  const cell=(g)=>{const have=c[g]||0,t=T[g];const d=t==null?null:t-have;
+    return `<div class="rc"><b>${DC_GRPLBL[g]||g}</b><span class="rc-n">${have}${DC_LIMEDIT?` / <input class="rc-in" data-rcg="${g}" inputmode="numeric" value="${t??""}" aria-label="${g} max">`:t!=null?` / ${t}`:""}</span>${!DC_LIMEDIT&&d!=null?`<span class="rc-d ${d<0?"over":d>0?"open":"even"}">${d<0?`${-d} over`:d>0?`${d} open`:"full"}</span>`:""}</div>`};
+  el.innerHTML=`<div class="rc-top"><span class="rc-big ${left<0?"over":""}">${total} <small>/ ${DC_LIMEDIT?`<input class="rc-in big" id="rcLimit" inputmode="numeric" value="${lim}" aria-label="Roster limit">`:lim}</small></span>
+      <span class="rc-sub">${left<0?`<b class="over">${-left} over the limit</b>`:`<b>${left}</b> roster spot${left===1?"":"s"} open`} · ${sch} scholarship${schT?` of ${schT} planned`:""} · ${woN} walk-on${woN===1?"":"s"}${unk?` · ${unk} without a position`:""}</span>
+      ${OWNER?`<button type="button" class="linkbtn rc-edit" id="rcEdit">${DC_LIMEDIT?"Done":"Edit limits"}</button>`:""}</div>
+    <div class="rc-grid">${DC_GRPS.map(cell).join("")}</div>`}
+$("dcRosterWrap").addEventListener("click",e=>{if(e.target.id!=="rcEdit")return;
+  if(DC_LIMEDIT){const z=DC_SZN;const L=DCS[z].limits=DCS[z].limits||{limit:105,targets:{}};L.targets=L.targets||{};
+    const v=$("rcLimit");if(v&&+v.value>0)L.limit=Math.round(+v.value);
+    document.querySelectorAll("[data-rcg]").forEach(i=>{const n=i.value.trim();if(n==="")delete L.targets[i.dataset.rcg];else if(+n>=0)L.targets[i.dataset.rcg]=Math.round(+n)});
+    dcSave(z)}
+  DC_LIMEDIT=!DC_LIMEDIT;drawRoster()});
+$("dcRosterWrap").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("rc-in"))$("rcEdit").click()});
 function dcMarks(x,k){return x.role&&x.role!==k?`<span class="dcm">${esc(x.role)}</span>`:""}
 /* tag color: yellow freshman, blue transfer, purple walk-on, red potential cut; more than one splits the tag */
 function dcCols(x){return [x.t==="fr"?"fr":"",x.t==="tr"?"tr":"",x.wo?"wo":"",x.cut?"cut":""].filter(Boolean)}
@@ -2244,6 +2284,7 @@ function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[]
     const n=pool?keys.length:keys.length===1?1:6;
     return `${pool?'<div class="dc-rowlbl">To place <span class="sub">drag each player to his spot</span></div>':lbl?`<div class="dc-rowlbl">${lbl}</div>`:""}<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${cols};--n:${n}">${keys.map(k=>dcCol(k,G)).join("")}</div>`}).join("");
   if(DC_ADDOPEN){const inp=document.querySelector(`#dcCols [data-dca="${DC_ADDOPEN}"] input`);if(inp)inp.focus()}
+  drawRoster();
   const all=Object.values(G).flat();const thinN=Object.values(DC_SIDES).flat().filter(k=>dcThin(k,G[k]||[])).length;
   $("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}${thinN?` · ${thinN} thin spot${thinN===1?"":"s"}`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
@@ -2296,6 +2337,7 @@ async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=si
 $("dcBtn").addEventListener("click",openDepth);
 $("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
 /* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = potential cut */
+const GRID_GRP={QB:"QB",RB:"RB",OL:"OL",OT:"OL",IOL:"OL",OG:"OL",C:"OL",WR:"WR",TE:"TE",SPEC:"ST",K:"ST",P:"ST",LS:"ST",DE:"DE",DT:"DT",DL:"DT",LB:"LB",SAF:"SAF",S:"SAF",DB:"SAF",CB:"CB",NIC:"NIC"};
 const GRID_POS={QB:"QB",RB:"RB",OL:"OLP",WR:"WRP",TE:"TE",SPEC:"ST",DE:"DLP",DT:"DLP",LB:"LBP",SAF:"DBP",CB:"DBP",NIC:"NIC",DB:"DBP",K:"ST",P:"ST",LS:"ST",OT:"OLP",IOL:"OLP",OG:"OLP",C:"OLP",S:"DBP",DL:"DLP"};
 function gridFill(c){const s=c&&c.s;if(!s||s.patternType==="none"||!s.fgColor)return "";const f=s.fgColor;const rgb=String(f.rgb||"").toUpperCase().slice(-6);
   if(f.theme===9||/^46BDC6$/.test(rgb)||/^(0070C0|00B0F0|4472C4|5B9BD5|9DC3E6|BDD7EE|DDEBF7|9BC2E6|6FA8DC|A4C2F4|CFE2F3|3C78D8)$/.test(rgb))return "tr";
@@ -2306,19 +2348,21 @@ function parseGridSheet(XL,ws){const ref=XL.utils.decode_range(ws["!ref"]);const
   let hdrs=[],end=ref.e.r;
   for(let r=0;r<=ref.e.r;r++){let years=0;for(let c=0;c<=ref.e.c;c++)if(/^year$/i.test(tx(r,c)))years++;if(years>=3)hdrs.push(r);
     if(r>(hdrs[1]||1e9)&&end===ref.e.r){for(let c=0;c<=ref.e.c;c++)if(/grad|attrition/i.test(tx(r,c))){end=r;break}}}
-  if(hdrs.length<2)return null;const out={};
+  if(hdrs.length<2)return null;const out={},targets={};
   hdrs.forEach((h,hi)=>{const last=hi===0?hdrs[1]-1:end-1;
     for(let c=0;c<=ref.e.c;c++){const head=tx(h,c);if(!/^year$/i.test(tx(h,c+1))&&!/walk/i.test(head))continue;const m=head.toUpperCase().replace(/'S\b/,"").match(/^([A-Z]+)/);const walk=/walk/i.test(head);
-      const gk=walk?null:GRID_POS[m&&m[1]];
+      const gk=walk?null:GRID_POS[m&&m[1]];const grp=walk?null:GRID_GRP[m&&m[1]];
+      if(grp){const nm=head.replace(/\([^)]*\)/g,"").match(/(\d+)/);if(nm)targets[grp]=+nm[1]}
       for(let r=h+1;r<=last;r++){const raw=tx(r,c);if(!raw||raw.indexOf(",")<0)continue;
         let name=raw,role="";const pm=raw.match(/\(([^)]+)\)\s*$/);if(pm){role=pm[1].trim().toUpperCase();name=raw.slice(0,pm.index).trim()}
         const i=name.indexOf(",");name=(name.slice(i+1).trim()+" "+name.slice(0,i).trim()).replace(/\s+/g," ");
         let k=walk?(GRID_POS[role]||null):gk;if(!k)continue;
         const fill=gridFill(at(r,c)),yr=tx(r,c+1);
         const x={id:dcId(),n:name,yr,t:fill==="tr"?"tr":fill==="fr"?"fr":(/^FR$/i.test(yr)?"fr":"ret")};
+        x.g=grp||GRID_GRP[role]||"";if(!x.g)delete x.g;
         if(fill==="cut")x.cut=true;if(walk)x.wo=true;if(k==="ST"){if(role)x.role=role;k=["K","P","LS"].includes(role)?role:"STP"}else if(walk&&role&&!["QB","RB","WR","TE","OL","DE","DT","LB","SAF","CB","NIC","DB"].includes(role))x.role=role;
         (out[k]=out[k]||[]).push(x)}}});
-  return out}
+  Object.defineProperty(out,"_targets",{value:targets,enumerable:false});return out}
 async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The spreadsheet tool didn't load. Refresh the page and try again.");return}
   let wb;try{wb=XL.read(await f.arrayBuffer(),{type:"array",cellStyles:true})}catch(e){flash("Couldn't read that workbook.");return}
   const now=wb.Sheets["105"],next=wb.Sheets["Fall"]||wb.Sheets[wb.SheetNames.find(n=>/^fall/i.test(n.trim()))];
@@ -2330,7 +2374,8 @@ async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The 
   [[gN,gF],[gF,gN]].forEach(([a,b])=>{if(!a||!b||!a.STP)return;const roles=new Map(["K","P","LS"].flatMap(r=>(b[r]||[]).map(x=>[normName(x.n),r])));
     const moved={};a.STP=a.STP.filter(x=>{const r=roles.get(normName(x.n));if(!r)return true;x.role=r;(moved[r]=moved[r]||[]).push(x);return false});
     Object.entries(moved).forEach(([r,l])=>{a[r]=[...l,...(a[r]||[])]});if(!a.STP.length)delete a.STP});
-  if(gN){DCS.now={groups:gN};await dcSave("now")}if(gF){DCS.next={groups:gF};await dcSave("next")}
+  const lim=g=>({limit:((DCS.now.limits||{}).limit)||105,targets:Object.assign({},g._targets||{})});
+  if(gN){DCS.now={groups:gN,limits:lim(gN)};await dcSave("now")}if(gF){DCS.next={groups:gF,limits:Object.assign(lim(gF),{limit:((DCS.next.limits||{}).limit)||105})};await dcSave("next")}
   if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
 function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
 $("gridUp").addEventListener("click",()=>$("gridFile").click());
@@ -2662,7 +2707,7 @@ $("nsPreview").addEventListener("click",async()=>{
     const next=CUR_SEASON+1;
     try{await DB.doc("config/rollover").set({id,at:new Date().toISOString(),from:CUR_SEASON,to:next,count:ok})}catch(e){}
     /* depth chart: next season's chart becomes this season's; the old one is kept so Undo can put it back */
-    if(dcAllZ("next").length){try{await DB.doc("shared/depth_prev").set({id,groups:DCS.now.groups||{}});DCS.now={groups:JSON.parse(JSON.stringify(DCS.next.groups))};await dcSave("now")}catch(e){}}
+    if(dcAllZ("next").length){try{await DB.doc("shared/depth_prev").set(Object.assign({id,groups:DCS.now.groups||{}},DCS.now.limits?{limits:DCS.now.limits}:{}));DCS.now={groups:JSON.parse(JSON.stringify(DCS.next.groups)),limits:DCS.next.limits?JSON.parse(JSON.stringify(DCS.next.limits)):DCS.now.limits};await dcSave("now")}catch(e){}}
     try{await DB.doc("shared/season").update({currentSeason:next})}catch(e){try{await DB.doc("shared/season").set({teamGames:TG||1,currentSeason:next})}catch(_){}}
     box.innerHTML=`<b>${next} season started.</b> ${ok} player${ok===1?"":"s"} updated${bad?`, ${bad} couldn't be changed`:""}. Use <b>Undo</b> above if you need to reverse it.`;GCACHE=null;
   };
@@ -2677,7 +2722,7 @@ $("nsUndo").addEventListener("click",async()=>{
     for(const d of qs.docs){const p=d.data();if(p.roll&&p.roll.id===ROLL.id){const pv=p.roll.prev||{};
       try{await DB.collection(k.toLowerCase()+"_players").doc(d.id).update({status:pv.status??"",elig:pv.elig,ref:!!pv.ref,marshall:!!pv.marshall,graduated:false,roll:null});n++}catch(e){}}}
   }
-  try{const pv=await DB.doc("shared/depth_prev").get();if(pv.exists&&pv.data().id===ROLL.id){DCS.now={groups:dcFix(pv.data().groups)};await dcSave("now")}}catch(e){}
+  try{const pv=await DB.doc("shared/depth_prev").get();if(pv.exists&&pv.data().id===ROLL.id){DCS.now={groups:dcFix(pv.data().groups),limits:pv.data().limits||DCS.now.limits};await dcSave("now")}}catch(e){}
   try{await DB.doc("config/rollover").set(Object.assign({},ROLL,{undone:true}))}catch(e){}
   try{await DB.doc("shared/season").update({currentSeason:ROLL.from})}catch(e){}
   b.disabled=false;delete b.dataset.armed;flash(`Undone: ${n} player${n===1?"":"s"} put back to the ${ROLL.from} season.`);GCACHE=null;
