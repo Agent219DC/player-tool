@@ -502,6 +502,7 @@ window.claude={use:async n=>{
         <label id="roleWrap" hidden>Role<select id="p-role"><option value="Slot">SLOT</option><option value="Outside">WR</option></select></label>
         <label>Season<select id="p-season"></select></label>
         <label>Numbers through<select id="p-thru"><option value="mid">Games so far</option><option value="full">Full season</option></select></label>
+        <label id="gmsWrap">His team's games<input id="p-gms" type="number" min="1" max="16" step="1" title="Games his team has played. Starts at ours; change it if his team has played more or fewer."></label>
       </div>
       <fieldset class="fold"><legend>Bio</legend><div class="grid2">
         <label>Height<input id="p-ht" type="text" placeholder="6-2" inputmode="numeric"></label>
@@ -909,11 +910,13 @@ function score(p){
   /* transfers: last season counts at the level he played it, weighted the same way the stats are blended */
   if(p.prior&&p.prior.level&&p.prior.level!==p.level&&b.eff>(p.db||0)){fPrior=S.levels[p.prior.level]??1;const wc=p.db||0,wp=b.eff-wc;factor=(fCur*wc+fPrior*wp)/(wc+wp)}
   const leveled=r.raw*factor;
-  const games=S.mode==="mid"?tg():S.seasonGames;
+  const games=S.mode==="mid"?(p.thru==="full"?S.seasonGames:(Number(p.thru)||tg())):S.seasonGames;
   const expected=S.dbPerGame*games; const part=Math.min(1,p.db/expected);
   const C=cuts(); const target=(C.rotation+C.starter)/2;
   const final=part>=1?leveled:target+(leveled-target)*part;
-  const [hi,mid]=P.conf;
+  /* confidence follows the games played: High = a full-time load for his games, Medium = half of that
+     (never below the position's old Medium mark for High, or half of it for Medium, so one-game samples stay Low) */
+  const hi=Math.max(expected,P.conf[1]),mid=Math.max(expected*0.5,P.conf[1]*0.5);
   let conf=b.eff>=hi?"High":b.eff>=mid?"Medium":"Low", disagree=null;
   const minDb=S.agreeMinDb??75, gap=S.agreeGap??20;
   if(p.prior&&p.prior.db>=minDb&&p.db>=minDb&&p.prior.m){
@@ -961,7 +964,7 @@ function buildPositionUI(){
 $("posBar").addEventListener("click",e=>{const b=e.target.closest("[data-pos]");if(!b||b.disabled)return;switchPos(b.dataset.pos)});
 
 function readForm(){
-  const p={name:$("p-name").value.trim(),school:$("p-school").value.trim(),level:$("p-level").value,season:$("p-season").value,thru:$("p-thru").value==="full"?"full":(tg()||null),db:num($("p-db").value),
+  const p={name:$("p-name").value.trim(),school:$("p-school").value.trim(),level:$("p-level").value,season:$("p-season").value,thru:$("p-thru").value==="full"?"full":(num($("p-gms").value)||tg()||null),db:num($("p-db").value),
     m:METRICS.map((_,i)=>num($("c-"+i).value))};
   const ht=$("p-ht").value.trim(),wt=num($("p-wt").value),hs=$("p-hs").value.trim(),home=$("p-home").value.trim(),st=$("p-st").value;
   if(ht)p.ht=ht; if(wt)p.wt=wt; if(hs)p.hs=hs; if(home)p.home=home; if(st)p.st=st;
@@ -976,7 +979,7 @@ function readForm(){
 let LOADED_KEY=null,LEGACY_PORTAL=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null,teamId:p.teamId||null};espnReset();
-  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-agency").value=p.agency||"";$("p-agent").value=p.agent||"";$("p-pcontact").value=p.pcontact||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-db").value=p.db??"";
+  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-agency").value=p.agency||"";$("p-agent").value=p.agent||"";$("p-pcontact").value=p.pcontact||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-gms").value=typeof p.thru==="number"?p.thru:(Number(p.thru)||tg()||"");$("gmsWrap").hidden=p.thru==="full";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
   $("pr-db").value=hp?p.prior.db??"":"";$("pr-level").value=hp&&p.prior.level?p.prior.level:""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
@@ -1958,6 +1961,7 @@ async function printReport(){
 }
 $("reportBtn").addEventListener("click",printReport);
 $("form").addEventListener("input",()=>setTimeout(updateReportBtn,0));
+$("p-thru").addEventListener("change",()=>{$("gmsWrap").hidden=$("p-thru").value==="full";if($("p-thru").value!=="full"&&!$("p-gms").value)$("p-gms").value=tg()||""});
 
 /* ---------- owner tools: trash ---------- */
 function renderTrash(){
