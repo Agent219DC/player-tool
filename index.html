@@ -455,7 +455,7 @@ window.claude={use:async n=>{
       </div>
     </div>
     <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="tbBtn">Tag Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
+      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button></div></div>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
   <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -483,7 +483,7 @@ window.claude={use:async n=>{
 
   <section id="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2>Big board</h2>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">Tag board</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button> <button class="btn" type="button" id="bbClose">Close</button></span>
     </div>
     <div class="bbctl">
@@ -493,16 +493,16 @@ window.claude={use:async n=>{
       <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
     </div>
     <div class="tablewrap"><table id="bbTbl"></table></div>
-    <p class="note">This season's targets at every position (Medium or High confidence; no NIP, Pass, hidden or our own players). <b>Priority</b> lists positions marked Upgrade first, then Solid, then Great, best grade first within each. <b>vs. ours</b> = his grade minus our weakest starter at that spot. Tap a player to open his card.</p>
+    <p class="note">This season's targets, Medium or High confidence. <b>Priority</b> puts Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter there. Tap a player for his card.</p>
   </section>
 
   <section id="tagboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2>Tag board</h2>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">Tag board</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button> <button class="btn" type="button" id="tbClose">Close</button></span>
     </div>
     <div class="tb-cols" id="tbCols"></div>
-    <p class="note">Drag tags (or use the arrows) to rank targets at each position; everyone on staff sees the same order. Only this season's targets with Medium or High confidence (no On Roster, NIP, Pass or hidden). New targets start at the bottom of their column in grade order. Tap a tag to open his card.</p>
+    <p class="note">Drag tags or use the arrows to rank each position; staff all see the same order. New targets start at the bottom in grade order. Tap a tag for his card.</p>
   </section>
 
   <section id="recruit" hidden>
@@ -531,7 +531,7 @@ window.claude={use:async n=>{
   </section>
 
   <details class="editor" id="editor">
-  <summary class="editor-sum"><span class="btn primary" id="editorBtn">+ Add player</span><span class="note" id="editorNote">Enter a player's numbers to grade him, or click a name on the board to edit him.</span></summary>
+  <summary class="editor-sum"><span class="btn primary" id="editorBtn">+ Add player</span><span class="note" id="editorNote">Add a new player here, or click a name on the board to open his card.</span></summary>
   <div class="main">
     <form class="panel" id="form" autocomplete="off">
       <h2>Player</h2>
@@ -663,16 +663,17 @@ window.claude={use:async n=>{
         <label>FCS factor<input id="s-FCS" type="number" step="0.01"></label>
       </div>
       <fieldset><legend>Our starter (reference row)</legend>
+        <p class="note" style="margin:0 0 6px">The name picks our reference starter. When he's on the board, his board entry is used; these numbers are only a fallback.</p>
         <div class="grid2">
           <label>Name<input id="l-name" type="text"></label>
           <label>Level<select id="l-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
           <label>Season<input id="l-season" type="number" step="1"></label>
           <label>Numbers through (games, blank = full)<input id="l-thru" type="number" step="1"></label>
           <label>This season <span class="sw">dropbacks</span><input id="l-db" type="number"></label>
-          <label>Last season <span class="sw">dropbacks</span><input id="l-pdb" type="number"></label>
+          <label hidden>Last season <span class="sw">dropbacks</span><input id="l-pdb" type="number"></label>
         </div>
         <div class="grid2" id="lineCur"></div>
-        <div class="grid2" id="linePrior"></div>
+        <div class="grid2" id="linePrior" hidden></div>
       </fieldset>
       <div class="btns"><button class="btn" type="button" id="reset">Reset to defaults</button></div>
     </div>
@@ -1734,7 +1735,7 @@ function renderOvField(side,rows){
 }
 $("ovField").addEventListener("click",e=>ovTblClick(e));
 document.querySelectorAll("[data-ovm]").forEach(b=>b.addEventListener("click",()=>{OV_MODE=b.dataset.ovm;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOverview()}));
-$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
+$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("recruit").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
 $("ovClose").addEventListener("click",()=>{$("overview").hidden=true});
 function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;
   {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
@@ -1995,7 +1996,8 @@ $("tbCols").addEventListener("click",e=>{const mv=e.target.closest("[data-mv]");
   if(mv){e.stopPropagation();const ids=TB[k].map(x=>x.p.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTagOrder(k,ids);return}
   if(Date.now()-TB_DRAG_AT<400)return;openPlayer(k,tag.dataset.tid)});
 document.querySelectorAll("[data-tbside]").forEach(b=>b.addEventListener("click",()=>{TB_SIDE=b.dataset.tbside;document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawTagBoard()}));
-$("tbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;$("bigboard").hidden=true;TB_SIDE=sideOf(POSKEY)==="def"?"def":"off";document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.tbside===TB_SIDE));renderTagBoard();$("tagboard").scrollIntoView({behavior:"smooth",block:"start"})});
+function openTagBoard(){$("overview").hidden=true;$("recruit").hidden=true;$("bigboard").hidden=true;TB_SIDE=sideOf(POSKEY)==="def"?"def":"off";document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.tbside===TB_SIDE));renderTagBoard();$("tagboard").scrollIntoView({behavior:"smooth",block:"start"})}
+document.querySelectorAll("[data-bbview]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.bbview==="tags"){if($("tagboard").hidden)openTagBoard()}else if($("bigboard").hidden){$("tagboard").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})}}));
 $("tbClose").addEventListener("click",()=>{$("tagboard").hidden=true});
 async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
