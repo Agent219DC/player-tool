@@ -49,7 +49,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
-.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px;display:grid;gap:24px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:24px 48px;display:grid;grid-template-columns:minmax(0,1fr);gap:24px}
 .brand{display:flex;align-items:center;gap:14px}
 header{position:relative;display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px;border-bottom:3px solid var(--accent);padding-bottom:12px}
 h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
@@ -60,6 +60,19 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 @media (max-width:480px){.themeBtn{padding:4px 10px;font-size:12px}}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pos{display:flex;flex-wrap:wrap;gap:6px}
+.pg-off{display:none!important}
+header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px}
+.tabrow{display:flex;gap:4px;overflow-x:auto;min-width:0;flex:0 1 auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;max-width:100%}
+.tabrow::-webkit-scrollbar{display:none}
+.tab{border:1px solid transparent;background:none;color:var(--muted);padding:8px 12px;border-radius:6px;font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--fg);background:var(--sunk)}
+.tab[aria-current=page]{background:var(--accent-fill,#00873a);color:#fff}
+.tab.has-dot::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cMed);margin-left:6px;vertical-align:2px}
+.tab[aria-current=page].has-dot::after{background:#fff}
+.posrow{display:flex;padding-top:2px}
+.setpos{display:flex;align-items:center;gap:8px;font-weight:600}.setpos select{width:auto;font-family:var(--body)}
+.ot-g{margin:6px 0 6px;padding-top:10px;border-top:1px solid var(--line);font:600 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+@media (max-width:640px){.tabrow{-webkit-mask-image:linear-gradient(90deg,#000 88%,transparent);mask-image:linear-gradient(90deg,#000 88%,transparent);padding-right:24px}header>.tabs .gsearch{flex:1 1 100%}header>.tabs .gsearch input{width:100%;max-width:none}}
 .pos button{font:600 14px var(--display);letter-spacing:.06em;padding:6px 12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px}
 .pos button[aria-pressed="true"]{background:var(--accent-fill);color:var(--accent-ink);border-color:var(--accent-fill)}
 .pos button:disabled{opacity:.45}
@@ -542,11 +555,12 @@ window.claude={use:async n=>{
         <h1>Player <span>Tool</span></h1>
       </div>
     </div>
-    <div class="navrow"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-      <div class="hnav"><span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span><button class="btn" type="button" id="ovBtn">Overview</button><button class="btn" type="button" id="bbBtn">Big Board</button><button class="btn" type="button" id="recBtn">Recruiting</button><button class="btn" type="button" id="dcBtn">Depth Chart</button><button class="btn" type="button" id="budBtn" hidden>Budget</button></div></div>
+    <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs">
+      <button type="button" class="tab" data-tab="boards" id="bdBtn">Boards</button><button type="button" class="tab" data-tab="overview" id="ovBtn">Overview</button><button type="button" class="tab" data-tab="bigboard" id="bbBtn">Big Board</button><button type="button" class="tab" data-tab="recruit" id="recBtn">Recruiting</button><button type="button" class="tab" data-tab="depth" id="dcBtn">Depth Chart</button><button type="button" class="tab" data-tab="budget" id="budBtn" hidden>Budget</button><button type="button" class="tab" data-tab="settings" id="setBtn">Settings</button></div>
+      <span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden onclick="firebase.auth().signOut().then(()=>location.reload())">Sign out</button></span>
   </header>
-  <div id="bkNag" class="bknag" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
+  <div id="bkNag" class="bknag" data-page="settings" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
   <script>
   (function(){var K="mf_theme",b=document.getElementById("themeBtn"),root=document.documentElement;
     function sys(){return window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}
@@ -557,7 +571,8 @@ window.claude={use:async n=>{
   })();
   </script>
 
-  <div class="modebar">
+  <div class="posrow" data-page="boards"><div class="pos" role="group" aria-label="Position" id="posBar"></div></div>
+  <div class="modebar" data-page="boards">
     <span class="eyebrow">This season</span>
     <label style="display:flex;align-items:center;gap:6px;color:var(--fg)">Team games played
       <input id="teamGames" type="number" min="1" max="15" style="width:70px">
@@ -565,10 +580,10 @@ window.claude={use:async n=>{
     <span id="modeNote" class="note"></span>
   </div>
 
-  <section id="bigboard" hidden>
+  <section id="bigboard" data-page="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">Portal board</button></span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button> <button class="btn" type="button" id="bbClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button></span>
     </div>
     <div class="bbctl">
       <span class="seg" role="group" aria-label="Sort"><button type="button" data-bbs="priority" aria-pressed="true">Priority</button><button type="button" data-bbs="grade" aria-pressed="false">Grade</button><button type="button" data-bbs="gain" aria-pressed="false">Biggest upgrade</button></span>
@@ -580,19 +595,19 @@ window.claude={use:async n=>{
     <p class="note">This season's targets, Medium or High confidence. <b>Priority</b> puts Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter there. Tap a player for his card.</p>
   </section>
 
-  <section id="tagboard" hidden>
+  <section id="tagboard" data-page="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">Portal board</button></span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button> <button class="btn" type="button" id="tbClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button></span>
     </div>
     <div class="tb-cols" id="tbCols"></div>
     <p class="note">Drag tags or use the arrows to rank each position; staff all see the same order. New targets start at the bottom in grade order. Tap a tag for his card.</p>
   </section>
 
-  <section id="recruit" hidden>
+  <section id="recruit" data-page="recruit" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <h2>Recruiting</h2>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button> <button class="btn" type="button" id="recClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button></span>
     </div>
     <div class="tablewrap"><table id="recTbl"></table></div>
     <p class="note">One entry per player (his latest season). Leaves out our own players, hidden players and Trash. Tap a number to open that list.</p>
@@ -603,10 +618,10 @@ window.claude={use:async n=>{
     <div id="visitList"></div>
   </section>
 
-  <section id="depth" hidden>
+  <section id="depth" data-page="depth" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button></span>
     </div>
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-cut),var(--dc-cut)),var(--surface)"></i></span><span>Potential cut</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(90deg,var(--dc-fr) 50%,var(--dc-cut) 50%),var(--surface)"></i></span><span>Two colors = both apply</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
@@ -615,18 +630,18 @@ window.claude={use:async n=>{
     <p class="note" id="dcNote">Drag players to set the order or move them between spots, or tap a player to edit his spot, depth and tags. Everyone on staff sees the same chart; grades come from his board entry this season.</p>
   </section>
 
-  <section id="budget" hidden>
+  <section id="budget" data-page="budget" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="budClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></span>
     </div>
     <div id="budBody"></div>
   </section>
 
-  <section id="overview" hidden>
+  <section id="overview" data-page="overview" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <h2 id="ovTitle">Overview</h2>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Overview season"><button type="button" data-ovm="now" aria-pressed="true">This season</button><button type="button" data-ovm="next" aria-pressed="false">Next season</button></span><button class="btn" type="button" id="ovPrint" disabled>Print</button> <button class="btn" type="button" id="ovClose">Close</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Overview side"><button type="button" data-ovside="off" aria-pressed="true">Offense</button><button type="button" data-ovside="def" aria-pressed="false">Defense</button></span><span class="seg" role="group" aria-label="Overview season"><button type="button" data-ovm="now" aria-pressed="true">This season</button><button type="button" data-ovm="next" aria-pressed="false">Next season</button></span><button class="btn" type="button" id="ovPrint" disabled>Print</button></span>
     </div>
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
@@ -634,7 +649,7 @@ window.claude={use:async n=>{
     <p class="note">One card per starting spot<span id="ovSpots"></span>. Ours is the depth chart's #1 at that spot; where none is set, our best-graded On Roster player (Medium or High confidence). Each card shows the best target for the weakest one. Need: <b>Upgrade</b> below 70, <b>Solid</b> 70–79, <b>Great</b> 80+. Tap a card (a row on phones) to compare ours with the target.</p>
   </section>
 
-  <details class="editor" id="editor">
+  <details class="editor" id="editor" data-page="boards">
   <summary class="editor-sum"><span class="btn primary" id="editorBtn">+ Add player</span><span class="note" id="editorNote">Add a new player here, or click a name on the board to open his card.</span></summary>
   <div class="main">
     <form class="panel" id="form" autocomplete="off">
@@ -705,7 +720,7 @@ window.claude={use:async n=>{
   </div>
   </details>
 
-  <section style="display:grid;gap:10px">
+  <section style="display:grid;gap:10px" data-page="boards" id="boardPage">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
         <h2 id="boardTitle">QB Board</h2>
@@ -746,9 +761,10 @@ window.claude={use:async n=>{
     </section>
   </section>
 
-  <details class="settings">
+  <details class="settings" id="modelSettings" data-page="settings" open>
     <summary>Model settings</summary>
     <div class="setbody">
+      <label class="setpos">Position <select id="setPos" aria-label="Which position's model"></select></label>
       <p class="note" id="lockNote" hidden style="color:var(--rotation);font-weight:600">Only the owner can change these settings.</p>
       <p class="note">Changes apply for everyone. Ceilings = the FBS leader with a real sample; floors = the pass mark. Blank full-season ceilings use the mid-season ones.</p>
       <div class="anchors"><table id="anchorTbl"></table></div>
@@ -782,16 +798,18 @@ window.claude={use:async n=>{
       <div class="btns"><button class="btn" type="button" id="reset">Reset to defaults</button></div>
     </div>
   </details>
-  <details class="settings" id="ownerTools" hidden>
+  <details class="settings" id="ownerTools" data-page="settings" open hidden>
     <summary>Owner tools</summary>
     <div class="setbody">
       <div id="staffBox" hidden>
+        <h4 class="ot-g">Access</h4>
         <h3 class="ot-h">Staff access</h3>
         <p class="note">Only these emails can sign in. You always have access.</p>
         <div id="staffList"></div>
         <div class="btns"><input id="staffEmail" type="email" placeholder="coach@email.com" style="width:260px;max-width:100%;font-family:var(--body)"><button class="btn" type="button" id="staffAdd">Add</button></div>
       </div>
       <div>
+        <h4 class="ot-g">Data loads</h4>
         <h3 class="ot-h">Roster for depth chart</h3>
         <p class="note">Load the roster grid workbook. The <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, red = potential cut. Replaces both charts.</p>
         <div class="btns"><button class="btn" type="button" id="gridUp">Load roster grid (.xlsx)…</button><input type="file" id="gridFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
@@ -807,6 +825,7 @@ window.claude={use:async n=>{
         <div class="btns"><button class="btn" type="button" id="mktUp">Load market file (.json)…</button><input type="file" id="mktFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
+        <h4 class="ot-g">Backup & export</h4>
         <h3 class="ot-h">Full backup</h3>
         <p class="note">Download every position, Trash, settings and both depth charts as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
         <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
@@ -818,12 +837,14 @@ window.claude={use:async n=>{
         <input type="file" id="impFile" accept=".csv,text/csv" hidden>
       </div>
       <div>
+        <h4 class="ot-g">Season</h4>
         <h3 class="ot-h">Start a new season</h3>
         <p class="note">Run once when the season turns over. At every position, graduating players come off the roster and are hidden, Committed players move to On Roster, everyone loses a year of eligibility, and the season moves forward. You can undo it here.</p>
         <div class="btns"><button class="btn" type="button" id="nsPreview">Start new season…</button><button class="btn" type="button" id="nsUndo" hidden>Undo last new season</button></div>
         <div id="nsBox" class="nsbox" hidden></div>
       </div>
       <div>
+        <h4 class="ot-g">Trash</h4>
         <h3 class="ot-h">Trash · <span id="trashPos">QB</span></h3>
         <p class="note">Deleted players land here. Restore puts them back; Delete forever can't be undone.</p>
         <div id="trashList"></div>
@@ -1765,7 +1786,7 @@ const OV_DC={"QB|":["QB"],"RB|":["RB"],"WR|Slot":["SLOT"],"WR|Outside":["X","Z"]
 async function renderOverview(){
   $("overview").hidden=false;
   if(!DB){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The overview needs the shared board.</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">The overview needs the shared board.</p>';return}
-  const side=sideOf(POSKEY);OV_SIDE=side;OV_ROWS=[];$("ovPrint").disabled=true;
+  const side=PREF.ovSide||sideOf(POSKEY);OV_SIDE=side;document.querySelectorAll("[data-ovside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.ovside===side));OV_ROWS=[];$("ovPrint").disabled=true;
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
@@ -1876,10 +1897,8 @@ function renderOvField(side,rows){
 }
 $("ovField").addEventListener("click",e=>ovTblClick(e));
 document.querySelectorAll("[data-ovm]").forEach(b=>b.addEventListener("click",()=>{OV_MODE=b.dataset.ovm;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderOverview()}));
-$("ovBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("recruit").hidden=true;renderOverview();$("overview").scrollIntoView({behavior:"smooth",block:"start"})});
-$("ovClose").addEventListener("click",()=>{$("overview").hidden=true});
 function ovTblClick(e){const tl=e.target.closest("[data-oid]");if(tl){e.stopPropagation();openPlayer(tl.dataset.ok,tl.dataset.oid);return}const tr=e.target.closest("[data-go]");if(!tr)return;
-  {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}$("overview").hidden=true;switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
+  {const o=OV_ROWS[+tr.dataset.oi];if(o&&o.best&&o.top){openCompare(o);return}}go("boards");switchPos(tr.dataset.go);if(tr.dataset.role&&P.roles){ROLEF=tr.dataset.role;document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF));renderBoard()}window.scrollTo({top:0,behavior:"smooth"})}
 $("ovTbl").addEventListener("click",ovTblClick);
 
 /* ---------- shared loading ---------- */
@@ -1901,7 +1920,6 @@ function isMarshallP(p){return isOurs(p)||/^\s*marshall\b/i.test(p.school||"")}
 /* open a player from anywhere: switch tab, then load him into the form */
 function openPlayer(k,id,role){
   PENDING={k,id};
-  $("overview").hidden=true;$("recruit").hidden=true;
   if(k!==POSKEY)switchPos(k);
   if(role&&P.roles){ROLEF="All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"))}
   openPending();
@@ -1910,7 +1928,7 @@ function openPlayer(k,id,role){
 let PENDING_CMP=null;
 function openCompare(o){
   PENDING_CMP={k:o.k,role:o.role||"",best:o.best.p.id||null,bestP:o.best.p.id?null:clone(o.best.p),top:o.top.p.id||null,topP:o.top.p.id?null:clone(o.top.p)};
-  $("overview").hidden=true;$("recruit").hidden=true;
+  go("boards");
   if(o.k!==POSKEY)switchPos(o.k);
   STARONLY=false;$("starOnly").checked=false;$("statusFilter").value="";$("boardSearch").value="";
   if(P.roles){ROLEF=o.role||"All";document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf===ROLEF))}
@@ -1931,7 +1949,7 @@ function tryCompare(){
 document.addEventListener("click",e=>{document.querySelectorAll("details.menu[open],details.rowmenu[open]").forEach(d=>{if(!d.contains(e.target)||e.target.closest(".menu-list button"))d.open=false})});
 document.addEventListener("toggle",e=>{const d=e.target;if(d.open&&d.matches&&d.matches("details.rowmenu"))document.querySelectorAll("details.rowmenu[open]").forEach(x=>{if(x!==d)x.open=false})},true);
 let EDIT_OPEN=false;
-function openEditor(){const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeout(()=>ed.scrollIntoView({behavior:"smooth",block:"start"}),30)}
+function openEditor(){if(TAB!=="boards")go("boards");const ed=$("editor");EDIT_OPEN=true;ed.open=true;setTimeout(()=>ed.scrollIntoView({behavior:"smooth",block:"start"}),30)}
 $("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o});
 /* ---------- player card: read-only view of a player; Edit opens the player panel ---------- */
 /* ---------- market price range (survey data in config/market; staff can read, owner loads it) ---------- */
@@ -2108,8 +2126,6 @@ function drawBigBoard(){const v=bbRows();
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
     <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td></tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
-$("bbBtn").addEventListener("click",()=>{$("overview").hidden=true;$("recruit").hidden=true;$("tagboard").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})});
-$("bbClose").addEventListener("click",()=>{$("bigboard").hidden=true});
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 $("bbNeed").addEventListener("change",drawBigBoard);$("bbTop").addEventListener("change",drawBigBoard);
@@ -2166,9 +2182,8 @@ $("tbCols").addEventListener("click",e=>{const mv=e.target.closest("[data-mv]");
   if(mv){e.stopPropagation();const ids=TB[k].map(x=>x.p.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTagOrder(k,ids);return}
   if(Date.now()-TB_DRAG_AT<400)return;openPlayer(k,tag.dataset.tid)});
 document.querySelectorAll("[data-tbside]").forEach(b=>b.addEventListener("click",()=>{TB_SIDE=b.dataset.tbside;document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawTagBoard()}));
-function openTagBoard(){$("overview").hidden=true;$("recruit").hidden=true;$("bigboard").hidden=true;TB_SIDE=sideOf(POSKEY)==="def"?"def":"off";document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.tbside===TB_SIDE));renderTagBoard();$("tagboard").scrollIntoView({behavior:"smooth",block:"start"})}
-document.querySelectorAll("[data-bbview]").forEach(b=>b.addEventListener("click",()=>{if(b.dataset.bbview==="tags"){if($("tagboard").hidden)openTagBoard()}else if($("bigboard").hidden){$("tagboard").hidden=true;renderBigBoard();$("bigboard").scrollIntoView({behavior:"smooth",block:"start"})}}));
-$("tbClose").addEventListener("click",()=>{$("tagboard").hidden=true});
+function openTagBoard(){$("bigboard").hidden=true;TB_SIDE=PREF.tbSide||(sideOf(POSKEY)==="def"?"def":"off");document.querySelectorAll("[data-tbside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.tbside===TB_SIDE));renderTagBoard()}
+document.querySelectorAll("[data-bbview]").forEach(b=>b.addEventListener("click",()=>{PREF.bbv=b.dataset.bbview;savePref();if(b.dataset.bbview==="tags"){if($("tagboard").hidden)openTagBoard()}else if($("bigboard").hidden){$("tagboard").hidden=true;renderBigBoard()}}));
 async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
@@ -2332,13 +2347,10 @@ $("dcCols").addEventListener("focusout",e=>{const f=e.target.closest("[data-dca]
 document.querySelectorAll("[data-dcside]").forEach(b=>b.addEventListener("click",()=>{DC_SIDE=b.dataset.dcside;document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 document.querySelectorAll("[data-dcszn]").forEach(b=>b.addEventListener("click",()=>{DC_SZN=b.dataset.dcszn;document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 function hideViews(except){["overview","bigboard","tagboard","recruit","depth","budget"].forEach(id=>{if(id!==except)$(id).hidden=true})}
-["ovBtn","bbBtn","recBtn"].forEach(id=>$(id).addEventListener("click",()=>{$("depth").hidden=true;$("budget").hidden=true}));
-async function openDepth(){hideViews("depth");$("depth").hidden=false;DC_SIDE=sideOf(POSKEY)==="def"?"def":"off";
-  document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcside===DC_SIDE));
-  drawDepth();$("depth").scrollIntoView({behavior:"smooth",block:"start"});
+async function openDepth(){$("depth").hidden=false;DC_SIDE=PREF.dcSide||(sideOf(POSKEY)==="def"?"def":"off");DC_SZN=PREF.dcSzn||DC_SZN;
+  document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcside===DC_SIDE));document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcszn===DC_SZN));
+  drawDepth();
   try{await dcLoadGrades()}catch(e){DC_GRADES=new Map()}if(!$("depth").hidden)drawDepth()}
-$("dcBtn").addEventListener("click",openDepth);
-$("dcClose").addEventListener("click",()=>{$("depth").hidden=true});
 /* roster grid workbook: "105" tab = this season, "Fall" tab = next season. Fill: blue = transfer, yellow = freshman, red = potential cut */
 const GRID_GRP={QB:"QB",RB:"RB",OL:"OL",OT:"OL",IOL:"OL",OG:"OL",C:"OL",WR:"WR",TE:"TE",SPEC:"ST",K:"ST",P:"ST",LS:"ST",DE:"DE",DT:"DT",DL:"DT",LB:"LB",SAF:"SAF",S:"SAF",DB:"SAF",CB:"CB",NIC:"NIC"};
 const GRID_POS={QB:"QB",RB:"RB",OL:"OLP",WR:"WRP",TE:"TE",SPEC:"ST",DE:"DLP",DT:"DLP",LB:"LBP",SAF:"DBP",CB:"DBP",NIC:"NIC",DB:"DBP",K:"ST",P:"ST",LS:"ST",OT:"OLP",IOL:"OLP",OG:"OLP",C:"OLP",S:"DBP",DL:"DLP"};
@@ -2465,8 +2477,6 @@ $("budBody").addEventListener("click",e=>{if(!BUDGET)return;const rm=e.target.cl
   if(add){const g=BUDGET.groups[+add.dataset.badd],pos=add.dataset.pos;let at=-1;g.rows.forEach((x,i)=>{if(x.pos===pos)at=i});
     g.rows.splice(at+1,0,{slot:"",pos,name:null,amt:0});budRenumber();renderBudget();budSave();
     const inp=document.querySelector(`[data-r="${+add.dataset.badd}.${at+1}"] .bn`);if(inp)inp.focus()}});
-$("budBtn").addEventListener("click",()=>{hideViews("budget");$("budget").hidden=false;renderBudget();$("budget").scrollIntoView({behavior:"smooth",block:"start"})});
-$("budClose").addEventListener("click",()=>{$("budget").hidden=true});
 $("budUp").addEventListener("click",()=>$("budFile").click());
 $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;let d;
   try{if(/\.json$/i.test(f.name)){d=JSON.parse(await f.text());if(d.format!=="player-tool-budget"||!Array.isArray(d.groups))throw 0}
@@ -2503,10 +2513,8 @@ function budgetCardHtml(p,r){if(!OWNER||!BUDGET)return "";const rows=budRows();c
   if(!his&&!slotLine)return "";
   return `<div class="pc-mkt pc-bud"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Our budget<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
     ${his?`<div class="sub">On our sheet at <b>${esc(his.slot)}</b>: <b>${money(his.amt)}</b></div>`:""}${slotLine?`<div class="sub">${slotLine}</div>`:""}</div>`}
-$("recBtn").addEventListener("click",()=>{$("bigboard").hidden=true;$("tagboard").hidden=true;$("overview").hidden=true;renderRecruit();$("recruit").scrollIntoView({behavior:"smooth",block:"start"})});
-$("recClose").addEventListener("click",()=>{$("recruit").hidden=true});
 document.querySelectorAll("[data-vm]").forEach(b=>b.addEventListener("click",()=>{VMODE=b.dataset.vm;document.querySelectorAll("[data-vm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderVisits()}));
-$("recTbl").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;$("recruit").hidden=true;switchPos(b.dataset.rk);$("statusFilter").value=b.dataset.rs;renderBoard();$("boardTitle").scrollIntoView({behavior:"smooth",block:"start"})});
+$("recTbl").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;go("boards");switchPos(b.dataset.rk);$("statusFilter").value=b.dataset.rs;renderBoard();$("boardTitle").scrollIntoView({behavior:"smooth",block:"start"})});
 $("visitList").addEventListener("click",e=>{const r=e.target.closest("[data-vk]");if(!r||!r.dataset.vid)return;openPlayer(r.dataset.vk,r.dataset.vid)});
 $("visitList").addEventListener("keydown",e=>{if(e.key==="Enter"){const r=e.target.closest("[data-vk]");if(r&&r.dataset.vid)openPlayer(r.dataset.vk,r.dataset.vid)}});
 
@@ -2645,7 +2653,7 @@ $("staffList").addEventListener("click",e=>{const b=e.target.closest("[data-unst
 let BK_LATER=false;
 function watchBackup(db){db.doc("config/backup").onSnapshot(s=>{
   const last=s.exists&&s.data().last?new Date(s.data().last):null,days=last?Math.floor((Date.now()-last)/864e5):null;
-  const due=!last||days>=7;$("bkNag").hidden=!due||BK_LATER;
+  const due=!last||days>=7;$("bkNag").hidden=!due||BK_LATER;$("setBtn").classList.toggle("has-dot",due);$("setBtn").title=due?"Backup due":"";
   $("bkNagTxt").textContent=!last?"No backup on record yet. Download one so the board can be restored if something goes wrong.":`Last backup was ${days} days ago. Download a fresh one.`},()=>{})}
 $("bkNagGo").addEventListener("click",()=>$("bkDown").click());
 $("bkNagLater").addEventListener("click",()=>{BK_LATER=true;$("bkNag").hidden=true});
@@ -2864,7 +2872,7 @@ function seedBoard(key,allDocs){
       if(Object.keys(fill).length&&!ex.deleted)DB.collection(lc+"_players").doc(ex.id).update(fill).catch(()=>{});return}
     DB.collection(lc+"_players").doc(id).set(Object.assign({updatedAt:new Date().toISOString()},sp)).catch(()=>{})});
 }
-function switchPos(k){if(!$("overview").hidden&&OV_SIDE&&sideOf(k)!==OV_SIDE)setTimeout(renderOverview,0);
+function switchPos(k){if($("setPos"))$("setPos").value=POSITIONS[k]?k:POSKEY;
   if(!POSITIONS[k]||k===POSKEY)return;
   POSKEY=k;P=POSITIONS[k];METRICS=P.metrics;save(POS_KEY,k);PICK.clear();
   const md=S.mode;DEFAULTS=defaultsFor(k);S=clone(DEFAULTS);S.mode=md;sortKey="grade";sortDir=-1;
@@ -2876,15 +2884,53 @@ async function connect(){
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
   applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);$("budBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
-  if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();return}
-  DB=db;subscribe();
+  if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();startTabs();return}
+  DB=db;subscribe();startTabs();
 }
+/* ---------- tabs: one section at a time; each has its own address (#depth), remembered between visits ---------- */
+const TABS=["boards","overview","bigboard","recruit","depth","budget","settings"],DEFAULT_TAB="boards";
+let TAB=null,TABS_READY=false;
+const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||{}}catch(e){return {}}})();
+function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
+function okTab(t){return TABS.includes(t)&&!(t==="budget"&&!OWNER_TAB())}
+function OWNER_TAB(){return !$("budBtn").hidden}
+function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PREF.tab||DEFAULT_TAB)}
+function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||t!=="budget")?DEFAULT_TAB:t;TAB=t;
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t){b.setAttribute("aria-current","page");const r=$("tabs");if(r.scrollWidth>r.clientWidth)r.scrollLeft=Math.max(0,b.offsetLeft-r.clientWidth/2+b.offsetWidth/2)}else b.removeAttribute("aria-current")});
+  document.querySelectorAll("[data-page]").forEach(el=>el.classList.toggle("pg-off",el.dataset.page!==t));
+  PREF.tab=t;savePref();
+  if(o.push!==false&&location.hash!=="#"+t){try{history.pushState(null,"","#"+t)}catch(e){location.hash=t}}
+  if(o.render===false)return;
+  if(o.scroll!==false)window.scrollTo(0,0);
+  if(t==="overview")renderOverview();
+  else if(t==="bigboard"){if(PREF.bbv==="tags"){document.querySelectorAll("[data-bbview]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bbview==="tags"));openTagBoard()}else{$("tagboard").hidden=true;renderBigBoard()}}
+  else if(t==="recruit")renderRecruit();
+  else if(t==="depth")openDepth();
+  else if(t==="budget"){$("budget").hidden=false;renderBudget()}
+  else if(t==="settings"){if(!$("ownerTools").hidden)$("ownerTools").open=true}
+}
+function startTabs(){if(TABS_READY)return;TABS_READY=true;go(firstTab(),{push:false,scroll:false});try{history.replaceState(null,"","#"+TAB)}catch(e){}}
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)go(b.dataset.tab)});
+window.addEventListener("popstate",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
+window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
+/* remember the toggles on each page */
+document.addEventListener("click",e=>{const b=e.target.closest("[data-dcszn],[data-dcside],[data-ovm],[data-ovside],[data-tbside]");if(!b)return;
+  if(b.dataset.dcszn)PREF.dcSzn=b.dataset.dcszn;if(b.dataset.dcside)PREF.dcSide=b.dataset.dcside;if(b.dataset.ovm)PREF.ovMode=b.dataset.ovm;if(b.dataset.tbside)PREF.tbSide=b.dataset.tbside;
+  if(b.dataset.ovside){PREF.ovSide=b.dataset.ovside;savePref();renderOverview();return}savePref()});
+if(PREF.ovMode){OV_MODE=PREF.ovMode;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.ovm===OV_MODE))}
+if(PREF.dcSzn)DC_SZN=PREF.dcSzn;
+if(PREF.bbv)document.querySelectorAll("[data-bbview]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bbview===PREF.bbv));
+/* model settings: pick the position here instead of on the Boards tab */
+function fillSetPos(){const sel=$("setPos");if(!sel)return;sel.innerHTML=ALL_POS.filter(k=>POSITIONS[k]).map(k=>`<option value="${k}"${k===POSKEY?" selected":""}>${k}</option>`).join("")}
+$("setPos").addEventListener("change",e=>switchPos(e.target.value));
+fillSetPos();
 buildSeasonOptions();
 buildPositionUI();
 fillSettings();
 fillForm({});
 renderBoard();
-if(window.claude&&claude.use) connect(); else subscribe();
+go(firstTab(),{render:false,push:false});
+if(window.claude&&claude.use) connect(); else {subscribe();startTabs()}
 </script>
 
 <p id="status" class="toast" role="status" hidden></p>
