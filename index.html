@@ -621,7 +621,7 @@ window.claude={use:async n=>{
   <section id="depth" data-page="depth" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sub" id="dcMeta" style="font-size:12.5px"></span><button class="btn" type="button" id="dcPrint">Print</button></span>
     </div>
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-cut),var(--dc-cut)),var(--surface)"></i></span><span>Potential cut</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(90deg,var(--dc-fr) 50%,var(--dc-cut) 50%),var(--surface)"></i></span><span>Two colors = both apply</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
@@ -1794,10 +1794,8 @@ async function renderOverview(){
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
   $("ovTbl").innerHTML='<tbody><tr><td class="sub">Loading every position…</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">Loading every position…</p>';
-  const out=await Promise.all(keys.map(async k=>{
-    const lc=k.toLowerCase();
-    const [cs,qs]=await Promise.all([DB.doc("config/"+lc).get().catch(()=>null),DB.collection(lc+"_players").get().catch(()=>null)]);
-    const cfg=cs&&cs.exists?cs.data():null;const docs=docsOf(qs);
+  const ALLP=await loadAllPositions(keys);
+  const out=await Promise.all(ALLP.map(async ({k,cfg,docs})=>{
     return withPos(k,cfg,()=>{
       /* one entry per player: keep his most recent season */
       const byKey=new Map();
@@ -1856,6 +1854,9 @@ async function renderOverview(){
       });
       return rows});
   })).then(a=>a.flat());
+  /* list order follows the field: left tackle to right tackle, front to back */
+  {const ord=["QB","RB","X","SLOT","Z","TE","LT","LG","OC","RG","RT","FE","DT","JACK","MIKE","WILL","NIC","FSAF","BSAF","FCB","BCB"];const ix=o=>{const i=ord.indexOf(o.lbl);return i<0?99:i};
+    out.forEach((o,i)=>o._i=i);out.sort((a,b)=>ix(a)-ix(b)||a._i-b._i);out.forEach(o=>{o.first=false});let prevK=null;out.forEach(o=>{if(o.k!==prevK)o.first=true;prevK=o.k})}
   OV_ROWS=out;$("ovPrint").disabled=!out.length;
   {const cnt={};out.forEach(o=>{const key=(o.fk||o.k)+"|"+o.role;o.si=cnt[key]=(cnt[key]??-1)+1});}
   renderOvField(side,out);
@@ -1903,15 +1904,19 @@ $("ovTbl").addEventListener("click",ovTblClick);
 
 /* ---------- shared loading ---------- */
 function docsOf(qs){return qs?qs.docs.map(d=>fixLegacy(Object.assign({id:d.id},d.data()))).filter(p=>!p.deleted):[]}
+/* one live copy of every position's board and settings: the first look waits for it, after that tabs open instantly and stay current */
+const POSCACHE={};
+function watchPos(k){if(POSCACHE[k])return POSCACHE[k].ready;const lc=k.toLowerCase();const c=POSCACHE[k]={cfg:null,docs:[]};
+  c.ready=new Promise(res=>{let a=false,b=false;const done=()=>{if(a&&b)res()};
+    DB.doc("config/"+lc).onSnapshot(s=>{c.cfg=s.exists?s.data():null;if(!a){a=true;done()}},()=>{if(!a){a=true;done()}});
+    DB.collection(lc+"_players").onSnapshot(qs=>{c.docs=docsOf(qs);GCACHE_AT=0;if(!b){b=true;done()}},()=>{if(!b){b=true;done()}});
+    setTimeout(()=>{a=b=true;res()},10000)});
+  return c.ready}
 async function loadAllPositions(keys){
   keys=keys||ALL_POS.filter(k=>POSITIONS[k]);
-  return Promise.all(keys.map(async k=>{
-    const lc=k.toLowerCase();let cfg=null,docs=[];
-    if(DB){const [cs,qs]=await Promise.all([DB.doc("config/"+lc).get().catch(()=>null),DB.collection(lc+"_players").get().catch(()=>null)]);
-      cfg=cs&&cs.exists?cs.data():null;docs=docsOf(qs)}
-    else if(k===POSKEY){docs=BOARD.map(clone)}
-    return {k,cfg,docs};
-  }));
+  if(!DB)return keys.map(k=>({k,cfg:null,docs:k===POSKEY?BOARD.map(clone):[]}));
+  await Promise.all(keys.map(watchPos));
+  return keys.map(k=>({k,cfg:POSCACHE[k].cfg?clone(POSCACHE[k].cfg):null,docs:POSCACHE[k].docs.map(clone)}));
 }
 /* latest entry per player (name+school) */
 function latestByPlayer(list){const m=new Map();list.forEach(x=>{const p=x.p||x;const key=(p.name||"").toLowerCase()+"|"+(p.school||"").toLowerCase();const o=m.get(key);const op=o&&(o.p||o);if(!o||(+p.season||0)>(+op.season||0))m.set(key,x)});return [...m.values()]}
@@ -2217,9 +2222,28 @@ function dcAll(){return Object.values(DCG()).flat()}
 /* older charts split OL into OT/IOL; fold them into OL */
 function dcFix(g){g=g||{};[["WRP",["WR"]],["OLP",["OL","OT","IOL"]],["DLP",["DE","DT"]],["LBP",["LB"]],["DBP",["SAF","CB"]]].forEach(([to,from])=>{from.forEach(f=>{if(g[f]){g[to]=[...(g[to]||[]),...g[f]];delete g[f]}})});
   if(g.ST){g.ST.forEach(x=>{const k=["K","P","LS"].includes(x.role)?x.role:"STP";(g[k]=g[k]||[]).push(x)});delete g.ST}return g}
-function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{if(Date.now()-DC_DIRTY<1500)return;const d=s.exists?s.data():{};DCS[z]={groups:dcFix(d.groups),limits:d.limits||null};if(!$("depth").hidden&&z===DC_SZN&&!$("dcDlg").open)drawDepth()},()=>{}))}
-async function dcSave(z){z=z||DC_SZN;DC_DIRTY=Date.now();if(!DB)return;
-  try{await DB.doc(DC_DOC[z]).set(Object.assign({groups:DCS[z].groups,updatedAt:new Date().toISOString()},DCS[z].limits?{limits:DCS[z].limits}:{}))}catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
+/* what the database last had for each spot, so a save only sends the spots that changed: two coaches editing different spots at once both stick */
+const DC_LAST={now:{},next:{}},DC_META={now:{},next:{}};let DC_DRAGGING=false,DC_REDRAW=false;
+const dcSnap=g=>Object.fromEntries(Object.entries(g||{}).map(([k,v])=>[k,JSON.stringify(v)]));
+function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{const d=s.exists?s.data():{};
+  DCS[z]={groups:dcFix(JSON.parse(JSON.stringify(d.groups||{}))),limits:d.limits||null};DC_LAST[z]=dcSnap(d.groups);DC_META[z]={at:d.updatedAt||"",by:d.updatedBy||""};
+  if(TAB==="depth"&&z===DC_SZN){if($("dcDlg").open||DC_DRAGGING||document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#dcRosterWrap,.dc-add"))DC_REDRAW=true;else drawDepth()}},()=>{}))}
+async function dcSave(z,full){z=z||DC_SZN;if(!DB)return;
+  const uid=USER?await USER.id().catch(()=>""):"";const meta={updatedAt:new Date().toISOString(),updatedBy:uid||""};DC_META[z]={at:meta.updatedAt,by:meta.updatedBy};
+  const G=DCS[z].groups||{},cur=dcSnap(G),last=DC_LAST[z]||{};
+  try{
+    if(full){await DB.doc(DC_DOC[z]).set(Object.assign({groups:G},meta,DCS[z].limits?{limits:DCS[z].limits}:{}))}
+    else{const up=Object.assign({},meta);Object.keys(cur).forEach(k=>{if(cur[k]!==last[k])up["groups."+k]=G[k]});
+      Object.keys(last).forEach(k=>{if(!(k in cur))up["groups."+k]=[]});
+      if(DCS[z].limits)up.limits=DCS[z].limits;
+      try{await DB.doc(DC_DOC[z]).update(up)}catch(e){await DB.doc(DC_DOC[z]).set(Object.assign({groups:G},meta,DCS[z].limits?{limits:DCS[z].limits}:{}))}}
+    DC_LAST[z]=cur;drawDcMeta()}
+  catch(e){flash("Couldn't save the depth chart. You may not have edit access.")}}
+let DC_NAMES={};
+function drawDcMeta(){const el=$("dcMeta");if(!el)return;const m=DC_META[DC_SZN]||{};if(!m.at){el.textContent="";return}
+  const t=new Date(m.at);const when=isNaN(t)?"":t.toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+  const nm=m.by&&DC_NAMES[m.by];el.textContent=`Last change: ${nm?nm+" · ":""}${when}`;
+  if(m.by&&!(m.by in DC_NAMES)&&USER&&USER.profiles){DC_NAMES[m.by]="";USER.profiles([m.by]).then(ps=>{if(ps&&ps[m.by])DC_NAMES[m.by]=ps[m.by].name;drawDcMeta()}).catch(()=>{})}}
 /* this season's board grades for our players, by name (any position board) */
 async function dcLoadGrades(){const all=await loadAllPositions();const m=new Map();
   all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{
@@ -2302,12 +2326,12 @@ function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[]
     const n=pool?keys.length:keys.length===1?1:6;
     return `${pool?'<div class="dc-rowlbl">To place <span class="sub">drag each player to his spot</span></div>':lbl?`<div class="dc-rowlbl">${lbl}</div>`:""}<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${cols};--n:${n}">${keys.map(k=>dcCol(k,G)).join("")}</div>`}).join("");
   if(DC_ADDOPEN){const inp=document.querySelector(`#dcCols [data-dca="${DC_ADDOPEN}"] input`);if(inp)inp.focus()}
-  drawRoster();$("dcKeyTr").hidden=DC_SZN==="next";
+  DC_REDRAW=false;drawRoster();drawDcMeta();$("dcKeyTr").hidden=DC_SZN==="next";
   const all=Object.values(G).flat();const thinN=Object.values(DC_SIDES).flat().filter(k=>dcThin(k,G[k]||[])).length;
   $("dcCount").textContent=all.length?`${all.length} players · ${DC_SZN==="next"?"":`${all.filter(dcIsTr).length} transfers · `}${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}${thinN?` · ${thinN} thin spot${thinN===1?"":"s"}`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
     DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,draggable:".tag",
-      onEnd:ev=>{DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex)return;dcFromDom()}}))});
+      onStart:()=>{DC_DRAGGING=true},onEnd:ev=>{DC_DRAGGING=false;DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex){if(DC_REDRAW){DC_REDRAW=false;drawDepth()}return}dcFromDom()}}))});
 }
 function dcFromDom(){const G=DCG();const by=new Map(dcAll().map(x=>[x.id,x]));
   document.querySelectorAll("#dcCols .tb-list").forEach(el=>{G[el.dataset.dck]=[...el.querySelectorAll(".tag")].map(t=>by.get(t.dataset.did)).filter(Boolean)});
@@ -2329,6 +2353,7 @@ function dcDepthOpts(){const f=DC_EDIT;if(!f)return;const to=$("dcdPos").value,G
   $("dcdDepth").disabled=DC_POOLS.includes(to);$("dcdDepth").innerHTML=Array.from({length:Math.max(n,1)},(_,i)=>`<option value="${i+1}"${i+1===cur?" selected":""}>${i+1}${i===0?" (starter)":""}</option>`).join("")}
 $("dcdPos").addEventListener("change",dcDepthOpts);
 $("dcdCancel").addEventListener("click",()=>$("dcDlg").close());
+$("dcDlg").addEventListener("close",()=>{if(DC_REDRAW)drawDepth()});
 $("dcdRemove").addEventListener("click",()=>{const f=DC_EDIT;if(!f||!confirm(`Take ${f.x.n} off the depth chart?`))return;DCG()[f.k].splice(f.i,1);$("dcDlg").close();drawDepth();dcSave()});
 $("dcdCard").addEventListener("click",()=>{const b=$("dcdCard");$("dcDlg").close();if(b.dataset.id)openPlayer(b.dataset.k,b.dataset.id)});
 $("dcCols").addEventListener("click",e=>{const ob=e.target.closest("[data-dcopen]");if(ob){DC_ADDOPEN=ob.dataset.dcopen;drawDepth();return}
@@ -2391,7 +2416,7 @@ async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The 
     Object.entries(moved).forEach(([r,l])=>{a[r]=[...l,...(a[r]||[])]});if(!a.STP.length)delete a.STP});
   const lim=g=>({limit:((DCS.now.limits||{}).limit)||105,targets:Object.assign({},g._targets||{})});
   if(gF)Object.values(gF).flat().forEach(x=>{if(x.t==="tr")x.t="ret"});
-  if(gN){DCS.now={groups:gN,limits:lim(gN)};await dcSave("now")}if(gF){DCS.next={groups:gF,limits:Object.assign(lim(gF),{limit:((DCS.next.limits||{}).limit)||105})};await dcSave("next")}
+  if(gN){DCS.now={groups:gN,limits:lim(gN)};await dcSave("now",true)}if(gF){DCS.next={groups:gF,limits:Object.assign(lim(gF),{limit:((DCS.next.limits||{}).limit)||105})};await dcSave("next",true)}
   if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
 function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
 $("gridUp").addEventListener("click",()=>$("gridFile").click());
@@ -2719,7 +2744,7 @@ $("nsPreview").addEventListener("click",async()=>{
     const next=CUR_SEASON+1;
     try{await DB.doc("config/rollover").set({id,at:new Date().toISOString(),from:CUR_SEASON,to:next,count:ok})}catch(e){}
     /* depth chart: next season's chart becomes this season's; the old one is kept so Undo can put it back */
-    if(dcAllZ("next").length){try{await DB.doc("shared/depth_prev").set(Object.assign({id,groups:DCS.now.groups||{}},DCS.now.limits?{limits:DCS.now.limits}:{}));DCS.now={groups:JSON.parse(JSON.stringify(DCS.next.groups)),limits:DCS.next.limits?JSON.parse(JSON.stringify(DCS.next.limits)):DCS.now.limits};await dcSave("now")}catch(e){}}
+    if(dcAllZ("next").length){try{await DB.doc("shared/depth_prev").set(Object.assign({id,groups:DCS.now.groups||{}},DCS.now.limits?{limits:DCS.now.limits}:{}));DCS.now={groups:JSON.parse(JSON.stringify(DCS.next.groups)),limits:DCS.next.limits?JSON.parse(JSON.stringify(DCS.next.limits)):DCS.now.limits};await dcSave("now",true)}catch(e){}}
     try{await DB.doc("shared/season").update({currentSeason:next})}catch(e){try{await DB.doc("shared/season").set({teamGames:TG||1,currentSeason:next})}catch(_){}}
     box.innerHTML=`<b>${next} season started.</b> ${ok} player${ok===1?"":"s"} updated${bad?`, ${bad} couldn't be changed`:""}. Use <b>Undo</b> above if you need to reverse it.`;GCACHE=null;
   };
@@ -2734,7 +2759,7 @@ $("nsUndo").addEventListener("click",async()=>{
     for(const d of qs.docs){const p=d.data();if(p.roll&&p.roll.id===ROLL.id){const pv=p.roll.prev||{};
       try{await DB.collection(k.toLowerCase()+"_players").doc(d.id).update({status:pv.status??"",elig:pv.elig,ref:!!pv.ref,marshall:!!pv.marshall,graduated:false,roll:null});n++}catch(e){}}}
   }
-  try{const pv=await DB.doc("shared/depth_prev").get();if(pv.exists&&pv.data().id===ROLL.id){DCS.now={groups:dcFix(pv.data().groups),limits:pv.data().limits||DCS.now.limits};await dcSave("now")}}catch(e){}
+  try{const pv=await DB.doc("shared/depth_prev").get();if(pv.exists&&pv.data().id===ROLL.id){DCS.now={groups:dcFix(pv.data().groups),limits:pv.data().limits||DCS.now.limits};await dcSave("now",true)}}catch(e){}
   try{await DB.doc("config/rollover").set(Object.assign({},ROLL,{undone:true}))}catch(e){}
   try{await DB.doc("shared/season").update({currentSeason:ROLL.from})}catch(e){}
   b.disabled=false;delete b.dataset.armed;flash(`Undone: ${n} player${n===1?"":"s"} put back to the ${ROLL.from} season.`);GCACHE=null;
