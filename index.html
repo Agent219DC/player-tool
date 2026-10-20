@@ -334,27 +334,28 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-sum{display:flex;flex-wrap:wrap;gap:10px}
 .bud-sum div{border:1px solid var(--line);border-radius:10px;padding:10px 14px;min-width:150px}
 .bud-sum b{display:block;font:700 22px var(--display)}
-.bud-groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:10px}
-.bud-g{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.bud-groups{columns:330px;column-gap:10px}
+.bud-groups>.bud-g{break-inside:avoid;margin-bottom:10px;display:inline-block;width:100%;box-sizing:border-box}
+.bud-g{border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--surface)}
 .bud-g h3{margin:0 0 6px;display:flex;justify-content:space-between;align-items:baseline;font:700 15px var(--display);letter-spacing:.06em;text-transform:uppercase}
 .bud-g h3 .sub{font:400 12px var(--body);letter-spacing:0;text-transform:none}
 .bud-g table{width:100%;min-width:0;border-collapse:collapse;font-size:13px;table-layout:fixed}
-.bud-g td{vertical-align:middle;padding:3px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
-.bud-g td.sl{width:40px;color:var(--muted);font:600 12px var(--mono)}
-.bud-g td.am{width:88px;font-family:var(--mono);white-space:nowrap;color:var(--muted)}
-.bud-g td.bp.mo{width:84px;color:var(--fg)}
+.bud-g td{vertical-align:middle;padding:1px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
+.bud-g td.sl{width:36px;color:var(--muted);font:600 12px var(--mono)}
+.bud-g td.am{width:74px;font-family:var(--mono);white-space:nowrap;color:var(--muted)}
+.bud-g td.bp.mo{width:64px;color:var(--fg)}
 .bud-g td.bp{width:44px;text-align:right;font:12px var(--mono);color:var(--muted)}
 .bud-g td.rm{width:22px;text-align:right}.bud-g td.rm button{border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
-.bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:3px 4px;border-radius:4px}
+.bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:2px 4px;border-radius:4px;text-overflow:ellipsis}
 .bud-g input:hover{border-color:var(--line)}.bud-g input:focus{border-color:var(--accent,#00b140);background:var(--surface);outline:none}
-.bud-g .ba{width:76px;text-align:right;font-family:var(--mono)}
+.bud-g .ba{width:66px;text-align:right;font-family:var(--mono)}
 .bud-g tr.open .bn::placeholder{color:var(--muted);font-style:italic}
 .bud-add{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.bud-add .linkbtn{font-size:12.5px}
 .bud-sum .sub{display:block;font-size:12px}
 .bud-tot{display:flex;align-items:center;font:700 22px var(--display);margin-top:2px}
 .bud-tot input{width:150px;font:700 22px var(--display);padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);margin-left:2px}
 .bud-bar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
-@media (max-width:420px){.bud-g td.bp:not(.mo){display:none}.bud-g td.bp.mo{width:70px;font-size:11px}}
+@media (max-width:420px){.bud-g td.bp:not(.mo){display:none}.bud-g td.sl{width:34px}.bud-g .bn{font-size:12.5px}.bud-g tr:has(td.bp.mo){display:grid;grid-template-columns:34px minmax(0,1fr) 74px 36px;align-items:center;border-top:1px solid var(--line)}.bud-g tr:has(td.bp.mo)>td{border-top:0;width:auto;grid-row:1/span 2}.bud-g tr:has(td.bp.mo)>td.am{grid-row:1;grid-column:3}.bud-g tr:has(td.bp.mo)>td.bp.mo{grid-row:2;grid-column:3;width:auto;font-size:11px;padding:0 2px 2px;line-height:1.1}.bud-g tr:has(td.bp.mo)>td.rm{grid-column:4}}
 .bud-bar span:first-child{background:var(--accent-fill,#00873a)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
 .bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
@@ -2625,7 +2626,7 @@ function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="
           <td class="rm"><button type="button" data-brm aria-label="Remove ${esc(x.slot)}">×</button></td></tr>`).join("")}</tbody></table>
         <div class="ft"><span data-gf="${gi}"></span>${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""}</div>
         <div class="bud-add">${kinds.map(k=>`<button type="button" class="linkbtn" data-badd="${gi}" data-pos="${esc(k)}">+ ${esc(k)} spot</button>`).join("")}</div></div>`}).join("")}</div>
-    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget.</p>`;
+    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget; with Per month on, the right column is the monthly amount on a 12-month deal.</p>`;
   budRecalc()}
 function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=budRows();const sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0);
   const held=sum(x=>x.name),open=sum(x=>!x.name),left=T-held-open,nH=rows.filter(x=>x.name).length;
@@ -2638,7 +2639,7 @@ function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=
   (b.groups||[]).forEach((g,gi)=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0);const gt=document.querySelector(`[data-gt="${gi}"]`);if(gt)gt.textContent=money(t);
     const gf=document.querySelector(`[data-gf="${gi}"]`);if(gf)gf.textContent=`${pct(t,T)} of budget · ${(g.rows||[]).filter(x=>!x.name).length} open`;
     if(gt&&BUD_MO())gt.textContent=money(t)+" · "+perMo(t);
-    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c){c.textContent=BUD_MO()?perMo(x.amt):pct(+x.amt||0,T);c.classList.toggle("mo",BUD_MO())}})});
+    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c){c.textContent=BUD_MO()?perMo(x.amt).replace("/mo",""):pct(+x.amt||0,T);c.title=BUD_MO()?perMo(x.amt)+" on a 12-month deal":"";c.classList.toggle("mo",BUD_MO())}})});
   if(BUD_MO()){set("heldPc",perMo(held)+" · "+pct(held,T));set("openPc",perMo(open)+" · "+pct(open,T))}
   document.querySelectorAll("[data-budmo]").forEach(x=>x.setAttribute("aria-pressed",String((x.dataset.budmo==="1")===BUD_MO())))}
 let BUD_T=null;
