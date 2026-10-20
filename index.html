@@ -392,7 +392,8 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
   #recTbl th{font-size:9.5px;letter-spacing:0;padding:8px 2px}#recTbl td{padding:8px 2px}#recTbl td.num button{padding:2px 4px}
   
 }
-@media (pointer:coarse),(max-width:640px){.bud-g input{padding:7px 4px}.bud-g td.rm{width:36px}.bud-g td.rm button{min-width:32px;min-height:32px;font-size:18px}.bud-add .linkbtn{padding:6px 0}}
+@media (pointer:coarse),(max-width:640px){.star{padding:8px 8px 8px 0;margin:-8px 0}.rowmenu>summary{padding:10px 12px}.rowmenu-list .x{min-height:36px;padding:0 12px}td.pick input,th.pick input{width:20px;height:20px}label>input[type=checkbox]{width:20px;height:20px}
+.bud-g input{padding:7px 4px}.bud-g td.rm{width:36px}.bud-g td.rm button{min-width:32px;min-height:32px;font-size:18px}.bud-add .linkbtn{padding:6px 0}}
 .vday{margin-top:8px}
 .vday h3{font:600 15px var(--display);letter-spacing:.06em;text-transform:uppercase;margin:10px 0 6px;color:var(--accent-text)}
 .vrow{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-bottom:6px;cursor:pointer}
@@ -2755,7 +2756,7 @@ function askHtml(p,r){if(!OWNER||isOurs(p))return "";const a=askOf(p),v=valueOf(
     lines+=`<div class="sub"><span class="valtag ${tag[1]}">${tag[0]}</span> ${money(a)} vs. a market price of ${money(v.mid)} for his grade at that spot: <b>${pctTxt(pc)}</b>.</div>`}
   if(v)lines+=`<div class="sub">${v.gain>0?`Upgrade: <b>+${fmt(v.gain)}</b> over ${v.weak==null?"an open spot (60 baseline)":"our weakest starter ("+fmt(v.weak)+")"} · <b>${fmt(v.upg,1)}</b> points per $10k.`:`No upgrade: he doesn't grade above our weakest starter (${fmt(v.weak)}).`} Grade could move about ±${moeOf(r)}.</div>`;
   return `<div class="pc-mkt pc-bud pc-ask"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Asking price<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
-    <div class="ask-row"><span>$</span><input id="pcAsk" inputmode="numeric" placeholder="What he's asking" value="${a?commas(a):""}" aria-label="Asking price"><button type="button" class="btn" data-pc="ask">Save</button>${a?'<button type="button" class="linkbtn" data-pc="askclear" style="font-size:12.5px">Clear</button>':""}</div>${lines}</div>`}
+    <div class="ask-row"><span>$</span><input id="pcAsk" inputmode="numeric" placeholder="Asking price" value="${a?commas(a):""}" aria-label="Asking price"><button type="button" class="btn" data-pc="ask">Save</button>${a?'<button type="button" class="linkbtn" data-pc="askclear" style="font-size:12.5px">Clear</button>':""}</div>${lines}</div>`}
 /* reads the Download tab: group blocks of NAME/TOTAL/% columns; "QB 1" style rows are open spots, "Last, First" rows are our players */
 function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==null?"":String(v).trim();
   const heads=[];R.forEach((row,r)=>{if(/^quarterback$/i.test(txt(cell(r,0)))||/^defensive line$/i.test(txt(cell(r,0))))heads.push(r)});if(!heads.length)return null;
