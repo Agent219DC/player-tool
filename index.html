@@ -342,6 +342,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-g td{vertical-align:middle;padding:3px 2px;border-top:1px solid var(--line);border-bottom:0;white-space:normal}
 .bud-g td.sl{width:40px;color:var(--muted);font:600 12px var(--mono)}
 .bud-g td.am{width:88px;font-family:var(--mono);white-space:nowrap;color:var(--muted)}
+.bud-g td.bp.mo{width:84px;color:var(--fg)}
 .bud-g td.bp{width:44px;text-align:right;font:12px var(--mono);color:var(--muted)}
 .bud-g td.rm{width:22px;text-align:right}.bud-g td.rm button{border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
 .bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:3px 4px;border-radius:4px}
@@ -353,7 +354,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-tot{display:flex;align-items:center;font:700 22px var(--display);margin-top:2px}
 .bud-tot input{width:150px;font:700 22px var(--display);padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);margin-left:2px}
 .bud-bar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
-@media (max-width:420px){.bud-g td.bp{display:none}}
+@media (max-width:420px){.bud-g td.bp:not(.mo){display:none}.bud-g td.bp.mo{width:70px;font-size:11px}}
 .bud-bar span:first-child{background:var(--accent-fill,#00873a)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
 .bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
@@ -689,7 +690,7 @@ window.claude={use:async n=>{
   <section id="budget" data-page="budget" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="budPrint">Print</button></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Show amounts as"><button type="button" data-budmo="0" aria-pressed="true">Per year</button><button type="button" data-budmo="1" aria-pressed="false">Per month</button></span><button class="btn" type="button" id="budPrint">Print</button></span>
     </div>
     <div id="budBody"></div>
   </section>
@@ -2636,8 +2637,15 @@ function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=
   if(bh)bh.style.width=(held/cap*100)+"%";if(bo)bo.style.width=(open/cap*100)+"%";
   (b.groups||[]).forEach((g,gi)=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0);const gt=document.querySelector(`[data-gt="${gi}"]`);if(gt)gt.textContent=money(t);
     const gf=document.querySelector(`[data-gf="${gi}"]`);if(gf)gf.textContent=`${pct(t,T)} of budget · ${(g.rows||[]).filter(x=>!x.name).length} open`;
-    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c)c.textContent=pct(+x.amt||0,T)})})}
+    if(gt&&BUD_MO())gt.textContent=money(t)+" · "+perMo(t);
+    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c){c.textContent=BUD_MO()?perMo(x.amt):pct(+x.amt||0,T);c.classList.toggle("mo",BUD_MO())}})});
+  if(BUD_MO()){set("heldPc",perMo(held)+" · "+pct(held,T));set("openPc",perMo(open)+" · "+pct(open,T))}
+  document.querySelectorAll("[data-budmo]").forEach(x=>x.setAttribute("aria-pressed",String((x.dataset.budmo==="1")===BUD_MO())))}
 let BUD_T=null;
+/* a 12-month deal paid monthly */
+const perMo=v=>"$"+Math.round((+v||0)/12).toLocaleString("en-US")+"/mo";
+const BUD_MO=()=>!!PREF.budMo;
+document.querySelectorAll("[data-budmo]").forEach(b=>b.addEventListener("click",()=>{PREF.budMo=b.dataset.budmo==="1";savePref();document.querySelectorAll("[data-budmo]").forEach(x=>x.setAttribute("aria-pressed",x===b));budRecalc()}));
 function budSaveSoon(){clearTimeout(BUD_T);BUD_T=setTimeout(budSave,700)}
 async function budSave(){clearTimeout(BUD_T);if(!DB||!BUDGET)return;BUDGET.at=new Date().toISOString();
   try{await DB.doc("owner/budget").set(JSON.parse(JSON.stringify(BUDGET)))}catch(e){flash("Couldn't save the budget.")}}
@@ -2659,7 +2667,7 @@ $("budBody").addEventListener("click",e=>{if(!BUDGET)return;const rm=e.target.cl
 async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budget first.");return}
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
-  const W=pdfHeader(doc,"Player Tool · Budget","Confidential: owner only"),PH=doc.internal.pageSize.getHeight();
+  const W=pdfHeader(doc,"Player Tool · Budget","Confidential: owner only"+(BUD_MO()?" · right column = per month on a 12-month deal":"")),PH=doc.internal.pageSize.getHeight();
   const Tt=+b.total||0,rows=budRows(),sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0),held=sum(x=>x.name),open=sum(x=>!x.name),left=Tt-held-open,pct=v=>Tt?(v/Tt*100).toFixed(1)+"%":"-";
   const nH=rows.filter(x=>x.name).length;
   /* summary boxes */
@@ -2674,12 +2682,12 @@ async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budge
     let c=colY.indexOf(Math.min(...colY));if(colY[c]+need>PH-30){doc.addPage();pdfHeader(doc,"Player Tool · Budget (cont.)","Confidential: owner only");colY.fill(80);c=0}
     const x=40+c*(cw+10);
     doc.autoTable({startY:colY[c],margin:{left:x},tableWidth:cw,theme:"grid",
-      head:[[{content:T(g.name),colSpan:2,styles:{halign:"left"}},{content:money(t),styles:{halign:"right"}},{content:pct(t),styles:{halign:"right"}}]],
-      body:gr.map(r=>[r.slot,r.name?T(r.name):"Open",money(r.amt),pct(+r.amt||0)]),
+      head:[[{content:T(g.name),colSpan:2,styles:{halign:"left"}},{content:money(t),styles:{halign:"right"}},{content:BUD_MO()?perMo(t).replace("/mo",""):pct(t),styles:{halign:"right"}}]],
+      body:gr.map(r=>[r.slot,r.name?T(r.name):"Open",money(r.amt),BUD_MO()?perMo(r.amt).replace("/mo",""):pct(+r.amt||0)]),
       foot:[[{content:`${gr.filter(r=>!r.name).length} open${goals[g.name]!=null?" · goal "+(goals[g.name]*100).toFixed(0)+"%":""}`,colSpan:4,styles:{halign:"left"}}]],
       styles:{font:"helvetica",fontSize:8,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
       headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8,cellPadding:{top:4,bottom:4,left:3,right:2}},footStyles:{fillColor:[243,245,242],textColor:[91,102,93],fontStyle:"normal",fontSize:7.5},
-      columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:31,textColor:[91,102,93]}},
+      columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:BUD_MO()?40:31,textColor:[91,102,93]}},
       didParseCell:h=>{if(h.section==="body"&&h.column.index===1&&!gr[h.row.index].name){h.cell.styles.textColor=[120,130,122];h.cell.styles.fontStyle="italic"}}});
     colY[c]=doc.lastAutoTable.finalY+12});
   await pdfSave(doc,`Budget ${new Date().toISOString().slice(0,10)}.pdf`)}
@@ -2727,6 +2735,7 @@ async function saveAsk(p,amt){if(!OWNER||!DB)return;const k=askKey(p);
   catch(e){flash("Couldn't save the asking price. Publish the latest database rules first.",8000)}}
 function askHtml(p,r){if(!OWNER||isOurs(p))return "";const a=askOf(p),v=valueOf(p,r);
   let lines="";
+  if(a)lines+=`<div class="sub">On a 12-month deal: <b>${perMo(a)}</b>${v&&v.mid?` · market ${perMo(v.mid)}`:""}</div>`;
   if(v&&v.mid){const pc=v.pct;const tag=pc<=-0.1?["Good value","good"]:pc<=0.1?["Fair price","fair"]:["Pricey","pricey"];
     lines+=`<div class="sub"><span class="valtag ${tag[1]}">${tag[0]}</span> ${money(a)} vs. a market price of ${money(v.mid)} for his grade at that spot: <b>${pctTxt(pc)}</b>.</div>`}
   if(v)lines+=`<div class="sub">${v.gain>0?`Upgrade: <b>+${fmt(v.gain)}</b> over ${v.weak==null?"an open spot (60 baseline)":"our weakest starter ("+fmt(v.weak)+")"} · <b>${fmt(v.upg,1)}</b> points per $10k.`:`No upgrade: he doesn't grade above our weakest starter (${fmt(v.weak)}).`} Grade could move about ±${moeOf(r)}.</div>`;
@@ -2754,10 +2763,10 @@ function budgetCardHtml(p,r){if(!OWNER||!BUDGET)return "";const rows=budRows();c
   const his=rows.find(x=>x.name&&normName(x.name)===nm);const g=r?marketRange(p,r,"g6"):null;
   let slotLine="";if(g&&!his){const key=g.slotLbl.replace(/^DT/,"IDL");const pos=key.replace(/\d+$/,"");let n=+key.replace(/^\D+/,"");let row=rows.find(x=>x.slot===key);
     while(!row&&n>1){n--;row=rows.find(x=>x.slot===pos+n)}
-    if(row)slotLine=`Our budget for <b>${esc(row.slot)}</b>: <b>${money(row.amt)}</b> · ${row.name?"now "+esc(row.name):"open spot"}${g.mid!=null?` · market center ${money(g.mid)}`:""}`}
+    if(row)slotLine=`Our budget for <b>${esc(row.slot)}</b>: <b>${money(row.amt)}</b> (${perMo(row.amt)}) · ${row.name?"now "+esc(row.name):"open spot"}${g.mid!=null?` · market center ${money(g.mid)}`:""}`}
   if(!his&&!slotLine)return "";
   return `<div class="pc-mkt pc-bud"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Our budget<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
-    ${his?`<div class="sub">On our sheet at <b>${esc(his.slot)}</b>: <b>${money(his.amt)}</b></div>`:""}${slotLine?`<div class="sub">${slotLine}</div>`:""}</div>`}
+    ${his?`<div class="sub">On our sheet at <b>${esc(his.slot)}</b>: <b>${money(his.amt)}</b> · ${perMo(his.amt)} over 12 months</div>`:""}${slotLine?`<div class="sub">${slotLine}</div>`:""}</div>`}
 document.querySelectorAll("[data-vm]").forEach(b=>b.addEventListener("click",()=>{VMODE=b.dataset.vm;document.querySelectorAll("[data-vm]").forEach(x=>x.setAttribute("aria-pressed",x===b));renderVisits()}));
 $("recTbl").addEventListener("click",e=>{const b=e.target.closest("[data-rk]");if(!b)return;go("boards");switchPos(b.dataset.rk);$("statusFilter").value=b.dataset.rs;renderBoard();$("boardTitle").scrollIntoView({behavior:"smooth",block:"start"})});
 $("visitList").addEventListener("click",e=>{const r=e.target.closest("[data-vk]");if(!r||!r.dataset.vid)return;openPlayer(r.dataset.vk,r.dataset.vid)});
