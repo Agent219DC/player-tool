@@ -315,6 +315,12 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
 .skel-line{height:12px}.skel-tag{height:52px}.skel-cards{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;padding:10px}.skel-card{height:150px}
 .dcinj{display:inline-flex;vertical-align:-2px;margin-left:5px;cursor:help}.dcinj svg{display:block}
+.ask-row{display:flex;align-items:center;gap:6px;margin:4px 0 2px}.ask-row input{width:150px;font:600 15px var(--mono);padding:5px 8px}
+.valtag{display:inline-block;font:700 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:8px;border:1px solid currentColor;margin-right:4px}
+.valtag.good{color:#00873a}.valtag.fair{color:var(--cMed)}.valtag.pricey{color:#c62828}
+[data-theme=dark] .valtag.good{color:#5fd38a}[data-theme=dark] .valtag.pricey{color:#ff8a80}
+.cmpverdict .valline{display:block;margin-top:6px}
+tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .dc-rowlbl{font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
 .dc-rowlbl .sub{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
 .dc-addbtn{border:1px dashed var(--line);background:none;color:var(--muted);border-radius:6px;padding:5px 8px;font:500 12.5px var(--body);cursor:pointer;text-align:left}
@@ -600,7 +606,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button></span>
     </div>
     <div class="bbctl">
-      <span class="seg" role="group" aria-label="Sort"><button type="button" data-bbs="priority" aria-pressed="true">Priority</button><button type="button" data-bbs="grade" aria-pressed="false">Grade</button><button type="button" data-bbs="gain" aria-pressed="false">Biggest upgrade</button></span>
+      <span class="seg" role="group" aria-label="Sort"><button type="button" data-bbs="priority" aria-pressed="true">Priority</button><button type="button" data-bbs="grade" aria-pressed="false">Grade</button><button type="button" data-bbs="gain" aria-pressed="false">Biggest upgrade</button><button type="button" data-bbs="value" aria-pressed="false" id="bbValBtn" hidden>Best value</button></span>
       <span class="seg" role="group" aria-label="Side"><button type="button" data-bbside="all" aria-pressed="true">All</button><button type="button" data-bbside="off" aria-pressed="false">Offense</button><button type="button" data-bbside="def" aria-pressed="false">Defense</button></span>
       <label class="check" style="font-size:13px"><input type="checkbox" id="bbNeed"> Upgrade spots only</label>
       <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
@@ -1613,13 +1619,26 @@ function renderCompare(given,ctx){
    <tr><td><b>Bio</b></td>${rows.map(x=>cell(x,esc(bioLine(x.p))||"–")).join("")}</tr>
    <tr><td><b>Status</b></td>${rows.map(x=>cell(x,x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:"–")).join("")}</tr>
    <tr><td><b>Eligibility / portal / visit</b></td>${rows.map(x=>cell(x,esc(recruitLine(x.p))||"–")).join("")}</tr>`
+   +(OWNER&&rows.some(x=>askOf(x.p))?(()=>{const vs=rows.map(x=>valueOf(x.p,x.r));const ok=vs.filter(Boolean).map(v=>v.per);const mx=ok.length>1?Math.max(...ok):null;
+     return `<tr class="ownrow"><td><b>Asking price</b> <span class="sub">only you</span></td>${rows.map(x=>cell(x,askOf(x.p)?money(askOf(x.p)):'<span class="sub">–</span>')).join("")}</tr>
+     <tr class="ownrow"><td><b>Value</b> <span class="sub">pts above 60 per $10k</span></td>${rows.map((x,i)=>cell(x,vs[i]?fmt(vs[i].per,1):'<span class="sub">–</span>',vs[i]&&mx!=null&&vs[i].per===mx?"best":"")).join("")}</tr>
+     <tr class="ownrow"><td><b>Grade could move</b></td>${rows.map(x=>cell(x,"±"+moeOf(x.r))).join("")}</tr>`})():"")
    +(rows.some(x=>x.p.career)?`<tr><td><b>Schools</b></td>${rows.map(x=>cell(x,x.p.career?esc(careerHist(x.p.career).join(" ← "))||"–":"No ESPN stats")).join("")}</tr>`:"");
   $("cmpTbl").innerHTML=head+"<tbody>"+mrows+extra.replace(/<\/td>,/g,"</td>")+"</tbody>";
   const withC=rows.filter(x=>x.p.career&&x.p.career.cats&&x.p.career.cats.length);const cc=$("cmpCareer");
   cc.hidden=!withC.length;cc.innerHTML=withC.length?`<h3>Career stats · ESPN</h3><div class="cgrid" style="--n:${rows.length}">${rows.map(x=>`<div class="career">${careerHtml(x.p.career,`<h4>${esc(x.p.name)}</h4>`)||`<h4>${esc(x.p.name)}</h4><div class="sub">No ESPN stats added. Open him and click Add stats.</div>`}</div>`).join("")}</div>`:"";
   $("compare").hidden=false;CMP_ROWS=rows;
-  const v=cmpVerdict(rows);$("cmpVerdict").hidden=!v;$("cmpVerdict").innerHTML=v?v.html:"";
+  const v=cmpVerdict(rows),vv=valueVerdict(rows);$("cmpVerdict").hidden=!v&&!vv;$("cmpVerdict").innerHTML=(v?v.html:"")+(vv?`<span class="valline">${vv}</span>`:"");
 }
+/* owner only: is the better grade worth the extra money? Two grades closer than their combined margin are treated as even */
+function valueVerdict(rows){if(!OWNER)return "";const w=rows.filter(x=>x.r.grade!=null&&askOf(x.p));if(w.length<2)return "";
+  const s=[...w].sort((a,b)=>b.r.grade-a.r.grade),A=s[0],B=s[1];const d=A.r.grade-B.r.grade,moe=Math.sqrt(moeOf(A.r)**2+moeOf(B.r)**2),pa=askOf(A.p),pb=askOf(B.p),diff=pa-pb;
+  const nm=x=>esc(x.p.name);
+  if(d<=moe){if(diff>0)return `<b>Value:</b> ${nm(A)} and ${nm(B)} grade about the same (${fmt(d)} apart, inside the ±${fmt(moe,1)} margin). ${nm(B)} costs ${money(diff)} less, so he's the better value.`;
+    if(diff<0)return `<b>Value:</b> ${nm(A)} grades a little higher and costs ${money(-diff)} less, so he's the clear pick.`;
+    return `<b>Value:</b> ${nm(A)} and ${nm(B)} grade about the same and ask the same.`}
+  if(diff<=0)return `<b>Value:</b> ${nm(A)} is clearly better (+${fmt(d)}, beyond the ±${fmt(moe,1)} margin) and doesn't cost more, so he's the pick.`;
+  return `<b>Value:</b> ${nm(A)} is clearly better (+${fmt(d)}, beyond the ±${fmt(moe,1)} margin) for ${money(diff)} more, about ${money(diff/d)} per grade point.`}
 /* one-line verdict: ours vs. target, or best vs. the rest */
 function cmpVerdict(rows){
   if(rows.length<2||rows.some(x=>x.r.grade==null))return null;
@@ -2022,13 +2041,15 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${r?marketHtml(p,r):""}${budgetCardHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${r?marketHtml(p,r):""}${askHtml(p,r)}${budgetCardHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
 $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){closeCard();return}const b=e.target.closest("[data-pc]");if(!b)return;const a=b.dataset.pc;
   if(a==="close")closeCard();
   if(a==="edit"){closeCard();fillForm(clone(CARD_P));openEditor()}
+  if(a==="ask"){const v=n0($("pcAsk").value);saveAsk(CARD_P,v).then(()=>openCard(CARD_P));return}
+  if(a==="askclear"){saveAsk(CARD_P,0).then(()=>openCard(CARD_P));return}
   if(a==="report"){fillForm(clone(CARD_P));printReport()}
   if(a==="cedit"){const box=d.querySelector(".pc-contacts"),q=CARD_P;
     box.innerHTML=`<h3>Contacts</h3><div class="grid2"><label>Agency<input id="pc-agency" type="text" value="${esc(q.agency||"")}" placeholder="Agency name"></label><label>Agent contact<input id="pc-agent" type="text" value="${esc(q.agent||"")}" placeholder="Name, phone or email"></label><label>Player contact<input id="pc-pcontact" type="text" value="${esc(q.pcontact||"")}" placeholder="Phone or email"></label></div><div class="pc-btns" style="margin-top:10px"><button type="button" class="btn primary" data-pc="csave">Save contacts</button><button type="button" class="btn" data-pc="ccancel">Cancel</button></div>`;
@@ -2136,18 +2157,19 @@ async function renderBigBoard(){
 }
 function bbRows(){if(!BB)return [];let v=BB.filter(x=>BBS.side==="all"||x.side===BBS.side);
   if($("bbNeed").checked)v=v.filter(x=>x.need==="High");
+  if(BBS.sort==="value"){const vo=x=>{const q=valueOf(x.p,x.r);return q?q.per:-1e9};v.sort((a,b)=>vo(b)-vo(a)||b.r.grade-a.r.grade)}else
   v.sort(BBS.sort==="grade"?(a,b)=>b.r.grade-a.r.grade:BBS.sort==="gain"?(a,b)=>b.gain-a.gain||b.r.grade-a.r.grade:(a,b)=>NEEDRANK[a.need]-NEEDRANK[b.need]||b.r.grade-a.r.grade);
   const n=+$("bbTop").value;return n?v.slice(0,n):v}
 function drawBigBoard(){const v=bbRows();
   if(!v.length){$("bbTbl").innerHTML=`<tbody><tr><td class="sub">${BB&&BB.length?"No targets match these filters.":"No graded targets yet. Add targets on the position boards and they'll show up here."}</td></tr></tbody>`;return}
-  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th></tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
+  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th>${OWNER?'<th class="num" title="Only you see this">Ask</th><th class="num" title="Grade points above 60 per $10k">Value</th>':""}</tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
     <td class="num rk">${i+1}</td><td><b>${esc(x.spot)}</b></td>
     <td class="bbp">${logoImg(x.p)}<b>${esc(x.p.name)}</b>${confFlag(x.r)}<div class="sub">${esc([x.p.school,seasonPlain(x.p)].filter(Boolean).join(" · "))}</div></td>
     <td>${esc(x.p.level||"")}</td><td class="num">${x.p.elig!=null?esc(String(x.p.elig)):"–"}</td>
     <td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:'<span class="sub">–</span>'}</td>
     <td class="num gtc gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</td><td><span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span></td>
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
-    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td></tr>`).join("")}</tbody>`}
+    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=valueOf(x.p,x.r);return `<td class="num">${q?money(q.ask):'<span class="sub">–</span>'}</td><td class="num">${q?`<b>${fmt(q.per,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
@@ -2566,6 +2588,30 @@ $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.tar
   try{await DB.doc("owner/budget").set({title:d.title||"",total:+d.total||0,groups:d.groups,goals:d.goals||{},at:new Date().toISOString()})}
   catch(err){flash("Couldn't save the budget. Publish the updated database rules first (Firebase → Firestore → Rules).",9000);return}
   flash("Budget loaded.")});
+/* ---------- value tracker: asking prices live at owner/asks, which only the owner can read ---------- */
+let ASKS={};
+const askKey=p=>normName(p.name)+"|"+String(p.school||"").toLowerCase().trim();
+const askOf=p=>{if(!OWNER||!p)return null;const a=ASKS[askKey(p)];return a&&a.amt>0?a.amt:null};
+/* how far a grade could move: the model's confidence turned into a plain +/- */
+const GRADE_MOE={High:3,Medium:5,Low:8};
+const moeOf=r=>GRADE_MOE[r&&r.conf]||8;
+/* value = grade points above the 60 pass mark for every $10k he's asking */
+function valueOf(p,r){const a=askOf(p);if(!a||!r||r.grade==null)return null;return {ask:a,per:(r.grade-60)/(a/10000)}}
+function watchAsks(db){db.doc("owner/asks").onSnapshot(s=>{ASKS=(s.exists&&s.data().asks)||{};
+  if($("pcard").open&&CARD_P)openCard(CARD_P);if(TAB==="bigboard"&&!$("bigboard").hidden)drawBigBoard();if(!$("compare").hidden&&CMP_ROWS.length>1)renderCompare(CMP_ROWS,CMP_CTX)},()=>{})}
+async function saveAsk(p,amt){if(!OWNER||!DB)return;const k=askKey(p);
+  const FV=window.firebase&&firebase.firestore&&firebase.firestore.FieldValue;
+  try{if(amt>0){ASKS[k]={amt,at:new Date().toISOString(),name:p.name};await DB.doc("owner/asks").set({asks:{[k]:ASKS[k]}},{merge:true})}
+    else{delete ASKS[k];await DB.doc("owner/asks").set({asks:{[k]:FV&&FV.delete?FV.delete():null}},{merge:true})}
+    flash(amt>0?`Asking price saved for ${p.name}.`:`Asking price cleared for ${p.name}.`)}
+  catch(e){flash("Couldn't save the asking price. Publish the latest database rules first.",8000)}}
+function askHtml(p,r){if(!OWNER||isOurs(p))return "";const a=askOf(p),g=r?marketRange(p,r,"g6"):null,v=valueOf(p,r);
+  let lines="";
+  if(a&&g&&g.mid){const d=a-g.mid,pc=d/g.mid;const tag=pc<=-0.1?["Good value","good"]:pc<=0.1?["Fair price","fair"]:["Pricey","pricey"];
+    lines+=`<div class="sub"><span class="valtag ${tag[1]}">${tag[0]}</span> ${money(a)} is ${d>=0?money(d)+" ("+Math.round(pc*100)+"%) above":money(-d)+" ("+Math.round(-pc*100)+"%) below"} the market center of ${money(g.mid)}.</div>`}
+  if(v)lines+=`<div class="sub">Value: <b>${fmt(v.per,1)}</b> grade points above passing (60) per $10k · grade could move about ±${moeOf(r)} at ${esc(r.conf||"low")} confidence.</div>`;
+  return `<div class="pc-mkt pc-bud pc-ask"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Asking price<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
+    <div class="ask-row"><span>$</span><input id="pcAsk" inputmode="numeric" placeholder="What he's asking" value="${a?commas(a):""}" aria-label="Asking price"><button type="button" class="btn" data-pc="ask">Save</button>${a?'<button type="button" class="linkbtn" data-pc="askclear" style="font-size:12.5px">Clear</button>':""}</div>${lines}</div>`}
 /* reads the Download tab: group blocks of NAME/TOTAL/% columns; "QB 1" style rows are open spots, "Last, First" rows are our players */
 function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==null?"":String(v).trim();
   const heads=[];R.forEach((row,r)=>{if(/^quarterback$/i.test(txt(cell(r,0)))||/^defensive line$/i.test(txt(cell(r,0))))heads.push(r)});if(!heads.length)return null;
@@ -2965,7 +3011,7 @@ async function connect(){
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);$("budBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);watchAsks(db);$("budBtn").hidden=false;$("bbValBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();startTabs();return}
   DB=db;subscribe();startTabs();
 }
