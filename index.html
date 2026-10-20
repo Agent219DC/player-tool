@@ -317,6 +317,7 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcinj{display:inline-flex;vertical-align:-2px;margin-left:5px;cursor:help}.dcinj svg{display:block}
 .ask-row{display:flex;align-items:center;gap:6px;margin:4px 0 2px}.ask-row input{width:150px;font:600 15px var(--mono);padding:5px 8px}
 .valtag{display:inline-block;font:700 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:8px;border:1px solid currentColor;margin-right:4px}
+td.vgood{color:#00873a;font-weight:600}td.vbad{color:#c62828;font-weight:600}[data-theme=dark] td.vgood{color:#5fd38a}[data-theme=dark] td.vbad{color:#ff8a80}
 .valtag.good{color:#00873a}.valtag.fair{color:var(--cMed)}.valtag.pricey{color:#c62828}
 [data-theme=dark] .valtag.good{color:#5fd38a}[data-theme=dark] .valtag.pricey{color:#ff8a80}
 .cmpverdict .valline{display:block;margin-top:6px}
@@ -1619,9 +1620,10 @@ function renderCompare(given,ctx){
    <tr><td><b>Bio</b></td>${rows.map(x=>cell(x,esc(bioLine(x.p))||"–")).join("")}</tr>
    <tr><td><b>Status</b></td>${rows.map(x=>cell(x,x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:"–")).join("")}</tr>
    <tr><td><b>Eligibility / portal / visit</b></td>${rows.map(x=>cell(x,esc(recruitLine(x.p))||"–")).join("")}</tr>`
-   +(OWNER&&rows.some(x=>askOf(x.p))?(()=>{const vs=rows.map(x=>valueOf(x.p,x.r));const ok=vs.filter(Boolean).map(v=>v.per);const mx=ok.length>1?Math.max(...ok):null;
+   +(OWNER&&rows.some(x=>askOf(x.p))?(()=>{const vs=rows.map(x=>valueOf(x.p,x.r));const pcs=vs.filter(v=>v&&v.pct!=null).map(v=>v.pct),best=pcs.length>1?Math.min(...pcs):null;const ups=vs.filter(Boolean).map(v=>v.upg),bu=ups.length>1?Math.max(...ups):null;
      return `<tr class="ownrow"><td><b>Asking price</b> <span class="sub">only you</span></td>${rows.map(x=>cell(x,askOf(x.p)?money(askOf(x.p)):'<span class="sub">–</span>')).join("")}</tr>
-     <tr class="ownrow"><td><b>Value</b> <span class="sub">pts above 60 per $10k</span></td>${rows.map((x,i)=>cell(x,vs[i]?fmt(vs[i].per,1):'<span class="sub">–</span>',vs[i]&&mx!=null&&vs[i].per===mx?"best":"")).join("")}</tr>
+     <tr class="ownrow"><td><b>vs. market</b> <span class="sub">for his grade</span></td>${rows.map((x,i)=>cell(x,vs[i]&&vs[i].mid?`${pctTxt(vs[i].pct)} <span class="sub">(${money(vs[i].mid)})</span>`:'<span class="sub">–</span>',vs[i]&&best!=null&&vs[i].pct===best?"best":"")).join("")}</tr>
+     <tr class="ownrow"><td><b>Upgrade per $10k</b> <span class="sub">over our weakest starter</span></td>${rows.map((x,i)=>cell(x,vs[i]?fmt(vs[i].upg,1):'<span class="sub">–</span>',vs[i]&&bu!=null&&bu>0&&vs[i].upg===bu?"best":"")).join("")}</tr>
      <tr class="ownrow"><td><b>Grade could move</b></td>${rows.map(x=>cell(x,"±"+moeOf(x.r))).join("")}</tr>`})():"")
    +(rows.some(x=>x.p.career)?`<tr><td><b>Schools</b></td>${rows.map(x=>cell(x,x.p.career?esc(careerHist(x.p.career).join(" ← "))||"–":"No ESPN stats")).join("")}</tr>`:"");
   $("cmpTbl").innerHTML=head+"<tbody>"+mrows+extra.replace(/<\/td>,/g,"</td>")+"</tbody>";
@@ -2002,15 +2004,15 @@ const money=v=>v==null?"–":v>=1e6?"$"+(v/1e6).toFixed(v>=1e7?0:2).replace(/\.?
 function gradePct(g){if(g==null)return null;if(g<=60)return 5;if(g>=90)return 95;return g<75?5+(g-60)/15*45:50+(g-75)/15*45}
 function pctValue(row,pc){const [,p5,p50,p95]=row;if(pc<=5)return p5;if(pc>=95)return p95;return pc<50?p5+(p50-p5)*(pc-5)/45:p50+(p95-p50)*(pc-50)/45}
 /* his projected slot among our players at this position (targets: vs our returning players; ours: his rank among us) */
-function projSlot(p,r){if(!r||r.grade==null)return null;const me=pkey(p);const yr=String(p.season||CUR_SEASON);
-  const ours=BOARD.filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr&&pkey(b)!==me).map(b=>({b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null);
+function projSlot(p,r,board){if(!r||r.grade==null)return null;const me=pkey(p);const yr=String(p.season||CUR_SEASON);
+  const ours=(board||BOARD).filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr&&pkey(b)!==me).map(b=>({b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null);
   const pool=isOurs(p)?ours:ours.filter(x=>x.b.elig!==0);
   return pool.filter(x=>x.r.grade>r.grade).length+1}
-function marketRange(p,r,lvl){if(!MARKET||!r||r.grade==null)return null;const tbl=MARKET[lvl]&&MARKET[lvl].apy;if(!tbl)return null;
-  const base=MKT_POS[POSKEY];if(!base)return null;let slot=projSlot(p,r);if(!slot)return null;
-  const shown=POSKEY==="NIC"?slot+1:slot;let n=shown,row=tbl[base+n];while(!row&&n>1){n--;row=tbl[base+n]}if(!row)return null;
+function marketRange(p,r,lvl,ctx){if(!MARKET||!r||r.grade==null)return null;const tbl=MARKET[lvl]&&MARKET[lvl].apy;if(!tbl)return null;
+  const PK=(ctx&&ctx.key)||POSKEY;const base=MKT_POS[PK];if(!base)return null;let slot=projSlot(p,r,ctx&&ctx.board);if(!slot)return null;
+  const shown=PK==="NIC"?slot+1:slot;let n=shown,row=tbl[base+n];while(!row&&n>1){n--;row=tbl[base+n]}if(!row)return null;
   const lo=pctValue(row,gradePct(r.grade-5)),hi=pctValue(row,gradePct(r.grade+5)),mid=pctValue(row,gradePct(r.grade));
-  return {lo,hi,mid,slotLbl:(POSKEY==="NIC"?"NIC"+slot:POSKEY+slot),rowLbl:base+n}}
+  return {lo,hi,mid,slotLbl:(PK==="NIC"?"NIC"+slot:PK+slot),rowLbl:base+n}}
 function marketHtml(p,r){const g=marketRange(p,r,"g6");if(!g)return "";const p4=marketRange(p,r,"p4");
   return `<div class="pc-mkt"><h3 style="margin:0">Market price range</h3><div class="big">${money(g.lo)} – ${money(g.hi)}</div>
     <div class="sub">Projects <b>${esc(g.slotLbl)}</b> for us · G6 market for ${esc(g.rowLbl)}, centered near <b>${money(g.mid)}</b></div>
@@ -2152,24 +2154,25 @@ async function renderBigBoard(){
       const weak=ours.length<g.n?null:ours[ours.length-1];
       const need=!weak||weak.r.grade<70?"High":weak.r.grade<80?"Upgrade":"Set";
       live.filter(x=>inRole(x)&&ok(x)&&!isMarshallP(x.p)&&x.p.status!=="Pass"&&x.p.status!=="NIP").forEach(x=>
-        rows.push({k,side:sideOf(k),spot:g.lbl,p:x.p,r:x.r,need,weak:weak?weak.r.grade:null,gain:x.r.grade-(weak?weak.r.grade:0)}))})}));
+        rows.push({k,side:sideOf(k),spot:g.lbl,p:x.p,r:x.r,need,weak:weak?weak.r.grade:null,gain:x.r.grade-(weak?weak.r.grade:0),
+          val:OWNER&&askOf(x.p)?valueOf(x.p,x.r,{mid:(marketRange(x.p,x.r,"g6",{key:k,board:docs})||{}).mid||null,weak:weak?weak.r.grade:null}):null}))})}));
   BB=rows;drawBigBoard();$("bbPrint").disabled=!rows.length;
 }
 function bbRows(){if(!BB)return [];let v=BB.filter(x=>BBS.side==="all"||x.side===BBS.side);
   if($("bbNeed").checked)v=v.filter(x=>x.need==="High");
-  if(BBS.sort==="value"){const vo=x=>{const q=valueOf(x.p,x.r);return q?q.per:-1e9};v.sort((a,b)=>vo(b)-vo(a)||b.r.grade-a.r.grade)}else
+  if(BBS.sort==="value"){const vo=x=>x.val&&x.val.pct!=null?x.val.pct:x.val?5:9;v.sort((a,b)=>vo(a)-vo(b)||(b.val?b.val.upg:0)-(a.val?a.val.upg:0)||b.r.grade-a.r.grade)}else
   v.sort(BBS.sort==="grade"?(a,b)=>b.r.grade-a.r.grade:BBS.sort==="gain"?(a,b)=>b.gain-a.gain||b.r.grade-a.r.grade:(a,b)=>NEEDRANK[a.need]-NEEDRANK[b.need]||b.r.grade-a.r.grade);
   const n=+$("bbTop").value;return n?v.slice(0,n):v}
 function drawBigBoard(){const v=bbRows();
   if(!v.length){$("bbTbl").innerHTML=`<tbody><tr><td class="sub">${BB&&BB.length?"No targets match these filters.":"No graded targets yet. Add targets on the position boards and they'll show up here."}</td></tr></tbody>`;return}
-  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th>${OWNER?'<th class="num" title="Only you see this">Ask</th><th class="num" title="Grade points above 60 per $10k">Value</th>':""}</tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
+  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th>${OWNER?'<th class="num" title="Only you see this">Ask</th><th class="num" title="His ask against the market price for his grade at that spot">vs. mkt</th><th class="num" title="Points over our weakest starter per $10k">Upg/$10k</th>':""}</tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
     <td class="num rk">${i+1}</td><td><b>${esc(x.spot)}</b></td>
     <td class="bbp">${logoImg(x.p)}<b>${esc(x.p.name)}</b>${confFlag(x.r)}<div class="sub">${esc([x.p.school,seasonPlain(x.p)].filter(Boolean).join(" · "))}</div></td>
     <td>${esc(x.p.level||"")}</td><td class="num">${x.p.elig!=null?esc(String(x.p.elig)):"–"}</td>
     <td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:'<span class="sub">–</span>'}</td>
     <td class="num gtc gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</td><td><span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span></td>
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
-    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=valueOf(x.p,x.r);return `<td class="num">${q?money(q.ask):'<span class="sub">–</span>'}</td><td class="num">${q?`<b>${fmt(q.per,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
+    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=x.val;return `<td class="num">${q?money(q.ask):'<span class="sub">–</span>'}</td><td class="num ${q&&q.pct!=null?(q.pct<=-0.1?"vgood":q.pct>0.1?"vbad":""):""}">${q&&q.pct!=null?pctTxt(q.pct):'<span class="sub">–</span>'}</td><td class="num">${q?`<b>${fmt(q.upg,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
@@ -2595,21 +2598,30 @@ const askOf=p=>{if(!OWNER||!p)return null;const a=ASKS[askKey(p)];return a&&a.am
 /* how far a grade could move: the model's confidence turned into a plain +/- */
 const GRADE_MOE={High:3,Medium:5,Low:8};
 const moeOf=r=>GRADE_MOE[r&&r.conf]||8;
-/* value = grade points above the 60 pass mark for every $10k he's asking */
-function valueOf(p,r){const a=askOf(p);if(!a||!r||r.grade==null)return null;return {ask:a,per:(r.grade-60)/(a/10000)}}
+/* our weakest starter at his spot (on the board in view): what he'd have to beat */
+function weakStarterGrade(p){const g=(OV_SPOTS[POSKEY]||[{n:1}]).find(s=>!s.role||s.role===p.role)||{n:1};
+  const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
+  const ours=BOARD.filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&(+b.season||0)===yr&&(!g.role||b.role===g.role)).map(b=>score(b)).filter(r=>r&&r.grade!=null&&(r.conf==="High"||r.conf==="Medium")).map(r=>r.grade).sort((a,b)=>b-a).slice(0,g.n);
+  return ours.length<g.n?null:ours[ours.length-1]}
+/* value: his ask against what the market pays for his grade at that spot, and how many points he adds over our weakest starter per $10k */
+function valueOf(p,r,ctx){const a=askOf(p);if(!a||!r||r.grade==null)return null;
+  const m=ctx&&"mid" in ctx?ctx.mid:(()=>{const g=marketRange(p,r,"g6");return g?g.mid:null})();
+  const weak=ctx&&"weak" in ctx?ctx.weak:weakStarterGrade(p);const gain=r.grade-(weak==null?60:weak);
+  return {ask:a,mid:m,pct:m?(a-m)/m:null,upg:Math.max(0,gain)/(a/10000),gain,weak}}
+const pctTxt=v=>v==null?"–":Math.abs(v)<0.005?"at market":`${Math.round(Math.abs(v)*100)}% ${v<0?"under":"over"}`;
 function watchAsks(db){db.doc("owner/asks").onSnapshot(s=>{ASKS=(s.exists&&s.data().asks)||{};
-  if($("pcard").open&&CARD_P)openCard(CARD_P);if(TAB==="bigboard"&&!$("bigboard").hidden)drawBigBoard();if(!$("compare").hidden&&CMP_ROWS.length>1)renderCompare(CMP_ROWS,CMP_CTX)},()=>{})}
+  if($("pcard").open&&CARD_P)openCard(CARD_P);if(TAB==="bigboard"&&!$("bigboard").hidden)renderBigBoard();if(!$("compare").hidden&&CMP_ROWS.length>1)renderCompare(CMP_ROWS,CMP_CTX)},()=>{})}
 async function saveAsk(p,amt){if(!OWNER||!DB)return;const k=askKey(p);
   const FV=window.firebase&&firebase.firestore&&firebase.firestore.FieldValue;
   try{if(amt>0){ASKS[k]={amt,at:new Date().toISOString(),name:p.name};await DB.doc("owner/asks").set({asks:{[k]:ASKS[k]}},{merge:true})}
     else{delete ASKS[k];await DB.doc("owner/asks").set({asks:{[k]:FV&&FV.delete?FV.delete():null}},{merge:true})}
     flash(amt>0?`Asking price saved for ${p.name}.`:`Asking price cleared for ${p.name}.`)}
   catch(e){flash("Couldn't save the asking price. Publish the latest database rules first.",8000)}}
-function askHtml(p,r){if(!OWNER||isOurs(p))return "";const a=askOf(p),g=r?marketRange(p,r,"g6"):null,v=valueOf(p,r);
+function askHtml(p,r){if(!OWNER||isOurs(p))return "";const a=askOf(p),v=valueOf(p,r);
   let lines="";
-  if(a&&g&&g.mid){const d=a-g.mid,pc=d/g.mid;const tag=pc<=-0.1?["Good value","good"]:pc<=0.1?["Fair price","fair"]:["Pricey","pricey"];
-    lines+=`<div class="sub"><span class="valtag ${tag[1]}">${tag[0]}</span> ${money(a)} is ${d>=0?money(d)+" ("+Math.round(pc*100)+"%) above":money(-d)+" ("+Math.round(-pc*100)+"%) below"} the market center of ${money(g.mid)}.</div>`}
-  if(v)lines+=`<div class="sub">Value: <b>${fmt(v.per,1)}</b> grade points above passing (60) per $10k · grade could move about ±${moeOf(r)} at ${esc(r.conf||"low")} confidence.</div>`;
+  if(v&&v.mid){const pc=v.pct;const tag=pc<=-0.1?["Good value","good"]:pc<=0.1?["Fair price","fair"]:["Pricey","pricey"];
+    lines+=`<div class="sub"><span class="valtag ${tag[1]}">${tag[0]}</span> ${money(a)} vs. a market price of ${money(v.mid)} for his grade at that spot: <b>${pctTxt(pc)}</b>.</div>`}
+  if(v)lines+=`<div class="sub">${v.gain>0?`Upgrade: <b>+${fmt(v.gain)}</b> over ${v.weak==null?"an open spot (60 baseline)":"our weakest starter ("+fmt(v.weak)+")"} · <b>${fmt(v.upg,1)}</b> points per $10k.`:`No upgrade: he doesn't grade above our weakest starter (${fmt(v.weak)}).`} Grade could move about ±${moeOf(r)}.</div>`;
   return `<div class="pc-mkt pc-bud pc-ask"><h3 style="margin:0;display:flex;justify-content:space-between;align-items:baseline">Asking price<span class="sub" style="font:400 11px var(--body);letter-spacing:0;text-transform:none">Only you see this</span></h3>
     <div class="ask-row"><span>$</span><input id="pcAsk" inputmode="numeric" placeholder="What he's asking" value="${a?commas(a):""}" aria-label="Asking price"><button type="button" class="btn" data-pc="ask">Save</button>${a?'<button type="button" class="linkbtn" data-pc="askclear" style="font-size:12.5px">Clear</button>':""}</div>${lines}</div>`}
 /* reads the Download tab: group blocks of NAME/TOTAL/% columns; "QB 1" style rows are open spots, "Last, First" rows are our players */
