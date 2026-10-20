@@ -689,7 +689,7 @@ window.claude={use:async n=>{
   <section id="budget" data-page="budget" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"></span>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="budPrint">Print</button></span>
     </div>
     <div id="budBody"></div>
   </section>
@@ -2642,6 +2642,35 @@ $("budBody").addEventListener("click",e=>{if(!BUDGET)return;const rm=e.target.cl
   if(add){const g=BUDGET.groups[+add.dataset.badd],pos=add.dataset.pos;let at=-1;g.rows.forEach((x,i)=>{if(x.pos===pos)at=i});
     g.rows.splice(at+1,0,{slot:"",pos,name:null,amt:0});budRenumber();renderBudget();budSave();
     const inp=document.querySelector(`[data-r="${+add.dataset.badd}.${at+1}"] .bn`);if(inp)inp.focus()}});
+/* owner-only printout: totals up top, then every group's spots in four columns */
+async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budget first.");return}
+  if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  const W=pdfHeader(doc,"Player Tool · Budget","Confidential: owner only"),PH=doc.internal.pageSize.getHeight();
+  const Tt=+b.total||0,rows=budRows(),sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0),held=sum(x=>x.name),open=sum(x=>!x.name),left=Tt-held-open,pct=v=>Tt?(v/Tt*100).toFixed(1)+"%":"-";
+  const nH=rows.filter(x=>x.name).length;
+  /* summary boxes */
+  const box=[["Total budget",money(Tt),""],[`Roster players (${nH})`,money(held),pct(held)+" of budget"],[`Open spots (${rows.length-nH})`,money(open),pct(open)+" of budget"],[left>=0?"Left to allocate":"Over budget",money(Math.abs(left)),pct(held+open)+" allocated"]];
+  const bw=(W-80-3*10)/4;box.forEach(([l,v,sub],i)=>{const x=40+i*(bw+10),y=76;doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.roundedRect(x,y,bw,46,4,4);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);doc.text(T(l),x+8,y+13);
+    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(...(i===3&&left<0?[198,40,40]:[24,32,26]));doc.text(T(v),x+8,y+31);
+    if(sub){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(91,102,93);doc.text(T(sub),x+8,y+41)}});
+  /* groups in the shortest of three columns */
+  const goals=b.goals||{},cols=4,cw=(W-80-(cols-1)*10)/cols,colY=Array(cols).fill(136);
+  (b.groups||[]).forEach(g=>{const gr=g.rows||[],t=gr.reduce((a,x)=>a+(+x.amt||0),0);const need=24+gr.length*14+16;
+    let c=colY.indexOf(Math.min(...colY));if(colY[c]+need>PH-30){doc.addPage();pdfHeader(doc,"Player Tool · Budget (cont.)","Confidential: owner only");colY.fill(80);c=0}
+    const x=40+c*(cw+10);
+    doc.autoTable({startY:colY[c],margin:{left:x},tableWidth:cw,theme:"grid",
+      head:[[{content:T(g.name),colSpan:2,styles:{halign:"left"}},{content:money(t),styles:{halign:"right"}},{content:pct(t),styles:{halign:"right"}}]],
+      body:gr.map(r=>[r.slot,r.name?T(r.name):"Open",money(r.amt),pct(+r.amt||0)]),
+      foot:[[{content:`${gr.filter(r=>!r.name).length} open${goals[g.name]!=null?" · goal "+(goals[g.name]*100).toFixed(0)+"%":""}`,colSpan:4,styles:{halign:"left"}}]],
+      styles:{font:"helvetica",fontSize:8,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
+      headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8,cellPadding:{top:4,bottom:4,left:3,right:2}},footStyles:{fillColor:[243,245,242],textColor:[91,102,93],fontStyle:"normal",fontSize:7.5},
+      columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:31,textColor:[91,102,93]}},
+      didParseCell:h=>{if(h.section==="body"&&h.column.index===1&&!gr[h.row.index].name){h.cell.styles.textColor=[120,130,122];h.cell.styles.fontStyle="italic"}}});
+    colY[c]=doc.lastAutoTable.finalY+12});
+  await pdfSave(doc,`Budget ${new Date().toISOString().slice(0,10)}.pdf`)}
+$("budPrint").addEventListener("click",printBudget);
 $("budUp").addEventListener("click",()=>$("budFile").click());
 $("budFile").addEventListener("change",async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;let d;
   try{if(/\.json$/i.test(f.name)){d=JSON.parse(await f.text());if(d.format!=="player-tool-budget"||!Array.isArray(d.groups))throw 0}
