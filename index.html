@@ -242,7 +242,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dc-rows{display:grid;gap:10px;min-width:0}
 .tb-col.dc-pool{border-style:dashed}
 @media (max-width:700px){.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(var(--n),200px)!important;grid-auto-flow:row}.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
-.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:5px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
+.dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:4px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
 .dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
 .dcm{display:inline-block;font:700 9.5px var(--body);letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);margin-right:3px;vertical-align:1px}
 .dcm.tr{background:rgba(70,189,198,.22);border-color:rgba(70,189,198,.7);color:var(--fg)}
@@ -251,10 +251,11 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 [data-theme=dark] .dcm.cut{color:#ff8a80}
 #depth{--dc-fr:rgba(255,214,0,.30);--dc-tr:rgba(70,189,198,.28);--dc-wo:rgba(140,100,220,.22);--dc-cut:rgba(220,60,60,.24)}
 [data-theme=dark] #depth{--dc-fr:rgba(255,214,0,.20);--dc-tr:rgba(70,189,198,.26);--dc-wo:rgba(160,120,240,.26);--dc-cut:rgba(240,80,80,.26)}
-.dc-key{display:grid;grid-template-columns:repeat(3,minmax(0,auto));border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;background:var(--surface)}
+.dc-key{display:grid;grid-template-columns:repeat(6,minmax(0,auto));border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;background:var(--surface)}
 .dc-keyh{grid-column:1/-1;padding:5px 10px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--sunk)}
 .dc-keyr[hidden]{display:none}.dc-keyr{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--line)}
 .dc-sw{display:inline-block;width:40px;height:18px;border-radius:4px;border:1px solid var(--line)}
+@media (max-width:1000px){.dc-key{grid-template-columns:repeat(3,minmax(0,auto))}}
 @media (max-width:640px){.dc-key{grid-template-columns:1fr 1fr}}
 .dc-keywrap{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:flex-start}
 .dc-legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12.5px;color:var(--muted)}
@@ -271,7 +272,7 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .tag.dc .meta b{font:700 12px var(--mono)}.tag.dc .gr small.bp{display:block;text-align:right;font:500 9.5px var(--body);color:var(--muted);letter-spacing:.04em}.tag.dc.dcchip .gr small.bp{display:inline;margin-left:4px}.tag.dc.dcchip .gr{font:700 11.5px var(--mono)}.tag.dc .meta .bp{font-size:10.5px}.tag.dc .meta .dot{opacity:.6}
 .tag.dc .ln2{grid-column:2/3;grid-row:3;margin-top:2px}
 .tag.dc .nm{overflow-wrap:normal;word-break:normal;line-height:1.2}
-.tag.dc.dcchip{display:block;padding:5px 8px;cursor:grab}.tag.dc.dcchip .nm{display:block;padding:0}.tag.dc.dcchip .meta{display:block}
+.tag.dc.dcchip{display:block;padding:4px 8px;cursor:grab;line-height:1.3}.tag.dc.dcchip .nm{display:inline;padding:0}.tag.dc.dcchip .meta{display:inline;margin-left:6px;font-size:11px}
 .dcc{display:inline-block;margin-left:4px;font:700 10px var(--body);padding:0 5px;border-radius:8px;background:rgba(198,40,40,.14);color:#c62828;border:1px solid rgba(198,40,40,.45)}
 [data-theme=dark] .dcc{color:#ff8a80}
 .dcthin{display:inline-block;vertical-align:2px;margin-left:4px;font:700 9.5px var(--body);letter-spacing:.05em;padding:1px 6px;border-radius:8px;background:rgba(214,150,0,.18);color:#8a5a00;border:1px solid rgba(214,150,0,.6)}
@@ -2184,7 +2185,7 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
 $("tbPrint").addEventListener("click",printTagBoard);
 /* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
 /* each side is rows of spots; WRP / OLP hold receivers and linemen not placed at a spot yet (shown only when someone is in them) */
-const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK"],["LBA","LBB","NIC"],["SAFA","SAFB","CBA","CBB"]],st:[["STP"],["K","P","LS"]]};
+const DC_ROWS={off:[["WRP","OLP"],["QB","RB","X","SLOT","Z","TE"],["LT","LG","OC","RG","RT"]],def:[["DLP","LBP","DBP"],["FE","DTA","DTB","JACK","LBA","LBB"],["NIC","SAFA","SAFB","CBA","CBB"]],st:[["STP"],["K","P","LS"]]};
 const DC_POOLS=["WRP","OLP","DLP","LBP","DBP","STP"];
 const DC_SIDES=Object.fromEntries(Object.entries(DC_ROWS).map(([k,r])=>[k,r.flat()]));
 const DC_LABEL={STP:"ST · to place",SLOT:"Slot",WRP:"WR · to place",OLP:"OL · to place",DLP:"DL · to place",LBP:"LB · to place",DBP:"DB · to place",DTA:"DT",DTB:"DT",LBA:"MIKE",LBB:"WILL",SAFA:"FSAF",SAFB:"BSAF",CBA:"FCB",CBB:"BCB"};
@@ -2259,7 +2260,7 @@ const dcIsTr=x=>x.t==="tr"&&DC_SZN!=="next";
 function dcCols(x){return [x.t==="fr"?"fr":"",dcIsTr(x)?"tr":"",x.wo?"wo":"",x.cut?"cut":""].filter(Boolean)}
 function dcBg(x){const c=dcCols(x);if(!c.length)return "";if(c.length===1)return `linear-gradient(var(--dc-${c[0]}),var(--dc-${c[0]})),var(--surface)`;
   const w=100/c.length;return `linear-gradient(90deg,${c.map((k,i)=>`var(--dc-${k}) ${i*w}% ${(i+1)*w}%`).join(",")}),var(--surface)`}
-const DC_ROWLBL={off:["","Skill","Offensive line"],def:["","Front","Linebackers","Secondary"],st:["","Specialists"]};
+const DC_ROWLBL={off:["","Skill","Offensive line"],def:["","Front & linebackers","Secondary"],st:["","Specialists"]};
 let DC_ADDOPEN=null;
 function dcHtWt(g){if(!g)return "";const h=String(g.ht||"").replace(/^(\d)\s*[-' ]\s*(\d{1,2})"?$/,"$1'$2\"");const w=g.wt?String(g.wt).replace(/\s*lbs?\.?$/i,""):"";return [h,w].filter(Boolean).join(" · ")}
 function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;const pool=DC_POOLS.includes(k);
