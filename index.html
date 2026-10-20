@@ -357,6 +357,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+#recTbl{min-width:0}#recruit .tablewrap{max-width:760px}#recTbl th,#recTbl td{text-align:center}#recTbl th:first-child,#recTbl td:first-child{text-align:left}#recTbl .og{display:block;font:500 10px var(--body);color:var(--muted)}
 #recTbl .open{color:#00873a}#recTbl .over,.recroster .over{color:#c62828}[data-theme=dark] #recTbl .open{color:#5fd38a}[data-theme=dark] #recTbl .over,[data-theme=dark] .recroster .over{color:#ff8a80}
 .recroster{margin:0;font-size:14px}
 /* phones: keep the columns that matter on screen instead of side-scrolling */
@@ -381,8 +382,8 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
   #bbTbl td[data-l]::before{content:attr(data-l) " ";font:500 11px var(--body);color:var(--muted)}
   #bbTbl td.bbp{min-width:0}#bbTbl td.bbp .slogo{display:none}
   #bbTbl tr>:nth-child(4),#bbTbl tr>:nth-child(5),#bbTbl tr>:nth-child(6),#bbTbl tr>:nth-child(8){display:none}
-  #recTbl th{font-size:10px;letter-spacing:0;padding:8px 3px}#recTbl td{padding:8px 3px}
-  #recTbl tr>:nth-child(8),#recTbl tr>:nth-child(9),#recTbl tr>:nth-child(10),#recTbl tr>:nth-child(11),#recTbl tr>:nth-child(5){display:none}
+  #recTbl th{font-size:9.5px;letter-spacing:0;padding:8px 2px}#recTbl td{padding:8px 2px}#recTbl td.num button{padding:2px 4px}
+  
 }
 @media (pointer:coarse),(max-width:640px){.bud-g td.rm{width:36px}.bud-g td.rm button{min-width:32px;min-height:32px;font-size:18px}.bud-add .linkbtn{padding:6px 0}}
 .vday{margin-top:8px}
@@ -660,7 +661,7 @@ window.claude={use:async n=>{
     </div>
     <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note"><b>Open</b> = the position max minus scholarship players on the Next season depth chart; <b>Left</b> = Open minus Committed targets not on the chart yet. The top line is the 105-man total, walk-ons included. Targets count once each (latest season); tap a number to open that list.</p>
+    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on the chart yet. <b>Working</b> = Target + Contacted. The top line is the 105-man total, walk-ons included. Tap a number to open that list.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
       <h2 style="font-size:19px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
@@ -774,7 +775,7 @@ window.claude={use:async n=>{
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
         <h2 id="boardTitle">QB Board</h2>
-        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option>On Roster</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option><option value="none">No status</option></select>
+        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option>On Roster</option><option value="working">Working (Target + Contacted)</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option><option value="none">No status</option></select>
         <input id="boardSearch" type="search" placeholder="Search players" aria-label="Search the board" style="width:220px;max-width:100%;font-family:var(--body)">
         <div class="seg" role="group" aria-label="Filter by role" id="roleFilter" hidden>
           <button type="button" data-rf="All" aria-pressed="true">All</button>
@@ -1432,7 +1433,7 @@ function eligLong(p){return p.elig===0?"0 yrs left":p.elig?p.elig+(p.elig===1?" 
 function eligShort(p){return p.elig===0?"0":p.elig?String(p.elig):"—"}
 function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.pdate)a.push("In portal since "+fmtDate(p.pdate));else if(p.portal==="Yes")a.push("In portal");if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
-function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:p.status!==sf)return false}
+function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:sf==="working"?!(p.status==="Target"||p.status==="Contacted"):p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
 const blendYr=p=>p.prior&&p.prior.db?(Number(p.season)?Number(p.season)-1:"last"):null;
 function behindBy(p){const g=Number(p.thru);return S.mode==="mid"&&g&&String(p.season)===String(CUR_SEASON)&&tg()-g>=2?tg()-g:0}
@@ -1446,7 +1447,7 @@ function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+"
 function filtersOn(){return STARONLY||!!$("statusFilter").value||!!($("boardSearch").value||"").trim()||(P.roles&&ROLEF!=="All")}
 function updateBoardTitle(){const sf=$("statusFilter").value,bits=[];
   if(P.roles&&ROLEF!=="All")bits.push(ROLEF==="Slot"?"SLOT":"WR");
-  if(sf)bits.push(sf==="none"?"No status":sf);
+  if(sf)bits.push(sf==="none"?"No status":sf==="working"?"Working":sf);
   if(STARONLY)bits.push("★ Starred");
   const q=($("boardSearch").value||"").trim();if(q)bits.push(`“${q}”`);
   $("boardTitle").textContent=P.label+" Board"+(bits.length?" · "+bits.join(" · "):"");}
@@ -2153,12 +2154,14 @@ async function renderRecruit(){
   const lim=L&&L.limit||105,commitAll=rows.reduce((a,r)=>a+(r.c.newCommit||0),0),openAll=lim-cnt.total;
   $("recRoster").innerHTML=hasChart?`<b>Next season:</b> ${cnt.total} / ${lim} · ${openAll>=0?`<b>${openAll}</b> roster spot${openAll===1?"":"s"} open`:`<b class="over">${-openAll} over</b>`} · ${commitAll} committed · ${openAll-commitAll>=0?`<b>${openAll-commitAll}</b> left`:`<b class="over">${commitAll-openAll} over</b>`} <span class="sub">(from the Next season depth chart)</span>`:'<span class="sub">Load the roster grid in Settings to see open roster spots here.</span>';
   REC={rows,visits,grp,hasChart};
-  const tot={};REC_COLS.concat(["none","visits"]).forEach(t=>tot[t]=rows.reduce((a,r)=>a+r.c[t],0));
-  const cell=(k,t,v)=>`<td class="num">${v?`<button type="button" data-rk="${k}" data-rs="${t}">${v}</button>`:`<span class="sub">0</span>`}</td>`;
-  const sp=(o,g,k)=>{if(!o)return '<td class="num"><span class="sub">–</span></td><td class="num"><span class="sub">–</span></td>';const sh=g!==k?` <span class="sub">${g}</span>`:"";
+  rows.forEach(r=>{r.c.working=(r.c.Target||0)+(r.c.Contacted||0)});
+  const cell=(k,t,v,nb)=>`<td class="num">${nb?'<span class="sub">–</span>':v?`<button type="button" data-rk="${k}" data-rs="${t}">${v}</button>`:`<span class="sub">0</span>`}</td>`;
+  const sp=(o,g,k)=>{if(!o)return '<td class="num"><span class="sub">–</span></td><td class="num"><span class="sub">–</span></td>';const sh=g!==k?`<span class="og">${g}</span>`:"";
     const f=v=>v==null?'<span class="sub">–</span>':v<0?`<b class="over">${v}</b>`:v===0?'<span class="sub">0</span>':`<b class="open">${v}</b>`;return `<td class="num">${f(o.open)}${sh}</td><td class="num">${f(o.left)}</td>`};
-  $("recTbl").innerHTML=`<thead><tr><th>Pos.</th><th class="num" title="Max at this position minus players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th>${REC_COLS.map(t=>`<th class="num">${t}</th>`).join("")}<th class="num">No status</th><th class="num">Visits set</th><th class="num">Total</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${REC_COLS.map(t=>r.noBoard?'<td class="num"><span class="sub">–</span></td>':cell(r.k,t,r.c[t])).join("")}${cell(r.k,"none",r.c.none)}<td class="num">${r.c.visits||'<span class="sub">0</span>'}</td><td class="num"><b>${r.total}</b></td></tr>`).join("")}
-    <tr class="tot"><td>Total</td>${(()=>{if(!REC.hasChart)return '<td class="num">–</td><td class="num">–</td>';const gs=Object.values(REC.grp).filter(o=>o.open!=null);return `<td class="num">${gs.reduce((a,o)=>a+Math.max(0,o.open),0)}</td><td class="num">${gs.reduce((a,o)=>a+Math.max(0,o.left),0)}</td>`})()}${REC_COLS.map(t=>`<td class="num">${tot[t]}</td>`).join("")}<td class="num">${tot.none}</td><td class="num">${tot.visits}</td><td class="num">${rows.reduce((a,r)=>a+r.total,0)}</td></tr></tbody>`;
+  const sumG=f=>REC.hasChart?Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0):"–";
+  const tot=t=>rows.reduce((a,r)=>a+(r.c[t]||0),0);
+  $("recTbl").innerHTML=`<thead><tr><th>Pos.</th><th class="num" title="Max at this position minus scholarship players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th><th class="num" title="Target + Contacted">Working</th><th class="num">Offered</th><th class="num">Committed</th><th class="num" title="Visits scheduled">Visits</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${cell(r.k,"working",r.c.working,r.noBoard)}${cell(r.k,"Offered",r.c.Offered,r.noBoard)}${cell(r.k,"Committed",r.c.Committed,r.noBoard)}<td class="num">${r.noBoard?'<span class="sub">–</span>':r.c.visits||'<span class="sub">0</span>'}</td></tr>`).join("")}
+    <tr class="tot"><td>Total</td><td class="num">${sumG(o=>o.open)}</td><td class="num">${sumG(o=>o.left)}</td><td class="num">${tot("working")}</td><td class="num">${tot("Offered")}</td><td class="num">${tot("Committed")}</td><td class="num">${tot("visits")}</td></tr></tbody>`;
   renderVisits();$("recPrint").disabled=false;
 }
 function visitRows(){
@@ -2735,12 +2738,13 @@ async function printRecruit(){
   doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text("Recruiting summary",40,y);if(REC.hasChart){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);doc.text(String($("recRoster").innerText).replace(/[−–]/g,"-"),170,y)}
   const os=r=>r.slot&&r.slot.open!=null?String(r.slot.open)+(r.g!==r.k?" ("+r.g+")":""):"-",ls=r=>r.slot&&r.slot.left!=null?String(r.slot.left):"-";
   const gsum=f=>REC.hasChart?String(Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0)):"-";
-  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos.","Open","Left",...REC_COLS,"No status","Visits set","Total"]],
-    body:REC.rows.map(r=>[r.k,os(r),ls(r),...REC_COLS.map(t=>r.noBoard?"-":String(r.c[t])),r.noBoard?"-":String(r.c.none),r.noBoard?"-":String(r.c.visits),String(r.total)]),
-    foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),...REC_COLS.map(t=>String(REC.rows.reduce((a,r)=>a+(+r.c[t]||0),0))),String(REC.rows.reduce((a,r)=>a+(+r.c.none||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.c.visits||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.total||0),0))]],
+  const wk=r=>(r.c.Target||0)+(r.c.Contacted||0),T2=t=>String(REC.rows.reduce((a,r)=>a+(t==="working"?wk(r):(r.c[t]||0)),0));
+  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos.","Open","Left","Working","Offered","Committed","Visits"]],
+    body:REC.rows.map(r=>[r.k,os(r),ls(r),r.noBoard?"-":String(wk(r)),r.noBoard?"-":String(r.c.Offered||0),r.noBoard?"-":String(r.c.Committed||0),r.noBoard?"-":String(r.c.visits||0)]),
+    foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),T2("working"),T2("Offered"),T2("Committed"),T2("visits")]],
     footStyles:{fillColor:[234,238,232],textColor:[24,32,26],fontStyle:"bold",halign:"center"},
-    styles:{font:"helvetica",fontSize:9,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"center"},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
+    styles:{font:"helvetica",fontSize:9.5,cellPadding:5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"center"},
+    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
   await pdfSave(doc,`Recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
 }
 $("recPrint").addEventListener("click",printRecruit);
