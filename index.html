@@ -253,7 +253,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 [data-theme=dark] #depth{--dc-fr:rgba(255,214,0,.20);--dc-tr:rgba(70,189,198,.26);--dc-wo:rgba(160,120,240,.26);--dc-cut:rgba(240,80,80,.26)}
 .dc-key{display:grid;grid-template-columns:repeat(3,minmax(0,auto));border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;background:var(--surface)}
 .dc-keyh{grid-column:1/-1;padding:5px 10px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--sunk)}
-.dc-keyr{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--line)}
+.dc-keyr[hidden]{display:none}.dc-keyr{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--line)}
 .dc-sw{display:inline-block;width:40px;height:18px;border-radius:4px;border:1px solid var(--line)}
 @media (max-width:640px){.dc-key{grid-template-columns:1fr 1fr}}
 .dc-keywrap{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:flex-start}
@@ -607,7 +607,7 @@ window.claude={use:async n=>{
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="dcPrint">Print</button> <button class="btn" type="button" id="dcClose">Close</button></span>
     </div>
-    <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-cut),var(--dc-cut)),var(--surface)"></i></span><span>Potential cut</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(90deg,var(--dc-fr) 50%,var(--dc-cut) 50%),var(--surface)"></i></span><span>Two colors = both apply</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
+    <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-cut),var(--dc-cut)),var(--surface)"></i></span><span>Potential cut</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(90deg,var(--dc-fr) 50%,var(--dc-cut) 50%),var(--surface)"></i></span><span>Two colors = both apply</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <div class="dc-rows" id="dcCols"></div>
     
@@ -2254,7 +2254,9 @@ $("dcRosterWrap").addEventListener("click",e=>{if(e.target.id!=="rcEdit")return;
 $("dcRosterWrap").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("rc-in"))$("rcEdit").click()});
 function dcMarks(x,k){return x.role&&x.role!==k?`<span class="dcm">${esc(x.role)}</span>`:""}
 /* tag color: yellow freshman, blue transfer, purple walk-on, red potential cut; more than one splits the tag */
-function dcCols(x){return [x.t==="fr"?"fr":"",x.t==="tr"?"tr":"",x.wo?"wo":"",x.cut?"cut":""].filter(Boolean)}
+/* next season nobody is a transfer any more: a year on the roster makes him one of ours */
+const dcIsTr=x=>x.t==="tr"&&DC_SZN!=="next";
+function dcCols(x){return [x.t==="fr"?"fr":"",dcIsTr(x)?"tr":"",x.wo?"wo":"",x.cut?"cut":""].filter(Boolean)}
 function dcBg(x){const c=dcCols(x);if(!c.length)return "";if(c.length===1)return `linear-gradient(var(--dc-${c[0]}),var(--dc-${c[0]})),var(--surface)`;
   const w=100/c.length;return `linear-gradient(90deg,${c.map((k,i)=>`var(--dc-${k}) ${i*w}% ${(i+1)*w}%`).join(",")}),var(--surface)`}
 const DC_ROWLBL={off:["","Skill","Offensive line"],def:["","Front","Linebackers","Secondary"],st:["","Specialists"]};
@@ -2284,9 +2286,9 @@ function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[]
     const n=pool?keys.length:keys.length===1?1:6;
     return `${pool?'<div class="dc-rowlbl">To place <span class="sub">drag each player to his spot</span></div>':lbl?`<div class="dc-rowlbl">${lbl}</div>`:""}<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${cols};--n:${n}">${keys.map(k=>dcCol(k,G)).join("")}</div>`}).join("");
   if(DC_ADDOPEN){const inp=document.querySelector(`#dcCols [data-dca="${DC_ADDOPEN}"] input`);if(inp)inp.focus()}
-  drawRoster();
+  drawRoster();$("dcKeyTr").hidden=DC_SZN==="next";
   const all=Object.values(G).flat();const thinN=Object.values(DC_SIDES).flat().filter(k=>dcThin(k,G[k]||[])).length;
-  $("dcCount").textContent=all.length?`${all.length} players · ${all.filter(x=>x.t==="tr").length} transfers · ${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}${thinN?` · ${thinN} thin spot${thinN===1?"":"s"}`:""}`:"";
+  $("dcCount").textContent=all.length?`${all.length} players · ${DC_SZN==="next"?"":`${all.filter(dcIsTr).length} transfers · `}${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}${thinN?` · ${thinN} thin spot${thinN===1?"":"s"}`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
     DC_SORT.push(Sortable.create(el,{group:"dc",animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,draggable:".tag",
       onEnd:ev=>{DC_DRAG_AT=Date.now();if(ev.from===ev.to&&ev.oldIndex===ev.newIndex)return;dcFromDom()}}))});
@@ -2296,7 +2298,7 @@ function dcFromDom(){const G=DCG();const by=new Map(dcAll().map(x=>[x.id,x]));
   drawDepth();dcSave()}
 function dcFind(id){const G=DCG();for(const k in G){const i=G[k].findIndex(x=>x.id===id);if(i>=0)return {k,i,x:G[k][i]}}return null}
 function dcOpenEdit(id){const f=dcFind(id);if(!f)return;DC_EDIT=f;const x=f.x,g=dcGrade(x);
-  $("dcdName").value=x.n;$("dcdYr").value=x.yr||"";$("dcdType").value=x.t||"ret";$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdRole").value=x.role||"";
+  $("dcdName").value=x.n;$("dcdYr").value=x.yr||"";$("dcdType").querySelector('[value="tr"]').hidden=DC_SZN==="next";$("dcdType").value=dcIsTr(x)?"tr":x.t==="tr"?"ret":(x.t||"ret");$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdRole").value=x.role||"";
   $("dcdPos").innerHTML=[].concat(...Object.values(DC_SIDES)).map(k=>`<option value="${k}"${k===f.k?" selected":""}>${DC_OPT(k)}</option>`).join("");dcDepthOpts();
   $("dcdLink").innerHTML=`<option value="">Auto: ${g?esc(g.name)+" ("+g.k+")":"no match"}</option>`+DC_OURS.map(c=>`<option value="${esc(c.id)}"${x.link===c.id?" selected":""}>${esc(c.name)} · ${c.k} · ${fmt(c.grade)} ${c.letter}</option>`).join("")+`<option value="none"${x.link==="none"?" selected":""}>Not on a board</option>`;
   $("dcdLinkWrap").hidden=!DC_GRADES;
@@ -2375,6 +2377,7 @@ async function importGrid(f){let XL;try{XL=await loadXLSX()}catch(e){flash("The 
     const moved={};a.STP=a.STP.filter(x=>{const r=roles.get(normName(x.n));if(!r)return true;x.role=r;(moved[r]=moved[r]||[]).push(x);return false});
     Object.entries(moved).forEach(([r,l])=>{a[r]=[...l,...(a[r]||[])]});if(!a.STP.length)delete a.STP});
   const lim=g=>({limit:((DCS.now.limits||{}).limit)||105,targets:Object.assign({},g._targets||{})});
+  if(gF)Object.values(gF).flat().forEach(x=>{if(x.t==="tr")x.t="ret"});
   if(gN){DCS.now={groups:gN,limits:lim(gN)};await dcSave("now")}if(gF){DCS.next={groups:gF,limits:Object.assign(lim(gF),{limit:((DCS.next.limits||{}).limit)||105})};await dcSave("next")}
   if(!$("depth").hidden)drawDepth();flash(`Roster loaded: ${cnt(gN)} players this season, ${cnt(gF)} next season.`,7000)}
 function dcAllZ(z){return Object.values(DCS[z].groups||{}).flat()}
