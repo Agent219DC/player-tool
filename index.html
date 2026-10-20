@@ -613,7 +613,7 @@ window.claude={use:async n=>{
       <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
     </div>
     <div class="tablewrap"><table id="bbTbl"></table></div>
-    <p class="note">This season's targets, Medium or High confidence. <b>Priority</b> puts Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter there. Tap a player for his card.</p>
+    <p class="note">This season's targets, Medium or High confidence. <b>Priority</b> puts Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter there (the depth chart's #1s, or our best grades where none is set). Tap a player for his card.</p>
   </section>
 
   <section id="tagboard" data-page="bigboard" hidden>
@@ -1461,7 +1461,7 @@ $("board").addEventListener("click",e=>{
     if(!del.dataset.armed){del.dataset.armed="1";del.textContent="Confirm";del.style.color="var(--tPass)";return}
     const p=BOARD[+del.dataset.del];
     if(DB&&p.id){(async()=>{const id=USER?await USER.id().catch(()=>null):null;
-      DB.collection(coll()).doc(p.id).update({deleted:true,deletedAt:new Date().toISOString(),deletedBy:id||null}).then(()=>flash(`${p.name} moved to Trash. The owner can restore him from Model settings → Trash.`)).catch(()=>flash("Couldn't remove that player. You may not have edit access."))})()}
+      DB.collection(coll()).doc(p.id).update({deleted:true,deletedAt:new Date().toISOString(),deletedBy:id||null}).then(()=>flash(`${p.name} moved to Trash. The owner can restore him from Settings → Trash.`)).catch(()=>flash("Couldn't remove that player. You may not have edit access."))})()}
     else{BOARD.splice(+del.dataset.del,1);renderBoard()}
   }
 });
@@ -2150,8 +2150,8 @@ async function renderBigBoard(){
     const ok=x=>(x.r.conf==="High"||x.r.conf==="Medium")&&(+x.p.season||0)===yr;
     (OV_SPOTS[k]||[{lbl:k,n:1}]).forEach(g=>{
       const inRole=x=>!g.role||x.p.role===g.role;
-      const ours=live.filter(x=>inRole(x)&&isOurs(x.p)&&ok(x)).sort((a,b)=>b.r.grade-a.r.grade).slice(0,g.n);
-      const weak=ours.length<g.n?null:ours[ours.length-1];
+      const st=starterGrades(k,g.role||"",live.filter(x=>(+x.p.season||0)===yr));const wg=st.grades.length<st.n?null:Math.min(...st.grades);
+      const weak=wg==null?null:{r:{grade:wg}};
       const need=!weak||weak.r.grade<70?"High":weak.r.grade<80?"Upgrade":"Set";
       live.filter(x=>inRole(x)&&ok(x)&&!isMarshallP(x.p)&&x.p.status!=="Pass"&&x.p.status!=="NIP").forEach(x=>
         rows.push({k,side:sideOf(k),spot:g.lbl,p:x.p,r:x.r,need,weak:weak?weak.r.grade:null,gain:x.r.grade-(weak?weak.r.grade:0),
@@ -2536,7 +2536,7 @@ const n0=v=>Math.round(+String(v==null?"":v).replace(/[^\d.]/g,"")||0);
 const commas=v=>Math.round(+v||0).toLocaleString("en-US");
 const pct=(v,t)=>t?(v/t*100).toFixed(1)+"%":"–";
 function budRenumber(){(BUDGET.groups||[]).forEach(g=>{const c={};(g.rows||[]).forEach(x=>{c[x.pos]=(c[x.pos]||0)+1;x.slot=x.pos+c[x.pos]})})}
-function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="sub">No budget loaded yet. Load the budget sheet in Owner tools.</p>';return}
+function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="sub">No budget loaded yet. Load the budget sheet in Settings → Owner tools.</p>';return}
   const goals=b.goals||{};
   $("budBody").innerHTML=`<div class="bud-sum"><div><label for="budTotal">Total budget</label><span class="bud-tot">$<input id="budTotal" inputmode="numeric" value="${commas(b.total)}" aria-label="Total budget"></span></div>
       <div>Roster players (<span data-bs="nH"></span>)<b data-bs="held"></b><span class="sub" data-bs="heldPc"></span></div>
@@ -2598,11 +2598,16 @@ const askOf=p=>{if(!OWNER||!p)return null;const a=ASKS[askKey(p)];return a&&a.am
 /* how far a grade could move: the model's confidence turned into a plain +/- */
 const GRADE_MOE={High:3,Medium:5,Low:8};
 const moeOf=r=>GRADE_MOE[r&&r.conf]||8;
+/* our starters at a spot: the depth chart's #1 at each matching spot first, then the best grades. entries = [{p,r}] for that position this season */
+function starterGrades(k,role,entries,zone){const g=(OV_SPOTS[k]||[{n:1}]).find(s=>!s.role||s.role===role)||{n:1};
+  const dcG=(DCS[zone||"now"]||{}).groups||{},sps=OV_DC[k+"|"+(g.role||"")]||[],used=new Set(),picks=[];
+  sps.forEach(sp=>{const x0=(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,entries);if(e&&e.r&&e.r.grade!=null&&!used.has(e.p.id)){used.add(e.p.id);picks.push(e.r.grade)}});
+  const rest=entries.filter(e=>!used.has(e.p.id)&&isOurs(e.p)&&(!g.role||e.p.role===g.role)&&e.r&&e.r.grade!=null&&(e.r.conf==="High"||e.r.conf==="Medium")).map(e=>e.r.grade).sort((a,b)=>b-a);
+  return {n:g.n,grades:picks.concat(rest).slice(0,g.n)}}
 /* our weakest starter at his spot (on the board in view): what he'd have to beat */
-function weakStarterGrade(p){const g=(OV_SPOTS[POSKEY]||[{n:1}]).find(s=>!s.role||s.role===p.role)||{n:1};
-  const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
-  const ours=BOARD.filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&(+b.season||0)===yr&&(!g.role||b.role===g.role)).map(b=>score(b)).filter(r=>r&&r.grade!=null&&(r.conf==="High"||r.conf==="Medium")).map(r=>r.grade).sort((a,b)=>b-a).slice(0,g.n);
-  return ours.length<g.n?null:ours[ours.length-1]}
+function weakStarterGrade(p){const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
+  const entries=BOARD.filter(b=>!b.ref&&!b.deleted&&(+b.season||0)===yr).map(b=>({p:b,r:score(b)}));
+  const s=starterGrades(POSKEY,p.role||"",entries);return s.grades.length<s.n?null:Math.min(...s.grades)}
 /* value: his ask against what the market pays for his grade at that spot, and how many points he adds over our weakest starter per $10k */
 function valueOf(p,r,ctx){const a=askOf(p);if(!a||!r||r.grade==null)return null;
   const m=ctx&&"mid" in ctx?ctx.mid:(()=>{const g=marketRange(p,r,"g6");return g?g.mid:null})();

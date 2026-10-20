@@ -5,3 +5,5 @@
 - Staff emails live in Firestore at `config/staff` (`emails` array), managed from Owner tools → Staff access.
 - Never commit player data or backup JSON files; this repo is public.
 - After changing `firestore.rules`, tell the owner to paste it into Firebase → Firestore → Rules → Publish.
+- Pages are tabs (`data-page` on each section, `go(tab)` router, `#tab` in the URL). Owner-only data (budget, asking prices) lives in Firestore `owner/*`, which the rules restrict to the owner; never put money in `config/`, `shared/` or player docs.
+- Depth charts live in `shared/depth` (this season) and `shared/depth_next`; saves send only changed spots (`groups.<spot>`). Starters on Overview and the Big Board come from each spot's depth chart #1.
