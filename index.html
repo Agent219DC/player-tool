@@ -271,7 +271,7 @@ details.settings summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dcm.cut{background:rgba(198,40,40,.14);border-color:rgba(198,40,40,.6);color:#c62828}
 [data-theme=dark] .dcm.cut{color:#ff8a80}
 #depth{--dc-fr:rgba(255,214,0,.30);--dc-tr:rgba(70,189,198,.28);--dc-wo:rgba(100,116,139,.24);--dc-cut:rgba(214,48,48,.30)}
-[data-theme=dark] #depth{--dc-fr:rgba(255,214,0,.20);--dc-tr:rgba(70,189,198,.26);--dc-wo:rgba(148,163,184,.22);--dc-cut:rgba(240,80,80,.34)}
+[data-theme=dark] #depth{--dc-fr:rgba(255,214,0,.20);--dc-tr:rgba(70,189,198,.26);--dc-wo:rgba(160,176,200,.36);--dc-cut:rgba(240,80,80,.34)}
 .dc-key{display:grid;grid-template-columns:repeat(6,minmax(0,auto));border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;background:var(--surface)}
 .dc-keyh{grid-column:1/-1;padding:5px 10px;font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);background:var(--sunk)}
 .dc-keyr[hidden]{display:none}.dc-keyr{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;padding:5px 10px;border-bottom:1px solid var(--line)}
@@ -322,6 +322,10 @@ td.vgood{color:#00873a;font-weight:600}td.vbad{color:#c62828;font-weight:600}[da
 [data-theme=dark] .valtag.good{color:#5fd38a}[data-theme=dark] .valtag.pricey{color:#ff8a80}
 .cmpverdict .valline{display:block;margin-top:6px}
 tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
+.dc-infobtn{display:none}
+@media (max-width:640px){.dc-infobtn{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:10px 12px;font:500 14px var(--body);cursor:pointer}
+  .dc-infobtn span{float:right;color:var(--muted)}
+  #depth:not(.dc-open) .dc-keywrap,#depth:not(.dc-open) .dc-roster{display:none}}
 .dc-rowlbl{font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
 .dc-rowlbl .sub{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
 .dc-addbtn{border:1px dashed var(--line);background:none;color:var(--muted);border-radius:6px;padding:5px 8px;font:500 12.5px var(--body);cursor:pointer;text-align:left}
@@ -674,6 +678,7 @@ window.claude={use:async n=>{
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sub" id="dcMeta" style="font-size:12.5px"></span><button class="btn" type="button" id="dcPrint">Print</button></span>
     </div>
+    <button type="button" class="dc-infobtn" id="dcInfoBtn" aria-expanded="false"></button>
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:repeating-linear-gradient(135deg,var(--dc-cut) 0 6px,transparent 6px 12px),var(--surface)"></i></span><span>Potential cut (stripes)</span></div><div class="dc-keyr"><span style="text-align:center"><span class="dcinj"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3" fill="#d32f2f"/><path d="M6.6 3.6h2.8v3h3v2.8h-3v3H6.6v-3h-3V6.6h3z" fill="#fff"/></svg></span></span><span>Injured</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <div class="dc-rows" id="dcCols"></div>
@@ -878,8 +883,8 @@ window.claude={use:async n=>{
       <div>
         <h4 class="ot-g">Backup & export</h4>
         <h3 class="ot-h">Full backup</h3>
-        <p class="note">Download every position, Trash, settings and both depth charts as one file, or restore from one. Restoring adds or replaces players; it never deletes anyone.</p>
-        <div class="btns"><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
+        <p class="note">Download every position, Trash, settings and both depth charts as one file, or restore from one. Your budget and asking prices download separately; restore either file here. Restoring adds or replaces players; it never deletes anyone.</p>
+        <div class="btns"><button class="btn" type="button" id="bkOwn" title="Your budget and asking prices; keep this file private">Download my budget &amp; asking prices</button><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Import / Export</h3>
@@ -2033,12 +2038,20 @@ const money=v=>v==null?"–":v>=1e6?"$"+(v/1e6).toFixed(v>=1e7?0:2).replace(/\.?
 function gradePct(g){if(g==null)return null;if(g<=60)return 5;if(g>=90)return 95;return g<75?5+(g-60)/15*45:50+(g-75)/15*45}
 function pctValue(row,pc){const [,p5,p50,p95]=row;if(pc<=5)return p5;if(pc>=95)return p95;return pc<50?p5+(p50-p5)*(pc-5)/45:p50+(p95-p50)*(pc-50)/45}
 /* his projected slot among our players at this position (targets: vs our returning players; ours: his rank among us) */
-function projSlot(p,r,board){if(!r||r.grade==null)return null;const me=pkey(p);const yr=String(p.season||CUR_SEASON);
+/* our players at a position in depth chart order: every spot's #1, then every #2, and so on; anyone not on the chart after, by grade */
+function dcOrderSlot(p,k,ours){const sps=Object.keys(OV_DC).filter(x=>x.startsWith(k+"|")).flatMap(x=>OV_DC[x]);const G=(DCS.now||{}).groups||{};
+  const maxD=Math.max(0,...sps.map(sp=>(G[sp]||[]).length));const order=[],seen=new Set();
+  for(let d=0;d<maxD;d++)sps.forEach(sp=>{const x=(G[sp]||[])[d];const e=x&&dcFindIn(x,ours);if(e&&!seen.has(e.p.id)){seen.add(e.p.id);order.push(e)}});
+  if(!order.length)return null;ours.filter(e=>!seen.has(e.p.id)).sort((a,b)=>b.r.grade-a.r.grade).forEach(e=>order.push(e));
+  const i=order.findIndex(e=>e.p.id===p.id);return i<0?null:i+1}
+function projSlot(p,r,board,key){if(!r||r.grade==null)return null;const me=pkey(p);const yr=String(p.season||CUR_SEASON);
   const ours=(board||BOARD).filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr&&pkey(b)!==me).map(b=>({b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null);
+  if(isOurs(p)){const all=(board||BOARD).filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr).map(b=>({p:b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null);
+    const d=dcOrderSlot(p,key||POSKEY,all);if(d)return d}
   const pool=isOurs(p)?ours:ours.filter(x=>x.b.elig!==0);
   return pool.filter(x=>x.r.grade>r.grade).length+1}
 function marketRange(p,r,lvl,ctx){if(!MARKET||!r||r.grade==null)return null;const tbl=MARKET[lvl]&&MARKET[lvl].apy;if(!tbl)return null;
-  const PK=(ctx&&ctx.key)||POSKEY;const base=MKT_POS[PK];if(!base)return null;let slot=projSlot(p,r,ctx&&ctx.board);if(!slot)return null;
+  const PK=(ctx&&ctx.key)||POSKEY;const base=MKT_POS[PK];if(!base)return null;let slot=projSlot(p,r,ctx&&ctx.board,PK);if(!slot)return null;
   const shown=PK==="NIC"?slot+1:slot;let n=shown,row=tbl[base+n];while(!row&&n>1){n--;row=tbl[base+n]}if(!row)return null;
   const lo=pctValue(row,gradePct(r.grade-5)),hi=pctValue(row,gradePct(r.grade+5)),mid=pctValue(row,gradePct(r.grade));
   return {lo,hi,mid,slotLbl:(PK==="NIC"?"NIC"+slot:PK+slot),rowLbl:base+n}}
@@ -2365,6 +2378,9 @@ function dcCounts(z){const G=(DCS[z]||{}).groups||{},seen=new Set(),c={},wo={};l
   Object.entries(G).forEach(([k,list])=>list.forEach(x=>{const key=normName(x.n);if(seen.has(key))return;seen.add(key);total++;
     const g=DC_SPOTGRP[k]||x.g||"";if(x.wo){woN++;return}if(!g){unk++;return}c[g]=(c[g]||0)+1}));
   return {c,total,woN,unk}}
+function dcInfoLine(){const b=$("dcInfoBtn");if(!b)return;const z=DC_SZN,L=(DCS[z]||{}).limits||{},lim=+L.limit||105,{total}=dcCounts(z),left=lim-total;const open=$("depth").classList.contains("dc-open");
+  b.innerHTML=`<b>${total} / ${lim}</b> · ${left>=0?left+" open":(-left)+" over"} · Roster & tag colors <span aria-hidden="true">${open?"▾":"▸"}</span>`;b.setAttribute("aria-expanded",open)}
+$("dcInfoBtn").addEventListener("click",()=>{const d=$("depth");d.classList.toggle("dc-open");PREF.dcInfo=d.classList.contains("dc-open");savePref();dcInfoLine()});
 function drawRoster(){const el=$("dcRoster");if(!el)return;const z=DC_SZN,L=(DCS[z]||{}).limits||{},lim=+L.limit||105,T=L.targets||{};const {c,total,woN,unk}=dcCounts(z);
   const left=lim-total,sch=Object.values(c).reduce((a,b)=>a+b,0),schT=DC_GRPS.reduce((a,g)=>a+(+T[g]||0),0);
   const cell=(g)=>{const have=c[g]||0,t=T[g];const d=t==null?null:t-have;
@@ -2420,7 +2436,7 @@ function drawDepth(){DC_SORT.forEach(s=>{try{s.destroy()}catch(e){}});DC_SORT=[]
     const n=pool?keys.length:keys.length===1?1:6;
     return `${pool?'<div class="dc-rowlbl">To place <span class="sub">drag each player to his spot</span></div>':lbl?`<div class="dc-rowlbl">${lbl}</div>`:""}<div class="tb-cols dc-cols${pool?" dc-poolrow":""}" style="grid-template-columns:${cols};--n:${n}">${keys.map(k=>dcCol(k,G)).join("")}</div>`}).join("");
   if(DC_ADDOPEN){const inp=document.querySelector(`#dcCols [data-dca="${DC_ADDOPEN}"] input`);if(inp)inp.focus()}
-  DC_REDRAW=false;drawRoster();drawDcMeta();$("dcKeyTr").hidden=DC_SZN==="next";
+  DC_REDRAW=false;drawRoster();dcInfoLine();drawDcMeta();$("dcKeyTr").hidden=DC_SZN==="next";
   const all=Object.values(G).flat();const thinN=Object.values(DC_SIDES).flat().filter(k=>dcThin(k,G[k]||[])).length;
   $("dcCount").textContent=all.length?`${all.length} players · ${DC_SZN==="next"?"":`${all.filter(dcIsTr).length} transfers · `}${all.filter(x=>x.t==="fr").length} freshmen${all.some(x=>x.cut)?` · ${all.filter(x=>x.cut).length} potential cuts`:""}${all.some(x=>x.inj)?` · ${all.filter(x=>x.inj).length} injured`:""}${thinN?` · ${thinN} thin spot${thinN===1?"":"s"}`:""}`:"";
   if(window.Sortable)document.querySelectorAll("#dcCols .tb-list").forEach(el=>{
@@ -2866,10 +2882,18 @@ $("bkDown").addEventListener("click",async()=>{
   catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make the backup. Try again.")}
   finally{b.disabled=false}
 });
+$("bkOwn").addEventListener("click",async()=>{if(!OWNER||!DB)return;
+  try{const [bd,as]=await Promise.all([DB.doc("owner/budget").get(),DB.doc("owner/asks").get()]);
+    const data={format:"player-tool-owner-backup",exported:new Date().toISOString(),budget:bd.exists?bd.data():null,asks:as.exists?as.data():null};
+    let dl=null;try{dl=await claude.use("downloads")}catch(e){}if(!dl){flash("Saving files isn't available in this view.");return}
+    await dl.save({filename:`Player Tool budget and asks ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Saved. Keep this file private; it has your budget and asking prices.")}
+  catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make that file. Try again.")}});
 $("bkUp").addEventListener("click",()=>{if(OWNER&&DB)$("bkFile").click()});
 $("bkFile").addEventListener("change",async e=>{
   const file=e.target.files[0];e.target.value="";if(!file)return;
   let data;try{data=JSON.parse(await file.text())}catch(_){flash("That file isn't a Player Tool backup.");return}
+  if(data&&data.format==="player-tool-owner-backup"){if(!OWNER){flash("Only the owner can restore that file.");return}
+    try{if(data.budget)await DB.doc("owner/budget").set(data.budget);if(data.asks)await DB.doc("owner/asks").set(data.asks);flash("Budget and asking prices restored.")}catch(e){flash("Couldn't restore. Publish the latest database rules first.")}return}
   if(!data||data.format!=="marshall-player-tool-backup"||!data.collections){flash("That file isn't a Player Tool backup.");return}
   const C=data.collections;const okColl=c=>/^[a-z]+_players$/.test(c)||c==="config"||c==="shared";
   let n=0,bad=0;const b=$("bkUp");b.disabled=true;b.textContent="Restoring…";
@@ -3113,7 +3137,7 @@ document.addEventListener("click",e=>{const b=e.target.closest("[data-dcszn],[da
   if(b.dataset.dcszn)PREF.dcSzn=b.dataset.dcszn;if(b.dataset.dcside)PREF.dcSide=b.dataset.dcside;if(b.dataset.ovm)PREF.ovMode=b.dataset.ovm;if(b.dataset.tbside)PREF.tbSide=b.dataset.tbside;
   if(b.dataset.ovside){PREF.ovSide=b.dataset.ovside;savePref();renderOverview();return}savePref()});
 if(PREF.ovMode){OV_MODE=PREF.ovMode;document.querySelectorAll("[data-ovm]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.ovm===OV_MODE))}
-if(PREF.dcSzn)DC_SZN=PREF.dcSzn;
+if(PREF.dcSzn)DC_SZN=PREF.dcSzn;if(PREF.dcInfo)$("depth").classList.add("dc-open");
 if(PREF.bbv)document.querySelectorAll("[data-bbview]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bbview===PREF.bbv));
 /* model settings: pick the position here instead of on the Boards tab */
 function fillSetPos(){const sel=$("setPos");if(!sel)return;sel.innerHTML=ALL_POS.filter(k=>POSITIONS[k]).map(k=>`<option value="${k}"${k===POSKEY?" selected":""}>${k}</option>`).join("")}
