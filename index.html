@@ -357,6 +357,8 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+#recTbl .open{color:#00873a}#recTbl .over,.recroster .over{color:#c62828}[data-theme=dark] #recTbl .open{color:#5fd38a}[data-theme=dark] #recTbl .over,[data-theme=dark] .recroster .over{color:#ff8a80}
+.recroster{margin:0;font-size:14px}
 /* phones: keep the columns that matter on screen instead of side-scrolling */
 @media (max-width:640px){
   #bbTbl,#recTbl{min-width:0}
@@ -380,7 +382,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
   #bbTbl td.bbp{min-width:0}#bbTbl td.bbp .slogo{display:none}
   #bbTbl tr>:nth-child(4),#bbTbl tr>:nth-child(5),#bbTbl tr>:nth-child(6),#bbTbl tr>:nth-child(8){display:none}
   #recTbl th{font-size:10px;letter-spacing:0;padding:8px 3px}#recTbl td{padding:8px 3px}
-  #recTbl tr>:nth-child(6),#recTbl tr>:nth-child(7),#recTbl tr>:nth-child(8),#recTbl tr>:nth-child(9){display:none}
+  #recTbl tr>:nth-child(8),#recTbl tr>:nth-child(9),#recTbl tr>:nth-child(10),#recTbl tr>:nth-child(11),#recTbl tr>:nth-child(5){display:none}
 }
 @media (pointer:coarse),(max-width:640px){.bud-g td.rm{width:36px}.bud-g td.rm button{min-width:32px;min-height:32px;font-size:18px}.bud-add .linkbtn{padding:6px 0}}
 .vday{margin-top:8px}
@@ -656,8 +658,9 @@ window.claude={use:async n=>{
       <h2>Recruiting</h2>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button></span>
     </div>
+    <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note">One entry per player (his latest season). Leaves out our own players, hidden players and Trash. Tap a number to open that list.</p>
+    <p class="note"><b>Open</b> = the position max minus scholarship players on the Next season depth chart; <b>Left</b> = Open minus Committed targets not on the chart yet. The top line is the 105-man total, walk-ons included. Targets count once each (latest season); tap a number to open that list.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
       <h2 style="font-size:19px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
@@ -2134,14 +2137,28 @@ async function renderRecruit(){
     const c={};REC_COLS.forEach(t=>c[t]=pool.filter(x=>x.p.status===t).length);
     c.none=pool.filter(x=>!x.p.status).length;
     c.visits=pool.filter(x=>x.p.visit==="Scheduled").length;
+    const onChart=new Set(dcAllZ("next").map(y=>normName(y.n)));
+    c.newCommit=pool.filter(x=>x.p.status==="Committed"&&!onChart.has(normName(x.p.name))).length;
     rows.push({k,c,total:pool.length});
     live.filter(x=>x.p.visit).forEach(x=>visits.push({k,...x}));
   }));
-  REC={rows,visits};
+  /* NIC has no board yet but does have roster spots */
+  if(!rows.some(r=>r.k==="NIC")){const c={};REC_COLS.forEach(t=>c[t]=0);c.none=0;c.visits=0;c.newCommit=0;const at=rows.findIndex(r=>r.k==="CB");rows.splice(at<0?rows.length:at,0,{k:"NIC",c,total:0,noBoard:true})}
+  /* open spots from the Next season depth chart: each position's max minus scholarship players on it, then minus Committed targets not on the chart yet */
+  const L=(DCS.next||{}).limits,cnt=dcCounts("next"),hasChart=!!(L&&L.targets)&&cnt.total>0;
+  const grpOf=k=>({IOL:"OL",OT:"OL"})[k]||k;const grp={};
+  if(hasChart)rows.forEach(r=>{const g=grpOf(r.k);const o=grp[g]=grp[g]||{max:L.targets[g],have:cnt.c[g]||0,commit:0};o.commit+=r.c.newCommit||0});
+  Object.values(grp).forEach(o=>{o.open=o.max==null?null:o.max-o.have;o.left=o.open==null?null:o.open-o.commit});
+  rows.forEach(r=>{r.g=grpOf(r.k);r.slot=hasChart?grp[r.g]:null});
+  const lim=L&&L.limit||105,commitAll=rows.reduce((a,r)=>a+(r.c.newCommit||0),0),openAll=lim-cnt.total;
+  $("recRoster").innerHTML=hasChart?`<b>Next season:</b> ${cnt.total} / ${lim} · ${openAll>=0?`<b>${openAll}</b> roster spot${openAll===1?"":"s"} open`:`<b class="over">${-openAll} over</b>`} · ${commitAll} committed · ${openAll-commitAll>=0?`<b>${openAll-commitAll}</b> left`:`<b class="over">${commitAll-openAll} over</b>`} <span class="sub">(from the Next season depth chart)</span>`:'<span class="sub">Load the roster grid in Settings to see open roster spots here.</span>';
+  REC={rows,visits,grp,hasChart};
   const tot={};REC_COLS.concat(["none","visits"]).forEach(t=>tot[t]=rows.reduce((a,r)=>a+r.c[t],0));
   const cell=(k,t,v)=>`<td class="num">${v?`<button type="button" data-rk="${k}" data-rs="${t}">${v}</button>`:`<span class="sub">0</span>`}</td>`;
-  $("recTbl").innerHTML=`<thead><tr><th>Pos.</th>${REC_COLS.map(t=>`<th class="num">${t}</th>`).join("")}<th class="num">No status</th><th class="num">Visits set</th><th class="num">Total</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${REC_COLS.map(t=>cell(r.k,t,r.c[t])).join("")}${cell(r.k,"none",r.c.none)}<td class="num">${r.c.visits||'<span class="sub">0</span>'}</td><td class="num"><b>${r.total}</b></td></tr>`).join("")}
-    <tr class="tot"><td>Total</td>${REC_COLS.map(t=>`<td class="num">${tot[t]}</td>`).join("")}<td class="num">${tot.none}</td><td class="num">${tot.visits}</td><td class="num">${rows.reduce((a,r)=>a+r.total,0)}</td></tr></tbody>`;
+  const sp=(o,g,k)=>{if(!o)return '<td class="num"><span class="sub">–</span></td><td class="num"><span class="sub">–</span></td>';const sh=g!==k?` <span class="sub">${g}</span>`:"";
+    const f=v=>v==null?'<span class="sub">–</span>':v<0?`<b class="over">${v}</b>`:v===0?'<span class="sub">0</span>':`<b class="open">${v}</b>`;return `<td class="num">${f(o.open)}${sh}</td><td class="num">${f(o.left)}</td>`};
+  $("recTbl").innerHTML=`<thead><tr><th>Pos.</th><th class="num" title="Max at this position minus players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th>${REC_COLS.map(t=>`<th class="num">${t}</th>`).join("")}<th class="num">No status</th><th class="num">Visits set</th><th class="num">Total</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${REC_COLS.map(t=>r.noBoard?'<td class="num"><span class="sub">–</span></td>':cell(r.k,t,r.c[t])).join("")}${cell(r.k,"none",r.c.none)}<td class="num">${r.c.visits||'<span class="sub">0</span>'}</td><td class="num"><b>${r.total}</b></td></tr>`).join("")}
+    <tr class="tot"><td>Total</td>${(()=>{if(!REC.hasChart)return '<td class="num">–</td><td class="num">–</td>';const gs=Object.values(REC.grp).filter(o=>o.open!=null);return `<td class="num">${gs.reduce((a,o)=>a+Math.max(0,o.open),0)}</td><td class="num">${gs.reduce((a,o)=>a+Math.max(0,o.left),0)}</td>`})()}${REC_COLS.map(t=>`<td class="num">${tot[t]}</td>`).join("")}<td class="num">${tot.none}</td><td class="num">${tot.visits}</td><td class="num">${rows.reduce((a,r)=>a+r.total,0)}</td></tr></tbody>`;
   renderVisits();$("recPrint").disabled=false;
 }
 function visitRows(){
@@ -2715,10 +2732,12 @@ async function printRecruit(){
     didParseCell:h=>{if(h.section==="body"&&h.column.index===8&&v[h.row.index]){const t=v[h.row.index].r&&v[h.row.index].r.tier;if(t)h.cell.styles.textColor=TIERRGB[t]}}});
   let y=v.length?doc.lastAutoTable.finalY+22:118;
   if(y>doc.internal.pageSize.getHeight()-160){doc.addPage();y=40}
-  doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text("Recruiting summary",40,y);
-  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos.",...REC_COLS,"No status","Visits set","Total"]],
-    body:REC.rows.map(r=>[r.k,...REC_COLS.map(t=>String(r.c[t])),String(r.c.none),String(r.c.visits),String(r.total)]),
-    foot:[[{content:"Total",styles:{halign:"left"}},...REC_COLS.map(t=>String(REC.rows.reduce((a,r)=>a+(+r.c[t]||0),0))),String(REC.rows.reduce((a,r)=>a+(+r.c.none||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.c.visits||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.total||0),0))]],
+  doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text("Recruiting summary",40,y);if(REC.hasChart){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);doc.text(String($("recRoster").innerText).replace(/[−–]/g,"-"),170,y)}
+  const os=r=>r.slot&&r.slot.open!=null?String(r.slot.open)+(r.g!==r.k?" ("+r.g+")":""):"-",ls=r=>r.slot&&r.slot.left!=null?String(r.slot.left):"-";
+  const gsum=f=>REC.hasChart?String(Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0)):"-";
+  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos.","Open","Left",...REC_COLS,"No status","Visits set","Total"]],
+    body:REC.rows.map(r=>[r.k,os(r),ls(r),...REC_COLS.map(t=>r.noBoard?"-":String(r.c[t])),r.noBoard?"-":String(r.c.none),r.noBoard?"-":String(r.c.visits),String(r.total)]),
+    foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),...REC_COLS.map(t=>String(REC.rows.reduce((a,r)=>a+(+r.c[t]||0),0))),String(REC.rows.reduce((a,r)=>a+(+r.c.none||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.c.visits||0),0)),String(REC.rows.reduce((a,r)=>a+(+r.total||0),0))]],
     footStyles:{fillColor:[234,238,232],textColor:[24,32,26],fontStyle:"bold",halign:"center"},
     styles:{font:"helvetica",fontSize:9,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"center"},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
