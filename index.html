@@ -325,7 +325,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .dc-infobtn{display:none}
 @media (max-width:640px){.dc-infobtn{display:block;width:100%;text-align:left;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);padding:10px 12px;font:500 14px var(--body);cursor:pointer}
   .dc-infobtn span{float:right;color:var(--muted)}
-  #depth:not(.dc-open) .dc-keywrap,#depth:not(.dc-open) .dc-roster{display:none}}
+  #depth:not(.dc-open) .dc-keywrap{display:none}}
 .dc-rowlbl{font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 2px -4px}
 .dc-rowlbl .sub{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
 .dc-addbtn{border:1px dashed var(--line);background:none;color:var(--muted);border-radius:6px;padding:5px 8px;font:500 12.5px var(--body);cursor:pointer;text-align:left}
@@ -678,9 +678,9 @@ window.claude={use:async n=>{
       <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sub" id="dcMeta" style="font-size:12.5px"></span><button class="btn" type="button" id="dcPrint">Print</button></span>
     </div>
+    <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <button type="button" class="dc-infobtn" id="dcInfoBtn" aria-expanded="false"></button>
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:repeating-linear-gradient(135deg,var(--dc-cut) 0 6px,transparent 6px 12px),var(--surface)"></i></span><span>Potential cut (stripes)</span></div><div class="dc-keyr"><span style="text-align:center"><span class="dcinj"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3" fill="#d32f2f"/><path d="M6.6 3.6h2.8v3h3v2.8h-3v3H6.6v-3h-3V6.6h3z" fill="#fff"/></svg></span></span><span>Injured</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
-    <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <div class="dc-rows" id="dcCols"></div>
     
     <p class="note" id="dcNote">Drag players to reorder them or move them to another spot, or tap a player to edit his spot, depth and tags. <b>Thin</b> = fewer than 2 healthy players who aren't potential cuts. Everyone on staff sees the same chart.</p>
@@ -2379,7 +2379,7 @@ function dcCounts(z){const G=(DCS[z]||{}).groups||{},seen=new Set(),c={},wo={};l
     const g=DC_SPOTGRP[k]||x.g||"";if(x.wo){woN++;return}if(!g){unk++;return}c[g]=(c[g]||0)+1}));
   return {c,total,woN,unk}}
 function dcInfoLine(){const b=$("dcInfoBtn");if(!b)return;const z=DC_SZN,L=(DCS[z]||{}).limits||{},lim=+L.limit||105,{total}=dcCounts(z),left=lim-total;const open=$("depth").classList.contains("dc-open");
-  b.innerHTML=`<b>${total} / ${lim}</b> · ${left>=0?left+" open":(-left)+" over"} · Roster & tag colors <span aria-hidden="true">${open?"▾":"▸"}</span>`;b.setAttribute("aria-expanded",open)}
+  b.innerHTML=`Tag colors <span aria-hidden="true">${open?"▾":"▸"}</span>`;b.setAttribute("aria-expanded",open)}
 $("dcInfoBtn").addEventListener("click",()=>{const d=$("depth");d.classList.toggle("dc-open");PREF.dcInfo=d.classList.contains("dc-open");savePref();dcInfoLine()});
 function drawRoster(){const el=$("dcRoster");if(!el)return;const z=DC_SZN,L=(DCS[z]||{}).limits||{},lim=+L.limit||105,T=L.targets||{};const {c,total,woN,unk}=dcCounts(z);
   const left=lim-total,sch=Object.values(c).reduce((a,b)=>a+b,0),schT=DC_GRPS.reduce((a,g)=>a+(+T[g]||0),0);
@@ -2558,7 +2558,20 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       else{doc.setFillColor(...DC_PRGB[c]);doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(lx,ly-7,16,9,"FD")}
       doc.setTextColor(91,102,93);doc.text(lab,lx+20,ly);lx+=26+doc.getTextWidth(lab)+14});
     doc.text("Left edge = grade tier · grade on the right",lx,ly)};
-  let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend()};
+  /* roster count strip: the 105 line and each position's players against its max, so the printout shows what we have and need */
+  const rosterStrip=()=>{const L=(DCS[DC_SZN]||{}).limits||{},lim=+L.limit||105,Tg=L.targets||{},{c,total,woN}=dcCounts(DC_SZN);if(!total)return;
+    const left=lim-total,sch=Object.values(c).reduce((a,b)=>a+b,0),schT=DC_GRPS.reduce((a,g)=>a+(+Tg[g]||0),0);
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...(left<0?[198,40,40]:[24,32,26]));doc.text(`${total} / ${lim}`,40,top+9);
+    const tw=doc.getTextWidth(`${total} / ${lim}`);doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);
+    doc.text(T(`${left>=0?left+" roster spot"+(left===1?"":"s")+" open":(-left)+" over the limit"} · ${sch} scholarship${schT?" of "+schT+" planned":""} · ${woN} walk-on${woN===1?"":"s"}`),40+tw+8,top+9);
+    const n=DC_GRPS.length,bw=(W-80-(n-1)*4)/n;let y=top+15;
+    DC_GRPS.forEach((g,i)=>{const x=40+i*(bw+4),have=c[g]||0,t=Tg[g],d=t==null?null:t-have;
+      doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,bw,24);
+      doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(24,32,26);doc.text(DC_GRPLBL[g]||g,x+4,y+9);
+      doc.setFontSize(8.5);doc.text(t!=null?`${have} / ${t}`:String(have),x+bw-4,y+9,{align:"right"});
+      if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[0,135,58]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
+    top=y+24+12};
+  let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend();if(!cont)rosterStrip()};
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{
     /* special teams shares the defense page when it fits */
     const stH=sd==="st"?40+Math.max(1,...["K","P","LS","STP"].map(k=>(G[k]||[]).length))*24:0;
