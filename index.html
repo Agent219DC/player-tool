@@ -357,6 +357,32 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
+/* phones: keep the columns that matter on screen instead of side-scrolling */
+@media (max-width:640px){
+  #bbTbl,#recTbl{min-width:0}
+  /* Big Board rows become small cards: name and grade on top, spot · need · vs. ours below, your value numbers last */
+  #bbTbl thead{display:none}
+  #bbTbl,#bbTbl tbody{display:block;width:100%}
+  #bbTbl tbody tr{display:grid;grid-template-columns:22px auto auto 1fr auto;column-gap:8px;row-gap:4px;padding:10px 8px;border-bottom:1px solid var(--line);align-items:center}
+  #bbTbl tbody td{display:block;padding:0;border:0;white-space:nowrap}
+  #bbTbl tr>:nth-child(1){grid-row:1/4;align-self:start;padding-top:2px}
+  #bbTbl tr>:nth-child(3){grid-column:2/5;grid-row:1;min-width:0;white-space:normal}
+  #bbTbl tr>:nth-child(7){grid-column:5;grid-row:1;text-align:right}
+  #bbTbl tr>:nth-child(2){grid-column:2;grid-row:2}
+  #bbTbl tr>:nth-child(9){grid-column:3;grid-row:2}
+  #bbTbl tr>:nth-child(10){grid-column:4/6;grid-row:2;text-align:right}
+  #bbTbl tr>:nth-child(11){grid-column:2/4;grid-row:3}
+  #bbTbl tr>:nth-child(12){grid-column:4/6;grid-row:3;text-align:right}
+  #bbTbl tr>:nth-child(13){grid-column:2/6;grid-row:4}
+  #bbTbl tr>:nth-child(n+11){font-size:12.5px}#bbTbl td.nov{display:none}
+  #bbTbl tr>:nth-child(1){grid-row:1/5}
+  #bbTbl td[data-l]::before{content:attr(data-l) " ";font:500 11px var(--body);color:var(--muted)}
+  #bbTbl td.bbp{min-width:0}#bbTbl td.bbp .slogo{display:none}
+  #bbTbl tr>:nth-child(4),#bbTbl tr>:nth-child(5),#bbTbl tr>:nth-child(6),#bbTbl tr>:nth-child(8){display:none}
+  #recTbl th{font-size:10px;letter-spacing:0;padding:8px 3px}#recTbl td{padding:8px 3px}
+  #recTbl tr>:nth-child(6),#recTbl tr>:nth-child(7),#recTbl tr>:nth-child(8),#recTbl tr>:nth-child(9){display:none}
+}
+@media (pointer:coarse),(max-width:640px){.bud-g td.rm{width:36px}.bud-g td.rm button{min-width:32px;min-height:32px;font-size:18px}.bud-add .linkbtn{padding:6px 0}}
 .vday{margin-top:8px}
 .vday h3{font:600 15px var(--display);letter-spacing:.06em;text-transform:uppercase;margin:10px 0 6px;color:var(--accent-text)}
 .vrow{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:4px 10px;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:6px;margin-bottom:6px;cursor:pointer}
@@ -2171,7 +2197,7 @@ function drawBigBoard(){const v=bbRows();
     <td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:'<span class="sub">–</span>'}</td>
     <td class="num gtc gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</td><td><span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span></td>
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
-    <td class="num">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=x.val;return `<td class="num">${q?money(q.ask):'<span class="sub">–</span>'}</td><td class="num ${q&&q.pct!=null?(q.pct<=-0.1?"vgood":q.pct>0.1?"vbad":""):""}">${q&&q.pct!=null?pctTxt(q.pct):'<span class="sub">–</span>'}</td><td class="num">${q?`<b>${fmt(q.upg,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
+    <td class="num" data-l="vs. ours">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=x.val;return `<td class="num${q?"":" nov"}" data-l="Ask">${q?money(q.ask):'<span class="sub">–</span>'}</td><td data-l="vs. mkt" class="num${q?"":" nov"} ${q&&q.pct!=null?(q.pct<=-0.1?"vgood":q.pct>0.1?"vbad":""):""}">${q&&q.pct!=null?pctTxt(q.pct):'<span class="sub">–</span>'}</td><td class="num${q?"":" nov"}" data-l="Upg/$10k">${q?`<b>${fmt(q.upg,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
