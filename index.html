@@ -613,7 +613,7 @@ window.claude={use:async n=>{
       <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
     </div>
     <div class="tablewrap"><table id="bbTbl"></table></div>
-    <p class="note">This season's targets, Medium or High confidence. <b>Priority</b> puts Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter there (the depth chart's #1s, or our best grades where none is set). Tap a player for his card.</p>
+    <p class="note">This season's targets (Medium or High confidence). <b>Priority</b> lists Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter, using the depth chart's #1s. Tap a player for his card.</p>
   </section>
 
   <section id="tagboard" data-page="bigboard" hidden>
@@ -648,7 +648,7 @@ window.claude={use:async n=>{
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
     <div class="dc-rows" id="dcCols"></div>
     
-    <p class="note" id="dcNote">Drag players to set the order or move them between spots, or tap a player to edit his spot, depth and tags. Everyone on staff sees the same chart; grades come from his board entry this season.</p>
+    <p class="note" id="dcNote">Drag players to reorder them or move them to another spot, or tap a player to edit his spot, depth and tags. <b>Thin</b> = fewer than 2 healthy players who aren't potential cuts. Everyone on staff sees the same chart.</p>
   </section>
 
   <section id="budget" data-page="budget" hidden>
@@ -667,7 +667,7 @@ window.claude={use:async n=>{
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
     <p class="note" id="ovModeNote" hidden><b>Next season:</b> graduating players drop off, every returning player counts, and Committed targets join the roster.</p>
-    <p class="note">One card per starting spot<span id="ovSpots"></span>. Ours is the depth chart's #1 at that spot; where none is set, our best-graded On Roster player (Medium or High confidence). Each card shows the best target for the weakest one. Need: <b>Upgrade</b> below 70, <b>Solid</b> 70–79, <b>Great</b> 80+. Tap a card (a row on phones) to compare ours with the target.</p>
+    <p class="note">One card per starting spot. Ours = the depth chart's #1 (our best grade if none is set). Each card pairs the best target with our weakest starter. Need: <b>Upgrade</b> under 70, <b>Solid</b> 70–79, <b>Great</b> 80+. Tap a card to compare.</p>
   </section>
 
   <details class="editor" id="editor" data-page="boards">
@@ -832,7 +832,7 @@ window.claude={use:async n=>{
       <div>
         <h4 class="ot-g">Data loads</h4>
         <h3 class="ot-h">Roster for depth chart</h3>
-        <p class="note">Load the roster grid workbook. The <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, red = potential cut. Replaces both charts.</p>
+        <p class="note">Load the roster grid workbook: the <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, pale red = potential cut. Replaces both charts and any order staff have set.</p>
         <div class="btns"><button class="btn" type="button" id="gridUp">Load roster grid (.xlsx)…</button><input type="file" id="gridFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
@@ -860,7 +860,7 @@ window.claude={use:async n=>{
       <div>
         <h4 class="ot-g">Season</h4>
         <h3 class="ot-h">Start a new season</h3>
-        <p class="note">Run once when the season turns over. At every position, graduating players come off the roster and are hidden, Committed players move to On Roster, everyone loses a year of eligibility, and the season moves forward. You can undo it here.</p>
+        <p class="note">Run once when the season turns over: graduates come off the roster, Committed players join it, everyone loses a year of eligibility, and Next season's depth chart becomes This season's. You can undo it.</p>
         <div class="btns"><button class="btn" type="button" id="nsPreview">Start new season…</button><button class="btn" type="button" id="nsUndo" hidden>Undo last new season</button></div>
         <div id="nsBox" class="nsbox" hidden></div>
       </div>
@@ -1827,7 +1827,6 @@ async function renderOverview(){
   const NEXT=OV_MODE==="next";
   $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
-  $("ovSpots").textContent=side==="off"?": QB, RB, X, SLOT, Z, TE, LT, LG, OC, RG, RT":": FE, DT, DT, JACK, MIKE, WILL, NIC, FSAF, BSAF, FCB, BCB";
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
   if(!POSCACHE_READY()){$("ovTbl").innerHTML=skelRows(6,9);$("ovField").innerHTML=`<div class="skel-cards">${'<div class="skel skel-card"></div>'.repeat(11)}</div>`}
