@@ -803,7 +803,7 @@ window.claude={use:async n=>{
         <button class="btn" type="button" id="cmpBtn" disabled>Compare selected</button>
         <button class="btn primary" type="button" id="printBtn" disabled>Print selected</button>
         <span class="tbsep" aria-hidden="true"></span>
-        <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on this board who has them">Refresh stats</button>
+        <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on every position board who has them">Refresh all stats</button>
       </div>
     </div>
     <div class="tablewrap"><table id="board"></table></div>
@@ -1348,20 +1348,27 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
     render();
   }catch(e){box.innerHTML='<div class="sub">Couldn\'t load his stats from ESPN. Try again, or enter his numbers by hand.</div>'}
 }
-/* Refresh stats: re-pull ESPN career stats for everyone on this board who has an ESPN link */
+/* Refresh stats: re-pull ESPN career stats for every player with an ESPN link, on every position board.
+   Each ESPN player is fetched once even if he sits on two boards; four requests run at a time. */
 let ESPN_ALL_BUSY=false;
 async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
-  const list=BOARD.filter(p=>p.espnId&&p.id&&!p.deleted);
-  if(!list.length){flash(`No one on the ${P.label} board has ESPN stats yet. Open a player and click Add stats first.`,7000);return}
   if(!DB){flash("The shared board isn't connected, so stats can't be saved right now.");return}
-  ESPN_ALL_BUSY=true;const btn=$("espnAll");btn.disabled=true;const coll0=coll();let ok=0,bad=0;
-  try{for(let i=0;i<list.length;i++){const p=list[i];btn.textContent=`Refreshing ${i+1} of ${list.length}…`;
-      try{const st=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(p.espnId)}/stats`);
-        const c=espnCareer(st);if(!c.cats.length){bad++;continue}
-        await DB.collection(coll0).doc(p.id).update({career:c});ok++}
-      catch(e){bad++;if(i===0&&!ok&&e instanceof TypeError){flash("Can't reach ESPN right now. Try again later.");return}}}
-    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"}${bad?` · ${bad} couldn't be updated`:""}.`,7000);
-  }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh stats"}}
+  const btn=$("espnAll");ESPN_ALL_BUSY=true;btn.disabled=true;btn.textContent="Loading boards…";let ok=0,bad=0,offline=false;
+  try{const all=await loadAllPositions();const by=new Map();
+    all.forEach(({k,docs})=>docs.forEach(p=>{if(!p.espnId||!p.id||p.deleted)return;const id=String(p.espnId);if(!by.has(id))by.set(id,[]);by.get(id).push({k,id:p.id})}));
+    const ids=[...by.keys()];
+    if(!ids.length){flash("No one on any board has ESPN stats yet. Open a player and click Add stats first.",7000);return}
+    let done=0,next=0;
+    const work=async()=>{while(next<ids.length&&!offline){const eid=ids[next++];
+      try{const st=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(eid)}/stats`);
+        const c=espnCareer(st);if(!c.cats.length)bad+=by.get(eid).length;
+        else{const r=await Promise.allSettled(by.get(eid).map(d=>DB.collection(d.k.toLowerCase()+"_players").doc(d.id).update({career:c})));r.forEach(x=>x.status==="fulfilled"?ok++:bad++)}}
+      catch(e){bad+=by.get(eid).length;if(e instanceof TypeError&&!ok&&done===0)offline=true}
+      done++;btn.textContent=`Refreshing ${done} of ${ids.length}…`}};
+    await Promise.all(Array.from({length:Math.min(4,ids.length)},work));
+    if(offline&&!ok){flash("Can't reach ESPN right now. Try again later.");return}
+    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"} across all positions${bad?` · ${bad} couldn't be updated`:""}.`,7000);
+  }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh all stats"}}
 $("espnAll").addEventListener("click",espnRefreshAll);
 teamsLoad();
 /* ESPN position vs. the board he's being added to */
