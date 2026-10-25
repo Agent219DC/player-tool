@@ -7,3 +7,5 @@
 - After changing `firestore.rules`, tell the owner to paste it into Firebase → Firestore → Rules → Publish.
 - Pages are tabs (`data-page` on each section, `go(tab)` router, `#tab` in the URL). Owner-only data (budget, asking prices) lives in Firestore `owner/*`, which the rules restrict to the owner; never put money in `config/`, `shared/` or player docs.
 - Depth charts live in `shared/depth` (this season) and `shared/depth_next`; saves send only changed spots (`groups.<spot>`). Starters on Overview and the Big Board come from each spot's depth chart #1.
+- Trademark rule (owner's call): the Marshall logo is used only inside the website (header). Never use it for the favicon, home-screen/app icons, or anything that leaves the site without asking the owner first.
+- Player cards show ESPN headshots (`headshotHtml`, initials fallback) for players with an `espnId`.

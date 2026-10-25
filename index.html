@@ -146,6 +146,12 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 dialog#pcard{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#pcard::backdrop{background:rgba(10,16,12,.5)}
 .pc{display:grid;gap:16px;padding:20px 22px 22px}
+.pc-who{display:flex;gap:14px;align-items:center;min-width:0}
+.hs{position:relative;flex:none;width:76px;height:76px;border-radius:50%;overflow:hidden;background:var(--accent-soft);border:2px solid var(--line);display:grid;place-items:center}
+.hs-ini{font:700 26px var(--display);color:var(--accent-text);letter-spacing:.02em}
+.hs img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;opacity:0;transition:opacity .2s;background:var(--sunk)}
+.hs.ok img{opacity:1}
+@media (max-width:640px){.hs{width:58px;height:58px}.hs-ini{font-size:20px}.pc-who{gap:10px}}
 .pc-top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
 .pc-top h2{margin:0;font:700 30px/1.05 var(--display);letter-spacing:.01em;text-transform:none}
 .pc-top .sub{margin-top:4px}
@@ -2220,6 +2226,11 @@ $("mktFile").addEventListener("change",async e=>{const f=e.target.files[0];e.tar
 let CARD_P=null;
 /* phone numbers and emails inside contact text become tap-to-call / tap-to-email links */
 function contactHtml(t){if(!t)return "–";return esc(t).replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g,m=>`<a href="mailto:${m}">${m}</a>`).replace(/(\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/g,m=>`<a href="tel:${m.replace(/[^\d+]/g,"")}">${m}</a>`)}
+/* ESPN headshot when the player is linked and ESPN has one; otherwise his initials */
+const headshotUrl=id=>`https://a.espncdn.com/i/headshots/college-football/players/full/${encodeURIComponent(id)}.png`;
+function initials(n){return String(n||"").replace(/\b(jr|sr|ii|iii|iv)\.?$/i,"").trim().split(/[\s-]+/).filter(Boolean).map(w=>w[0]).slice(0,2).join("").toUpperCase()||"?"}
+function headshotHtml(p){const ini=`<span class="hs-ini">${esc(initials(p.name))}</span>`;
+  return `<span class="hs" aria-hidden="true">${ini}${p.espnId?`<img src="${headshotUrl(p.espnId)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ok')" onerror="this.remove()">`:""}</span>`}
 function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const role=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
   const top=[p.school,p.level,role].filter(Boolean).join(" · ");
@@ -2234,7 +2245,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
     ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
-  return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
+  return `<div class="pc"><div class="pc-top"><div class="pc-who">${headshotHtml(p)}<div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
     ${grade}${pfHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
