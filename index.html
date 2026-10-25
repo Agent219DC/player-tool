@@ -1068,7 +1068,7 @@ const POSITIONS={
       {name:"Yards per Route Run",short:"YPRR",unit:"",dp:2,step:0.01},
       {name:"Receiving Grade",short:"Rec Grd",unit:"",dp:1,step:0.1},
       {name:"YAC per Reception",short:"YAC/Rec",unit:"",dp:1,step:0.1},
-      {name:"Separation",short:"Sep %",unit:"%",dp:1,step:0.1}],
+      {name:"Separation",short:"Sep %",unit:"%",dp:1,step:0.1,fcsMin:30}],
     defaults:{dbPerGame:20,agreeMinDb:100,weights:[40,25,20,15],
       anchors:{mid:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]},full:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]}},
       line:{name:"Adrian Norton",level:"G6",season:"2026",thru:6,cur:{db:126,m:[1.45,63.4,3.7,72.0]},prior:{db:283,m:[1.28,65.7,5.6,68.3]}}},
@@ -1234,7 +1234,11 @@ function lineScore(){
   return {...r,m:b.m,final:r.raw*(S.levels[L.level]??1)};
 }
 function scaleReady(){const A=anchors();return !A.floor.some(v=>v==null)&&!A.ceil.some(v=>v==null)}
+/* metrics PFF doesn't track reliably at FCS (e.g. WR separation): an FCS value under the metric's fcsMin counts as missing */
+function cleanM(m,level){if(!m||level!=="FCS"||!METRICS.some(x=>x.fcsMin!=null))return m;return m.map((v,i)=>v!=null&&METRICS[i]&&METRICS[i].fcsMin!=null&&v<METRICS[i].fcsMin?null:v)}
 function score(p){
+  if(p&&p.m&&p.level==="FCS"||p&&p.prior&&p.prior.m){const m2=cleanM(p.m,p.level),pr2=p.prior&&p.prior.m?Object.assign({},p.prior,{m:cleanM(p.prior.m,p.prior.level||p.level)}):p.prior;
+    if(m2!==p.m||(pr2&&p.prior&&pr2.m!==p.prior.m)){const q=Object.assign({},p,{m:m2,prior:pr2});if(JSON.stringify(q.m)!==JSON.stringify(p.m)||JSON.stringify(q.prior)!==JSON.stringify(p.prior)){const r=score(q);if(r)r.fcsDropped=true;return r}}}
   const miss=missCount(p.m);
   if(!p.m||miss>1||!p.db||!scaleReady()) return null;
   const A=anchors(modeFor(p.thru)); const b=blend({db:p.db,m:p.m},p.prior); const r=rawScore(b.m,A);
@@ -2031,9 +2035,11 @@ async function renderOverview(){
         for(let i=0;i<g.n;i++){
           const best=mine[i]||null;
           /* weakest spot is paired with the best target */
-          const top=tg2[g.n-1-(g._rank?g._rank[i]:i)]||null;
+          const cand=tg2[g.n-1-(g._rank?g._rank[i]:i)]||null;
+          /* a target who grades at or below our player there isn't an upgrade: say so instead of pairing him */
+          const noUp=!!(best&&cand&&!best.commit&&cand.r.grade<=best.r.grade),top=noUp?null:cand;
           const need=!best?"High":best.r.grade<70?"High":best.r.grade<80?"Upgrade":"Set";
-          rows.push({k,role:g.role||"",lbl:(g._sps&&g._sps[i]&&(DC_LABEL[g._sps[i]]||g._sps[i]).toUpperCase())||g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":why});
+          rows.push({k,role:g.role||"",lbl:(g._sps&&g._sps[i]&&(DC_LABEL[g._sps[i]]||g._sps[i]).toUpperCase())||g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":noUp?`No upgrade on the board (best: ${cand.p.name}, ${fmt(cand.r.grade)})`:why});
         }
       });
       return rows});
@@ -2191,7 +2197,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
       ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
       <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div></div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
-  const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span></div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
+  const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
     ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
