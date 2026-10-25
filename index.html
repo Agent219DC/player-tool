@@ -1148,7 +1148,8 @@ function blend(cur,prior){
   const wc=cur.db||0, wp=prior.db*S.priorWeight, t=wc+wp;
   return {m:cur.m.map((v,i)=>{const q=prior.m[i];if(v==null)return null;if(q==null)return v;return (v*wc+q*wp)/t}), eff:t};
 }
-function norm(v,i,A){return Math.max(0,Math.min(100,(v-A.floor[i])/(A.ceil[i]-A.floor[i])*100))}
+function norm(v,i,A){const f=A.floor[i],c=A.ceil[i];if(f==null||c==null||!isFinite(f)||!isFinite(c)||c===f)return null;/* a broken scale skips that metric instead of blanking the grade */
+  return Math.max(0,Math.min(100,(v-f)/(c-f)*100))}
 function rawScore(m,A){const W=S.weights;let tw=0,sum=0;const n=m.map((v,i)=>v==null?null:norm(v,i,A));n.forEach((x,i)=>{if(x!=null){tw+=W[i];sum+=x*W[i]}});return {n,raw:tw?sum/tw:0}}
 function missCount(m){return m?m.filter(v=>v==null).length:99}
 /* our reference starter = his own board entry when he's on the board (one player, one grade);
