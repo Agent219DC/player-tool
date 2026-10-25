@@ -108,6 +108,9 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .sgrp>div{display:grid;gap:6px}.sgrp>div+div{border-top:1px solid var(--line);padding-top:12px}
 .sgrp fieldset{border:0;padding:0;min-width:0}.sgrp fieldset>legend{display:none}
 .sgrp[data-sg=access] .ot-h,.sgrp[data-sg=season] .ot-h{display:none}
+.espnres{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-left:3px solid var(--cMed);border-radius:8px;background:var(--surface);display:grid;gap:8px;font-size:13.5px}
+.espnres .er-h{display:flex;justify-content:space-between;align-items:center}.er-l{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.er-p{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:5px 9px;font:500 13px var(--body);cursor:pointer;text-align:left}.er-p:hover{border-color:var(--accent)}
 .ot-g{margin:6px 0 6px;padding-top:10px;border-top:1px solid var(--line);font:600 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
 @media (max-width:640px){header>.tabs .gsearch{flex:1 1 100%}header>.tabs .gsearch input{width:100%;max-width:none}}
 .pos button{font:600 14px var(--display);letter-spacing:.06em;padding:6px 12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px}
@@ -846,6 +849,7 @@ window.claude={use:async n=>{
         <span class="tbsep" aria-hidden="true"></span>
         <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on every position board who has them">Refresh all stats</button>
       </div>
+      <div id="espnAllRes" class="espnres" hidden></div>
     </div>
     <div class="tablewrap"><table id="board"></table></div>
     <p class="note boardfoot"><span style="display:inline-flex;flex-wrap:wrap;gap:8px;align-items:center">Confidence: <span class="c-High"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" style="vertical-align:-2px;margin-right:3px"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>High</span><span class="c-Medium"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" style="vertical-align:-2px;margin-right:3px"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>Medium</span><span class="c-Low"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true" style="vertical-align:-2px;margin-right:3px"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>Low</span><span>* = seasons disagree or 3 of 4 metrics</span></span></p>
@@ -1404,22 +1408,27 @@ async function espnPick(id){const box=$("espnRes");box.hidden=false;box.innerHTM
 let ESPN_ALL_BUSY=false;
 async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
   if(!DB){flash("The shared board isn't connected, so stats can't be saved right now.");return}
-  const btn=$("espnAll");ESPN_ALL_BUSY=true;btn.disabled=true;btn.textContent="Loading boards…";let ok=0,bad=0,offline=false;
+  const btn=$("espnAll"),box=$("espnAllRes");ESPN_ALL_BUSY=true;btn.disabled=true;btn.textContent="Loading boards…";box.hidden=true;let ok=0,offline=false;const miss=[];
   try{const all=await loadAllPositions();const by=new Map();
-    all.forEach(({k,docs})=>docs.forEach(p=>{if(!p.espnId||!p.id||p.deleted)return;const id=String(p.espnId);if(!by.has(id))by.set(id,[]);by.get(id).push({k,id:p.id})}));
+    all.forEach(({k,docs})=>docs.forEach(p=>{if(!p.espnId||!p.id||p.deleted)return;const id=String(p.espnId);if(!by.has(id))by.set(id,[]);by.get(id).push({k,id:p.id,name:p.name||"(no name)",school:p.school||""})}));
     const ids=[...by.keys()];
     if(!ids.length){flash("No one on any board has ESPN stats yet. Open a player and click Add stats first.",7000);return}
-    let done=0,next=0;
+    let done=0,next=0;const fail=(eid,why,list)=>(list||by.get(eid)).forEach(d=>miss.push(Object.assign({why},d)));
     const work=async()=>{while(next<ids.length&&!offline){const eid=ids[next++];
       try{const st=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(eid)}/stats`);
-        const c=espnCareer(st);if(!c.cats.length)bad+=by.get(eid).length;
-        else{const r=await Promise.allSettled(by.get(eid).map(d=>DB.collection(d.k.toLowerCase()+"_players").doc(d.id).update({career:c})));r.forEach(x=>x.status==="fulfilled"?ok++:bad++)}}
-      catch(e){bad+=by.get(eid).length;if(e instanceof TypeError&&!ok&&done===0)offline=true}
+        const c=espnCareer(st);if(!c.cats.length)fail(eid,"none");
+        else{const L=by.get(eid);const r=await Promise.allSettled(L.map(d=>DB.collection(d.k.toLowerCase()+"_players").doc(d.id).update({career:c})));r.forEach((x,i)=>x.status==="fulfilled"?ok++:fail(eid,"save",[L[i]]))}}
+      catch(e){const m=String(e&&e.message||"");fail(eid,/HTTP 404/.test(m)?"gone":"espn");if(e instanceof TypeError&&!ok&&done===0)offline=true}
       done++;btn.textContent=`Refreshing ${done} of ${ids.length}…`}};
     await Promise.all(Array.from({length:Math.min(4,ids.length)},work));
     if(offline&&!ok){flash("Can't reach ESPN right now. Try again later.");return}
-    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"} across all positions${bad?` · ${bad} couldn't be updated`:""}.`,7000);
+    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"} across all positions${miss.length?` · ${miss.length} couldn't be updated (listed under the button)`:""}.`,8000);
+    if(miss.length){const WHY={none:"ESPN has no season stats for him (normal for offensive linemen and players who haven't played)",gone:"ESPN no longer has this player page; open his card and use Add stats to re-link him",espn:"ESPN didn't answer for him; try again later",save:"couldn't save to the board"};
+      const grp={};miss.forEach(m=>(grp[m.why]=grp[m.why]||[]).push(m));
+      box.innerHTML=`<div class="er-h"><b>${miss.length} not updated</b><button type="button" class="linkbtn" id="espnResX">Hide</button></div>`+Object.entries(grp).map(([w,L])=>`<div class="er-g"><div class="sub">${esc(WHY[w])}:</div><div class="er-l">${L.sort((a,b)=>a.k.localeCompare(b.k)||a.name.localeCompare(b.name)).map(m=>`<button type="button" class="er-p" data-ek="${esc(m.k)}" data-eid="${esc(m.id)}">${esc(m.name)} <span class="sub">${esc(m.k)}${m.school?" · "+esc(m.school):""}</span></button>`).join("")}</div></div>`).join("");
+      box.hidden=false}
   }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh all stats"}}
+$("espnAllRes").addEventListener("click",e=>{if(e.target.id==="espnResX"){$("espnAllRes").hidden=true;return}const b=e.target.closest("[data-ek]");if(b)openPlayer(b.dataset.ek,b.dataset.eid)});
 $("espnAll").addEventListener("click",espnRefreshAll);
 teamsLoad();
 /* ESPN position vs. the board he's being added to */
