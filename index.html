@@ -55,7 +55,7 @@ header{position:sticky;top:0;z-index:40;background:var(--bg);padding-top:10px;ma
 h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,5vw,44px);line-height:1;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
 h1 span{color:var(--accent-text)}
 h2{font-family:var(--display);font-weight:600;font-size:22px;text-transform:uppercase;letter-spacing:.04em;margin:0}
-header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:100%;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px} .themeBtn{font:600 13px var(--body);padding:0 12px;min-height:32px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+header>.brand{order:1;flex:1 1 0;min-width:0}  .themeBtn{font:600 13px var(--body);padding:0 12px;min-height:32px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
 .themeBtn:hover{border-color:var(--accent)}
 @media (max-width:480px){.themeBtn{padding:4px 10px;font-size:12px}}
 body.scrolled header{padding-top:6px;padding-bottom:8px;box-shadow:0 6px 14px -12px rgba(0,0,0,.4)}
@@ -112,7 +112,7 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .espnres .er-h{display:flex;justify-content:space-between;align-items:center}.er-l{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .er-p{border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:6px;padding:5px 9px;font:500 13px var(--body);cursor:pointer;text-align:left}.er-p:hover{border-color:var(--accent)}
 
-.ot-g{margin:6px 0 6px;padding-top:10px;border-top:1px solid var(--line);font:600 11.5px var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+
 @media (max-width:640px){header>.tabs .gsearch{flex:1 1 100%}header>.tabs .gsearch input{width:100%;max-width:none}}
 .pos button{font:600 14px var(--display);letter-spacing:.06em;padding:6px 12px;border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px}
 .pos button[aria-pressed="true"]{background:var(--accent-fill);color:var(--accent-ink);border-color:var(--accent-fill)}
@@ -121,7 +121,7 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .modebar .seg button{padding:3px 10px;font-size:13px}
 .modebar label{font-size:13px}.modebar #teamGames{width:56px;padding:3px 6px;font-size:13px}
 .modebar .note{font-size:12.5px}
-.hnav{align-items:center;flex-wrap:wrap}
+
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
 .pc-mkt{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
@@ -180,7 +180,7 @@ table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl 
 .ovlogo{width:13px;height:13px;margin:0 0 0 5px;vertical-align:-2px}
 .career td .slogo{width:14px;height:14px;vertical-align:-3px}
 .cg.tc-Elite,.letter.tc-Elite{color:var(--tElite)} .cg.tc-Impact,.letter.tc-Impact{color:var(--tImpact)} .cg.tc-Starter,.letter.tc-Starter{color:var(--tStarter)} .cg.tc-Rotation,.letter.tc-Rotation{color:var(--tRotation)} .cg.tc-Pass,.letter.tc-Pass{color:var(--tPass)}
-@media (max-width:640px){.tbsep{display:none}.hnav{width:100%}.hnav .gsearch{flex:1 1 100%}.hnav .gsearch input{width:100%;max-width:none}}
+@media (max-width:640px){.tbsep{display:none}}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;min-height:36px}
 .seg button{border:0;background:transparent;color:var(--fg);padding:6px 12px;font:500 14px var(--body)}
 .seg button[aria-pressed="true"]{background:var(--accent-fill);color:var(--accent-ink)}
@@ -237,7 +237,7 @@ table .chip{font-size:10.5px;padding:2px 7px}
 .btn:disabled,.btn.primary:disabled{background:transparent;color:var(--muted);border-color:var(--line);opacity:.6;cursor:not-allowed;filter:none}
 #board a[data-load]{text-decoration:none} #board a[data-load]:hover,#board a[data-load]:focus-visible{text-decoration:underline}
 .bio{font-size:12px;margin-top:2px;white-space:normal}
-.notes{font-size:12px;font-style:italic;margin-top:2px;white-space:normal;max-width:46ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
 .stag{display:inline-block;font:600 10.5px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px;border:1px solid currentColor}
 .st-OnRoster{color:var(--accent-text);background:transparent;border-color:currentColor} .st-Target{color:var(--starter)} .st-Contacted{color:var(--muted)} .st-Offered{color:var(--offer)} .st-Committed{color:var(--impact);background:var(--accent-soft)} .st-NIP{color:var(--muted);opacity:.85} .st-Pass{color:#fff;background:var(--tPass);border-color:var(--tPass)}
 .trend{font:600 11px var(--mono);margin-left:4px}
@@ -257,8 +257,8 @@ select.qsel{width:auto;display:inline-block;font:500 12px var(--body);padding:2p
 .need{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
 #ovTbl .chip{font-size:10.5px;padding:2px 7px} #ovTbl td:nth-child(3),#ovTbl td:nth-child(6){white-space:normal;min-width:150px} #ovTbl tr.ovfirst td{border-top:2px solid var(--line)} #ovTbl tbody tr.ovfirst:first-child td{border-top:0} .need-High{color:var(--pass)} .need-Upgrade{color:var(--rotation)} .need-Set{color:var(--impact)}
 .meta{font-size:11px;margin-top:2px;opacity:.8}
-.boardtools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.boardtools input{width:220px;max-width:100%;font-family:var(--body)}
+
+
 #compare{display:grid;gap:10px}
 .cmp td,.cmp th{white-space:normal;vertical-align:top}
 .cmp td.best{background:var(--accent-soft);font-weight:600}
@@ -289,7 +289,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .anchors td{padding:6px 8px}
 .anchors input{min-width:80px}
 .note{font-size:13px;color:var(--muted);max-width:70ch}
-.warn{font-size:13px;color:var(--rotation)}
+
 .gsearch{position:relative}
 .gsearch input{width:220px;max-width:60vw;font-family:var(--body);font-size:14px;padding:6px 9px}
 .gresults{position:absolute;right:0;top:calc(100% + 4px);z-index:20;width:min(380px,90vw);max-height:360px;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
@@ -324,7 +324,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 @media (min-width:701px) and (max-width:1100px){.tb-cols.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row;grid-auto-columns:auto;overflow-x:visible}}
 @media (max-width:700px){.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(var(--n),200px)!important;grid-auto-flow:row}.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
 .dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:4px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
-.dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
+
 .dcm{display:inline-block;font:700 9.5px var(--body);letter-spacing:.04em;padding:1px 5px;border-radius:3px;border:1px solid var(--line);color:var(--muted);margin-right:3px;vertical-align:1px}
 .dcm.tr{background:rgba(70,189,198,.22);border-color:rgba(70,189,198,.7);color:var(--fg)}
 .dcm.fr{background:rgba(255,214,0,.3);border-color:rgba(214,170,0,.8);color:var(--fg)}
@@ -339,7 +339,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 @media (max-width:1000px){.dc-key{grid-template-columns:repeat(3,minmax(0,auto))}}
 @media (max-width:640px){.dc-key{grid-template-columns:1fr 1fr}}
 .dc-keywrap{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:flex-start}
-.dc-legend{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;font-size:12.5px;color:var(--muted)}
+
 dialog#dcDlg{width:min(420px,calc(100% - 32px));padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcd{display:grid;gap:10px;padding:18px}.dcd h3{margin:0;font:700 18px var(--display)}
@@ -467,8 +467,8 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .nsbox ul{margin:0;padding-left:18px}
 .cmpverdict{margin:6px 0 10px;padding:10px 14px;border-radius:8px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--surface);font-size:15px}
 .cmpverdict b{font-family:var(--display);font-size:18px;letter-spacing:.02em}
-.hnav{display:flex;gap:8px}
-.hnav .btn{font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:6px 14px}
+
+
 .editor{display:block}
 .editor>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:12px;cursor:pointer;padding:2px 0}
 .editor>summary::-webkit-details-marker{display:none}
@@ -533,11 +533,12 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .ovcard.ovc-empty b{font:700 15px var(--display);letter-spacing:.04em}
 .ovlist{display:none}
 @media (max-width:1040px){.ovfieldwrap{display:none}.ovlist{display:block}}
-/* mid widths (small laptops, tablets): overview rows as cards, two per row */
-@media (min-width:641px) and (max-width:1040px){
+/* phones through small laptops: overview rows become cards (two per row above phone width) */
+@media (max-width:1040px){
+  #ovTbl .tlink,#ovTbl button{text-align:left}
   .ovlist.tablewrap{overflow:visible;border:0;background:none}
   #ovTbl{min-width:0;display:block}#ovTbl thead{display:none}
-  #ovTbl tbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #ovTbl tbody{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:10px}
   #ovTbl tbody tr{display:grid;grid-template-columns:auto 1fr auto auto;grid-template-areas:"pos need need need" "mn mn mg me" "tn tn tg tt" "tn tn gap gap";gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
   #ovTbl tbody td{border:0!important;padding:0;white-space:normal;min-width:0!important}
   #ovTbl .o-pos{grid-area:pos;font-size:16px}#ovTbl .o-need{grid-area:need;text-align:right}
@@ -574,18 +575,6 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
   .verdict{grid-template-columns:1fr;gap:8px}
   .score{font-size:72px}
   /* overview rows become cards */
-  #ovTbl{min-width:0}
-  #ovTbl thead{display:none}
-  #ovTbl tbody tr{display:grid;grid-template-columns:auto 1fr auto auto;grid-template-areas:"pos need need need" "mn mn mg me" "tn tn tg tt" "tn tn gap gap";gap:4px 10px;padding:10px;border-bottom:1px solid var(--line)}
-  #ovTbl tbody td{border:0!important;padding:0;white-space:normal;min-width:0!important}
-  #ovTbl .o-pos{grid-area:pos;font-size:16px}
-  #ovTbl .o-need{grid-area:need;text-align:right}
-  #ovTbl .o-mn{grid-area:mn}#ovTbl .o-mg{grid-area:mg}#ovTbl .o-me{grid-area:me;text-align:right}
-  #ovTbl .o-tn{grid-area:tn}#ovTbl .o-tg{grid-area:tg}#ovTbl .o-tt{grid-area:tt;text-align:right}
-  #ovTbl .o-gap{grid-area:gap;font-size:12px;color:var(--muted)}
-  #ovTbl .o-gap::before{content:"Gap "}
-  #ovTbl .o-mn::before,#ovTbl .o-tn::before{content:attr(data-l);display:block;font:600 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-  #ovTbl tbody tr.ovfirst{border-top:2px solid var(--line)}
   #overview tr.go:hover td{background:transparent} #overview tr.go:hover{background:var(--sunk)}
   /* fold long form sections */
   fieldset.fold.closed>:not(legend){display:none!important}
@@ -602,7 +591,7 @@ body{font-variant-numeric:tabular-nums}
 @media (pointer:fine) and (min-width:641px){.gsearch::after{content:"/";position:absolute;right:8px;top:50%;transform:translateY(-50%);font:600 11px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;line-height:16px;pointer-events:none}
   .gsearch:focus-within::after,.gsearch:has(input:not(:placeholder-shown))::after{display:none}}
 /* small labels and tags in normal case; headings and tabs stay in caps */
-.chip,.stag,.need,.valtag,.behind,th,.pc h3,.pc details.career>summary,legend,.ot-g,.dc-keyh,.dc-rowlbl,.career h3,.cmpcareer>h3{text-transform:none!important;letter-spacing:.01em!important}
+.chip,.stag,.need,.valtag,.behind,th,.pc h3,.pc details.career>summary,legend,.dc-keyh,.dc-rowlbl,.career h3,.cmpcareer>h3{text-transform:none!important;letter-spacing:.01em!important}
 .pc h3{font-size:12.5px;font-weight:700}
 th{font-size:12.5px}
 .sgrp>summary{text-transform:none;letter-spacing:.01em;font:700 16px var(--display)}
@@ -758,7 +747,7 @@ window.claude={use:async n=>{
       <select id="bbTop" aria-label="How many" style="width:auto;font-family:var(--body);font-size:14px"><option value="25">Top 25</option><option value="50" selected>Top 50</option><option value="0">All</option></select>
     </div>
     <div class="tablewrap"><table id="bbTbl"></table></div>
-    <p class="note">This season's targets (Medium or High confidence). <b>Priority</b> lists Upgrade spots first. <b>vs. ours</b> = his grade minus our weakest starter, using the depth chart's #1s. Tap a player for his card.</p>
+    <p class="note">Targets with Medium or High confidence. <b>Priority</b> lists Upgrade spots first. <b>Vs. ours</b> = his grade minus our weakest starter. Tap a player for his card.</p>
   </section>
 
   <section id="tagboard" data-page="bigboard" hidden>
@@ -767,7 +756,7 @@ window.claude={use:async n=>{
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button></span>
     </div>
     <div class="tb-cols" id="tbCols"></div>
-    <p class="note">Drag tags or use the arrows to rank each position; staff all see the same order. New targets start at the bottom in grade order. Tap a tag for his card.</p>
+    <p class="note">Drag tags or use the arrows to rank each position; everyone sees the same order. New targets start at the bottom. Tap a tag for his card.</p>
   </section>
 
   <section id="recruit" data-page="recruit" hidden>
@@ -777,7 +766,7 @@ window.claude={use:async n=>{
     </div>
     <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on the chart yet. <b>Working</b> = Target + Contacted. The top line is the 105-man total, walk-ons included. Tap a number to open that list.</p>
+    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
       <h2 style="font-size:19px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
@@ -795,7 +784,7 @@ window.claude={use:async n=>{
     <div class="dc-keywrap"><div class="dc-key" aria-label="Tag colors"><div class="dc-keyh">Tag colors <span style="text-transform:none;letter-spacing:0;font-weight:400">· left edge = grade tier when he's on a board</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:var(--surface)"></i></span><span>Returning</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-fr),var(--dc-fr)),var(--surface)"></i></span><span>Freshman</span></div><div class="dc-keyr" id="dcKeyTr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-tr),var(--dc-tr)),var(--surface)"></i></span><span>Transfer</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:linear-gradient(var(--dc-wo),var(--dc-wo)),var(--surface)"></i></span><span>Walk-on</span></div><div class="dc-keyr"><span><i class="dc-sw" style="background:repeating-linear-gradient(135deg,var(--dc-cut) 0 6px,transparent 6px 12px),var(--surface)"></i></span><span>Potential cut (stripes)</span></div><div class="dc-keyr"><span style="text-align:center"><span class="dcinj"><svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3" fill="#d32f2f"/><path d="M6.6 3.6h2.8v3h3v2.8h-3v3H6.6v-3h-3V6.6h3z" fill="#fff"/></svg></span></span><span>Injured</span></div></div><span class="sub" id="dcCount" style="font-size:12.5px;padding-top:4px"></span></div>
     <div class="dc-rows" id="dcCols"></div>
     
-    <p class="note" id="dcNote">Drag players to reorder them or move them to another spot, or tap a player to edit his spot, depth and tags. <b>Thin</b> = fewer than 2 healthy players who aren't potential cuts. Everyone on staff sees the same chart.</p>
+    <p class="note" id="dcNote">Drag to reorder or move players; tap a player to edit his spot and tags. <b>Thin</b> = fewer than 2 healthy players who aren't potential cuts.</p>
   </section>
 
   <section id="budget" data-page="budget" hidden>
@@ -814,7 +803,7 @@ window.claude={use:async n=>{
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
     <div class="tablewrap ovlist"><table id="ovTbl"></table></div>
     <p class="note" id="ovModeNote" hidden><b>Next season:</b> graduating players drop off, every returning player counts, and Committed targets join the roster.</p>
-    <p class="note">One card per starting spot. Ours = the depth chart's #1 (our best grade if none is set). Each card pairs the best target with our weakest starter. Need: <b>Upgrade</b> under 70, <b>Solid</b> 70–79, <b>Great</b> 80+. Tap a card to compare.</p>
+    <p class="note"><b>Ours</b> = each spot's depth chart #1. Each card pairs our weakest starter with the best target. Need: <b>Upgrade</b> under 70 · <b>Solid</b> 70–79 · <b>Great</b> 80+. Tap a card to compare.</p>
   </section>
 
   <details class="editor" id="editor" data-page="boards">
@@ -986,12 +975,12 @@ window.claude={use:async n=>{
       <details class="sgrp" data-sg="loads"><summary>Data loads · roster, budget, market</summary>
       <div>
         <h3 class="ot-h">Roster for depth chart</h3>
-        <p class="note">Load the roster grid workbook: the <b>105</b> tab fills This season, the <b>Fall</b> tab fills Next season. Blue = transfer, yellow = freshman, pale red = potential cut. Replaces both charts and any order staff have set.</p>
+        <p class="note">Fills This season from the <b>105</b> tab and Next season from the <b>Fall</b> tab. Replaces both charts, including any order staff have set.</p>
         <div class="btns"><button class="btn" type="button" id="gridUp">Load roster grid (.xlsx)…</button><input type="file" id="gridFile" accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
         <h3 class="ot-h">Budget</h3>
-        <p class="note" id="budNote">Load the NIL budget workbook (it reads the <b>Download</b> tab) to see the Budget page and our slot values on player cards. Only your account can read it.</p>
+        <p class="note" id="budNote">Reads the <b>Download</b> tab of the NIL budget workbook. Only your account can see it.</p>
         <div class="btns"><button class="btn" type="button" id="budUp">Load budget sheet (.xlsx)…</button><input type="file" id="budFile" accept=".xlsx,.xls,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden></div>
       </div>
       <div>
@@ -1003,7 +992,7 @@ window.claude={use:async n=>{
       <details class="sgrp" data-sg="backup"><summary>Backup, import &amp; export</summary>
       <div>
         <h3 class="ot-h">Full backup</h3>
-        <p class="note">Download every position, Trash, settings and both depth charts as one file, or restore from one. Your budget and asking prices download separately; restore either file here. Restoring adds or replaces players; it never deletes anyone.</p>
+        <p class="note">One file with every position, Trash, settings and both depth charts. Budget and asking prices download separately. Restoring adds or replaces players; it never deletes anyone.</p>
         <div class="btns"><button class="btn" type="button" id="bkOwn" title="Your budget and asking prices; keep this file private">Download my budget &amp; asking prices</button><button class="btn" type="button" id="bkDown">Download backup (.json)</button><button class="btn" type="button" id="bkUp">Restore from backup…</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
       </div>
       <div>
@@ -1016,7 +1005,7 @@ window.claude={use:async n=>{
       <details class="sgrp" data-sg="season"><summary>Start a new season</summary>
       <div>
         <h3 class="ot-h">Start a new season</h3>
-        <p class="note">Run once when the season turns over: graduates come off the roster, Committed players join it, everyone loses a year of eligibility, and Next season's depth chart becomes This season's. You can undo it.</p>
+        <p class="note">Run once at season turnover: graduates leave, Committed players join, everyone loses a year of eligibility, and Next season's depth chart becomes This season's. You can undo it.</p>
         <div class="btns"><button class="btn" type="button" id="nsPreview">Start new season…</button><button class="btn" type="button" id="nsUndo" hidden>Undo last new season</button></div>
         <div id="nsBox" class="nsbox" hidden></div>
       </div>
@@ -1232,7 +1221,7 @@ const POSITIONS={
 const clone=o=>JSON.parse(JSON.stringify(o));
 function load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-const MODE_KEY="hpg-qb-mode", POS_KEY="hpg-pos";
+const POS_KEY="hpg-pos";
 let POSKEY=POSITIONS[load(POS_KEY,"QB")]?load(POS_KEY,"QB"):"QB";
 let P=POSITIONS[POSKEY], METRICS=P.metrics;
 const defaultsFor=k=>Object.assign(clone(BASE),clone(POSITIONS[k].defaults));
@@ -1373,13 +1362,6 @@ function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
 }
 
 /* ---------- school logos (ESPN team list, cached a week in this browser) ---------- */
-const TEAMS_KEY="pt_espn_teams_v1",LOGO_ALIAS={miamifl:"miami",miamiflorida:"miami",miamioh:"miamioh",olemiss:"olemiss",pitt:"pittsburgh",umass:"massachusetts",ulmonroe:"ulmonroe",louisianamonroe:"ulmonroe",ullafayette:"louisiana",louisianalafayette:"louisiana",southernmississippi:"southernmiss",usc:"usc",lsu:"lsu",tcu:"tcu",smu:"smu",byu:"byu",utep:"utep",utsa:"utsa",fiu:"fiu",fau:"floridaatlantic",appalachianstate:"appstate",ncstate:"ncstate",northcarolinastate:"ncstate",uconn:"uconn",connecticut:"uconn"};
-let TEAMS=null;
-function teamsIndex(list){const m=new Map();list.forEach(t=>{[t[1],t[2],t[3],t[4]].forEach(k=>{const n=normT(k);if(n&&!m.has(n))m.set(n,t[0])})});return m}
-async function teamsLoad(){
-  try{const c=JSON.parse(localStorage.getItem(TEAMS_KEY)||"null");if(c&&c.list&&Date.now()-c.at<7*864e5){TEAMS=teamsIndex(c.list);return}}catch(e){}
-  /* ESPN's full team list can't be read from a browser (CORS), so schools are looked up one at a time with ESPN search (below) */
-}
 /* school -> ESPN team id, looked up once per school and remembered in this browser */
 const TLOOK_KEY="pt_team_lookup_v1";let TLOOK=(()=>{try{return JSON.parse(localStorage.getItem(TLOOK_KEY)||"{}")||{}}catch(e){return {}}})();
 const TLQ=new Map();let TLQ_T=null,TLQ_RUN=false;
@@ -1402,7 +1384,6 @@ async function teamDrain(){if(TLQ_RUN)return;TLQ_RUN=true;let found=0;
   if(found){try{renderBoard()}catch(e){}if($("pcard").open&&CARD_P)openCard(CARD_P)}
   if(TLQ.size)teamDrain()}
 function teamIdFor(p,school){if(p&&p.teamId&&(school==null||normT(school)===normT(p.school)))return p.teamId;const raw=school!=null?school:p&&p.school,n=normT(raw);if(!n)return null;
-  if(TEAMS){const t=TEAMS.get(n)||TEAMS.get(LOGO_ALIAS[n]||"")||TEAMS.get(n.replace(/university$|universityof|^universityof/,""));if(t)return t}
   if(n in TLOOK)return TLOOK[n]||null;teamQueue(n,raw);return null}
 const logoUrl=id=>`https://a.espncdn.com/i/teamlogos/ncaa/500/${encodeURIComponent(id)}.png`;
 function logoImg(p,cls,school){const id=teamIdFor(p,school);return id?`<img class="${cls||"slogo"}" src="${logoUrl(id)}" alt="" loading="lazy" onerror="this.remove()">`:""}
@@ -1524,7 +1505,6 @@ async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
   }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh all stats"}}
 $("espnAllRes").addEventListener("click",e=>{if(e.target.id==="espnResX"){$("espnAllRes").hidden=true;return}const b=e.target.closest("[data-ek]");if(b)openPlayer(b.dataset.ek,b.dataset.eid)});
 $("espnAll").addEventListener("click",espnRefreshAll);
-teamsLoad();
 /* ESPN position vs. the board he's being added to */
 const ESPN_POS={QB:["QB"],RB:["RB","HB","FB"],WR:["WR"],TE:["TE"],IOL:["G","OG","C","OL","IOL"],OT:["T","OT","OL"],DT:["DT","NT","DL"],DE:["DE","DL","EDGE"],LB:["LB","ILB","OLB","MLB"],SAF:["S","FS","SS","DB"],NIC:["CB","S","DB","NB"],CB:["CB","DB"]};
 function espnPosNote(pos){const ok=ESPN_POS[POSKEY];if(ok&&!ok.includes(pos.toUpperCase()))flash(`Heads up: ESPN lists him as ${pos}, and you're adding him to the ${P.label} board.`,9000)}
@@ -1597,7 +1577,6 @@ function renderBoard(){
 const isOurs=p=>p.status==="On Roster"||(!!p.marshall&&!p.status);
 function fixLegacy(p){if(p.status==="Passed"||p.status==="NGE")p.status="Pass";if(p.status==="Visit"){delete p.status;if(!p.visit)p.visit="Scheduled"}return p}
 const STATUSES=["On Roster","Target","Contacted","Offered","Committed","NIP","Pass"];
-function safeUrl(u){if(!u)return"";u=String(u).trim();if(!/^https?:\/\//i.test(u))u="https://"+u;try{const x=new URL(u);return /^https?:$/.test(x.protocol)?x.href:""}catch(e){return""}}
 function fmtDate(d){if(!d)return"";const t=new Date(d+"T12:00:00");return isNaN(t)?d:t.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
 function eligLong(p){return p.elig===0?"0 yrs left":p.elig?p.elig+(p.elig===1?" yr":" yrs")+" left":""}
 function eligShort(p){return p.elig===0?"0":p.elig?String(p.elig):"—"}
@@ -2006,9 +1985,7 @@ function setPath(o,path,v){const ks=path.split(".");let a=o;for(let i=0;i<ks.len
 function cfgFixes(k,o){const up={};(POSITIONS[k].cfgFix||[]).forEach(f=>{if(JSON.stringify(getPath(o,f.field))===JSON.stringify(f.from))up[f.field]=f.to});return up}
 function withPos(k,cfg,fn){const sv={P,METRICS,S,DEFAULTS};P=POSITIONS[k];METRICS=P.metrics;DEFAULTS=defaultsFor(k);S=Object.assign(clone(DEFAULTS),cfg?clone(cfg):{});Object.entries(cfgFixes(k,S)).forEach(([f,v])=>setPath(S,f,v));S.mode=sv.S.mode;
   try{return fn()}finally{P=sv.P;METRICS=sv.METRICS;S=sv.S;DEFAULTS=sv.DEFAULTS}}
-function htwt(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":""].filter(Boolean).join(" · ")}
 const NEEDLABEL={High:"Upgrade",Upgrade:"Solid",Set:"Great"};
-function tierChip(x){return x&&x.r&&x.r.tier?` <span class="chip t-${x.r.tier}" style="margin-left:6px">${TIERNAME[x.r.tier]}</span>`:""}
 function eligText(p){return p.elig===0?"0 yrs":p.elig?p.elig+(p.elig===1?" yr":" yrs"):"–"}
 const OV_SPOTS={WR:[{lbl:"SLOT",role:"Slot",n:1},{lbl:"WR",role:"Outside",n:2}],IOL:[{lbl:"IOL",n:3}],OT:[{lbl:"OT",n:2}],
   DT:[{lbl:"DT",n:2}],DE:[{lbl:"DE",n:2}],LB:[{lbl:"LB",n:2}],SAF:[{lbl:"SAF",n:2}],NIC:[{lbl:"NIC",n:1}],CB:[{lbl:"CB",n:2}]};
@@ -2520,7 +2497,7 @@ const DC_LABEL={STP:"ST · to place",SLOT:"Slot",WRP:"WR · to place",OLP:"OL ·
 const DC_OPT=k=>({DTA:"DT (1st)",DTB:"DT (2nd)",LBA:"MIKE",LBB:"WILL",SAFA:"FSAF",SAFB:"BSAF",CBA:"FCB",CBB:"BCB"})[k]||DC_LABEL[k]||k;
 const DC_FAM=k=>({X:"WR",Z:"WR",SLOT:"WR",WRP:"WR",WR:"WR",LT:"OL",LG:"OL",OC:"OL",RG:"OL",RT:"OL",OLP:"OL",OL:"OL",OT:"OL",IOL:"OL",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT",LBA:"LB",LBB:"LB",SAFA:"SAF",SAFB:"SAF",CBA:"CB",CBB:"CB"})[k]||k;
 const DC_DOC={now:"shared/depth",next:"shared/depth_next"};
-const DC_TYPE={ret:"Returning",tr:"Transfer",fr:"Freshman"};
+
 let DCS={now:{groups:{}},next:{groups:{}}},DC_SZN="next",DC_SIDE="off",DC_SORT=[],DC_DRAG_AT=0,DC_GRADES=null,DC_OURS=[],DC_DIRTY=0,DC_EDIT=null;
 const DCG=()=>DCS[DC_SZN].groups;
 const normName=n=>String(n||"").toLowerCase().replace(/[.'’]/g,"").replace(/\b(jr|sr|ii|iii|iv|v)\b/g,"").replace(/[^a-z0-9]+/g," ").trim();
@@ -2688,7 +2665,6 @@ $("dcCols").addEventListener("keydown",e=>{if(e.key==="Escape"&&e.target.closest
 $("dcCols").addEventListener("focusout",e=>{const f=e.target.closest("[data-dca]");if(!f)return;setTimeout(()=>{if(DC_ADDOPEN===f.dataset.dca&&!f.contains(document.activeElement)&&!f.querySelector("input").value.trim()){DC_ADDOPEN=null;drawDepth()}},150)});
 document.querySelectorAll("[data-dcside]").forEach(b=>b.addEventListener("click",()=>{DC_SIDE=b.dataset.dcside;document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
 document.querySelectorAll("[data-dcszn]").forEach(b=>b.addEventListener("click",()=>{DC_SZN=b.dataset.dcszn;document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDepth()}));
-function hideViews(except){["overview","bigboard","tagboard","recruit","depth","budget"].forEach(id=>{if(id!==except)$(id).hidden=true})}
 async function openDepth(){$("depth").hidden=false;DC_SIDE=PREF.dcSide||(sideOf(POSKEY)==="def"?"def":"off");DC_SZN=PREF.dcSzn||DC_SZN;
   document.querySelectorAll("[data-dcside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcside===DC_SIDE));document.querySelectorAll("[data-dcszn]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dcszn===DC_SZN));
   drawDepth();
@@ -2807,7 +2783,7 @@ $("dcPrint").addEventListener("click",async()=>{if(!DC_GRADES){try{await dcLoadG
 
 /* ---------- budget: owner only. Lives at owner/budget, which the database rules let only the owner read ---------- */
 let BUDGET=null;
-const BUD_POS={DT:"IDL"};
+
 function watchBudget(db){db.doc("owner/budget").onSnapshot(s=>{BUDGET=s.exists?s.data():null;
   $("budNote").textContent=BUDGET?`Loaded: ${BUDGET.title||"budget"}, ${money(BUDGET.total)} total${BUDGET.at?" ("+fmtDate(String(BUDGET.at).slice(0,10))+")":""}. Only your account can read it. Load a new file to replace it.`:"Load the NIL budget workbook (it reads the Download tab) to see the Budget page and our slot values on player cards. Only your account can read it.";
   if(!$("budget").hidden&&!$("budget").contains(document.activeElement))renderBudget();if($("pcard").open&&CARD_P)openCard(CARD_P)},()=>{})}
@@ -2830,7 +2806,7 @@ function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="
           <td class="rm"><button type="button" data-brm aria-label="Remove ${esc(x.slot)}">×</button></td></tr>`).join("")}</tbody></table>
         <div class="ft"><span data-gf="${gi}"></span>${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""}</div>
         <div class="bud-add">${kinds.map(k=>`<button type="button" class="linkbtn" data-badd="${gi}" data-pos="${esc(k)}">+ ${esc(k)} spot</button>`).join("")}</div></div>`}).join("")}</div>`).join("")}</div></section>`).join("")}
-    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget; with Per month on, the right column is the monthly amount on a 12-month deal. A wavy underline means that name isn't on the Next season depth chart; check the spelling.</p>`;
+    <p class="note">Type to change a name, amount or total; it saves on its own. Clear a name to open the spot. <b>Per month</b> = 12-month deal. A wavy underline means the name isn't on the Next season depth chart.</p>`;
   budRecalc()}
 /* budget names are typed by hand: flag any that don't match someone on the Next season depth chart */
 function budOffChart(name){const all=(DCS.next&&DCS.next.groups)?dcAllZ("next"):[];if(!all.length)return false;const n=normName(name);return !all.some(x=>normName(x.n)===n)}
