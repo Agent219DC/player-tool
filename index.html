@@ -92,6 +92,9 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
 .pc-mkt{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
+.pc-hist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px}.pc-hist .up,.pc-imp .up{color:var(--cHigh,#00873a)}.pc-hist .dn,.pc-imp .dn{color:var(--cLow,#c62828)}.pc-hist>span{color:var(--muted)}.pc-hist>span.up{color:var(--cHigh,#00873a)}.pc-hist>span.dn{color:var(--cLow,#c62828)}
+@media (max-width:480px){.pc-hist{flex-direction:column;align-items:flex-start;gap:6px}}
+.pc-imp .pc-own::after{content:' · only you see this';color:var(--muted);font-size:11px}
 .pc-mkt .big{font:700 22px var(--display);letter-spacing:.01em}
 .pc-mkt .sub b{color:var(--fg)}
 .behind{display:inline-block;font:600 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--tRotation);border:1px solid currentColor;border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
@@ -1174,7 +1177,7 @@ function score(p){
   if(p.prior&&p.prior.level&&p.prior.level!==p.level&&b.eff>(p.db||0)){fPrior=S.levels[p.prior.level]??1;const wc=p.db||0,wp=b.eff-wc;factor=(fCur*wc+fPrior*wp)/(wc+wp)}
   const leveled=r.raw*factor;
   const games=S.mode==="mid"?(p.thru==="full"?S.seasonGames:(Number(p.thru)||tg())):S.seasonGames;
-  const expected=S.dbPerGame*games; const part=Math.min(1,p.db/expected);
+  const expected=S.dbPerGame*games; const part=Math.min(1,b.eff/expected); /* last season's sample counts too, at the same weight as the stat blend */
   const C=cuts(); const target=(C.rotation+C.starter)/2;
   const final=part>=1?leveled:target+(leveled-target)*part;
   /* confidence follows the games played: High = a full-time load for his games, Medium = half of that
@@ -1383,8 +1386,8 @@ $("espnCard").addEventListener("click",e=>{if(e.target.id==="espnOther"){ESPN_X=
 function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCareer();{const fp=readForm();$("v-logo").innerHTML=fp.school?logoImg(fp,"vlogo"):""}
   const A=anchors();
   $("modeNote").textContent=(S.mode==="mid"
-    ?`Full credit at ${S.dbPerGame*tg()} ${P.sample} (${S.dbPerGame} × ${tg()} games).`
-    :`Full credit at ${S.dbPerGame*S.seasonGames} ${P.sample}.`)+(A.fallback?" Full-season ceilings not set; using mid-season ceilings.":"");
+    ?`Full credit at ${S.dbPerGame*tg()} ${P.sample} (${S.dbPerGame} × ${tg()} games); last season's count at ${S.priorWeight} weight.`
+    :`Full credit at ${S.dbPerGame*S.seasonGames} ${P.sample}; last season's count at ${S.priorWeight} weight.`)+(A.fallback?" Full-season ceilings not set; using mid-season ceilings.":"");
   $("teamGames").disabled=S.mode==="full";
   const p=readForm(), r=score(p), L=lineScore();
   if(!r){
@@ -1405,7 +1408,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-math").textContent=
 `Raw (weighted)       ${fmt(r.raw)}
 ${r.fPrior!=null?`× level factor ${r.factor.toFixed(2)}  ${fmt(r.leveled)}  (${p.level} ${r.fCur.toFixed(2)} this season, ${p.prior.level} ${r.fPrior.toFixed(2)} last, by sample)`:`× ${p.level} factor ${r.factor.toFixed(2)}     ${fmt(r.leveled)}`}
-Sample               ${p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
+Sample               ${p.prior&&p.prior.db?`${fmt(r.eff,0)} (${p.db} + ${S.priorWeight} × ${p.prior.db} last season)`:p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
 ${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
 Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
   drawScale(r.grade,S.line.name?lg:null);
@@ -1842,7 +1845,9 @@ $("impFile").addEventListener("change",async e=>{
   flash(`Importing ${rows.length-1} rows…`);
   for(const r of rows.slice(1)){
     const res=rowToPlayer(h,r);if(res.err){errs.push(res.err);continue}
-    const p=res.p;const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
+    let p=res.p;const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
+    /* updating someone already on the board: the file's columns win, everything else (contacts, ESPN stats, visits, tags) stays */
+    if(ex){const keep=Object.assign({},ex);delete keep.id;p=Object.assign(keep,p)}
     withTrend(p,ex);if(uid)p.addedBy=uid;p.updatedAt=new Date().toISOString();
     try{await DB.collection(coll()).doc(ex&&ex.id?ex.id:slug(p.name+"-"+p.school+"-"+p.season)).set(p);ex?updated++:added++}
     catch(err){errs.push(`${p.name}: couldn't save (you may have view-only access)`);if(err&&err.code==="invalid_argument")break}
@@ -2089,7 +2094,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const grade=r&&r.grade!=null?`<div class="pc-grade"><div class="score gtc-${r.tier}">${fmt(r.grade)}<small> ${r.letter}</small></div><div>
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
       ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
-      <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div></div></div>`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
+      <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div></div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
   const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span></div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
@@ -2097,7 +2102,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${r?marketHtml(p,r):""}${askHtml(p,r)}${budgetCardHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${r?marketHtml(p,r):""}${askHtml(p,r)}${budgetCardHtml(p,r)}${impactHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
@@ -2783,6 +2788,25 @@ function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==nul
   groups.sort((a,b)=>order.indexOf(a.name)-order.indexOf(b.name));
   return groups.length?{format:"player-tool-budget",title:"NIL budget",total:total||groups.reduce((a,g)=>a+g.rows.reduce((x,y)=>x+y.amt,0),0),groups,goals}:null}
 /* owner-only line on a player card: our slot value at the spot he projects to, and his own number if he's on the sheet */
+/* what changes if this target commits: Next season roster count, where he lands among our guys, and (owner only) the budget */
+function impactHtml(p,r){if(!p||isOurs(p)||p.ref||p.deleted||!r||r.grade==null)return "";const lines=[];const nm=normName(p.name);
+  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;
+  const Ln=(DCS.next||{}).limits||{},cnt=(DCS.next&&DCS.next.groups)?dcCounts("next"):null;
+  if(cnt&&cnt.total){const on=dcAllZ("next").some(x=>normName(x.n)===nm);
+    if(on)lines.push(`Already on the Next season depth chart.`);
+    else{const lim=+Ln.limit||105,t1=cnt.total+1,have=cnt.c[grp]||0,mx=(Ln.targets||{})[grp],gl=DC_GRPLBL[grp]||grp;
+      lines.push(`Roster: <b>${cnt.total} → ${t1}</b> of ${lim}${t1>lim?` <b class="dn">(${t1-lim} over)</b>`:` (${lim-t1} open after)`}`
+        +(mx!=null?` · ${esc(gl)} <b>${have} → ${have+1}</b> of ${mx}${have+1>mx?` <b class="dn">(${have+1-mx} over)</b>`:""}`:""))}}
+  {const yr=String(p.season||CUR_SEASON);const pool=BOARD.filter(b=>!b.ref&&!b.deleted&&isOurs(b)&&String(b.season)===yr&&b.elig!==0).map(b=>({b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null).sort((a,b)=>b.r.grade-a.r.grade);
+    const n=pool.filter(x=>x.r.grade>r.grade).length+1,bump=pool[n-1],lbl=(POSKEY==="NIC"?"NIC":POSKEY)+n;
+    lines.push(`Depth: projects <b>${lbl}</b> among our returning players${bump?` · moves ${esc(bump.b.name)} (${fmt(bump.r.grade)}) to ${POSKEY}${n+1}`:pool.length?"":" · we have no graded returning players here"}`)}
+  if(OWNER&&BUDGET){const rows=budRows(),T=+BUDGET.total||0,held=rows.filter(x=>x.name).reduce((a,x)=>a+(+x.amt||0),0),open=rows.filter(x=>!x.name).reduce((a,x)=>a+(+x.amt||0),0),left=T-held-open;
+    const ask=askOf(p),g=marketRange(p,r,"g6"),cost=ask||(g&&g.mid)||null;
+    if(cost){let row=null;if(g){const key=g.slotLbl.replace(/^DT/,"IDL"),pos=key.replace(/\d+$/,"");let k=+key.replace(/^\D+/,"");row=rows.find(x=>x.slot===key);while(!row&&k>1){k--;row=rows.find(x=>x.slot===pos+k)}}
+      const fills=row&&!row.name,after=fills?left+(+row.amt||0)-cost:left-cost;
+      lines.push(`<span class="pc-own">Budget: ${ask?"his ask":"market center"} ${money(cost)}${fills?` fills open ${esc(row.slot)} (${money(row.amt)})`:row?` on top of ${esc(row.slot)} (${esc(row.name)})`:""} · left to allocate <b>${money(left)}</b> → ${after<0?`<b class="dn">${money(-after)} over budget</b>`:`<b>${money(after)}</b>`}</span>`)}}
+  if(!lines.length)return "";
+  return `<div class="pc-mkt pc-imp"><h3 style="margin:0">${p.status==="Committed"?"With his commitment":"If he commits"}</h3>${lines.map(l=>`<div class="sub">${l}</div>`).join("")}</div>`}
 function budgetCardHtml(p,r){if(!OWNER||!BUDGET)return "";const rows=budRows();const nm=normName(p.name);
   const his=rows.find(x=>x.name&&normName(x.name)===nm);const g=r?marketRange(p,r,"g6"):null;
   let slotLine="";if(g&&!his){const key=g.slotLbl.replace(/^DT/,"IDL");const pos=key.replace(/\d+$/,"");let n=+key.replace(/^\D+/,"");let row=rows.find(x=>x.slot===key);
@@ -3077,7 +3101,23 @@ function oddStats(p){const A=anchors(modeFor(p.thru)),out=[];
     if(v<lo-pad||v>hi+pad)out.push(`${METRICS[i].short}${tag} ${fm(v,i)}${METRICS[i].unit} (usual ${fm(lo,i)}–${fm(hi,i)})`)});
   chk(p.m,"");if(p.prior&&p.prior.db)chk(p.prior.m," last season");return out}
 function statsKey(p){return JSON.stringify([p.db,p.m,p.prior||null])}
-function withTrend(p,ex){if(!ex)return p;if(ex.marshall)p.marshall=true;if(ex.ref)p.ref=true;if(ex.star&&p.star==null)p.star=true;
+/* grade history: a snapshot of his stats each time they change (last 12), re-scored with today's model when shown */
+const ghSnap=x=>({d:(x.updatedAt||new Date().toISOString()).slice(0,10),thru:x.thru??null,db:x.db??null,m:x.m?x.m.slice():null});
+function withHist(p,ex){const cur=ghSnap(Object.assign({},p,{updatedAt:new Date().toISOString()}));
+  let gh=ex&&Array.isArray(ex.gh)&&ex.gh.length?ex.gh.slice():ex&&ex.m&&ex.db?[ghSnap(ex)]:[];
+  const same=a=>a&&JSON.stringify([a.thru,a.db,a.m])===JSON.stringify([cur.thru,cur.db,cur.m]);
+  if(!same(gh[gh.length-1]))gh.push(cur);p.gh=gh.slice(-12);return p}
+function gradeHist(p){if(!Array.isArray(p.gh)||p.gh.length<2)return [];
+  return p.gh.map(h=>{const r=score(Object.assign({},p,{thru:h.thru,db:h.db,m:h.m}));return r&&r.grade!=null?{d:h.d,thru:h.thru,g:r.grade,l:r.letter}:null}).filter(Boolean)}
+function histHtml(p){const H=gradeHist(p);if(H.length<2)return "";const a=H[0],z=H[H.length-1],d=z.g-a.g;
+  const lbl=h=>h.thru==="full"?"Full":h.thru?"Gm "+h.thru:fmtDate(h.d);
+  const W=120,Ht=26,xs=H.map((h,i)=>4+i*(W-8)/(H.length-1)),lo=Math.min(...H.map(h=>h.g)),hi=Math.max(...H.map(h=>h.g)),sp=Math.max(4,hi-lo);
+  const ys=H.map(h=>Ht-4-(h.g-lo)/sp*(Ht-8));
+  const svg=`<svg width="${W}" height="${Ht}" viewBox="0 0 ${W} ${Ht}" aria-hidden="true" style="flex:none"><polyline fill="none" stroke="currentColor" stroke-width="1.6" points="${xs.map((x,i)=>x.toFixed(1)+","+ys[i].toFixed(1)).join(" ")}"/>${xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.2" fill="currentColor"/>`).join("")}</svg>`;
+  return `<div class="pc-hist"><span class="${Math.abs(d)<0.1?"":d>0?"up":"dn"}">${svg}</span><div><b>Grade trend</b> · ${H.map(h=>`${lbl(h)} ${fmt(h.g)}`).join(" → ")}${Math.abs(d)>=0.1?` <b class="${d>0?"up":"dn"}">(${d>0?"+":"−"}${fmt(Math.abs(d))})</b>`:""}<div class="sub">${H.length} updates · ${fmtDate(a.d)} to ${fmtDate(z.d)} · each one graded with today's settings</div></div></div>`}
+function withTrend(p,ex){withHist(p,ex);if(!ex)return p;
+  /* fields the edit form doesn't show (portal board order, new-season undo info) carry over instead of being wiped */
+  ["tagRank","roll","graduated"].forEach(k=>{if(ex[k]!=null&&p[k]==null)p[k]=ex[k]});if(ex.marshall)p.marshall=true;if(ex.ref)p.ref=true;if(ex.star&&p.star==null)p.star=true;
   /* level/conference corrections never count as a grade change: the old stats are re-scored at the new level */
   if(statsKey(ex)!==statsKey(p)){const r=score(Object.assign({},ex,{level:p.level}));if(r&&r.grade!=null){p.prevGrade=r.grade;p.prevAt=ex.updatedAt||null}}
   else if(ex.level===p.level){if(ex.prevGrade!=null)p.prevGrade=ex.prevGrade;if(ex.prevAt)p.prevAt=ex.prevAt}
