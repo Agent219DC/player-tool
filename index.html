@@ -61,15 +61,15 @@ header>.brand{order:1;flex:1 1 0;min-width:0} header>.navrow{order:3;flex-basis:
 body.scrolled header{padding-top:6px;padding-bottom:8px;box-shadow:0 6px 14px -12px rgba(0,0,0,.4)}
 body.scrolled header .brand .eyebrow{display:none}
 body.scrolled header h1{font-size:24px}
-body.scrolled header .brandlogo{width:26px;height:26px}
+body.scrolled header .brandlogo{width:36px;height:36px}
 body.scrolled header .tab{padding:6px 11px}
-@media (max-width:640px){body.scrolled header .gsearch,body.scrolled header .brand .brandlogo{display:none}body.scrolled header h1{font-size:20px}body.scrolled header{gap:6px}}
-.brandlogo{width:44px;height:44px;object-fit:contain;flex:none}
+@media (max-width:640px){body.scrolled header .gsearch{display:none}body.scrolled header .brand .brandlogo{width:30px;height:30px}body.scrolled header h1{font-size:20px}body.scrolled header{gap:6px}}
+.brandlogo{width:68px;height:68px;object-fit:contain;flex:none;image-rendering:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.12))}
 /* phone layout: one-line header with icon buttons, section tabs in a bar along the bottom */
 .tab .ti,.tab .ts{display:none}
 #signOut,.themeBtn{display:inline-flex;align-items:center;gap:6px}#signOut .hi{flex:none}
 @media (max-width:640px){
-  header .brand .eyebrow{display:none}header h1{font-size:25px;white-space:nowrap}header .brandlogo{width:32px;height:32px}.brand{gap:10px}
+  header .brand .eyebrow{display:none}header h1{font-size:25px;white-space:nowrap}header .brandlogo{width:44px;height:44px}.brand{gap:10px}
   header{gap:8px;padding-bottom:10px}header>.brand{align-self:center}header>span{align-self:center!important}
   .themeBtn,#signOut{padding:0;width:36px;min-height:36px;justify-content:center;margin-left:0}.themeBtn .lbl,#signOut .lbl{display:none}.themeBtn .hi{font-size:16px}
   header>.tabs{gap:8px}
@@ -648,7 +648,7 @@ window.claude={use:async n=>{
 <div class="wrap">
   <header>
     <div class="brand">
-      <img class="brandlogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="44" height="44" onerror="this.remove()"><img class="brandlogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="44" height="44" onerror="this.remove()">
+      <img class="brandlogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="68" height="68" onerror="this.remove()"><img class="brandlogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="68" height="68" onerror="this.remove()">
       <div>
         <div class="eyebrow">Staff Board</div>
         <h1>Player <span>Tool</span></h1>
