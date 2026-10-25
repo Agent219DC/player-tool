@@ -154,6 +154,11 @@ table.gl th{font-size:11.5px;background:var(--sunk);cursor:default}table.gl tr.g
 table.gl .gl-tag{font:700 9.5px var(--body);color:var(--accent-text);border:1px solid currentColor;border-radius:3px;padding:0 3px;vertical-align:1px}
 table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl tr.gl-sum td{font-weight:700;background:var(--sunk)}
 .pc-glog .tw{overflow-x:auto;max-width:100%}.pc>*{min-width:0}.pc-glog{min-width:0;max-width:100%}
+.pc-notes{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}.pc-notes h3{margin:0}
+.note-i{border-left:3px solid var(--accent);padding:2px 0 2px 10px}.note-t{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}.note-m{font-size:12px;margin-top:2px}
+.note-add{display:flex;gap:8px;align-items:flex-end}.note-add textarea{flex:1;min-width:0;resize:vertical;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
+@media (max-width:480px){.note-add{flex-direction:column;align-items:stretch}}
+.notemark{display:inline-flex;align-items:center;gap:1px;margin-left:5px;color:var(--accent-text);font:700 11px var(--body);vertical-align:-1px}
 .pc-who{display:flex;gap:14px;align-items:center;min-width:0}
 .hs{position:relative;flex:none;width:76px;height:76px;border-radius:50%;overflow:hidden;background:var(--accent-soft);border:2px solid var(--line);display:grid;place-items:center}
 .hs-ini{font:700 26px var(--display);color:var(--accent-text);letter-spacing:.02em}
@@ -1567,7 +1572,7 @@ function renderBoard(){
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
   $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
-   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${logoImg(x.p)}${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
+   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${noteMark(x.p)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${logoImg(x.p)}${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
    <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td><td class="num cel">${x.line?"—":esc(eligShort(x.p))}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
    <td class="num cg${x.r.tier?" tc-"+x.r.tier:""}" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter${x.r.tier?" tc-"+x.r.tier:""}">${x.r.letter}</span></td>
    <td class="ct" >${x.r.tier?`<span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span>`:'<span class="sub">Scale not set</span>'}</td>
@@ -1968,7 +1973,7 @@ $("impFile").addEventListener("change",async e=>{
   flash(`Importing ${rows.length-1} rows…`);
   for(const r of rows.slice(1)){
     const res=rowToPlayer(h,r);if(res.err){errs.push(res.err);continue}
-    let p=res.p;const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
+    let p=res.p;const exAll=BOARD.filter(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));const ex=exAll.find(b=>!b.ref)||exAll[0];
     /* updating someone already on the board: the file's columns win, everything else (contacts, ESPN stats, visits, tags) stays */
     if(ex){const keep=Object.assign({},ex);delete keep.id;p=Object.assign(keep,p)}
     withTrend(p,ex);if(uid)p.addedBy=uid;p.updatedAt=new Date().toISOString();
@@ -2216,6 +2221,27 @@ const headshotUrl=id=>`https://a.espncdn.com/i/headshots/college-football/player
 function initials(n){return String(n||"").replace(/\b(jr|sr|ii|iii|iv)\.?$/i,"").trim().split(/[\s-]+/).filter(Boolean).map(w=>w[0]).slice(0,2).join("").toUpperCase()||"?"}
 function headshotHtml(p){const ini=`<span class="hs-ini">${esc(initials(p.name))}</span>`;
   return `<span class="hs" aria-hidden="true">${ini}${p.espnId?`<img src="${headshotUrl(p.espnId)}" alt="" loading="lazy" onload="this.parentNode.classList.add('ok')" onerror="this.remove()">`:""}</span>`}
+/* ---------- coach notes: dated, signed notes on a player (stored on his player doc as notes[]) ---------- */
+let ME={id:"",name:""};
+async function whoAmI(){if(ME.id)return ME;try{const id=USER?await USER.id():"";let name="";
+    if(id&&USER.profiles){const ps=await USER.profiles([id]).catch(()=>null);name=ps&&ps[id]&&ps[id].name||""}ME={id:id||"",name:name||(OWNER?"Owner":"Staff")}}catch(e){}return ME}
+const noteList=p=>(Array.isArray(p&&p.notes)?p.notes:[]).filter(n=>n&&n.t).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+function noteMark(p){const n=noteList(p).length;return n?`<span class="notemark" title="${n} coach note${n>1?"s":""}: ${esc(noteList(p)[0].t.slice(0,90))}"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 2h10v9l-3 3H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.5 6h5M5.5 8.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${n>1?n:""}</span>`:""}
+function notesHtml(p){if(!p||!p.id)return "";const L=noteList(p);
+  const when=at=>{const d=new Date(at);return isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
+  return `<div class="pc-notes"><h3>Coach notes${L.length?` <span class="sub">(${L.length})</span>`:""}</h3>
+    ${L.map(n=>`<div class="note-i"><div class="note-t">${esc(n.t)}</div><div class="note-m sub">${esc(n.byName||"Staff")} · ${when(n.at)}${(OWNER||(ME.id&&n.by===ME.id))?` · <button type="button" class="linkbtn" data-pc="note-del" data-nid="${esc(n.id)}">Delete</button>`:""}</div></div>`).join("")}
+    <div class="note-add"><textarea id="pcNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" data-pc="note-add">Add note</button></div></div>`}
+async function noteSave(op,arg){const q=CARD_P;if(!DB||!q||!q.id)return;const k=CARD_K||POSKEY,ref=DB.collection(k.toLowerCase()+"_players").doc(q.id);
+  const d=$("pcard"),top=d.scrollTop;
+  try{if(op==="add"){const t=String(arg||"").trim();if(!t)return;const me=await whoAmI();
+      const n={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,at:new Date().toISOString(),by:me.id,byName:me.name};
+      const FV=window.firebase&&firebase.firestore&&firebase.firestore.FieldValue;
+      await ref.update({notes:FV&&FV.arrayUnion?FV.arrayUnion(n):(q.notes||[]).concat([n])});q.notes=(q.notes||[]).concat([n])}
+    else{const keep=(q.notes||[]).filter(n=>n.id!==arg);await ref.update({notes:keep});q.notes=keep}
+    const b=BOARD.find(x=>x.id===q.id);if(b)b.notes=clone(q.notes);
+    openCard(q);d.scrollTop=top;if(TAB==="boards")renderBoard();flash(op==="add"?"Note saved.":"Note deleted.")}
+  catch(e){flash("Couldn't save the note. Try again.")}}
 function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const role=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
   const top=[p.school,p.level,role].filter(Boolean).join(" · ");
@@ -2231,9 +2257,10 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div class="pc-who">${headshotHtml(p)}<div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${notesHtml(p)}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
-function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P)}
+let CARD_K=null;
+function openCard(p){if(!p)return;CARD_K=POSKEY;CARD_P=clone(p);if(!ME.id)whoAmI();const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P)}
 /* ---------- live from ESPN on the card: season line, game log, vs. FBS ---------- */
 const ESPN_LIVE=new Map();
 async function fbsIds(){const yr=CUR_SEASON,K="pt_fbs_ids_"+yr;try{const c=JSON.parse(localStorage.getItem(K)||"null");if(c&&c.ids&&Date.now()-c.at<7*864e5)return new Set(c.ids)}catch(e){}
@@ -2282,7 +2309,11 @@ $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){clos
     box.innerHTML=`<h3>Contacts</h3><div class="grid2"><label>Agency<input id="pc-agency" type="text" value="${esc(q.agency||"")}" placeholder="Agency name"></label><label>Agent contact<input id="pc-agent" type="text" value="${esc(q.agent||"")}" placeholder="Name, phone or email"></label><label>Player contact<input id="pc-pcontact" type="text" value="${esc(q.pcontact||"")}" placeholder="Phone or email"></label></div><div class="pc-btns" style="margin-top:10px"><button type="button" class="btn primary" data-pc="csave">Save contacts</button><button type="button" class="btn" data-pc="ccancel">Cancel</button></div>`;
     $("pc-agency").focus()}
   if(a==="ccancel")openCard(CARD_P);
-  if(a==="csave")saveContacts()});
+  if(a==="csave")saveContacts();
+  if(a==="note-add"){const v=$("pcNote").value;if(v.trim())noteSave("add",v)}
+  if(a==="note-del"){if(confirmDel(b))noteSave("del",b.dataset.nid)}});
+/* two-tap delete on notes: first tap asks, second tap within 4s deletes (no browser pop-up) */
+function confirmDel(b){if(b.dataset.armed){return true}b.dataset.armed="1";const t=b.textContent;b.textContent="Tap again to delete";setTimeout(()=>{if(b.isConnected){delete b.dataset.armed;b.textContent=t}},4000);return false}
 async function saveContacts(){const q=CARD_P;const up={agency:$("pc-agency").value.trim()||null,agent:$("pc-agent").value.trim()||null,pcontact:$("pc-pcontact").value.trim()||null};
   if(DB&&q.id){try{await DB.collection(coll()).doc(q.id).update(up)}catch(e){flash("Couldn't save the contacts. You may not have edit access.");return}}
   else{const b=BOARD.find(x=>pkey(x)===pkey(q));if(b)Object.assign(b,up)}
@@ -3289,7 +3320,7 @@ function histHtml(p){const H=gradeHist(p);if(H.length<2)return "";const a=H[0],z
   return `<div class="pc-hist"><span class="${Math.abs(d)<0.1?"":d>0?"up":"dn"}">${svg}</span><div><b>Grade trend</b> · ${H.map(h=>`${lbl(h)} ${fmt(h.g)}`).join(" → ")}${Math.abs(d)>=0.1?` <b class="${d>0?"up":"dn"}">(${d>0?"+":"−"}${fmt(Math.abs(d))})</b>`:""}<div class="sub">${H.length} updates · ${fmtDate(a.d)} to ${fmtDate(z.d)} · each one graded with today's settings</div></div></div>`}
 function withTrend(p,ex){withHist(p,ex);if(!ex)return p;
   /* fields the edit form doesn't show (portal board order, new-season undo info) carry over instead of being wiped */
-  ["tagRank","roll","graduated"].forEach(k=>{if(ex[k]!=null&&p[k]==null)p[k]=ex[k]});if(ex.marshall)p.marshall=true;if(ex.ref)p.ref=true;if(ex.star&&p.star==null)p.star=true;
+  ["tagRank","roll","graduated","notes"].forEach(k=>{if(ex[k]!=null&&p[k]==null)p[k]=ex[k]});if(ex.marshall)p.marshall=true;if(ex.ref)p.ref=true;if(ex.star&&p.star==null)p.star=true;
   /* level/conference corrections never count as a grade change: the old stats are re-scored at the new level */
   if(statsKey(ex)!==statsKey(p)){const r=score(Object.assign({},ex,{level:p.level}));if(r&&r.grade!=null){p.prevGrade=r.grade;p.prevAt=ex.updatedAt||null}}
   else if(ex.level===p.level){if(ex.prevGrade!=null)p.prevGrade=ex.prevGrade;if(ex.prevAt)p.prevAt=ex.prevAt}
@@ -3301,7 +3332,7 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();const p=readFor
     if(odd.length&&ODD_ARMED!==key){ODD_ARMED=key;flash(`Double-check before saving: ${odd.join("; ")}. If it's right, click Save again.`,12000);$("status").scrollIntoView({block:"nearest"});return}}
   if(DB){
     try{const id=USER?await USER.id():null;if(id)p.addedBy=id;p.updatedAt=new Date().toISOString();
-      const ex=BOARD.find(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));
+      const exAll=BOARD.filter(b=>b.name.toLowerCase()===p.name.toLowerCase()&&(b.school||"").toLowerCase()===(p.school||"").toLowerCase()&&(b.season||"")===(p.season||""));const ex=exAll.find(b=>!b.ref)||exAll[0];
       if(ex&&pkey(p)!==LOADED_KEY&&DUP_ARMED!==pkey(p)){DUP_ARMED=pkey(p);flash(`${ex.name} (${ex.school||"no school"}, ${ex.season||""}) is already on the board. Click Save again to update his entry.`);$("status").scrollIntoView({block:"nearest"});return}
       if(!ex&&XDUP_ARMED!==pkey(p)){const nm=normT(p.name),sc=normT(p.school);let others=[];
         try{GCACHE_AT=0;others=(await gData()).filter(x=>x.k!==POSKEY&&normT(x.p.name)===nm&&(!sc||!x.p.school||normT(x.p.school)===sc))}catch(_){}

@@ -11,3 +11,4 @@
 - Player cards show ESPN headshots (`headshotHtml`, initials fallback) for players with an `espnId`.
 - Player cards load ESPN live on open (`fillEspnLive`): season line, game log, and totals vs. FBS opponents (FBS team ids from ESPN's core API, cached in localStorage). Nothing from it is saved to Firestore.
 - School logos come from ESPN team search (`teamDrain`, cached per browser); ESPN's full team list is blocked by CORS.
+- Coach notes live on each player doc as `notes[]` ({id,t,at,by,byName}); staff can add, authors (and the owner) can delete. Form saves carry `notes` over (`withTrend`), so editing a player never drops them.
