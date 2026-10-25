@@ -146,6 +146,14 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 dialog#pcard{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#pcard::backdrop{background:rgba(10,16,12,.5)}
 .pc{display:grid;gap:16px;padding:20px 22px 22px}
+.pc-line{margin-top:4px;font-size:13px}.pc-line b{font-weight:700}
+.pc-glog h3{margin:0 0 6px}.gl-fbs{font-size:13px;margin:0 0 6px}
+table.gl{border-collapse:collapse;font-size:12px;width:100%;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.gl th,table.gl td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right}table.gl th:nth-child(-n+3),table.gl td:nth-child(-n+3){text-align:left}
+table.gl th{font-size:11.5px;background:var(--sunk);cursor:default}table.gl tr.gl-f td{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+table.gl .gl-tag{font:700 9.5px var(--body);color:var(--accent-text);border:1px solid currentColor;border-radius:3px;padding:0 3px;vertical-align:1px}
+table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl tr.gl-sum td{font-weight:700;background:var(--sunk)}
+.pc-glog .tw{overflow-x:auto}
 .pc-who{display:flex;gap:14px;align-items:center;min-width:0}
 .hs{position:relative;flex:none;width:76px;height:76px;border-radius:50%;overflow:hidden;background:var(--accent-soft);border:2px solid var(--line);display:grid;place-items:center}
 .hs-ini{font:700 26px var(--display);color:var(--accent-text);letter-spacing:.02em}
@@ -2238,7 +2246,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const grade=r&&r.grade!=null?`<div class="pc-grade"><div class="score gtc-${r.tier}">${fmt(r.grade)}<small> ${r.letter}</small></div><div>
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
       ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
-      <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div></div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
+      <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div>${p.espnId?'<div class="pc-line" data-espnline></div>':""}</div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
   const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
@@ -2246,9 +2254,42 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div class="pc-who">${headshotHtml(p)}<div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${pfHtml(p,r)}${mets}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
-function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0}
+function openCard(p){if(!p)return;CARD_P=clone(p);const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P)}
+/* ---------- live from ESPN on the card: season line, game log, vs. FBS ---------- */
+const ESPN_LIVE=new Map();
+async function fbsIds(){const yr=CUR_SEASON,K="pt_fbs_ids_"+yr;try{const c=JSON.parse(localStorage.getItem(K)||"null");if(c&&c.ids&&Date.now()-c.at<7*864e5)return new Set(c.ids)}catch(e){}
+  try{const j=await espnJSON(`https://sports.core.api.espn.com/v2/sports/football/leagues/college-football/seasons/${yr}/types/2/groups/80/teams?limit=300`);
+    const ids=(j.items||[]).map(x=>String(x.$ref||"").match(/teams\/(\d+)/)).filter(Boolean).map(m=>m[1]);if(ids.length>100){try{localStorage.setItem(K,JSON.stringify({at:Date.now(),ids}))}catch(e){}return new Set(ids)}}catch(e){}
+  return null}
+function espnLive(id){if(ESPN_LIVE.has(id))return ESPN_LIVE.get(id);
+  const pr=(async()=>{const base=`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`;
+    const [a,g,fbs]=await Promise.all([espnJSON(base).catch(()=>null),espnJSON(base+"/gamelog").catch(()=>null),fbsIds()]);
+    const ath=a&&(a.athlete||a),ss=ath&&ath.statsSummary;
+    const line=ss&&ss.statistics&&ss.statistics.length?{title:ss.displayName||"",stats:ss.statistics.map(x=>({l:x.shortDisplayName||x.abbreviation||x.displayName,v:x.displayValue}))}:null;
+    let games=[],labels=[];
+    if(g&&g.events){labels=(g.labels||[]).map(String);const names=(g.names||[]).map(String);const rows={};
+      (g.seasonTypes||[]).forEach(st=>(st.categories||[]).forEach(c=>(c.events||[]).forEach(e=>{rows[e.eventId]=(e.stats||[]).map(String)})));
+      games=Object.values(g.events).filter(e=>rows[e.id]).map(e=>({id:e.id,date:e.gameDate,at:e.atVs||"vs",opp:(e.opponent&&(e.opponent.displayName||e.opponent.abbreviation))||"",oppId:e.opponent&&String(e.opponent.id),res:e.gameResult||"",score:e.score||"",fbs:fbs?fbs.has(String(e.opponent&&e.opponent.id)):null,s:rows[e.id]}))
+        .sort((x,y)=>String(y.date).localeCompare(String(x.date)));
+      games.names=names}
+    return {line,labels,games}})();
+  ESPN_LIVE.set(id,pr);pr.catch(()=>ESPN_LIVE.delete(id));return pr}
+/* sum a set of game rows: counting stats add up, AVG is recomputed from the yards and attempts before it, LNG is the longest */
+function glogSum(labels,rows){const num=v=>{const n=parseFloat(String(v).replace(/,/g,""));return isFinite(n)?n:0};
+  const out=labels.map((l,i)=>/^LNG$/i.test(l)?Math.max(0,...rows.map(r=>num(r[i]))):rows.reduce((a,r)=>a+num(r[i]),0));
+  labels.forEach((l,i)=>{if(/^AVG$/i.test(l)&&i>=2){const att=out[i-2];out[i]=att?out[i-1]/att:0}});
+  return out.map((v,i)=>/^AVG$/i.test(labels[i])?v.toFixed(1):Number.isInteger(v)?v.toLocaleString("en-US"):v.toFixed(1))}
+async function fillEspnLive(p){let d;try{d=await espnLive(p.espnId)}catch(e){return}
+  if(!CARD_P||CARD_P.espnId!==p.espnId)return;const box=$("pcard");
+  const ln=box.querySelector("[data-espnline]");if(ln&&d.line)ln.innerHTML=`<span class="sub">${esc(d.line.title||"This season")}:</span> ${d.line.stats.map(x=>`<b>${esc(x.v)}</b> ${esc(x.l)}`).join(" · ")}`;
+  const gl=box.querySelector("[data-espnglog]");if(!gl||!d.games.length)return;
+  const L=d.labels,G=d.games,F=G.filter(x=>x.fbs),W=a=>a.filter(x=>x.res==="W").length,Lx=a=>a.filter(x=>x.res==="L").length;
+  const sumRow=(a,lbl)=>`<tr class="gl-sum"><td colspan="2">${lbl}</td><td>${W(a)}–${Lx(a)}</td>${glogSum(L,a.map(x=>x.s)).map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`;
+  const fbsLine=F.length?`<div class="gl-fbs"><b>Vs. FBS opponents</b> · ${F.length} game${F.length>1?"s":""} (${W(F)}–${Lx(F)}): ${glogSum(L,F.map(x=>x.s)).map((v,i)=>/^(AVG|LNG)$/i.test(L[i])&&!/^(YDS)$/i.test(L[i])?null:`${esc(v)} ${esc(L[i])}`).filter(Boolean).slice(0,6).join(" · ")}</div>`:(G.some(x=>x.fbs===false)&&p.level!=="P4"&&p.level!=="G6"?'<div class="gl-fbs sub">No games against FBS opponents this season.</div>':"");
+  gl.innerHTML=`<h3>Game log · ESPN</h3>${fbsLine}<div class="tw"><table class="gl"><thead><tr><th>Date</th><th>Opponent</th><th>Result</th>${L.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${G.map(x=>`<tr${x.fbs?' class="gl-f"':""}><td>${esc(new Date(x.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}))}</td><td>${esc(x.at)} ${esc(x.opp)}${x.fbs?' <span class="gl-tag">FBS</span>':""}</td><td class="${x.res==="W"?"up":x.res==="L"?"dn":""}">${esc(x.res)} ${esc(x.score)}</td>${x.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${sumRow(G,"Season")}${F.length&&F.length<G.length?sumRow(F,"Vs. FBS"):""}</tbody></table></div>`;
+  gl.hidden=false}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
 $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){closeCard();return}const b=e.target.closest("[data-pc]");if(!b)return;const a=b.dataset.pc;
   if(a==="close")closeCard();
