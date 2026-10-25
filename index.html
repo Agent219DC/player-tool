@@ -3119,7 +3119,7 @@ $("trashList").addEventListener("click",e=>{
 
 /* ---------- owner tools: staff access (standalone site only) ---------- */
 let STAFF=[];
-function renderStaff(){$("staffList").innerHTML=STAFF.length?STAFF.map(e=>`<div class="trow"><span>${esc(e)}</span><button class="btn" type="button" data-unstaff="${esc(e)}">Remove</button></div>`).join(""):'<p class="sub">No staff added yet.</p>'}
+function renderStaff(){$("staffList").innerHTML=STAFF.length?[...STAFF].sort((x,y)=>x.localeCompare(y)).map(e=>`<div class="trow"><span>${esc(e)}</span><button class="btn" type="button" data-unstaff="${esc(e)}">Remove</button></div>`).join(""):'<p class="sub">No staff added yet.</p>'}
 function watchStaff(db){
   if(!window.PT_STAFF_ADMIN||!OWNER)return;$("staffBox").hidden=false;
   db.doc("config/staff").onSnapshot(s=>{STAFF=(s.exists&&s.data().emails)||[];renderStaff()},()=>{});
