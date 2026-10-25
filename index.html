@@ -1418,14 +1418,18 @@ async function espnRefreshAll(){if(ESPN_ALL_BUSY)return;
       try{const st=await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(eid)}/stats`);
         const c=espnCareer(st);if(!c.cats.length)fail(eid,"none");
         else{const L=by.get(eid);const r=await Promise.allSettled(L.map(d=>DB.collection(d.k.toLowerCase()+"_players").doc(d.id).update({career:c})));r.forEach((x,i)=>x.status==="fulfilled"?ok++:fail(eid,"save",[L[i]]))}}
-      catch(e){const m=String(e&&e.message||"");fail(eid,/HTTP 404/.test(m)?"gone":"espn");if(e instanceof TypeError&&!ok&&done===0)offline=true}
+      catch(e){const m=String(e&&e.message||"");let why="espn";
+        /* ESPN answers 404 on the stats page for players with no stats (offensive linemen); only a missing profile means a bad link */
+        if(/HTTP 404/.test(m)){why="gone";try{await espnJSON(`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(eid)}`);why="none"}catch(_){}}
+        fail(eid,why);if(e instanceof TypeError&&!ok&&done===0)offline=true}
       done++;btn.textContent=`Refreshing ${done} of ${ids.length}…`}};
     await Promise.all(Array.from({length:Math.min(4,ids.length)},work));
     if(offline&&!ok){flash("Can't reach ESPN right now. Try again later.");return}
-    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"} across all positions${miss.length?` · ${miss.length} couldn't be updated (listed under the button)`:""}.`,8000);
-    if(miss.length){const WHY={none:"ESPN has no season stats for him (normal for offensive linemen and players who haven't played)",gone:"ESPN no longer has this player page; open his card and use Add stats to re-link him",espn:"ESPN didn't answer for him; try again later",save:"couldn't save to the board"};
+    const nNone=miss.filter(m=>m.why==="none").length,nBad=miss.length-nNone;
+    flash(`Stats refreshed for ${ok} player${ok===1?"":"s"} across all positions${nNone?` · ${nNone} have no ESPN stats (linemen)`:""}${nBad?` · ${nBad} couldn't be updated`:""}${miss.length?" (listed under the button)":""}.`,8000);
+    if(miss.length){const WHY={none:"No ESPN stats to pull (normal: ESPN doesn't keep stats for offensive linemen or players who haven't played). Nothing to fix",gone:"ESPN no longer has this player page; open his card and use Add stats to re-link him",espn:"ESPN didn't answer for him; try again later",save:"couldn't save to the board"};
       const grp={};miss.forEach(m=>(grp[m.why]=grp[m.why]||[]).push(m));
-      box.innerHTML=`<div class="er-h"><b>${miss.length} not updated</b><button type="button" class="linkbtn" id="espnResX">Hide</button></div>`+Object.entries(grp).map(([w,L])=>`<div class="er-g"><div class="sub">${esc(WHY[w])}:</div><div class="er-l">${L.sort((a,b)=>a.k.localeCompare(b.k)||a.name.localeCompare(b.name)).map(m=>`<button type="button" class="er-p" data-ek="${esc(m.k)}" data-eid="${esc(m.id)}">${esc(m.name)} <span class="sub">${esc(m.k)}${m.school?" · "+esc(m.school):""}</span></button>`).join("")}</div></div>`).join("");
+      box.innerHTML=`<div class="er-h"><b>${nBad?`${nBad} couldn't be updated`:"Everyone with ESPN stats is up to date"}${nNone?` · ${nNone} with no ESPN stats`:""}</b><button type="button" class="linkbtn" id="espnResX">Hide</button></div>`+Object.entries(grp).map(([w,L])=>`<div class="er-g"><div class="sub">${esc(WHY[w])}:</div><div class="er-l">${L.sort((a,b)=>a.k.localeCompare(b.k)||a.name.localeCompare(b.name)).map(m=>`<button type="button" class="er-p" data-ek="${esc(m.k)}" data-eid="${esc(m.id)}">${esc(m.name)} <span class="sub">${esc(m.k)}${m.school?" · "+esc(m.school):""}</span></button>`).join("")}</div></div>`).join("");
       box.hidden=false}
   }finally{ESPN_ALL_BUSY=false;btn.disabled=false;btn.textContent="Refresh all stats"}}
 $("espnAllRes").addEventListener("click",e=>{if(e.target.id==="espnResX"){$("espnAllRes").hidden=true;return}const b=e.target.closest("[data-ek]");if(b)openPlayer(b.dataset.ek,b.dataset.eid)});
