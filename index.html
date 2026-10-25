@@ -1724,10 +1724,7 @@ async function printSelected(){
   doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F NGE.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,y2);
   const fname=`${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
-  let dl=null;try{dl=await claude.use("downloads")}catch(e){}
-  if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
-  try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
-  catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
+  await pdfSave(doc,fname);
 }
 $("printBtn").addEventListener("click",printSelected);
 async function printOverview(){
@@ -1782,10 +1779,7 @@ async function printOverview(){
   doc.setFontSize(8);doc.setTextColor(91,102,93);
   doc.text(doc.splitTextToSize("Need: Upgrade = below 70 · Solid = 70–79 · Great = 80+. Our weakest starter is paired with the best target. Medium and High confidence only; targets leave out NIP, Pass and hidden players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
-  let dl=null;try{dl=await claude.use("downloads")}catch(e){}
-  if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
-  try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
-  catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
+  await pdfSave(doc,fname);
 }
 $("ovPrint").addEventListener("click",printOverview);
 $("boardSearch").addEventListener("input",()=>renderBoard());
