@@ -306,6 +306,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dc-cols{grid-template-columns:repeat(6,minmax(165px,1fr))}
 .dc-rows{display:grid;gap:10px;min-width:0}
 .tb-col.dc-pool{border-style:dashed}
+@media (min-width:701px) and (max-width:1100px){.tb-cols.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-flow:row;grid-auto-columns:auto;overflow-x:visible}}
 @media (max-width:700px){.dc-cols:not(.dc-poolrow){grid-template-columns:repeat(var(--n),200px)!important;grid-auto-flow:row}.dc-cols.dc-poolrow{grid-template-columns:minmax(0,1fr)!important;grid-auto-flow:row;grid-auto-columns:auto}}
 .dc-pool .tb-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(205px,1fr));gap:4px;align-content:start}.dc-pool .dc-add,.dc-pool .dc-addbtn{max-width:240px}
 .dc-cols.n5{grid-template-columns:repeat(5,minmax(165px,1fr))}
@@ -393,6 +394,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:2px 4px;border-radius:4px;text-overflow:ellipsis}
 .bud-g input:hover{border-color:var(--line)}.bud-g input:focus{border-color:var(--accent,#00b140);background:var(--surface);outline:none}
 .bud-g .ba{width:66px;text-align:right;font-family:var(--mono)}
+.bud-g tr.nochart .bn{text-decoration:underline wavy var(--cMed);text-underline-offset:3px}
 .bud-g tr.open .bn::placeholder{color:var(--muted);font-style:italic}
 .bud-add{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}.bud-add .linkbtn{font-size:12.5px}
 .bud-sum .sub{display:block;font-size:12px}
@@ -515,7 +517,20 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .ovcard.ovc-empty{cursor:default;background:transparent;border-style:dashed;color:var(--muted);text-align:center;align-content:center}
 .ovcard.ovc-empty b{font:700 15px var(--display);letter-spacing:.04em}
 .ovlist{display:none}
-@media (max-width:760px){.ovfieldwrap{display:none}.ovlist{display:block}}
+@media (max-width:1040px){.ovfieldwrap{display:none}.ovlist{display:block}}
+/* mid widths (small laptops, tablets): overview rows as cards, two per row */
+@media (min-width:641px) and (max-width:1040px){
+  .ovlist.tablewrap{overflow:visible;border:0;background:none}
+  #ovTbl{min-width:0;display:block}#ovTbl thead{display:none}
+  #ovTbl tbody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #ovTbl tbody tr{display:grid;grid-template-columns:auto 1fr auto auto;grid-template-areas:"pos need need need" "mn mn mg me" "tn tn tg tt" "tn tn gap gap";gap:4px 10px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+  #ovTbl tbody td{border:0!important;padding:0;white-space:normal;min-width:0!important}
+  #ovTbl .o-pos{grid-area:pos;font-size:16px}#ovTbl .o-need{grid-area:need;text-align:right}
+  #ovTbl .o-mn{grid-area:mn}#ovTbl .o-mg{grid-area:mg}#ovTbl .o-me{grid-area:me;text-align:right}
+  #ovTbl .o-tn{grid-area:tn}#ovTbl .o-tg{grid-area:tg}#ovTbl .o-tt{grid-area:tt;text-align:right}
+  #ovTbl .o-gap{grid-area:gap;font-size:12px;color:var(--muted)}#ovTbl .o-gap::before{content:"Gap "}
+  #ovTbl .o-mn::before,#ovTbl .o-tn::before{content:attr(data-l);display:block;font:600 10.5px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+}
 @media (min-width:641px) and (max-width:1180px){#board td.chw,#board th[data-k="ht"],#board th[data-k="wt"]{display:none}#board .mob-hw{display:inline}#board td.cn{min-width:190px}}
 .tlink{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
 /* phone: board rows become cards */
@@ -1309,14 +1324,32 @@ let TEAMS=null;
 function teamsIndex(list){const m=new Map();list.forEach(t=>{[t[1],t[2],t[3],t[4]].forEach(k=>{const n=normT(k);if(n&&!m.has(n))m.set(n,t[0])})});return m}
 async function teamsLoad(){
   try{const c=JSON.parse(localStorage.getItem(TEAMS_KEY)||"null");if(c&&c.list&&Date.now()-c.at<7*864e5){TEAMS=teamsIndex(c.list);return}}catch(e){}
-  try{const j=await espnJSON("https://site.api.espn.com/apis/site/v2/sports/football/college-football/teams?limit=2000");
-    const list=(((j.sports||[])[0]||{}).leagues||[{}])[0].teams.map(x=>x.team).filter(t=>t&&t.id).map(t=>[String(t.id),t.location||"",t.shortDisplayName||"",t.displayName||"",t.abbreviation||""]);
-    if(!list.length)return;TEAMS=teamsIndex(list);try{localStorage.setItem(TEAMS_KEY,JSON.stringify({at:Date.now(),list}))}catch(e){}
-    renderBoard();
-  }catch(e){}
+  /* ESPN's full team list can't be read from a browser (CORS), so schools are looked up one at a time with ESPN search (below) */
 }
-function teamIdFor(p,school){if(p&&p.teamId&&(school==null||normT(school)===normT(p.school)))return p.teamId;const n=normT(school!=null?school:p&&p.school);if(!n||!TEAMS)return null;
-  return TEAMS.get(n)||TEAMS.get(LOGO_ALIAS[n]||"")||TEAMS.get(n.replace(/university$|universityof|^universityof/,""))||null}
+/* school -> ESPN team id, looked up once per school and remembered in this browser */
+const TLOOK_KEY="pt_team_lookup_v1";let TLOOK=(()=>{try{return JSON.parse(localStorage.getItem(TLOOK_KEY)||"{}")||{}}catch(e){return {}}})();
+const TLQ=new Map();let TLQ_T=null,TLQ_RUN=false;
+function teamQueue(n,raw){if(TLQ.has(n)||!raw)return;TLQ.set(n,raw);clearTimeout(TLQ_T);TLQ_T=setTimeout(teamDrain,250)}
+async function teamDrain(){if(TLQ_RUN)return;TLQ_RUN=true;let found=0;
+  /* players linked to ESPN already carry their team id: learn schools from them first */
+  try{Object.values(typeof POSCACHE==="object"&&POSCACHE||{}).forEach(c=>(c.docs||[]).forEach(p=>{const n=normT(p.school);if(n&&p.teamId&&!TLOOK[n]){TLOOK[n]=String(p.teamId);if(TLQ.delete(n))found++}}))}catch(e){}
+  try{const jobs=[...TLQ.entries()];TLQ.clear();let i=0;
+    const work=async()=>{while(i<jobs.length){const [n,raw]=jobs[i++];
+      try{let hit=null;
+        for(const q of [...new Set([raw,raw.replace(/\s*&\s*/g," ").trim(),raw.replace(/\s+State$/i,"").trim()])]){
+          const j=await espnJSON(`${ESPN_API}/search?query=${encodeURIComponent(q)}&type=team&limit=10`);
+          const cf=(j.items||[]).filter(x=>x.league==="college-football"&&x.id);if(!cf.length)continue;
+          hit=cf.find(x=>[x.location,x.displayName,x.name&&x.location+" "+x.name].some(v=>normT(v)===n))||cf.find(x=>normT(x.location).startsWith(n)||n.startsWith(normT(x.location)))||cf[0];break}
+        TLOOK[n]=hit?String(hit.id):"";if(hit)found++}
+      catch(e){/* network trouble: leave it unknown so it is tried again next visit */}}};
+    await Promise.all([work(),work(),work()]);
+    try{localStorage.setItem(TLOOK_KEY,JSON.stringify(TLOOK))}catch(e){}
+  }finally{TLQ_RUN=false}
+  if(found){try{renderBoard()}catch(e){}if($("pcard").open&&CARD_P)openCard(CARD_P)}
+  if(TLQ.size)teamDrain()}
+function teamIdFor(p,school){if(p&&p.teamId&&(school==null||normT(school)===normT(p.school)))return p.teamId;const raw=school!=null?school:p&&p.school,n=normT(raw);if(!n)return null;
+  if(TEAMS){const t=TEAMS.get(n)||TEAMS.get(LOGO_ALIAS[n]||"")||TEAMS.get(n.replace(/university$|universityof|^universityof/,""));if(t)return t}
+  if(n in TLOOK)return TLOOK[n]||null;teamQueue(n,raw);return null}
 const logoUrl=id=>`https://a.espncdn.com/i/teamlogos/ncaa/500/${encodeURIComponent(id)}.png`;
 function logoImg(p,cls,school){const id=teamIdFor(p,school);return id?`<img class="${cls||"slogo"}" src="${logoUrl(id)}" alt="" loading="lazy" onerror="this.remove()">`:""}
 /* logos for PDFs: fetched once as data URLs; skipped quietly if ESPN won't share them */
@@ -1353,10 +1386,13 @@ async function espnAdd(){
     box.innerHTML='<div class="sub">More than one match. Pick him:</div>'+items.map(it=>`<button type="button" class="espn-hit" data-eid="${esc(it.id)}"><span><b>${esc(it.displayName||"")}</b><span class="sub">${esc([it.position&&it.position.displayName,team(it)].filter(Boolean).join(" · "))}</span></span></button>`).join("");
   }catch(e){box.innerHTML='<div class="sub">Can\'t reach ESPN right now. Try again later, or enter his numbers by hand.</div>'}
 }
-function espnLevel(team){const g=team&&team.groups||{},par=(g.parent&&(g.parent.name||g.parent.abbreviation))||"";
-  if(/FCS/i.test(par)||/FCS/i.test(g.name||""))return "FCS";
-  if(P4_CONF.test(g.name||"")||/notre dame/i.test(team.location||""))return "P4";
-  return "G6"}
+/* ESPN's athlete team carries only the conference name (no FBS/FCS parent), so FBS is named outright and everything else is FCS */
+const G6_CONF=/\b(American Athletic|American Conference|Conference USA|C-USA|Mid-American|MAC|Mountain West|Sun Belt|Pac-12|FBS)\b/i;
+function espnLevel(team){const g=team&&team.groups||{},par=(g.parent&&(g.parent.name||g.parent.abbreviation))||"",n=[g.name,g.shortName,g.abbreviation].filter(Boolean).join(" ");
+  if(/FCS/i.test(par)||/FCS/i.test(n))return "FCS";
+  if(P4_CONF.test(n)||/notre dame/i.test(team&&team.location||""))return "P4";
+  if(G6_CONF.test(n)||/FBS/i.test(par))return "G6";
+  return n.trim()?"FCS":"G6"}
 function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl]||Object.values(teams).find(x=>x&&x.slug===sl)||{};return {n:t.location||t.displayName||sl||"",lv:t.groups?espnLevel(t):""}};
   const zero=a=>a.every(v=>!parseFloat(String(v).replace(/,/g,"")));
   const cats=[];const seen={};
@@ -2701,8 +2737,10 @@ function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="
           <td class="rm"><button type="button" data-brm aria-label="Remove ${esc(x.slot)}">×</button></td></tr>`).join("")}</tbody></table>
         <div class="ft"><span data-gf="${gi}"></span>${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""}</div>
         <div class="bud-add">${kinds.map(k=>`<button type="button" class="linkbtn" data-badd="${gi}" data-pos="${esc(k)}">+ ${esc(k)} spot</button>`).join("")}</div></div>`}).join("")}</div>`).join("")}</div></section>`).join("")}
-    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget; with Per month on, the right column is the monthly amount on a 12-month deal.</p>`;
+    <p class="note">Type to change a name, amount or the total; it saves on its own. Clear a name to make the spot open. Percentages are of the total budget; with Per month on, the right column is the monthly amount on a 12-month deal. A wavy underline means that name isn't on the Next season depth chart; check the spelling.</p>`;
   budRecalc()}
+/* budget names are typed by hand: flag any that don't match someone on the Next season depth chart */
+function budOffChart(name){const all=(DCS.next&&DCS.next.groups)?dcAllZ("next"):[];if(!all.length)return false;const n=normName(name);return !all.some(x=>normName(x.n)===n)}
 function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=budRows();const sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0);
   const held=sum(x=>x.name),open=sum(x=>!x.name),left=T-held-open,nH=rows.filter(x=>x.name).length;
   const set=(k,v)=>{const el=document.querySelector(`[data-bs="${k}"]`);if(el)el.textContent=v};
@@ -2714,7 +2752,8 @@ function budRecalc(){const b=BUDGET;if(!b)return;const T=+b.total||0;const rows=
   (b.groups||[]).forEach((g,gi)=>{const t=(g.rows||[]).reduce((a,x)=>a+(+x.amt||0),0);const gt=document.querySelector(`[data-gt="${gi}"]`);if(gt)gt.textContent=money(t);
     const gf=document.querySelector(`[data-gf="${gi}"]`);if(gf)gf.textContent=`${pct(t,T)} of budget · ${(g.rows||[]).filter(x=>!x.name).length} open`;
     if(gt&&BUD_MO())gt.textContent=money(t)+" · "+perMo(t);
-    (g.rows||[]).forEach((x,ri)=>{const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c){c.textContent=BUD_MO()?perMo(x.amt).replace("/mo",""):pct(+x.amt||0,T);c.title=BUD_MO()?perMo(x.amt)+" on a 12-month deal":"";c.classList.toggle("mo",BUD_MO())}})});
+    (g.rows||[]).forEach((x,ri)=>{const tr=document.querySelector(`tr[data-r="${gi}.${ri}"]`);if(tr){const miss=!!x.name&&budOffChart(x.name);tr.classList.toggle("nochart",miss);const bn=tr.querySelector(".bn");if(bn)bn.title=miss?"Not found on the Next season depth chart. Check the spelling.":""}
+      const c=document.querySelector(`[data-rp="${gi}.${ri}"]`);if(c){c.textContent=BUD_MO()?perMo(x.amt).replace("/mo",""):pct(+x.amt||0,T);c.title=BUD_MO()?perMo(x.amt)+" on a 12-month deal":"";c.classList.toggle("mo",BUD_MO())}})});
   budSides(b).forEach(sd=>{const el=document.querySelector(`[data-st="${sd.k}"]`);if(!el)return;const t=sd.idx.reduce((a,gi)=>a+(b.groups[gi].rows||[]).reduce((c,x)=>c+(+x.amt||0),0),0);el.textContent=money(t)+" · "+pct(t,T)+(BUD_MO()?" · "+perMo(t):"")});
   if(BUD_MO()){set("heldPc",perMo(held)+" · "+pct(held,T));set("openPc",perMo(open)+" · "+pct(open,T))}
   document.querySelectorAll("[data-budmo]").forEach(x=>x.setAttribute("aria-pressed",String((x.dataset.budmo==="1")===BUD_MO())))}
