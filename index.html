@@ -3313,7 +3313,8 @@ function subscribe(){
   unsubs.push(DB.doc(cfgPath()).onSnapshot(s=>{
     if(key!==POSKEY||!s.exists)return;
     const up=cfgFixes(key,s.data());
-    if(Object.keys(up).length&&OWNER&&USER&&DB){DB.doc(cfgPath()).update(up).catch(()=>{});return}
+    /* apply the corrected settings now; the owner's copy also saves the correction for everyone */
+    if(Object.keys(up).length&&OWNER&&USER&&DB)DB.doc(cfgPath()).update(up).catch(()=>{});
     const md=S.mode;S=Object.assign(clone(DEFAULTS),clone(s.data()));Object.entries(up).forEach(([f,v])=>setPath(S,f,v));S.mode=md;
     if(S.levels&&S.levels.G5!=null){if(S.levels.G6==null)S.levels.G6=S.levels.G5;delete S.levels.G5}
     if(S.line&&S.line.level==="G5")S.line.level="G6";
