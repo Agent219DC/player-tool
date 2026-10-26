@@ -639,6 +639,10 @@ body.mode-hs .gsearch{display:none}
 .hs-tag{font:700 9.5px var(--body);border:1px solid currentColor;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px;color:var(--muted)}
 .hs-tag.v{color:var(--accent-text)}
 .hs-tag.l{color:var(--pass)}
+.tag .hs-tag{white-space:nowrap;display:inline-block}
+.hs-tag.cm{color:#fff;background:var(--accent);border-color:var(--accent)}
+.tag.tb-none{border-left-style:dashed}
+.tag .g.none{color:var(--muted);font-weight:600}
 .chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
 dialog#hsDlg{width:min(820px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
@@ -971,19 +975,28 @@ window.claude={use:async n=>{
       <select id="hsClass" aria-label="Class"></select>
       <select id="hsStatus" aria-label="Status"><option value="">All statuses</option></select>
       <span class="sub" id="hsCount"></span>
+      <button class="btn" type="button" id="hsSortReset" hidden>Commits first</button>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
     <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. A <b>~</b> testing score is estimated from Tracking Football because he has no usable testing; <b>CHECK</b> means our testing and theirs disagree by 25+ points. <b>vs MU</b> is his Tracking Football athletic rating percentile among Marshall players at his position. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
-    <div class="hs-top"><h2>HS Big Board</h2></div>
-    <div class="hs-ctl">
+    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>HS Big Board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">Prospect board</button></span></span>
+      <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
+    <div id="hsTbWrap" hidden style="display:grid;gap:10px">
+      <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
+        <select id="hsTbShow" aria-label="Show"><option value="">Commits, offers and targets</option><option value="Committed">Commits only</option><option value="Offered">Offers only</option></select>
+        <span class="sub" id="hsTbCount"></span></div>
+      <div class="tb-cols" id="hsTbCols"></div>
+      <p class="note">Drag tags or use the arrows to rank each position; everyone sees the same order. Commits start at the top, then everyone else by score. New prospects start below anyone you've ranked. Tap a tag for his card. Committed elsewhere and Pass are left off.</p>
+    </div>
+    <div class="hs-ctl" id="hsListCtl">
       <span class="seg" role="group" aria-label="Side"><button type="button" data-hsside="all" aria-pressed="true">All</button><button type="button" data-hsside="off" aria-pressed="false">Offense</button><button type="button" data-hsside="def" aria-pressed="false">Defense</button></span>
       <select id="hsBigClass" aria-label="Class"></select>
       <select id="hsBigConf" aria-label="Confidence"><option value="">Any confidence</option><option value="Medium">Medium or High</option><option value="High">High only</option></select>
     </div>
-    <div class="tablewrap"><table id="hsBigTbl"></table></div>
+    <div class="tablewrap" id="hsListWrap"><table id="hsBigTbl"></table></div>
   </section>
 
   <section id="hsset" data-page="hsset" class="hs-set" style="display:grid;gap:14px">
@@ -3611,8 +3624,8 @@ const DEF={
     DB:{t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
   cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true
 };
-let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"score",d:-1},BIGSIDE="all",OPEN=null,ME_=null;
-try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null")}catch(e){}
+let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,OPEN=null,ME_=null;
+try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off"}catch(e){}
 const q=id=>document.getElementById(id);
 const e_=s=>s==null?"":String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>{if(v===""||v==null)return null;const n=+v;return isFinite(n)?n:null};
@@ -3685,7 +3698,13 @@ function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"
   <td>${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td><td>${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
   <td class="num">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num">${(r.outside&&r.outside.tf&&num(r.outside.tf.muPct)!=null)?Math.round(num(r.outside.tf.muPct)*100)+"%":"–"}</td><td class="num">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
 const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":""}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
-function sortRows(L){const k=SORT.k,d=SORT.d;const val=x=>k==="score"?x.s.score:k==="film"?(x.s.F&&x.s.F.score):k==="test"?x.s.Tm:k==="t40"?(official(x.r,"t40")?-official(x.r,"t40").v:null):k==="offers"?num(x.r.offers):k==="mu"?num(((x.r.outside||{}).tf||{}).muPct):String(x.r[k]||"").toLowerCase();
+const ST_ORD=s=>{const i=STATUSES.indexOf(s);return i<0?STATUSES.length:i};
+/* default order: our commits, then offers, then everyone else; best score first inside each (testing, then name, breaks ties) */
+function commitOrder(a,b){const sa=ST_ORD(a.r.status),sb=ST_ORD(b.r.status);if(sa!==sb)return sa-sb;
+  const A=a.s.score,B=b.s.score;if(A!=null||B!=null){if(A==null)return 1;if(B==null)return -1;if(A!==B)return B-A}
+  const ta=a.s.Tm,tb=b.s.Tm;if(ta!=null||tb!=null){if(ta==null)return 1;if(tb==null)return -1;if(ta!==tb)return tb-ta}
+  return String(a.r.name||"").localeCompare(String(b.r.name||""))}
+function sortRows(L){const k=SORT.k,d=SORT.d;if(k==="commit")return L.sort(commitOrder);if(k==="status")return L.sort((a,b)=>(ST_ORD(a.r.status)-ST_ORD(b.r.status))*d||commitOrder(a,b));const val=x=>k==="score"?x.s.score:k==="film"?(x.s.F&&x.s.F.score):k==="test"?x.s.Tm:k==="t40"?(official(x.r,"t40")?-official(x.r,"t40").v:null):k==="offers"?num(x.r.offers):k==="mu"?num(((x.r.outside||{}).tf||{}).muPct):String(x.r[k]||"").toLowerCase();
   return L.sort((a,b)=>{const A=val(a),B=val(b);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (A>B?1:A<B?-1:0)*d})}
 function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").value,"All classes");
   if(q("hsStatus").options.length<2)q("hsStatus").innerHTML=`<option value="">All statuses</option>`+STATUSES.map(s=>`<option>${s}</option>`).join("");
@@ -3693,12 +3712,59 @@ function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").v
   let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
   L=sortRows(rowsFor(L));q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
   q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="14" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
-  q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})}
-function renderBig(){fillSelect(q("hsBigClass"),classes(),q("hsBigClass").value,"All classes");const cl=q("hsBigClass").value,cf=q("hsBigConf").value;
+  q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})
+  q("hsSortReset").hidden=SORT.k==="commit"}
+function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("hsTbBtns").hidden=!tags;q("hsListCtl").hidden=tags;q("hsListWrap").hidden=tags;
+  document.querySelectorAll("[data-hsview]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.hsview===BIGVIEW)));
+  document.querySelectorAll("[data-hstbside]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.hstbside===TBSIDE)));
+  if(tags){renderTags();return}
+  fillSelect(q("hsBigClass"),classes(),q("hsBigClass").value,"All classes");const cl=q("hsBigClass").value,cf=q("hsBigConf").value;
   let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
     .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
   L.sort((a,b)=>b.s.score-a.s.score);
   q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
+
+/* ---------- prospect board: drag tags to rank each position (mirrors the portal board). Order is saved as hsRank on each prospect ---------- */
+const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","NIC","CB"];
+function tbOrder(a,b){const ra=a.r.hsRank,rb=b.r.hsRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return commitOrder(a,b)}
+function buildTags(){const cl=q("hsTbClass").value,sh=q("hsTbShow").value;const cols={};POS.forEach(k=>cols[k]=[]);
+  rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(!sh||r.status===sh))).forEach(x=>cols[x.r.pos].push(x));
+  POS.forEach(k=>cols[k].sort(tbOrder));return cols}
+function tagHS(k,x,i){const r=x.r,s=x.s,t=tierOfHS(s.score);
+  const g=s.score!=null?`<span class="g gtc-${t}">${f1(s.score,1)} ${letter(s.score)}</span>`:s.Tm!=null?`<span class="g none">Test ${s.estTm?"~":""}${f1(s.Tm,0)}</span>`:`<span class="g none">No grade</span>`;
+  const st=r.status==="Committed"?'<span class="hs-tag cm">COMMIT</span>':r.status==="Offered"?'<span class="hs-tag v">OFFER</span>':r.status?`<span class="hs-tag">${e_(r.status.toUpperCase())}</span>`:"";
+  return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${e_(r.name||"Unnamed")}${st}</span>${g}
+    <span class="ln2">${e_([r.school,r.state,r.cls,(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?fmtHt(r.ht):"")+(r.wt?(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?"/":"")+r.wt:""),r.offers?r.offers+" offers":""].filter(Boolean).join(" · "))}</span>
+    <span class="mv"><button type="button" data-mv="-1" aria-label="Move ${e_(r.name)} up">▲</button><button type="button" data-mv="1" aria-label="Move ${e_(r.name)} down">▼</button></span></div>`}
+function renderTags(){if(TB_BUSY)return;fillSelect(q("hsTbClass"),classes(),q("hsTbClass").value,"All classes");TBS=buildTags();
+  const n=Object.values(TBS).reduce((a,l)=>a+l.length,0),cm=Object.values(TBS).reduce((a,l)=>a+l.filter(x=>x.r.status==="Committed").length,0);
+  q("hsTbCount").textContent=`${n} prospect${n===1?"":"s"} · ${cm} commit${cm===1?"":"s"}`;drawTags()}
+function drawTags(){TB_SRT.forEach(x=>{try{x.destroy()}catch(e){}});TB_SRT=[];const keys=TBSIDE==="def"?TB_DEF:TB_OFF;const el=q("hsTbCols");
+  el.style.gridTemplateColumns=`repeat(${keys.length},minmax(175px,1fr))`;
+  el.innerHTML=keys.map(k=>{const L=TBS[k]||[],c=L.filter(x=>x.r.status==="Committed").length;
+    return `<div class="tb-col"><h3>${k}<span class="sub">${L.length}${c?` · ${c} commit${c===1?"":"s"}`:""}</span></h3><div class="tb-list" data-tbk="${k}">${L.length?L.map((x,i)=>tagHS(k,x,i)).join(""):`<div class="tb-empty">No prospects</div>`}</div></div>`}).join("");
+  if(window.Sortable)el.querySelectorAll(".tb-list").forEach(l=>{if(!l.querySelector(".tag"))return;
+    TB_SRT.push(Sortable.create(l,{animation:150,delay:180,delayOnTouchOnly:true,filter:".mv button",preventOnFilter:false,
+      onStart:()=>{TB_BUSY=true},onEnd:ev=>{TB_BUSY=false;TB_DRAG=Date.now();if(ev.oldIndex===ev.newIndex)return;saveTags(l.dataset.tbk,[...l.querySelectorAll(".tag")].map(t=>t.dataset.tid))}}))})}
+async function saveTags(k,ids){const L=TBS[k];if(!L)return;const by=new Map(L.map(x=>[x.r.id,x]));TBS[k]=ids.map(id=>by.get(id)).filter(Boolean);const ups=[];
+  /* a filtered view only renumbers the prospects it shows, keeping the slots they already held */
+  const slots=TBS[k].map(x=>x.r.hsRank).filter(v=>v!=null).sort((a,b)=>a-b);const full=!q("hsTbClass").value&&!q("hsTbShow").value;
+  TBS[k].forEach((x,i)=>{const v=full||slots.length!==TBS[k].length?i+1:slots[i];if(x.r.hsRank!==v){x.r.hsRank=v;if(DBX)ups.push(DBX.collection("hs_players").doc(x.r.id).update({hsRank:v}))}});
+  drawTags();try{await Promise.all(ups)}catch(e){toast("Couldn't save the new order. You may not have edit access.")}}
+async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF){toast("The print tool didn't load. Refresh the page and try again.");return}
+  const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
+  const RGB=(typeof TIERRGB!=="undefined"&&TIERRGB)||{};
+  [[TB_OFF,"Offense"],[TB_DEF,"Defense"]].forEach(([keys,nm],pi)=>{if(pi)doc.addPage();
+    const W=pdfHeader(doc,"Player Tool · HS Prospect Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-(keys.length-1)*8)/keys.length;
+    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
+      const L=TBS[k]||[];if(!L.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No prospects",x+5,y+6);return}
+      L.forEach((t,i)=>{if(y>PH-44)return;const tier=tierOfHS(t.s.score);const rgb=RGB[tier]||[140,148,140];
+        doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.r.name||"")}${t.r.status==="Committed"?" (C)":""}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
+        doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
+        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
+        const g=t.s.score!=null?`${f1(t.s.score,1)} ${T(letter(t.s.score))}`:"–";doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
+        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.r.school,t.r.state].filter(Boolean).join(", ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
+  await pdfSave(doc,`HS prospect board ${new Date().toISOString().slice(0,10)}.pdf`)}
 
 /* ---------- outside ratings (Tracking Football, NextGen / Catapult) ---------- */
 const OF={tf:[["pai","PAI","n"],["com","HS Combine score","n"],["hsPct","vs HS class %","p"],["diPct","vs D-I %","p"],["muPct","vs Marshall %","p"],["sbPct","vs Sun Belt %","p"],["nflPct","vs NFL Draft %","p"],["mph","Game speed MPH","n"]],
@@ -3818,7 +3884,7 @@ async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSO
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
   /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
      Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
-  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","updatedBy","updatedAt"]);
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","updatedBy","updatedAt"]);
   const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
   const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
   const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
@@ -3856,10 +3922,18 @@ document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]")
   if(sw){const hs=sw.dataset.side==="hs";let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}go(hs?(pr.hsTab||"hsboard"):(pr.ptTab||"boards"));return}
   const hp=ev.target.closest("[data-hp]");if(hp){POSF=hp.dataset.hp||null;try{localStorage.setItem("hs_pos",JSON.stringify(POSF))}catch(e){}renderBoard();return}
   const hb=ev.target.closest("[data-hsside]");if(hb){BIGSIDE=hb.dataset.hsside;document.querySelectorAll("[data-hsside]").forEach(b=>b.setAttribute("aria-pressed",String(b===hb)));renderBig();return}
+  const bv=ev.target.closest("[data-hsview]");if(bv){BIGVIEW=bv.dataset.hsview;try{localStorage.setItem("hs_bbv",BIGVIEW)}catch(e){}renderBig();return}
+  const ts=ev.target.closest("[data-hstbside]");if(ts){TBSIDE=ts.dataset.hstbside;try{localStorage.setItem("hs_tbside",TBSIDE)}catch(e){}renderBig();return}
+  const tag=ev.target.closest("#hsTbCols .tag");if(tag){const mv=ev.target.closest("[data-mv]"),k=tag.dataset.tk;
+    if(mv){ev.stopPropagation();const ids=TBS[k].map(x=>x.r.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTags(k,ids);return}
+    if(Date.now()-TB_DRAG<400)return;openCard(tag.dataset.tid);return}
   const th=ev.target.closest("#hsTbl th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:["name","pos","status","cls"].includes(k)?1:-1};renderBoard();return}
   const tr=ev.target.closest("#hsTbl tr[data-id],#hsBigTbl tr[data-id]");if(tr){openCard(tr.dataset.id)}});
 ["hsSearch","hsClass","hsStatus"].forEach(id=>q(id).addEventListener(id==="hsSearch"?"input":"change",renderBoard));
 ["hsBigClass","hsBigConf"].forEach(id=>q(id).addEventListener("change",renderBig));
+["hsTbClass","hsTbShow"].forEach(id=>q(id).addEventListener("change",renderTags));
+q("hsTbPrint").onclick=printTags;
+q("hsSortReset").onclick=()=>{SORT={k:"commit",d:1};renderBoard()};
 q("hsAdd").onclick=()=>openCard(null);
 q("hsDlg").addEventListener("close",()=>{OPEN=null});
 q("hsSaveCfg").onclick=async()=>{if(!isOwner()||!DBX)return;try{await DBX.doc("config/hs").set(readSet());toast("HS settings saved for the staff.")}catch(e){toast("Couldn't save settings.")}};
