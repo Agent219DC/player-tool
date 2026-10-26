@@ -1054,7 +1054,7 @@ window.claude={use:async n=>{
       </div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
-      <p class="note">For each position group: the result that scores <b>70</b> (current Marshall roster median) and the result that scores <b>100</b> (roster best), from Tracking Football's high school data. Small samples are widened to a minimum spread so one great tester can't break the scale.</p>
+      <p class="note">For each position group: the result that scores <b>70</b> (current Marshall roster median) and the roster's best (the <b>100 mark</b>), from Tracking Football's high school data. Scores ease off above 90: matching the roster best lands near 95, and only results well past it approach 100, so top testers keep their order. Small samples are widened to a minimum spread so one great tester can't break the scale.</p>
       <div class="tablewrap"><table id="hsBenchTbl"></table></div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Grade cutoffs</h2></summary>
@@ -3696,7 +3696,9 @@ function official(p,k){if(Array.isArray(p.ignoreTests)&&p.ignoreTests.includes(k
   const T=TEST[k];L.sort((a,b)=>((TIMING[a.timing]||TIMING.listed).r-(TIMING[b.timing]||TIMING.listed).r)||(T.low?a.v-b.v:b.v-a.v));return L[0]}
 function bench(pos,k){const b=(CFG.bench[GROUP[pos]]||{})[k];if(!b||b[0]==null||b[1]==null)return null;let m70=+b[0],m100=+b[1];const T=TEST[k];
   const dir=T.low?-1:1;if((m100-m70)*dir<T.span)m100=m70+dir*T.span;return [m70,m100]}
-function testScore(pos,k,v){const b=bench(pos,k);if(!b||v==null)return null;const s=70+30*(v-b[0])/(b[1]-b[0]);return Math.max(0,Math.min(100,s))}
+/* linear through the 70 and 100 marks, then eased above 90 so elite testers keep their order instead of all tying at 100 (the 100 mark lands near 95) */
+const ease=s=>s<=90?s:90+10*(1-Math.exp(-(s-90)/15));
+function testScore(pos,k,v){const b=bench(pos,k);if(!b||v==null)return null;const s=70+30*(v-b[0])/(b[1]-b[0]);return Math.max(0,Math.min(100,ease(s)))}
 function filmStats(p){const tr=CFG.traits[p.pos]||[];const G=Object.entries(p.film||{}).map(([uid,f])=>({uid,name:f.name||"",at:f.at,g:(f.g||[]).map(num)})).filter(f=>f.g.filter(x=>x!=null).length);
   const avg=[0,1,2,3].map(i=>{const v=G.map(f=>f.g[i]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null});
   const split=[0,1,2,3].filter(i=>{const v=G.map(f=>f.g[i]).filter(x=>x!=null);return v.length>1&&Math.max(...v)-Math.min(...v)>=3}).map(i=>tr[i]||("Trait "+(i+1)));
@@ -3709,7 +3711,7 @@ function scoreOf(p){const pos=POS.includes(p.pos)?p.pos:null;if(!pos)return {sco
     const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w:CFG.testW[i]});if(s!=null){tw+=CFG.testW[i];ts+=s*CFG.testW[i]}});
   const OT=(p.outside||{}).tf||{};const outEst=num(OT.muPct)!=null?Math.max(0,Math.min(100,70+(num(OT.muPct)*100-50)*0.6)):null;
   let Tm=tw?ts/tw:null,estTm=false;if(Tm==null&&outEst!=null&&CFG.useOutside!==false){Tm=outEst;estTm=true}
-  const disagree=!estTm&&Tm!=null&&outEst!=null&&Math.abs(Tm-outEst)>=25;const w=(CFG.filmW[pos]??60)/100;
+  const nCounted=parts.filter(x=>x.o&&x.s!=null).length;const disagree=!estTm&&nCounted>=2&&Tm!=null&&outEst!=null&&Math.abs(Tm-outEst)>=25;const w=(CFG.filmW[pos]??60)/100;
   let base=F.score!=null&&Tm!=null?F.score*w+Tm*(1-w):F.score!=null?F.score:Tm;
   const verified=parts.some(x=>x.o&&x.s!=null&&TIMING[x.o.timing]&&TIMING[x.o.timing].r<=2);
   const anyTest=parts.some(x=>x.o&&x.s!=null&&x.o.timing!=="listed");
