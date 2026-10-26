@@ -627,7 +627,6 @@ button.stag.st-Pass{color:#fff;border-color:transparent!important}
 .sidesw button{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:4px 12px}
 body:not(.mode-hs) #tabs [data-hs]{display:none}
 body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
-body.mode-hs .gsearch{display:none}
 .hs-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px}
 .hs-ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
 .hs-ctl input[type=search]{width:220px}
@@ -642,6 +641,23 @@ body.mode-hs .gsearch{display:none}
 .tag .hs-tag{white-space:nowrap;display:inline-block}
 .hs-tag.cm{color:#fff;background:var(--accent);border-color:var(--accent)}
 .tag.tb-none{border-left-style:dashed}
+.hs-star{color:#c9a100;margin-right:3px}
+.hs-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hs-acts .btn{font-size:13px;padding:5px 10px}
+.hs-acts .btn[aria-pressed=true]{border-color:#c9a100;color:#8a6d00;background:rgba(201,161,0,.1)}
+#hsCmpBar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:30;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 24px);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:0 8px 28px rgba(0,0,0,.22);font-size:14px}
+body:not(.mode-hs) #hsCmpBar{display:none}
+#hsCmpBar .cmp-chip{display:inline-flex;gap:4px;align-items:center;background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px;font-weight:600}
+#hsCmpBar .cmp-chip button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px}
+dialog#hsCmpDlg{width:min(1100px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog#hsCmpDlg::backdrop{background:rgba(10,16,12,.5)}
+table.hs-cmp td,table.hs-cmp th{vertical-align:top}table.hs-cmp th.rowh{font-weight:600;color:var(--muted);text-align:left;white-space:nowrap}
+table.hs-cmp td.best{background:rgba(0,177,64,.12);font-weight:700}table.hs-cmp td.worst{color:var(--pass)}
+table.hs-cmp tr.grp th{background:var(--sunk);font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;text-align:left}
+table.hs-cmp .cn button{font:inherit;font-weight:700;background:none;border:0;color:var(--accent-text);cursor:pointer;padding:0;text-align:left}
+.need-full{color:var(--accent-text);font-weight:700}.need-open{color:var(--pass);font-weight:700}.need-over{color:var(--cMed);font-weight:700}
+#hsNeedTbl td{vertical-align:top}#hsNeedTbl .nl{display:flex;flex-direction:column;gap:2px}#hsNeedTbl .nl button{font:inherit;font-size:13px;background:none;border:0;padding:0;text-align:left;color:var(--fg);cursor:pointer}#hsNeedTbl .nl button:hover{color:var(--accent-text);text-decoration:underline}
+#hsNeedTbl tr.tot td{border-top:2px solid var(--line);font-weight:700}
+#hsNeedTbl input{width:64px}
 .tag .g.none{color:var(--muted);font-weight:600}
 .chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
 dialog#hsDlg{width:min(820px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -756,8 +772,8 @@ window.claude={use:async n=>{
       <span class="seg sidesw" role="group" aria-label="Portal or High School"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High School</button></span>
     </div>
     <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs">
-      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Overview</span><span class="ts">Overview</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="budget" id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="hsset" data-hs id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">Settings</span></button></div>
-      <span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
+      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Overview</span><span class="ts">Overview</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="budget" id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">HS Needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsset" data-hs id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">Settings</span></button></div>
+      <span class="gsearch"><input id="gSearch" type="search" placeholder="Search portal + HS" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden aria-label="Sign out" title="Sign out" onclick="firebase.auth().signOut().then(()=>location.reload())"><svg class="hi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span class="lbl">Sign out</span></button></span>
   </header>
   <div id="bkNag" class="bknag" data-page="settings" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
@@ -975,7 +991,9 @@ window.claude={use:async n=>{
       <select id="hsClass" aria-label="Class"></select>
       <select id="hsStatus" aria-label="Status"><option value="">All statuses</option></select>
       <span class="sub" id="hsCount"></span>
+      <label class="check" style="font-size:13px"><input type="checkbox" id="hsPri"> Priority only</label>
       <button class="btn" type="button" id="hsSortReset" hidden>Commits first</button>
+      <button class="btn" type="button" id="hsListPrint" style="margin-left:auto">Print</button>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
     <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. A <b>~</b> testing score is estimated from Tracking Football because he has no usable testing; <b>CHECK</b> means our testing and theirs disagree by 25+ points. <b>vs MU</b> is his Tracking Football athletic rating percentile among Marshall players at his position. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
@@ -986,7 +1004,7 @@ window.claude={use:async n=>{
       <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
     <div id="hsTbWrap" hidden style="display:grid;gap:10px">
       <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
-        <select id="hsTbShow" aria-label="Show"><option value="">Commits, offers and targets</option><option value="Committed">Commits only</option><option value="Offered">Offers only</option></select>
+        <select id="hsTbShow" aria-label="Show"><option value="">Commits, offers and targets</option><option value="Committed">Commits only</option><option value="Offered">Offers only</option><option value="priority">Priority only</option></select>
         <span class="sub" id="hsTbCount"></span></div>
       <div class="tb-cols" id="hsTbCols"></div>
       <p class="note">Drag tags or use the arrows to rank each position; everyone sees the same order. Commits start at the top, then everyone else by score. New prospects start below anyone you've ranked. Tap a tag for his card. Committed elsewhere and Pass are left off.</p>
@@ -997,6 +1015,12 @@ window.claude={use:async n=>{
       <select id="hsBigConf" aria-label="Confidence"><option value="">Any confidence</option><option value="Medium">Medium or High</option><option value="High">High only</option></select>
     </div>
     <div class="tablewrap" id="hsListWrap"><table id="hsBigTbl"></table></div>
+  </section>
+
+  <section id="hsneeds" data-page="hsneeds" style="display:grid;gap:10px">
+    <div class="hs-top"><h2>HS Needs</h2><span class="btns"><select id="hsNeedClass" aria-label="Class" style="width:auto"></select><button class="btn primary" type="button" id="hsNeedSave" hidden>Save needs</button><button class="btn" type="button" id="hsNeedPrint">Print</button></span></div>
+    <div class="tablewrap"><table id="hsNeedTbl"></table></div>
+    <p class="note">How many we want at each position in this class, against who's committed. Top targets follow the order on the Prospect board. Only the owner can change the numbers. Tap a name for his card.</p>
   </section>
 
   <section id="hsset" data-page="hsset" class="hs-set" style="display:grid;gap:14px">
@@ -1134,6 +1158,8 @@ window.claude={use:async n=>{
 
 <dialog id="pcard" aria-label="Player card"></dialog>
 <dialog id="hsDlg" aria-label="Prospect card"></dialog>
+<dialog id="hsCmpDlg" aria-label="Compare prospects"></dialog>
+<div id="hsCmpBar" hidden></div>
 <dialog id="dcDlg" aria-label="Edit depth chart player"><form class="dcd" method="dialog">
   <h3>Depth chart player</h3>
   <label>Name<input id="dcdName" maxlength="60" required></label>
@@ -2442,16 +2468,19 @@ async function gData(){
 async function runSearch(){
   const q=($("gSearch").value||"").trim().toLowerCase(),box=$("gResults");
   if(q.length<2){box.hidden=true;return}
-  const data=await gData();
-  const hits=data.filter(x=>!x.p.ref&&[x.p.name,x.p.school].filter(Boolean).join(" ").toLowerCase().includes(q))
+  const hsHits=window.HS&&HS.search?HS.search(q).map(h=>({hs:true,h})):[];
+  const data=await gData().catch(()=>[]);
+  const pHits=data.filter(x=>!x.p.ref&&[x.p.name,x.p.school].filter(Boolean).join(" ").toLowerCase().includes(q))
     .sort((a,b)=>((+b.p.season||0)-(+a.p.season||0))||((b.r&&b.r.grade||0)-(a.r&&a.r.grade||0))).slice(0,12);
-  box.innerHTML=hits.length?hits.map((x,i)=>`<button type="button" data-gi="${i}"><span class="gp">${x.k}${x.p.role&&x.k==="WR"?(x.p.role==="Slot"?" S":""):""}</span><span><b>${esc(x.p.name)}</b> <span class="sub">${esc(x.p.school||"")}${x.p.season?" · "+esc(x.p.season):""}${x.p.ref?" · hidden":""}</span></span><span class="gg">${x.r&&x.r.grade!=null?fmt(x.r.grade)+" "+x.r.letter:"–"}</span></button>`).join(""):`<div class="gnone">No players match “${esc(q)}”.</div>`;
+  const hsMode=document.body.classList.contains("mode-hs");const hits=(hsMode?hsHits.concat(pHits):pHits.concat(hsHits)).slice(0,16);
+  box.innerHTML=hits.length?hits.map((x,i)=>x.hs?`<button type="button" data-gi="${i}"><span class="gp">HS ${esc(x.h.pos||"")}</span><span><b>${esc(x.h.name)}</b> <span class="sub">${esc([x.h.school,x.h.cls,x.h.status].filter(Boolean).join(" · "))}</span></span><span class="gg">${esc(x.h.grade)}</span></button>`:`<button type="button" data-gi="${i}"><span class="gp">${x.k}${x.p.role&&x.k==="WR"?(x.p.role==="Slot"?" S":""):""}</span><span><b>${esc(x.p.name)}</b> <span class="sub">${esc(x.p.school||"")}${x.p.season?" · "+esc(x.p.season):""}${x.p.ref?" · hidden":""}</span></span><span class="gg">${x.r&&x.r.grade!=null?fmt(x.r.grade)+" "+x.r.letter:"–"}</span></button>`).join(""):`<div class="gnone">No players match “${esc(q)}”.</div>`;
   box.hidden=false;box._hits=hits;
 }
 let gT=null;
 $("gSearch").addEventListener("input",()=>{clearTimeout(gT);gT=setTimeout(runSearch,150)});
 $("gSearch").addEventListener("focus",()=>{GCACHE_AT=0;if(($("gSearch").value||"").trim().length>=2)runSearch()});
 $("gResults").addEventListener("click",e=>{const b=e.target.closest("[data-gi]");if(!b)return;const x=$("gResults")._hits[+b.dataset.gi];$("gResults").hidden=true;$("gSearch").value="";
+  if(x.hs){if(!document.body.classList.contains("mode-hs"))go("hsboard");HS.open(x.h.id);return}
   if(x.p.ref&&!SHOWREF){SHOWREF=true;$("showRef").checked=true}
   openPlayer(x.k,x.p.id,x.p.role)});
 document.addEventListener("click",e=>{if(!e.target.closest(".gsearch"))$("gResults").hidden=true});
@@ -3531,7 +3560,7 @@ async function connect(){
   DB=db;subscribe();startTabs();if(window.HS)HS.connect(db);
 }
 /* ---------- tabs: one section at a time; each has its own address (#depth), remembered between visits ---------- */
-const TABS=["boards","overview","bigboard","recruit","depth","budget","settings","hsboard","hsbig","hsset"],DEFAULT_TAB="boards";
+const TABS=["boards","overview","bigboard","recruit","depth","budget","settings","hsboard","hsbig","hsneeds","hsset"],DEFAULT_TAB="boards";
 let TAB=null,TABS_READY=false;
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||{}}catch(e){return {}}})();
 function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
@@ -3622,10 +3651,11 @@ const DEF={
     DE:{shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
     LB:{t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
     DB:{t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
-  cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true
+  cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true,needs:{}
 };
-let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,OPEN=null,ME_=null;
-try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off"}catch(e){}
+const NEED_DEF={QB:1,RB:2,WR:4,TE:2,OL:5,DT:2,DE:2,ILB:2,OLB:1,SAF:2,NIC:1,CB:3};
+let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,LAST_LIST=[],CMP=[],OPEN=null,ME_=null;
+try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off";CMP=JSON.parse(localStorage.getItem("hs_cmp")||"[]")||[]}catch(e){}
 const q=id=>document.getElementById(id);
 const e_=s=>s==null?"":String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>{if(v===""||v==null)return null;const n=+v;return isFinite(n)?n:null};
@@ -3637,7 +3667,7 @@ function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
   ["traitW","testW"].forEach(k=>{if(Array.isArray(c[k])&&c[k].length===4)o[k]=c[k].map(Number)});
   ["traits","filmW","tests"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
   if(c.bench)Object.keys(c.bench).forEach(g=>{o.bench[g]=Object.assign({},o.bench[g]||{},c.bench[g])});
-  if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;return o}
+  if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;if(c.needs&&typeof c.needs==="object")o.needs=c.needs;return o}
 
 /* ---------- scoring ---------- */
 function official(p,k){const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
@@ -3691,7 +3721,7 @@ function posBar(){const el=q("hsPosBar");const cnt=p=>ROWS.filter(r=>r.pos===p).
 function rowsFor(list){return list.map(r=>({r,s:scoreOf(r)}))}
 function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `<span class="hs-tag ${T.cls}" title="${e_(T.n+(o.src?" · "+o.src:"")+(o.date?" · "+o.date:""))}">${T.tag}</span>`}
 function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40");
-  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn"><b>${e_(r.name||"Unnamed")}</b><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}</div></td>
+  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn">${r.priority?'<span class="hs-star" title="Priority">★</span>':""}<b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}<div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}</div></td>
   <td>${e_(r.pos||"–")}</td><td>${e_(r.cls||"")}</td><td class="num">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td>${e_(r.status||"")}</td>
   <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${s.estTm?"~":""}${f1(s.Tm,0)}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num"><b>${f1(s.score,1)}</b></td><td class="ctr"><span class="hs-ltr">${s.score!=null?letter(s.score):"–"}</span></td>
@@ -3708,9 +3738,9 @@ function sortRows(L){const k=SORT.k,d=SORT.d;if(k==="commit")return L.sort(commi
   return L.sort((a,b)=>{const A=val(a),B=val(b);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (A>B?1:A<B?-1:0)*d})}
 function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").value,"All classes");
   if(q("hsStatus").options.length<2)q("hsStatus").innerHTML=`<option value="">All statuses</option>`+STATUSES.map(s=>`<option>${s}</option>`).join("");
-  const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value;
-  let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
-  L=sortRows(rowsFor(L));q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
+  const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value,pri=q("hsPri").checked;
+  let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!pri||r.priority)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
+  L=sortRows(rowsFor(L));LAST_LIST=L;q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
   q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="14" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
   q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})
   q("hsSortReset").hidden=SORT.k==="commit"}
@@ -3728,12 +3758,12 @@ function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("h
 const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","NIC","CB"];
 function tbOrder(a,b){const ra=a.r.hsRank,rb=b.r.hsRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return commitOrder(a,b)}
 function buildTags(){const cl=q("hsTbClass").value,sh=q("hsTbShow").value;const cols={};POS.forEach(k=>cols[k]=[]);
-  rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(!sh||r.status===sh))).forEach(x=>cols[x.r.pos].push(x));
+  rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(!sh||(sh==="priority"?r.priority:r.status===sh)))).forEach(x=>cols[x.r.pos].push(x));
   POS.forEach(k=>cols[k].sort(tbOrder));return cols}
 function tagHS(k,x,i){const r=x.r,s=x.s,t=tierOfHS(s.score);
   const g=s.score!=null?`<span class="g gtc-${t}">${f1(s.score,1)} ${letter(s.score)}</span>`:s.Tm!=null?`<span class="g none">Test ${s.estTm?"~":""}${f1(s.Tm,0)}</span>`:`<span class="g none">No grade</span>`;
   const st=r.status==="Committed"?'<span class="hs-tag cm">COMMIT</span>':r.status==="Offered"?'<span class="hs-tag v">OFFER</span>':r.status?`<span class="hs-tag">${e_(r.status.toUpperCase())}</span>`:"";
-  return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${e_(r.name||"Unnamed")}${st}</span>${g}
+  return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${r.priority?'<span class="hs-star" title="Priority">★</span>':""}${e_(r.name||"Unnamed")}${st}</span>${g}
     <span class="ln2">${e_([r.school,r.state,r.cls,(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?fmtHt(r.ht):"")+(r.wt?(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?"/":"")+r.wt:""),r.offers?r.offers+" offers":""].filter(Boolean).join(" · "))}</span>
     <span class="mv"><button type="button" data-mv="-1" aria-label="Move ${e_(r.name)} up">▲</button><button type="button" data-mv="1" aria-label="Move ${e_(r.name)} down">▼</button></span></div>`}
 function renderTags(){if(TB_BUSY)return;fillSelect(q("hsTbClass"),classes(),q("hsTbClass").value,"All classes");TBS=buildTags();
@@ -3765,6 +3795,121 @@ async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF)
         const g=t.s.score!=null?`${f1(t.s.score,1)} ${T(letter(t.s.score))}`:"–";doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.r.school,t.r.state].filter(Boolean).join(", ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`HS prospect board ${new Date().toISOString().slice(0,10)}.pdf`)}
+
+/* ---------- coach notes on prospects (notes[] like the portal; an old single text note shows as "Profile note") ---------- */
+function hsNotes(p){const n=p&&p.notes;if(Array.isArray(n))return n.filter(x=>x&&x.t);if(typeof n==="string"&&n.trim())return [{id:"legacy",t:n.trim(),at:p.addedAt||"",byName:"Profile note"}];return []}
+function noteMk(p){const n=hsNotes(p).length;return n?`<span class="notemark" title="${n} coach note${n>1?"s":""}"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 2h10v9l-3 3H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.5 6h5M5.5 8.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${n>1?n:""}</span>`:""}
+const noteWhen=at=>{const d=new Date(at);return !at||isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
+function notesBox(p,m){const L=hsNotes(p).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+  return `<div class="pc-notes"><h3>Coach notes${L.length?` <span class="sub">(${L.length})</span>`:""}</h3>
+    ${L.map(n=>`<div class="note-i"><div class="note-t">${e_(n.t)}</div><div class="note-m sub">${e_(n.byName||"Staff")}${n.at?" · "+noteWhen(n.at):""}${(isOwner()||(m.id&&n.by===m.id)||(n.id==="legacy"&&(isOwner()||p.addedBy===m.id)))?` · <button type="button" class="linkbtn" data-hsnd="${e_(n.id)}">Delete</button>`:""}</div></div>`).join("")}
+    <div class="note-add"><textarea id="hsNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" id="hsNoteAdd">Add note</button></div></div>`}
+async function noteSaveHS(id,op,arg){const p=ROWS.find(r=>r.id===id);if(!p||!DBX)return;const m=await me();let L=hsNotes(p);
+  if(op==="add"){const t=String(arg||"").trim();if(!t)return;L=L.concat([{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,at:new Date().toISOString(),by:m.id||"",byName:m.name||"Staff"}])}
+  else L=L.filter(n=>n.id!==arg);
+  try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({notes:L});toast(op==="add"?"Note saved.":"Note deleted.")}catch(e){REFRESH=false;toast("Couldn't save the note.")}}
+
+/* ---------- priority star ---------- */
+async function togglePri(id){const p=ROWS.find(r=>r.id===id);if(!p)return;try{REFRESH=true;await saveRow(id,{priority:!p.priority});toast(p.priority?"Priority removed.":"Marked priority.")}catch(e){REFRESH=false;toast("Couldn't save.")}}
+
+/* ---------- compare (up to 3 prospects side by side) ---------- */
+function saveCmp(){CMP=CMP.filter(id=>ROWS.some(r=>r.id===id)||!ROWS.length).slice(0,3);try{localStorage.setItem("hs_cmp",JSON.stringify(CMP))}catch(e){}cmpBar()}
+function toggleCmp(id){if(CMP.includes(id))CMP=CMP.filter(x=>x!==id);else{if(CMP.length>=3){toast("Compare holds 3 prospects. Remove one first.");return false}CMP.push(id)}saveCmp();return true}
+function cmpBar(){const b=q("hsCmpBar");const L=CMP.map(id=>ROWS.find(r=>r.id===id)).filter(Boolean);b.hidden=!L.length;if(!L.length)return;
+  b.innerHTML=`<b>Compare</b>${L.map(r=>`<span class="cmp-chip">${e_(r.name)}<button type="button" data-cmprm="${e_(r.id)}" aria-label="Remove ${e_(r.name)}">×</button></span>`).join("")}
+    <button class="btn primary" type="button" id="hsCmpGo"${L.length<2?" disabled title=\"Add at least 2\"":""}>Compare${L.length<2?" (add 1 more)":""}</button><button class="btn" type="button" id="hsCmpClr">Clear</button>`}
+function cmpRows(L){const tv=(r,src,k)=>num(((r.outside||{})[src]||{})[k]);const samePos=L.every(x=>x.r.pos===L[0].r.pos);
+  const rows=[["grp","Profile"],["Position",x=>x.r.pos||"–"],["High school",x=>[x.r.school,x.r.state].filter(Boolean).join(", ")||"–"],["Class",x=>x.r.cls||"–"],
+    ["Ht / Wt",x=>[fmtHt(x.r.ht),x.r.wt].filter(Boolean).join(" / ")||"–"],["Status",x=>x.r.status+(x.r.commitTo&&x.r.status!=="Committed"?" ("+x.r.commitTo+")":"")],
+    ["Offers",x=>num(x.r.offers),"hi",0],["P4 offers",x=>num(x.r.p4),"hi",0],["GPA",x=>num(x.r.gpa),"hi",2],
+    ["grp","Our grade"],["Score",x=>x.s.score,"hi",1],["Grade",x=>x.s.score!=null?letter(x.s.score):"–"],["Tier",x=>x.s.score!=null?TN[tierOfHS(x.s.score)]:"–"],["Confidence",x=>x.s.conf&&x.s.conf!=="–"?x.s.conf:"–"],
+    ["Film (avg of coaches)",x=>x.s.F&&x.s.F.score!=null?x.s.F.score/10:null,"hi",1],
+    ...[0,1,2,3].map(i=>[samePos?(CFG.traits[L[0].r.pos]||[])[i]||"Trait "+(i+1):"Trait "+(i+1),x=>x.s.F&&x.s.F.avg?x.s.F.avg[i]:null,"hi",1,samePos?null:x=>(CFG.traits[x.r.pos]||[])[i]]),
+    ["Testing score",x=>x.s.Tm,"hi",0],
+    ["grp","Testing (official)"],...TKEYS.map(k=>[TEST[k].n,x=>{const o=official(x.r,k);return o?num(o.v):null},TEST[k].low?"lo":"hi",TEST[k].dp,x=>{const o=official(x.r,k);return o?(TIMING[o.timing]||TIMING.listed).tag:""}]),
+    ["grp","Tracking Football"],["PAI",x=>tv(x.r,"tf","pai"),"hi",1],["HS Combine score",x=>tv(x.r,"tf","com"),"hi",1],["vs HS class",x=>tv(x.r,"tf","hsPct")!=null?tv(x.r,"tf","hsPct")*100:null,"hi",0,null,"%"],
+    ["vs D-I",x=>tv(x.r,"tf","diPct")!=null?tv(x.r,"tf","diPct")*100:null,"hi",0,null,"%"],["vs Marshall",x=>tv(x.r,"tf","muPct")!=null?tv(x.r,"tf","muPct")*100:null,"hi",0,null,"%"],["Game speed MPH",x=>tv(x.r,"tf","mph")??num(x.r.mph),"hi",2],
+    ["grp","NextGen / Catapult"],["XOS rating",x=>tv(x.r,"ng","xos"),"hi",1],["ISR grade",x=>tv(x.r,"ng","isr"),"hi",1],["LSR grade",x=>tv(x.r,"ng","lsr"),"hi",1],["Catapult top speed",x=>tv(x.r,"ng","topSpeed"),"hi",2],["247 rating",x=>tv(x.r,"ng","r247")??num(x.r.r247),"hi",2]];
+  return rows}
+function openCompare(){const L=CMP.map(id=>ROWS.find(r=>r.id===id)).filter(Boolean).map(r=>({r,s:scoreOf(r)}));if(L.length<2)return;const dlg=q("hsCmpDlg");
+  const body=cmpRows(L).map(row=>{if(row[0]==="grp")return `<tr class="grp"><th colspan="${L.length+1}">${row[1]}</th></tr>`;
+    const [lab,fn,dir,dp,sub,suf]=row;const vals=L.map(fn);if(vals.every(v=>v==null||v===""||v==="–"))return "";
+    const nums=vals.filter(v=>typeof v==="number");let best=null,worst=null;
+    if(dir&&nums.length>1){best=dir==="hi"?Math.max(...nums):Math.min(...nums);worst=dir==="hi"?Math.min(...nums):Math.max(...nums);if(best===worst)best=worst=null}
+    return `<tr><th class="rowh">${e_(lab)}</th>${vals.map((v,i)=>{const t=typeof v==="number"?f1(v,dp??1)+(suf||""):e_(v??"–");const sb=sub?sub(L[i]):"";
+      return `<td class="${typeof v==="number"?"num":""}${v!=null&&v===best?" best":v!=null&&v===worst&&L.length>2?" worst":""}">${v==null?"–":t}${sb?` <span class="sub">${e_(sb)}</span>`:""}</td>`}).join("")}</tr>`}).join("");
+  dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>Compare prospects</h2><div class="sub">Green is the best in each row. Tap a name for his card.</div></div><button class="pc-x" type="button" id="hsCmpX" aria-label="Close">×</button></div>
+    <div class="tablewrap"><table class="hs-cmp"><thead><tr><th></th>${L.map(x=>`<th class="cn"><button type="button" data-cmpopen="${e_(x.r.id)}">${x.r.priority?"★ ":""}${e_(x.r.name)}</button><div class="sub">${e_([x.r.pos,x.r.cls].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="btns"><button class="btn" type="button" id="hsCmpPrint">Print</button></div></div>`;
+  q("hsCmpX").onclick=()=>dlg.close();q("hsCmpPrint").onclick=()=>printCompare(L);
+  if(!dlg.open)dlg.showModal()}
+
+/* ---------- needs by position ---------- */
+function needCls(){const cs=classes();const sel=q("hsNeedClass").value;if(sel)return sel;const c=ROWS.filter(r=>r.status==="Committed").map(r=>String(r.cls));
+  const by={};c.forEach(x=>by[x]=(by[x]||0)+1);return Object.keys(by).sort((a,b)=>by[b]-by[a])[0]||cs[0]||String(new Date().getFullYear()+1)}
+function needsFor(cl){const n=(CFG.needs||{})[cl]||{};const o={};POS.forEach(p=>o[p]=n[p]!=null?+n[p]:NEED_DEF[p]);return o}
+function needData(cl){const N=needsFor(cl);return POS.map(p=>{const L=rowsFor(ROWS.filter(r=>r.pos===p&&String(r.cls)===cl));
+  const com=L.filter(x=>x.r.status==="Committed").sort(commitOrder),tgt=L.filter(x=>!["Committed","Committed elsewhere","Pass"].includes(x.r.status)).sort(tbOrder);
+  const off=L.filter(x=>x.r.status==="Offered").length,left=N[p]-com.length;return {p,need:N[p],com,tgt,off,left}})}
+function needStatus(d){return d.left>0?`<span class="need-open">Need ${d.left}</span>`:d.left<0?`<span class="need-over">Over by ${-d.left}</span>`:`<span class="need-full">Full</span>`}
+function renderNeeds(){const cs=classes();const cl=needCls();fillSelect(q("hsNeedClass"),cs.includes(cl)?cs:cs.concat([cl]).sort(),cl,"Class");q("hsNeedClass").value=cl;
+  const own=isOwner();q("hsNeedSave").hidden=!own;const D=needData(cl);
+  const nm=x=>`<button type="button" data-id="${e_(x.r.id)}">${x.r.priority?'<span class="hs-star">★</span>':""}${e_(x.r.name)} <span class="sub">${x.s.score!=null?f1(x.s.score,1)+" "+letter(x.s.score):x.s.Tm!=null?"Test "+f1(x.s.Tm,0):""}</span></button>`;
+  const row=d=>`<tr><td><b>${d.p}</b></td><td class="num">${own?`<input type="number" min="0" max="15" data-need="${d.p}" value="${d.need}">`:d.need}</td><td class="num">${d.com.length}</td><td class="num">${d.off}</td><td>${needStatus(d)}</td>
+    <td><div class="nl">${d.com.map(nm).join("")||'<span class="sub">–</span>'}</div></td><td><div class="nl">${d.tgt.slice(0,3).map(nm).join("")||'<span class="sub">No targets</span>'}${d.tgt.length>3?`<span class="sub">+${d.tgt.length-3} more</span>`:""}</div></td></tr>`;
+  const tot=(L,n)=>{const a=L.reduce((s,d)=>s+d.need,0),c=L.reduce((s,d)=>s+d.com.length,0),o=L.reduce((s,d)=>s+d.off,0);return `<tr class="tot"><td>${n}</td><td class="num">${a}</td><td class="num">${c}</td><td class="num">${o}</td><td>${needStatus({left:a-c})}</td><td></td><td></td></tr>`};
+  const O=D.filter(d=>OFF.has(d.p)),Df=D.filter(d=>!OFF.has(d.p));
+  q("hsNeedTbl").innerHTML=`<thead><tr><th>Pos</th><th class="num">Need</th><th class="num">Committed</th><th class="num">Offered</th><th>Status</th><th>Commits</th><th>Top targets</th></tr></thead><tbody>${O.map(row).join("")}${tot(O,"Offense")}${Df.map(row).join("")}${tot(Df,"Defense")}${tot(D,"Class of "+cl)}</tbody>`}
+async function saveNeeds(){if(!isOwner()||!DBX)return;const cl=needCls();const n={};document.querySelectorAll("[data-need]").forEach(el=>{const v=num(el.value);n[el.dataset.need]=v==null?NEED_DEF[el.dataset.need]:Math.max(0,Math.round(v))});
+  const all=Object.assign({},CFG.needs||{},{[cl]:n});try{await DBX.doc("config/hs").set({needs:all},{merge:true});toast("Needs saved for the staff.")}catch(e){toast("Couldn't save needs.")}}
+
+/* ---------- search hook for the header search (portal + high school) ---------- */
+function search(t){t=String(t||"").toLowerCase().trim();if(t.length<2)return [];
+  return rowsFor(ROWS.filter(r=>[r.name,r.school,r.state].filter(Boolean).join(" ").toLowerCase().includes(t))).sort(commitOrder).slice(0,10)
+    .map(x=>({id:x.r.id,name:x.r.name,pos:x.r.pos,school:[x.r.school,x.r.state].filter(Boolean).join(", "),cls:x.r.cls,status:x.r.status,grade:x.s.score!=null?f1(x.s.score,1)+" "+letter(x.s.score):x.s.Tm!=null?"T "+f1(x.s.Tm,0):"–"}))}
+
+/* ---------- printouts ---------- */
+const PT=t=>String(t??"").replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"*");
+function pdfOk(){if(!window.jspdf||!window.jspdf.jsPDF){toast("The print tool didn't load. Refresh the page and try again.");return false}return true}
+const TSTY={styles:{font:"helvetica",fontSize:8.6,cellPadding:4,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},alternateRowStyles:{fillColor:[243,245,242]}};
+const tierRGB=t=>((typeof TIERRGB!=="undefined"&&TIERRGB)||{})[t]||[24,32,26];
+async function printList(){if(!pdfOk())return;const L=LAST_LIST;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+  const f=[POSF,q("hsClass").value&&"Class of "+q("hsClass").value,q("hsStatus").value,q("hsPri").checked&&"Priority only"].filter(Boolean).join(" · ");
+  pdfHeader(doc,"Player Tool · HS Prospects",`${L.length} prospects${f?" · "+f:""}`);
+  doc.autoTable(Object.assign({startY:76,head:[["#","Player","Pos","Class","High school","Status","Film","Testing","Score","Grade","Tier","40","vs MU","Offers"]],
+    body:L.map((x,i)=>{const r=x.r,s=x.s,o=official(r,"t40"),mu=num(((r.outside||{}).tf||{}).muPct);return [i+1,PT((r.priority?"* ":"")+r.name),r.pos||"",r.cls||"",PT([r.school,r.state].filter(Boolean).join(", ")),PT(r.status+(r.commitTo&&r.status!=="Committed"?" ("+r.commitTo+")":"")),
+      s.F&&s.F.coaches?f1(s.F.score/10,1):"-",s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"-",s.score!=null?f1(s.score,1):"-",s.score!=null?PT(letter(s.score)):"-",s.score!=null?TN[tierOfHS(s.score)]:"",o?f1(+o.v,2):"-",mu!=null?Math.round(mu*100)+"%":"-",r.offers??"-"]}),
+    columnStyles:{0:{halign:"right",cellWidth:24},1:{fontStyle:"bold"},8:{halign:"right",fontStyle:"bold"},10:{fontStyle:"bold"}},
+    didParseCell:h=>{if(h.section==="body"&&(h.column.index===10||h.column.index===8)){const x=L[h.row.index];const t=x&&x.s.score!=null&&tierOfHS(x.s.score);if(t)h.cell.styles.textColor=tierRGB(t)}}},TSTY));
+  await pdfSave(doc,`HS prospects ${new Date().toISOString().slice(0,10)}.pdf`)}
+async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);if(!p)return;const s=scoreOf(p),t=tierOfHS(s.score),tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
+  const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});const W=pdfHeader(doc,PT((p.priority?"* ":"")+p.name),PT([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state,p.status+(p.commitTo&&p.status!=="Committed"?" ("+p.commitTo+")":"")].filter(Boolean).join(" · ")));
+  let y=84;const H=txt=>{if(y>700){doc.addPage();y=50}doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(txt,40,y);y+=6};
+  const T=(head,body,cs)=>{doc.autoTable(Object.assign({startY:y,margin:{left:40,right:40},head:[head],body,columnStyles:cs||{}},TSTY));y=doc.lastAutoTable.finalY+18};
+  doc.setFont("helvetica","bold");doc.setFontSize(26);doc.setTextColor(...(t?tierRGB(t):[24,32,26]));doc.text(s.score!=null?PT(letter(s.score)):"-",40,y+20);
+  doc.setFontSize(14);doc.text(s.score!=null?`${f1(s.score,1)}  ${TN[t]}`:"Not graded yet",90,y+8);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);
+  doc.text(PT(s.score==null?(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)} · ${CFG.filmW[p.pos]??60}% film · ${s.conf} confidence`),90,y+22);y+=44;
+  const G=s.F?s.F.G:[];if(G.length){H("Film grades (1-10)");T(["Coach",...tr.map(PT),"Updated"],G.map(f=>[PT(f.name||"Coach"),...[0,1,2,3].map(i=>f.g[i]??"-"),(f.at||"").slice(0,10)]).concat([["Average",...s.F.avg.map(a=>f1(a,1)),""]]))}
+  if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%"]))}
+  const o=p.outside||{},TF=o.tf||{},NG=o.ng||{},kv=[];const add=(k,v)=>{if(v!=null&&v!=="")kv.push([k,PT(v)])};
+  add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / "));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
+  add("Tracking Football PAI",TF.pai);add("HS Combine score",TF.com);add("vs Marshall",num(TF.muPct)!=null?Math.round(TF.muPct*100)+"%":"");add("vs D-I",num(TF.diPct)!=null?Math.round(TF.diPct*100)+"%":"");add("Game speed MPH",TF.mph);
+  add("XOS rating",NG.xos);add("ISR grade",NG.isr);add("LSR grade",NG.lsr);add("Catapult top speed",NG.topSpeed);add("247 rating",NG.r247);
+  if(kv.length){H("Profile and outside ratings");T(["Item","Value"],kv,{0:{fontStyle:"bold",cellWidth:180}})}
+  const N=hsNotes(p).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at)));if(N.length){H("Coach notes");T(["Note","By"],N.map(n=>[PT(n.t),PT((n.byName||"Staff")+(n.at?"\n"+String(n.at).slice(0,10):""))]),{1:{cellWidth:110}})}
+  await pdfSave(doc,`${PT(p.name)} prospect card.pdf`)}
+async function printNeeds(){if(!pdfOk())return;const cl=needCls(),D=needData(cl);const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+  pdfHeader(doc,"Player Tool · HS Needs","Class of "+cl);const st=d=>d.left>0?"Need "+d.left:d.left<0?"Over by "+(-d.left):"Full";
+  const nm=x=>PT((x.r.priority?"* ":"")+x.r.name)+(x.s.score!=null?` (${f1(x.s.score,1)})`:"");
+  doc.autoTable(Object.assign({startY:76,head:[["Pos","Need","Committed","Offered","Status","Commits","Top targets"]],body:D.map(d=>[d.p,d.need,d.com.length,d.off,st(d),d.com.map(nm).join("\n")||"-",d.tgt.slice(0,3).map(nm).join("\n")||"-"]),
+    columnStyles:{0:{fontStyle:"bold",cellWidth:40},1:{halign:"right",cellWidth:40},2:{halign:"right",cellWidth:62},3:{halign:"right",cellWidth:52},4:{fontStyle:"bold",cellWidth:64}},
+    didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[0,122,51]}}},TSTY));
+  await pdfSave(doc,`HS needs ${cl} ${new Date().toISOString().slice(0,10)}.pdf`)}
+async function printCompare(L){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Player Tool · Compare prospects",L.map(x=>PT(x.r.name)).join(" vs. "));
+  const body=[];cmpRows(L).forEach(row=>{if(row[0]==="grp"){body.push([{content:row[1],colSpan:L.length+1,styles:{fillColor:[230,234,229],fontStyle:"bold"}}]);return}
+    const [lab,fn,,dp,sub,suf]=row;const v=L.map(fn);if(v.every(x=>x==null||x===""||x==="–"))return;body.push([lab,...v.map((x,i)=>(x==null?"-":typeof x==="number"?f1(x,dp??1)+(suf||""):PT(x))+(sub&&sub(L[i])?" "+PT(sub(L[i])):""))])});
+  doc.autoTable(Object.assign({startY:76,head:[["",...L.map(x=>PT(x.r.name))]],body,columnStyles:{0:{fontStyle:"bold",cellWidth:150}}},TSTY));
+  await pdfSave(doc,`Compare ${L.map(x=>PT(x.r.name)).join(" vs ")}.pdf`)}
 
 /* ---------- outside ratings (Tracking Football, NextGen / Catapult) ---------- */
 const OF={tf:[["pai","PAI","n"],["com","HS Combine score","n"],["hsPct","vs HS class %","p"],["diPct","vs D-I %","p"],["muPct","vs Marshall %","p"],["sbPct","vs Sun Belt %","p"],["nflPct","vs NFL Draft %","p"],["mph","Game speed MPH","n"]],
@@ -3806,10 +3951,11 @@ function testRows(p){const L=(p.tests||[]);return L.map((t,i)=>`<tr data-i="${i}
   <td><input data-f="src" type="text" value="${e_(t.src||"")}" placeholder="Where (camp / site)"></td><td><input data-f="date" type="text" value="${e_(t.date||"")}" placeholder="Date"></td>
   <td><button type="button" class="btn" data-del="${i}" aria-label="Remove">✕</button></td></tr>`).join("")}
 async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)){OPEN=id;REFRESH=true;return}const p=id?ROWS.find(r=>r.id===id):{pos:POSF||"",cls:String(new Date().getFullYear()+1),status:"Evaluating",tests:[],film:{}};
-  if(!p)return;OPEN=id||null;const s=scoreOf(p),t=tierOfHS(s.score),m=await me(),mine=(p.film||{})[m.id]||{},tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
+  if(!p)return;const keepTop=dlg.open&&OPEN===id?dlg.scrollTop:0;OPEN=id||null;const s=scoreOf(p),t=tierOfHS(s.score),m=await me(),mine=(p.film||{})[m.id]||{},tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
   const canDel=id&&(isOwner()||p.addedBy===m.id);
   const others=s.F?s.F.G:[];
-  dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div></div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
+  dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div>
+    ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.priority}">${p.priority?"★ Priority":"☆ Mark priority"}</button><button class="btn" type="button" id="hsCmpBtn" aria-pressed="${CMP.includes(id)}">${CMP.includes(id)?"✓ In compare":"+ Compare"}</button><button class="btn" type="button" id="hsCardPrint">Print</button></div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
   ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${f1(s.score,1)} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
     <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
@@ -3823,6 +3969,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
     <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
+  ${id?notesBox(p,m):""}
   ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}
   ${id&&p.pulledAt?`<details class="hsd-box" id="hsEditBox"><summary><h3 style="display:inline">Edit profile</h3> <span class="sub">filled from sources; change only to correct something. Your corrections stick through refreshes.</span></summary>`:""}<form class="${id&&p.pulledAt?"":"hsd-box"}" id="hsForm" autocomplete="off" style="display:grid;gap:10px">${id&&p.pulledAt?"":`<h3>${id?"Profile":"Add prospect"}</h3>`}
     <div class="grid2">${field("hsF-name","Name",p.name)}${sel("hsF-pos","Position",[["","Pick"]].concat(POS.map(x=>[x,x])),p.pos)}${field("hsF-cls","Class",p.cls,"number"," step=\"1\"")}${sel("hsF-status","Status",STATUSES.map(x=>[x,x]),p.status||"Evaluating")}</div>
@@ -3836,13 +3983,16 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     <fieldset><legend>Outside ratings</legend><div class="grid2">${sel("hsO-rating","Tracking Football rating",[["","–"],["PAI","PAI (track)"],["HS Combine","HS Combine"]],((p.outside||{}).tf||{}).rating)}${OF.tf.map(([k,n,t])=>field("hsO-tf-"+k,n,oval(p,"tf",k,t),"number"," step=\"0.1\"")).join("")}</div>
       <div class="grid2">${OF.ng.map(([k,n,t])=>field("hsO-ng-"+k,n,oval(p,"ng",k,t),t==="txt"?"text":"number"," step=\"0.01\"")).join("")}</div>
       <p class="sub" style="margin:0">Percentiles are 0–100. "vs Marshall" is his rating's percentile among Marshall players at his position; it fills in his testing score when he has no usable testing.</p></fieldset>
-    <label>Notes<textarea id="hsF-notes" rows="3">${e_(p.notes||"")}</textarea></label>
     <div class="btns"><button class="btn primary" type="submit">${id?"Save profile":"Add prospect"}</button>${canDel?`<button class="btn" type="button" id="hsDel" style="margin-left:auto">Remove prospect</button>`:""}</div>
     ${p.sources?`<p class="sub" style="margin:0">Sources: ${e_(p.sources)}</p>`:""}
   </form>${id&&p.pulledAt?"</details>":""}</div>`;
   let tests=JSON.parse(JSON.stringify(p.tests||[]));
   const readTests=()=>{tests=[...q("hsTests").querySelectorAll("tbody tr")].map(tr=>{const o={};tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim());o.v=num(o.v);return o}).filter(t=>t.v!=null)};
   q("hsX").onclick=()=>dlg.close();
+  if(id){q("hsPriBtn").onclick=()=>togglePri(id);q("hsCardPrint").onclick=()=>printCard(id);
+    q("hsCmpBtn").onclick=()=>{if(toggleCmp(id)){const on=CMP.includes(id);q("hsCmpBtn").setAttribute("aria-pressed",on);q("hsCmpBtn").textContent=on?"✓ In compare":"+ Compare"}};
+    q("hsNoteAdd").onclick=()=>{const v=q("hsNote").value;if(v.trim())noteSaveHS(id,"add",v)};
+    dlg.querySelectorAll("[data-hsnd]").forEach(b=>b.onclick=()=>{if(confirm("Delete this note?"))noteSaveHS(id,"del",b.dataset.hsnd)})}
   q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
   q("hsTests").addEventListener("click",ev=>{const b=ev.target.closest("[data-del]");if(!b)return;readTests();b.closest("tr").remove()});
   if(q("hsSaveG"))q("hsSaveG").onclick=async()=>{const g=[0,1,2,3].map(i=>num(q("hsG"+i).value));if(g.every(x=>x==null)){toast("Pick at least one grade.");return}
@@ -3853,11 +4003,11 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   q("hsForm").onsubmit=async ev=>{ev.preventDefault();readTests();const v=k=>q("hsF-"+k).value.trim();
     const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
       wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
-      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),notes:q("hsF-notes").value.trim(),tests,outside:readOutside(p)};
+      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),tests,outside:readOutside(p)};
     if(id&&p.pulledAt){const man=new Set(p.manual||[]);const dflt={comp:"1.00",multi:false,age:""};const same=(a,b)=>String(a??"")===String(b??"");Object.keys(d).forEach(k=>{if(k==="outside"||k==="tests"){if(JSON.stringify(d[k]||[])!==JSON.stringify(p[k]||[]))man.add(k)}else if(k in dflt){if(!same(d[k],p[k]??dflt[k]))man.add(k)}else if(!same(d[k],p[k]))man.add(k)});d.manual=[...man]}
     if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
     try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
-  if(!dlg.open)dlg.showModal()}
+  if(!dlg.open)dlg.showModal();dlg.scrollTop=keepTop}
 
 /* ---------- settings ---------- */
 function setOwnerUi(){const own=isOwner();q("hsOwnerBtns").hidden=!own;q("hsImportBox").hidden=!DBX;
@@ -3877,14 +4027,14 @@ function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
   Object.keys(c.bench).forEach(g=>Object.keys(c.bench[g]).forEach(k=>{if(c.bench[g][k].some(x=>x==null))delete c.bench[g][k]}));
   const w=s=>{const a=s.split(/[,\s]+/).map(Number).filter(x=>isFinite(x));return a.length===4?a:null};
   c.traitW=w(q("hsTraitW").value)||CFG.traitW;c.testW=w(q("hsTestW").value)||CFG.testW;
-  c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};c.useOutside=q("hsUseOut").checked;return c}
+  c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};c.useOutside=q("hsUseOut").checked;c.needs=CFG.needs||{};return c}
 
 /* ---------- import / export ---------- */
 async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSON.parse(await file.text())}catch(e){msg.textContent="That file isn't valid JSON.";return}
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
   /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
      Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
-  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","updatedBy","updatedAt"]);
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","priority","updatedBy","updatedAt"]);
   const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
   const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
   const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
@@ -3916,7 +4066,7 @@ async function exportAll(){const out=JSON.stringify({exported:new Date().toISOSt
   try{const dl=await claude.use("downloads");await dl.save({filename:"hs-prospects-"+new Date().toISOString().slice(0,10)+".json",data:out})}catch(e){toast("Couldn't download.")}}
 
 /* ---------- wiring ---------- */
-function render(t){syncSwitch();if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsset")renderSet()}
+function render(t){syncSwitch();cmpBar();if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
 function syncSwitch(){const hs=typeof TAB!=="undefined"&&String(TAB||"").startsWith("hs");document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.side==="hs")===hs)))}
 document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
   if(sw){const hs=sw.dataset.side==="hs";let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}go(hs?(pr.hsTab||"hsboard"):(pr.ptTab||"boards"));return}
@@ -3927,12 +4077,18 @@ document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]")
   const tag=ev.target.closest("#hsTbCols .tag");if(tag){const mv=ev.target.closest("[data-mv]"),k=tag.dataset.tk;
     if(mv){ev.stopPropagation();const ids=TBS[k].map(x=>x.r.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTags(k,ids);return}
     if(Date.now()-TB_DRAG<400)return;openCard(tag.dataset.tid);return}
+  const rm=ev.target.closest("[data-cmprm]");if(rm){toggleCmp(rm.dataset.cmprm);return}
+  if(ev.target.closest("#hsCmpGo")){openCompare();return}if(ev.target.closest("#hsCmpClr")){CMP=[];saveCmp();return}
+  const co=ev.target.closest("[data-cmpopen]");if(co){q("hsCmpDlg").close();openCard(co.dataset.cmpopen);return}
+  const nb=ev.target.closest("#hsNeedTbl [data-id]");if(nb){openCard(nb.dataset.id);return}
   const th=ev.target.closest("#hsTbl th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:["name","pos","status","cls"].includes(k)?1:-1};renderBoard();return}
   const tr=ev.target.closest("#hsTbl tr[data-id],#hsBigTbl tr[data-id]");if(tr){openCard(tr.dataset.id)}});
 ["hsSearch","hsClass","hsStatus"].forEach(id=>q(id).addEventListener(id==="hsSearch"?"input":"change",renderBoard));
 ["hsBigClass","hsBigConf"].forEach(id=>q(id).addEventListener("change",renderBig));
 ["hsTbClass","hsTbShow"].forEach(id=>q(id).addEventListener("change",renderTags));
 q("hsTbPrint").onclick=printTags;
+q("hsPri").addEventListener("change",renderBoard);q("hsListPrint").onclick=printList;
+q("hsNeedClass").addEventListener("change",renderNeeds);q("hsNeedSave").onclick=saveNeeds;q("hsNeedPrint").onclick=printNeeds;
 q("hsSortReset").onclick=()=>{SORT={k:"commit",d:1};renderBoard()};
 q("hsAdd").onclick=()=>openCard(null);
 q("hsDlg").addEventListener("close",()=>{OPEN=null});
@@ -3940,7 +4096,7 @@ q("hsSaveCfg").onclick=async()=>{if(!isOwner()||!DBX)return;try{await DBX.doc("c
 q("hsResetCfg").onclick=async()=>{if(!isOwner()||!DBX||!confirm("Reset HS settings to the defaults?"))return;try{await DBX.doc("config/hs").set(JSON.parse(JSON.stringify(DEF)));toast("Reset to defaults.")}catch(e){toast("Couldn't reset.")}};
 q("hsImportFile").addEventListener("change",ev=>{const f=ev.target.files&&ev.target.files[0];if(f)importFile(f)});
 q("hsExport").onclick=exportAll;
-return {connect,render,syncSwitch,scoreOf,official,_cfg:()=>CFG,_rows:r=>{if(r)ROWS=r;return ROWS}};
+return {connect,render,syncSwitch,scoreOf,official,search,open:id=>openCard(id),_cfg:()=>CFG,_rows:r=>{if(r)ROWS=r;return ROWS}};
 })();
 if(typeof DB!=="undefined"&&DB)HS.connect(DB);
 if(typeof TAB!=="undefined"&&TAB)HS.render(TAB);
