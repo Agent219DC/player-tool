@@ -4079,7 +4079,7 @@ function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub"
 /* ---------- prospect card ---------- */
 /* Our measurements (taken on a visit): saved into ht/wt/wing/arm/hand, marked manual so imports never overwrite them; meas keeps when, where, who and the listed numbers they replaced */
 const MK=[["ht","Height"],["wt","Weight"],["wing","Wingspan"],["arm","Arm"],["hand","Hand"]];
-function measFmt(k,v){if(v==null||v==="")return "–";return k==="ht"?fmtHt(v):k==="wt"?v+" lbs":v+'"'}
+function measFmt(k,v){if(v==null||v==="")return "–";if(k==="ht"){const m=String(v).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)\s*(\d{1,2}(?:\.\d+)?)/);return m?`${m[1]}'${+m[2]}"`:fmtHt(v)}return k==="wt"?v+" lbs":v+'"'}
 function measWhen(M){return M?[M.date?fmtDate(M.date):"",M.where||"",M.byName||""].filter(Boolean).join(" · "):""}
 function measBox(p){const M=p.meas,W=(M&&M.was)||{},td=new Date().toISOString().slice(0,10);
   return `<div class="hsd-box" id="hsMeasBox"><h3>Measurements ${M?`<span class="chip meas-chip">Measured by us</span>`:""}</h3>
