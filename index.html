@@ -695,6 +695,7 @@ dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
 .hsd-break div{display:grid;gap:2px}
 .hsd-break b{font:700 22px var(--display)}
 .sbc-up{color:#00873a;font-weight:700}.sbc-dn{color:#c62828;font-weight:700}[data-theme=dark] .sbc-up{color:#5fd38a}[data-theme=dark] .sbc-dn{color:#ff8a80}
+#sbc{grid-template-columns:minmax(0,1fr)} #sbc>*,#sbcBody>*{min-width:0} #sbcBody{display:grid;gap:10px;min-width:0}
 #sbcTbl tr.ours td{background:var(--accent-soft)} #sbcTbl td.tm{font-weight:600;white-space:nowrap} .sbc-chart{width:100%;max-width:760px;height:auto;display:block}
 .sbc-chart text{font:600 11px var(--body);fill:var(--muted)} .sbc-chart .lbl{fill:var(--fg)} .sbc-chart .ours{fill:var(--accent-text)}
 .sbc-dc td.unit{font:700 12px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)} .sbc-dc .pn{font-weight:600} .sbc-dc .ps{font-size:12px;color:var(--muted)}
@@ -3662,7 +3663,13 @@ function sbcChart(rows,fit){const P=rows.filter(r=>r.grade!=null&&r.pct!=null);i
   for(let v=Math.ceil(x0/5)*5;v<=x1;v+=5)g+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${v}</text>`;
   const ya=Math.max(0,Math.min(1,fit.a+fit.b*x0)),yb=Math.max(0,Math.min(1,fit.a+fit.b*x1));
   g+=`<line x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
-  g+=P.map(r=>{const o=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";return `<circle cx="${X(r.grade)}" cy="${Y(r.pct)}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: grade ${fmt(r.grade)}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${X(r.grade)+8}" y="${Y(r.pct)+4}">${esc(ab(r.name))}</text>`}).join("");
+  const placed=[];
+  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const o=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
+    /* try right, left, above, below so labels don't sit on top of each other */
+    const opts=[[cx+9,cy+4,"start"],[cx-9,cy+4,"end"],[cx,cy-10,"middle"],[cx,cy+17,"middle"],[cx+9,cy-9,"start"],[cx+9,cy+16,"start"]];
+    const box=([x,y,a])=>{const x0=a==="start"?x:a==="end"?x-tw:x-tw/2;return [x0,y-10,x0+tw,y+2]};const hit=b=>placed.some(q=>b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]);
+    const pick=opts.find(op=>{const b=box(op);return !hit(b)&&b[0]>=L&&b[2]<=W-2})||opts[0];placed.push(box(pick));
+    return `<circle cx="${cx}" cy="${cy}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: grade ${fmt(r.grade)}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
   g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">Team grade (two-deep, board scale) →</text>`;
   return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Team grade vs. win percentage">${g}</svg>`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
