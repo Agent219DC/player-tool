@@ -698,6 +698,7 @@ dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
 #sbc{grid-template-columns:minmax(0,1fr)} #sbc>*,#sbcBody>*{min-width:0} #sbcBody{display:grid;gap:10px;min-width:0}
 #sbcTbl tr.ours td{background:var(--accent-soft)} #sbcTbl td.tm{font-weight:600;white-space:nowrap} .sbc-chart{width:100%;max-width:760px;height:auto;display:block}
 .sbc-chart text{font:600 11px var(--body);fill:var(--muted)} .sbc-chart .lbl{fill:var(--fg)} .sbc-chart .ours{fill:var(--accent-text)}
+.sbc-fieldwrap{overflow-x:auto;margin:4px 0} .sbc-fieldwrap .ovfield{min-width:980px} .sbc-card{cursor:default} .sbc-card:hover{border-color:var(--line)} .sbc-prev{display:block;font-size:11px}
 .sbc-dc td.unit{font:700 12px var(--display);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--sunk)} .sbc-dc .pn{font-weight:600} .sbc-dc .ps{font-size:12px;color:var(--muted)}
 .meas-chip{font:600 11px var(--body);vertical-align:middle;color:var(--accent-text);border-color:currentColor} .meas-ok{color:var(--accent-text);font-weight:700}
 .hs-traits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
@@ -3635,7 +3636,27 @@ function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PR
    Players live in sbc_players; records and the as-of date in shared/sbc. */
 const SBC_W={QB:3},SBC_BACKUP=0.25,SBC_OFF=new Set(["QB","RB","WR","TE","OT","IOL"]);
 const SBC_GRP=[["QB","Quarterback"],["RB","Running back"],["SK","Receivers / tight ends"],["OL","Offensive line"],["FR","Front seven"],["DB","Secondary"]];
-let SBC=null,SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false;
+let SBC=null,SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field";
+/* team overview on the field, laid out like our Overview: each spot shows the starter and his backup.
+   Players fill spots by their PFF position first (T at OT, G/C at IOL, DI at DT, ED at DE, slot CB at NIC); anyone left over takes an open spot in his group and the card shows his own position */
+const SBC_FIELD={off:{cols:9,los:"top",spots:[["WO",1,1,"WR"],["OT",1,3,"OT"],["IOL",1,4,"IOL"],["IOL",1,5,"IOL"],["IOL",1,6,"IOL"],["OT",1,7,"OT"],["TE",1,8,"TE"],["WO",1,9,"WR"],["SL",2,2,"SLOT"],["QB",2,5,"QB"],["RB",3,5,"RB"]]},
+  def:{cols:8,los:"bottom",spots:[["SAF",1,3,"SAF"],["SAF",1,6,"SAF"],["LB",2,3.5,"LB"],["LB",2,5.5,"LB"],["NIC",2,7.5,"NIC"],["CB",3,1,"CB"],["DE",3,3,"DE"],["DT",3,4,"DT"],["DT",3,5,"DT"],["DE",3,6,"DE"],["CB",3,8,"CB"]]}};
+const SBC_GROUPOF={QB:"QB",RB:"RB",WO:"SK",SL:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",NIC:"DB",CB:"DB"};
+function sbcFits(spot,p){const P=p.pos;return spot==="QB"?P==="QB":spot==="RB"?(P==="HB"||P==="FB"):spot==="TE"?P==="TE":(spot==="WO"||spot==="SL")?P==="WR":spot==="OT"?P==="T":spot==="IOL"?(P==="G"||P==="C"):spot==="DT"?P==="DI":spot==="DE"?P==="ED":spot==="LB"?P==="LB":spot==="SAF"?P==="S":spot==="NIC"?(P==="CB"&&p.nic):spot==="CB"?(P==="CB"&&!p.nic):false}
+function sbcAssign(L,side,dep){const F=SBC_FIELD[side].spots;const pool=L.filter(p=>p.dep===dep).sort((a,b)=>(b.snaps||0)-(a.snaps||0));const used=new Set(),out=F.map(()=>null);
+  F.forEach((s,i)=>{const p=pool.find(x=>!used.has(x)&&SBC_GROUPOF[s[0]]===x.grp&&sbcFits(s[0],x));if(p){used.add(p);out[i]=p}});
+  /* leftovers: a slot corner when the nickel is a safety, a third LB in a 3-3-5, a second TE, ... */
+  F.forEach((s,i)=>{if(out[i])return;const p=pool.find(x=>!used.has(x)&&SBC_GROUPOF[s[0]]===x.grp);if(p){used.add(p);out[i]=p}});
+  return out}
+function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String(fid));const F=SBC_FIELD[side];const S1=sbcAssign(L,side,1),S2=sbcAssign(L,side,2);
+  const ln=(lab,p)=>{if(!p)return `<div><span class="ovc-l">${lab}</span><span class="sub">–</span></div>`;const r=p.r;
+    return `<div><span class="ovc-l">${lab}</span><span class="ovc-n">${esc(p.name)}</span>${p.prev?`<span class="sub sbc-prev" title="Transfer">from ${esc(p.prev)}</span>`:""}<br>${p.g!=null?`<span class="ovc-g gtc-${r.tier}">${fmt(p.g)} ${esc(r.letter||"")}</span>${r.conf==="Low"?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'} · <span class="sub">${p.snaps||0} snaps</span></div>`};
+  const cards=F.spots.map(([k,r,c,lbl],i)=>{const a=S1[i],b=S2[i];const pos=`grid-row:${r+(F.los==="top"?1:0)};grid-column:${Math.round((c-1)*4)+1} / span 4`;
+    const show=a&&!sbcFits(k,a)?(a.nic?"NIC":({HB:"RB",DI:"DT",ED:"DE",S:"SAF",T:"OT",G:"IOL",C:"IOL"})[a.pos]||a.pos):lbl;
+    if(!a&&!b)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(lbl)}</b><span class="sub">No one</span></div>`;
+    return `<div class="ovcard sbc-card" style="${pos}"><div class="ovc-h"><b>${esc(show)}</b>${a&&a.r&&a.r.tier?`<span class="chip t-${a.r.tier}">${TIERNAME[a.r.tier]}</span>`:""}</div>${ln("Starter",a)}${ln("Backup",b)}</div>`}).join("");
+  const maxR=Math.max(...F.spots.map(s=>s[1]));
+  return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
 async function loadSbc(force){if(SBC&&!force)return SBC;
   const [ps,sh]=await Promise.all([DB.collection("sbc_players").get(),DB.doc("shared/sbc").get()]);
   const players=ps.docs.map(d=>Object.assign({id:d.id},d.data())).filter(p=>!p.deleted);const meta=sh.exists?sh.data():{};
@@ -3674,7 +3695,7 @@ function sbcChart(rows,fit){const P=rows.filter(r=>r.grade!=null&&r.pct!=null);i
   return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Team grade vs. win percentage">${g}</svg>`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
   const cell=p=>{if(!p)return "<td></td><td></td>";const r=p.r;const low=r&&r.conf==="Low";
-    return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${p.snaps||0} snaps${p.yr?" · "+esc(p.yr):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
+    return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${p.snaps||0} snaps${p.prev?" · from "+esc(p.prev):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
   let h="";for(const [k,n] of SBC_GRP){const S=L.filter(p=>p.grp===k&&p.dep===1).sort((a,b)=>a.ord-b.ord),Bk=L.filter(p=>p.grp===k&&p.dep===2).sort((a,b)=>a.ord-b.ord);if(!S.length&&!Bk.length)continue;
     if(k==="QB")h+=`<tr><td class="unit" colspan="4">Offense</td></tr>`;if(k==="FR")h+=`<tr><td class="unit" colspan="4">Defense</td></tr>`;
     for(let i=0;i<Math.max(S.length,Bk.length);i++)h+=`<tr>${i===0?`<td rowspan="${Math.max(S.length,Bk.length)}" class="sub" style="vertical-align:top">${n}</td>`:""}${cell(S[i])}${cell(Bk[i]).replace(/^<td>/,'<td class="sub">')}</tr>`}
@@ -3697,11 +3718,14 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <div class="tablewrap"><table id="sbcTbl">${head}<tbody>${body}</tbody></table></div>
     <p class="note"><b>Team grade</b> = every two-deep player graded on his board position's scale (same numbers as our boards), averaged with the QB counting 3× and backups ¼. <b>Expected W</b> comes from a straight-line fit of win % on team grade across the league (fit explains ${Math.round(fit.r2*100)}% of the differences in record). <b>Wins vs. talent</b> = actual wins minus expected: +1 or more is overperforming, −1 or less underperforming. Overall record, all games.</p>
     ${sbcChart(rows,fit)}
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Two-deep</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`:""}</div>
-    ${sbcDepth(SBC_TEAM)}
-    <p class="note">Starters and backups are the snap leaders at each group this season (PFF). <b>*</b> = small sample (Low confidence). "–" = not enough data to grade; he's left out of the team grade.</p>`}
+    <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span>${t?`<span class="sub">${SBC_VIEW==="field"?(SBC_SIDE==="off"?"Offense "+fmt(t.off):"Defense "+fmt(t.def)):""}</span>`:""}</div>
+    ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
+    <p class="note">Starters and backups are the snap leaders at each group this season (PFF); each spot is filled by position first, so a team in a 3-3-5 shows its third linebacker where a lineman would sit. "from" = his previous school if he transferred. <b>*</b> = small sample (Low confidence). "–" = not enough data to grade; he's left out of the team grade.</p>`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
+  const sd=e.target.closest("[data-sbcside]");if(sd){SBC_SIDE=sd.dataset.sbcside;SBC_VIEW="field";renderSbc();return}
+  const sv=e.target.closest("[data-sbcview]");if(sv){SBC_VIEW=sv.dataset.sbcview;renderSbc();return}
   const t=e.target.closest("[data-sbct]");if(t){SBC_TEAM=t.dataset.sbct;renderSbc();$("sbcTeamSel").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(e.target.id==="sbcCancelRec"){SBC_EDIT=false;renderSbc();return}
   if(e.target.id==="sbcSaveRec"){const up={};$("sbcBody").querySelectorAll("[data-sbcw]").forEach(i=>{const f=i.dataset.sbcw,l=$("sbcBody").querySelector(`[data-sbcl="${f}"]`);const w=parseInt(i.value,10),ll=parseInt(l.value,10);if(isFinite(w)&&isFinite(ll)){up[`teams.${f}.w`]=w;up[`teams.${f}.l`]=ll}});
