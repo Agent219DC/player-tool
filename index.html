@@ -3829,7 +3829,7 @@ function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("h
   q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody graded yet. A prospect joins this list once a coach grades his film. Until then, rank by hand on the Prospect board.</td></tr>`}</tbody>`}
 
 /* ---------- prospect board: drag tags to rank each position (mirrors the portal board). Order is saved as hsRank on each prospect ---------- */
-const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","NIC","CB"];
+const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","CB"];
 function tbOrder(a,b){const ra=a.r.hsRank,rb=b.r.hsRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return commitOrder(a,b)}
 function buildTags(){const cl=q("hsTbClass").value,sh=q("hsTbShow").value;const cols={};POS.forEach(k=>cols[k]=[]);
   rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&(isCom(r.status)||isTgt(r))&&(!cl||String(r.cls)===cl)&&(!sh||(sh==="star"?r.star:sh==="Committed"?isCom(r.status):r.status===sh)))).forEach(x=>cols[x.r.pos].push(x));
