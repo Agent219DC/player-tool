@@ -290,7 +290,7 @@ details.settings{background:var(--surface);border:1px solid var(--line);border-r
 details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--display);letter-spacing:.05em;text-transform:uppercase}
 .setbody{padding:0 18px 18px;display:grid;gap:16px}
 .anchors{overflow-x:auto}
-.anchors table{min-width:640px}
+.anchors{overflow-x:auto;max-width:100%}.anchors table{min-width:640px}
 .anchors td{padding:6px 8px}
 .anchors input{min-width:80px}
 .note{font-size:13px;color:var(--muted);max-width:70ch}
@@ -635,19 +635,36 @@ body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
 #hsTbl tr[data-id],#hsBigTbl tr[data-id]{cursor:pointer}
 #hsTbl tr[data-id]:hover,#hsBigTbl tr[data-id]:hover{background:var(--sunk)}
 .hs-ltr{font:700 18px var(--display);letter-spacing:.02em}
+#hsPosBar button[aria-pressed=true] .sub{color:inherit;opacity:.85}
+#hsTbl .mstat,#hsBigTbl .mstat,#hsTbl .mtest,#hsBigTbl .mtest{display:none}
+#hsTbl td.cst .stag,#hsBigTbl td.cst .stag{margin-left:0}
+@media (max-width:640px){
+  #hsTbl,#hsBigTbl{min-width:0}
+  #hsTbl thead tr,#hsBigTbl thead tr{display:flex;align-items:center}
+  #hsTbl thead th,#hsBigTbl thead th{display:none}
+  #hsTbl thead th.pick{display:block;border:0}
+  #hsTbl thead th.pick::after{content:"Select all";font:500 12px var(--body);letter-spacing:0;text-transform:none;margin-left:8px;vertical-align:3px}
+  #hsTbl tbody tr,#hsBigTbl tbody tr{display:grid;grid-template-columns:30px minmax(0,1fr) auto;grid-template-areas:"pk nm gr" "pk tr tr";gap:2px 8px;padding:10px 8px;border-bottom:1px solid var(--line)}
+  #hsTbl tbody td,#hsBigTbl tbody td{border:0;padding:0;white-space:normal}
+  #hsTbl td.pick,#hsBigTbl td.crk{grid-area:pk;width:auto;padding:2px 0 0}
+  #hsTbl td.cn,#hsBigTbl td.cn{grid-area:nm;min-width:0}
+  #hsTbl td.cg,#hsBigTbl td.cg{grid-area:gr;display:flex;align-items:baseline;gap:6px;justify-content:flex-end;font-size:16px}
+  #hsTbl td.cg::after,#hsBigTbl td.cg::after{content:attr(data-l);font:700 16px var(--display)}
+  #hsTbl td.ct,#hsBigTbl td.ct{grid-area:tr;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px}
+  #hsTbl td:is(.cpo,.ccl,.chw,.cst,.cf,.ctm,.cle,.ccf,.c40,.cmu,.cof),#hsBigTbl td:is(.cpo,.ccl,.chw,.cst,.cf,.ctm,.cle,.ccf,.c40,.cmu,.cof){display:none}
+  #hsTbl .mstat,#hsBigTbl .mstat,#hsTbl .mtest,#hsBigTbl .mtest{display:inline}
+  #hsTbl .dtest,#hsBigTbl .dtest{display:none}
+  #hsTbl tbody td[colspan],#hsBigTbl tbody td[colspan]{grid-column:1/-1}
+}
 .hs-tag{font:700 9.5px var(--body);border:1px solid currentColor;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px;color:var(--muted)}
 .hs-tag.v{color:var(--accent-text)}
 .hs-tag.l{color:var(--pass)}
 .tag .hs-tag{white-space:nowrap;display:inline-block}
 .hs-tag.cm{color:#fff;background:var(--accent);border-color:var(--accent)}
 .tag.tb-none{border-left-style:dashed}
-.hs-star{color:#c9a100;margin-right:3px}
+.hs-star{color:#e0a100;margin-right:3px}
 .hs-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hs-acts .btn{font-size:13px;padding:5px 10px}
-.hs-acts .btn[aria-pressed=true]{border-color:#c9a100;color:#8a6d00;background:rgba(201,161,0,.1)}
-#hsCmpBar{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:30;display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:calc(100% - 24px);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:0 8px 28px rgba(0,0,0,.22);font-size:14px}
-body:not(.mode-hs) #hsCmpBar{display:none}
-#hsCmpBar .cmp-chip{display:inline-flex;gap:4px;align-items:center;background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:2px 4px 2px 10px;font-weight:600}
-#hsCmpBar .cmp-chip button{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:14px;padding:0 4px}
+.hs-acts .btn[aria-pressed=true]{border-color:#e0a100}
 dialog#hsCmpDlg{width:min(1100px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#hsCmpDlg::backdrop{background:rgba(10,16,12,.5)}
 table.hs-cmp td,table.hs-cmp th{vertical-align:top}table.hs-cmp th.rowh{font-weight:600;color:var(--muted);text-align:left;white-space:nowrap}
@@ -673,6 +690,7 @@ dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
 table.hs-mini{min-width:0;font-size:13px}
 table.hs-mini th,table.hs-mini td{padding:5px 6px}
 table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
+.hs-set{grid-template-columns:minmax(0,1fr)}.hs-set>*{min-width:0}
 .hs-set table{min-width:0}
 .hs-set td input{min-width:70px}
 @media (max-width:640px){header .brand{flex-wrap:wrap}.sidesw{margin:8px 0 0;flex:1 0 100%;display:flex}.sidesw button{flex:1}.hs-ctl input[type=search]{width:100%}}
@@ -991,9 +1009,11 @@ window.claude={use:async n=>{
       <select id="hsClass" aria-label="Class"></select>
       <select id="hsStatus" aria-label="Status"><option value="">All statuses</option></select>
       <span class="sub" id="hsCount"></span>
-      <label class="check" style="font-size:13px"><input type="checkbox" id="hsPri"> Priority only</label>
       <button class="btn" type="button" id="hsSortReset" hidden>Commits first</button>
-      <button class="btn" type="button" id="hsListPrint" style="margin-left:auto">Print</button>
+    </div>
+    <div class="printbar">
+      <label class="check" style="font-size:13px;color:var(--muted)"><input type="checkbox" id="hsPri"> <span style="color:#e0a100">★</span> Starred only</label>
+      <div class="btns"><button class="btn" type="button" id="hsCmpSel" disabled>Compare selected</button><button class="btn primary" type="button" id="hsListPrint" disabled>Print selected</button></div>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
     <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. A <b>~</b> testing score is estimated from Tracking Football because he has no usable testing; <b>CHECK</b> means our testing and theirs disagree by 25+ points. <b>vs MU</b> is his Tracking Football athletic rating percentile among Marshall players at his position. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
@@ -1004,7 +1024,7 @@ window.claude={use:async n=>{
       <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
     <div id="hsTbWrap" hidden style="display:grid;gap:10px">
       <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
-        <select id="hsTbShow" aria-label="Show"><option value="">Commits, offers and targets</option><option value="Committed">Commits only</option><option value="Offered">Offers only</option><option value="priority">Priority only</option></select>
+        <select id="hsTbShow" aria-label="Show"><option value="">Commits, offers and targets</option><option value="Committed">Commits only</option><option value="Offered">Offers only</option><option value="star">Starred only</option></select>
         <span class="sub" id="hsTbCount"></span></div>
       <div class="tb-cols" id="hsTbCols"></div>
       <p class="note">Drag tags or use the arrows to rank each position; everyone sees the same order. Commits start at the top, then everyone else by score. New prospects start below anyone you've ranked. Tap a tag for his card. Committed elsewhere and Pass are left off.</p>
@@ -1159,7 +1179,7 @@ window.claude={use:async n=>{
 <dialog id="pcard" aria-label="Player card"></dialog>
 <dialog id="hsDlg" aria-label="Prospect card"></dialog>
 <dialog id="hsCmpDlg" aria-label="Compare prospects"></dialog>
-<div id="hsCmpBar" hidden></div>
+
 <dialog id="dcDlg" aria-label="Edit depth chart player"><form class="dcd" method="dialog">
   <h3>Depth chart player</h3>
   <label>Name<input id="dcdName" maxlength="60" required></label>
@@ -3308,6 +3328,8 @@ async function backupData(){
   const out={};const keys=ALL_POS.filter(k=>POSITIONS[k]);
   for(const k of keys){const lc=k.toLowerCase();const qs=await DB.collection(lc+"_players").get().catch(()=>null);out[lc+"_players"]={};if(qs)qs.docs.forEach(d=>out[lc+"_players"][d.id]=d.data());
     const cs=await DB.doc("config/"+lc).get().catch(()=>null);if(cs&&cs.exists){out.config=out.config||{};out.config[lc]=cs.data()}}
+  {const qs=await DB.collection("hs_players").get().catch(()=>null);out.hs_players={};if(qs)qs.docs.forEach(d=>out.hs_players[d.id]=d.data());
+    const cs=await DB.doc("config/hs").get().catch(()=>null);if(cs&&cs.exists){out.config=out.config||{};out.config.hs=cs.data()}}
   for(const p of ["shared/season","shared/depth","shared/depth_next","config/rollover"]){const d=await DB.doc(p).get().catch(()=>null);if(d&&d.exists){const [c,id]=p.split("/");out[c]=out[c]||{};out[c][id]=d.data()}}
   return {format:"marshall-player-tool-backup",version:1,exported:new Date().toISOString(),collections:out};
 }
@@ -3654,8 +3676,8 @@ const DEF={
   cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true,needs:{}
 };
 const NEED_DEF={QB:1,RB:2,WR:4,TE:2,OL:5,DT:2,DE:2,ILB:2,OLB:1,SAF:2,NIC:1,CB:3};
-let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,LAST_LIST=[],CMP=[],OPEN=null,ME_=null;
-try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off";CMP=JSON.parse(localStorage.getItem("hs_cmp")||"[]")||[]}catch(e){}
+let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,LAST_LIST=[],PICKH=new Set(),OPEN=null,ME_=null;
+try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off"}catch(e){}
 const q=id=>document.getElementById(id);
 const e_=s=>s==null?"":String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const num=v=>{if(v===""||v==null)return null;const n=+v;return isFinite(n)?n:null};
@@ -3670,7 +3692,7 @@ function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
   if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;if(c.needs&&typeof c.needs==="object")o.needs=c.needs;return o}
 
 /* ---------- scoring ---------- */
-function official(p,k){const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
+function official(p,k){if(Array.isArray(p.ignoreTests)&&p.ignoreTests.includes(k))return null;const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
   const T=TEST[k];L.sort((a,b)=>((TIMING[a.timing]||TIMING.listed).r-(TIMING[b.timing]||TIMING.listed).r)||(T.low?a.v-b.v:b.v-a.v));return L[0]}
 function bench(pos,k){const b=(CFG.bench[GROUP[pos]]||{})[k];if(!b||b[0]==null||b[1]==null)return null;let m70=+b[0],m100=+b[1];const T=TEST[k];
   const dir=T.low?-1:1;if((m100-m70)*dir<T.span)m100=m70+dir*T.span;return [m70,m100]}
@@ -3720,14 +3742,17 @@ function posBar(){const el=q("hsPosBar");const cnt=p=>ROWS.filter(r=>r.pos===p).
   el.innerHTML=`<button type="button" data-hp="" aria-pressed="${!POSF}">All <span class="sub">${ROWS.length}</span></button>`+POS.map(p=>`<button type="button" data-hp="${p}" aria-pressed="${POSF===p}">${p}${cnt(p)?` <span class="sub">${cnt(p)}</span>`:""}</button>`).join("")}
 function rowsFor(list){return list.map(r=>({r,s:scoreOf(r)}))}
 function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `<span class="hs-tag ${T.cls}" title="${e_(T.n+(o.src?" · "+o.src:"")+(o.date?" · "+o.date:""))}">${T.tag}</span>`}
-function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40");
-  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn">${r.priority?'<span class="hs-star" title="Priority">★</span>':""}<b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}<div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}</div></td>
-  <td>${e_(r.pos||"–")}</td><td>${e_(r.cls||"")}</td><td class="num">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td>${e_(r.status||"")}</td>
-  <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${s.estTm?"~":""}${f1(s.Tm,0)}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
-  <td class="num"><b>${f1(s.score,1)}</b></td><td class="ctr"><span class="hs-ltr">${s.score!=null?letter(s.score):"–"}</span></td>
-  <td>${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td><td>${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
-  <td class="num">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num">${(r.outside&&r.outside.tf&&num(r.outside.tf.muPct)!=null)?Math.round(num(r.outside.tf.muPct)*100)+"%":"–"}</td><td class="num">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
-const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":""}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
+function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40"),id=e_(r.id),L=s.score!=null?letter(s.score):"–";
+  const st=r.status?`<span class="stag st-${e_(r.status.replace(/\s+/g,""))}">${e_(r.status)}</span>`:"";
+  const tm=s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"–";
+  return `<tr data-id="${id}">${rank?`<td class="num crk">${rank}</td>`:`<td class="pick"><input type="checkbox" data-hpick="${id}" aria-label="Select ${e_(r.name)}"${PICKH.has(r.id)?" checked":""}></td>`}
+  <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
+  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td class="cst">${st}</td>
+  <td class="num cf">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num ctm"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${tm}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
+  <td class="num cg${t?" tc-"+t:""}" data-l="${s.score!=null?e_(L):""}">${s.score!=null?`<b>${f1(s.score,1)}</b>`:`<span class="mtest sub">${s.Tm!=null?"Test "+tm:"No grade"}</span><span class="dtest">–</span>`}</td><td class="ctr cle"><span class="letter${t?" tc-"+t:""}">${L}</span></td>
+  <td class="ct">${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}<span class="mstat">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</span></td><td class="ccf">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
+  <td class="num c40">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num cmu">${(r.outside&&r.outside.tf&&num(r.outside.tf.muPct)!=null)?Math.round(num(r.outside.tf.muPct)*100)+"%":"–"}</td><td class="num cof">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
+const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":`<th class="pick"><input type="checkbox" id="hsPickAll" aria-label="Select all prospects"></th>`}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
 const ST_ORD=s=>{const i=STATUSES.indexOf(s);return i<0?STATUSES.length:i};
 /* default order: our commits, then offers, then everyone else; best score first inside each (testing, then name, breaks ties) */
 function commitOrder(a,b){const sa=ST_ORD(a.r.status),sb=ST_ORD(b.r.status);if(sa!==sb)return sa-sb;
@@ -3739,10 +3764,10 @@ function sortRows(L){const k=SORT.k,d=SORT.d;if(k==="commit")return L.sort(commi
 function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").value,"All classes");
   if(q("hsStatus").options.length<2)q("hsStatus").innerHTML=`<option value="">All statuses</option>`+STATUSES.map(s=>`<option>${s}</option>`).join("");
   const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value,pri=q("hsPri").checked;
-  let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!pri||r.priority)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
+  let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!pri||r.star)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
   L=sortRows(rowsFor(L));LAST_LIST=L;q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
-  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="14" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
-  q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})
+  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="15" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
+  q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"});pickUI()
   q("hsSortReset").hidden=SORT.k==="commit"}
 function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("hsTbBtns").hidden=!tags;q("hsListCtl").hidden=tags;q("hsListWrap").hidden=tags;
   document.querySelectorAll("[data-hsview]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.hsview===BIGVIEW)));
@@ -3752,18 +3777,18 @@ function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("h
   let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
     .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
   L.sort((a,b)=>b.s.score-a.s.score);
-  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
+  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody graded yet. A prospect joins this list once a coach grades his film. Until then, rank by hand on the Prospect board.</td></tr>`}</tbody>`}
 
 /* ---------- prospect board: drag tags to rank each position (mirrors the portal board). Order is saved as hsRank on each prospect ---------- */
 const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","NIC","CB"];
 function tbOrder(a,b){const ra=a.r.hsRank,rb=b.r.hsRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return commitOrder(a,b)}
 function buildTags(){const cl=q("hsTbClass").value,sh=q("hsTbShow").value;const cols={};POS.forEach(k=>cols[k]=[]);
-  rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(!sh||(sh==="priority"?r.priority:r.status===sh)))).forEach(x=>cols[x.r.pos].push(x));
+  rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(!sh||(sh==="star"?r.star:r.status===sh)))).forEach(x=>cols[x.r.pos].push(x));
   POS.forEach(k=>cols[k].sort(tbOrder));return cols}
 function tagHS(k,x,i){const r=x.r,s=x.s,t=tierOfHS(s.score);
   const g=s.score!=null?`<span class="g gtc-${t}">${f1(s.score,1)} ${letter(s.score)}</span>`:s.Tm!=null?`<span class="g none">Test ${s.estTm?"~":""}${f1(s.Tm,0)}</span>`:`<span class="g none">No grade</span>`;
   const st=r.status==="Committed"?'<span class="hs-tag cm">COMMIT</span>':r.status==="Offered"?'<span class="hs-tag v">OFFER</span>':r.status?`<span class="hs-tag">${e_(r.status.toUpperCase())}</span>`:"";
-  return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${r.priority?'<span class="hs-star" title="Priority">★</span>':""}${e_(r.name||"Unnamed")}${st}</span>${g}
+  return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${r.star?'<span class="hs-star" title="Starred priority">★</span>':""}${e_(r.name||"Unnamed")}${st}</span>${g}
     <span class="ln2">${e_([r.school,r.state,r.cls,(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?fmtHt(r.ht):"")+(r.wt?(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?"/":"")+r.wt:""),r.offers?r.offers+" offers":""].filter(Boolean).join(" · "))}</span>
     <span class="mv"><button type="button" data-mv="-1" aria-label="Move ${e_(r.name)} up">▲</button><button type="button" data-mv="1" aria-label="Move ${e_(r.name)} down">▼</button></span></div>`}
 function renderTags(){if(TB_BUSY)return;fillSelect(q("hsTbClass"),classes(),q("hsTbClass").value,"All classes");TBS=buildTags();
@@ -3809,15 +3834,12 @@ async function noteSaveHS(id,op,arg){const p=ROWS.find(r=>r.id===id);if(!p||!DBX
   else L=L.filter(n=>n.id!==arg);
   try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({notes:L});toast(op==="add"?"Note saved.":"Note deleted.")}catch(e){REFRESH=false;toast("Couldn't save the note.")}}
 
-/* ---------- priority star ---------- */
-async function togglePri(id){const p=ROWS.find(r=>r.id===id);if(!p)return;try{REFRESH=true;await saveRow(id,{priority:!p.priority});toast(p.priority?"Priority removed.":"Marked priority.")}catch(e){REFRESH=false;toast("Couldn't save.")}}
+/* ---------- star (same as the portal: a starred priority) ---------- */
+async function toggleStar(id){const p=ROWS.find(r=>r.id===id);if(!p||!DBX)return;try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({star:!p.star})}catch(e){REFRESH=false;toast("Couldn't change that prospect. You may not have edit access.")}}
 
 /* ---------- compare (up to 3 prospects side by side) ---------- */
-function saveCmp(){CMP=CMP.filter(id=>ROWS.some(r=>r.id===id)||!ROWS.length).slice(0,3);try{localStorage.setItem("hs_cmp",JSON.stringify(CMP))}catch(e){}cmpBar()}
-function toggleCmp(id){if(CMP.includes(id))CMP=CMP.filter(x=>x!==id);else{if(CMP.length>=3){toast("Compare holds 3 prospects. Remove one first.");return false}CMP.push(id)}saveCmp();return true}
-function cmpBar(){const b=q("hsCmpBar");const L=CMP.map(id=>ROWS.find(r=>r.id===id)).filter(Boolean);b.hidden=!L.length;if(!L.length)return;
-  b.innerHTML=`<b>Compare</b>${L.map(r=>`<span class="cmp-chip">${e_(r.name)}<button type="button" data-cmprm="${e_(r.id)}" aria-label="Remove ${e_(r.name)}">×</button></span>`).join("")}
-    <button class="btn primary" type="button" id="hsCmpGo"${L.length<2?" disabled title=\"Add at least 2\"":""}>Compare${L.length<2?" (add 1 more)":""}</button><button class="btn" type="button" id="hsCmpClr">Clear</button>`}
+function pickUI(){const n=LAST_LIST.filter(x=>PICKH.has(x.r.id)).length;q("hsListPrint").disabled=!n;q("hsCmpSel").disabled=n<2;q("hsListPrint").textContent=n?`Print selected (${n})`:"Print selected";
+  const h=q("hsPickAll");if(h)h.checked=LAST_LIST.length>0&&LAST_LIST.every(x=>PICKH.has(x.r.id))}
 function cmpRows(L){const tv=(r,src,k)=>num(((r.outside||{})[src]||{})[k]);const samePos=L.every(x=>x.r.pos===L[0].r.pos);
   const rows=[["grp","Profile"],["Position",x=>x.r.pos||"–"],["High school",x=>[x.r.school,x.r.state].filter(Boolean).join(", ")||"–"],["Class",x=>x.r.cls||"–"],
     ["Ht / Wt",x=>[fmtHt(x.r.ht),x.r.wt].filter(Boolean).join(" / ")||"–"],["Status",x=>x.r.status+(x.r.commitTo&&x.r.status!=="Committed"?" ("+x.r.commitTo+")":"")],
@@ -3831,7 +3853,7 @@ function cmpRows(L){const tv=(r,src,k)=>num(((r.outside||{})[src]||{})[k]);const
     ["vs D-I",x=>tv(x.r,"tf","diPct")!=null?tv(x.r,"tf","diPct")*100:null,"hi",0,null,"%"],["vs Marshall",x=>tv(x.r,"tf","muPct")!=null?tv(x.r,"tf","muPct")*100:null,"hi",0,null,"%"],["Game speed MPH",x=>tv(x.r,"tf","mph")??num(x.r.mph),"hi",2],
     ["grp","NextGen / Catapult"],["XOS rating",x=>tv(x.r,"ng","xos"),"hi",1],["ISR grade",x=>tv(x.r,"ng","isr"),"hi",1],["LSR grade",x=>tv(x.r,"ng","lsr"),"hi",1],["Catapult top speed",x=>tv(x.r,"ng","topSpeed"),"hi",2],["247 rating",x=>tv(x.r,"ng","r247")??num(x.r.r247),"hi",2]];
   return rows}
-function openCompare(){const L=CMP.map(id=>ROWS.find(r=>r.id===id)).filter(Boolean).map(r=>({r,s:scoreOf(r)}));if(L.length<2)return;const dlg=q("hsCmpDlg");
+function openCompare(){const L=LAST_LIST.filter(x=>PICKH.has(x.r.id));if(L.length<2)return;if(L.length>4){toast("Compare up to 4 prospects at a time.");return}const dlg=q("hsCmpDlg");
   const body=cmpRows(L).map(row=>{if(row[0]==="grp")return `<tr class="grp"><th colspan="${L.length+1}">${row[1]}</th></tr>`;
     const [lab,fn,dir,dp,sub,suf]=row;const vals=L.map(fn);if(vals.every(v=>v==null||v===""||v==="–"))return "";
     const nums=vals.filter(v=>typeof v==="number");let best=null,worst=null;
@@ -3839,7 +3861,7 @@ function openCompare(){const L=CMP.map(id=>ROWS.find(r=>r.id===id)).filter(Boole
     return `<tr><th class="rowh">${e_(lab)}</th>${vals.map((v,i)=>{const t=typeof v==="number"?f1(v,dp??1)+(suf||""):e_(v??"–");const sb=sub?sub(L[i]):"";
       return `<td class="${typeof v==="number"?"num":""}${v!=null&&v===best?" best":v!=null&&v===worst&&L.length>2?" worst":""}">${v==null?"–":t}${sb?` <span class="sub">${e_(sb)}</span>`:""}</td>`}).join("")}</tr>`}).join("");
   dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>Compare prospects</h2><div class="sub">Green is the best in each row. Tap a name for his card.</div></div><button class="pc-x" type="button" id="hsCmpX" aria-label="Close">×</button></div>
-    <div class="tablewrap"><table class="hs-cmp"><thead><tr><th></th>${L.map(x=>`<th class="cn"><button type="button" data-cmpopen="${e_(x.r.id)}">${x.r.priority?"★ ":""}${e_(x.r.name)}</button><div class="sub">${e_([x.r.pos,x.r.cls].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="tablewrap"><table class="hs-cmp"><thead><tr><th></th>${L.map(x=>`<th class="cn"><button type="button" data-cmpopen="${e_(x.r.id)}">${x.r.star?"★ ":""}${e_(x.r.name)}</button><div class="sub">${e_([x.r.pos,x.r.cls].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead><tbody>${body}</tbody></table></div>
     <div class="btns"><button class="btn" type="button" id="hsCmpPrint">Print</button></div></div>`;
   q("hsCmpX").onclick=()=>dlg.close();q("hsCmpPrint").onclick=()=>printCompare(L);
   if(!dlg.open)dlg.showModal()}
@@ -3854,7 +3876,7 @@ function needData(cl){const N=needsFor(cl);return POS.map(p=>{const L=rowsFor(RO
 function needStatus(d){return d.left>0?`<span class="need-open">Need ${d.left}</span>`:d.left<0?`<span class="need-over">Over by ${-d.left}</span>`:`<span class="need-full">Full</span>`}
 function renderNeeds(){const cs=classes();const cl=needCls();fillSelect(q("hsNeedClass"),cs.includes(cl)?cs:cs.concat([cl]).sort(),cl,"Class");q("hsNeedClass").value=cl;
   const own=isOwner();q("hsNeedSave").hidden=!own;const D=needData(cl);
-  const nm=x=>`<button type="button" data-id="${e_(x.r.id)}">${x.r.priority?'<span class="hs-star">★</span>':""}${e_(x.r.name)} <span class="sub">${x.s.score!=null?f1(x.s.score,1)+" "+letter(x.s.score):x.s.Tm!=null?"Test "+f1(x.s.Tm,0):""}</span></button>`;
+  const nm=x=>`<button type="button" data-id="${e_(x.r.id)}">${x.r.star?'<span class="hs-star">★</span>':""}${e_(x.r.name)} <span class="sub">${x.s.score!=null?f1(x.s.score,1)+" "+letter(x.s.score):x.s.Tm!=null?"Test "+f1(x.s.Tm,0):""}</span></button>`;
   const row=d=>`<tr><td><b>${d.p}</b></td><td class="num">${own?`<input type="number" min="0" max="15" data-need="${d.p}" value="${d.need}">`:d.need}</td><td class="num">${d.com.length}</td><td class="num">${d.off}</td><td>${needStatus(d)}</td>
     <td><div class="nl">${d.com.map(nm).join("")||'<span class="sub">–</span>'}</div></td><td><div class="nl">${d.tgt.slice(0,3).map(nm).join("")||'<span class="sub">No targets</span>'}${d.tgt.length>3?`<span class="sub">+${d.tgt.length-3} more</span>`:""}</div></td></tr>`;
   const tot=(L,n)=>{const a=L.reduce((s,d)=>s+d.need,0),c=L.reduce((s,d)=>s+d.com.length,0),o=L.reduce((s,d)=>s+d.off,0);return `<tr class="tot"><td>${n}</td><td class="num">${a}</td><td class="num">${c}</td><td class="num">${o}</td><td>${needStatus({left:a-c})}</td><td></td><td></td></tr>`};
@@ -3869,21 +3891,21 @@ function search(t){t=String(t||"").toLowerCase().trim();if(t.length<2)return [];
     .map(x=>({id:x.r.id,name:x.r.name,pos:x.r.pos,school:[x.r.school,x.r.state].filter(Boolean).join(", "),cls:x.r.cls,status:x.r.status,grade:x.s.score!=null?f1(x.s.score,1)+" "+letter(x.s.score):x.s.Tm!=null?"T "+f1(x.s.Tm,0):"–"}))}
 
 /* ---------- printouts ---------- */
-const PT=t=>String(t??"").replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"*");
+const PT=t=>String(t??"").replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
 function pdfOk(){if(!window.jspdf||!window.jspdf.jsPDF){toast("The print tool didn't load. Refresh the page and try again.");return false}return true}
 const TSTY={styles:{font:"helvetica",fontSize:8.6,cellPadding:4,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},alternateRowStyles:{fillColor:[243,245,242]}};
 const tierRGB=t=>((typeof TIERRGB!=="undefined"&&TIERRGB)||{})[t]||[24,32,26];
-async function printList(){if(!pdfOk())return;const L=LAST_LIST;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  const f=[POSF,q("hsClass").value&&"Class of "+q("hsClass").value,q("hsStatus").value,q("hsPri").checked&&"Priority only"].filter(Boolean).join(" · ");
+async function printList(){if(!pdfOk())return;const L=LAST_LIST.filter(x=>PICKH.has(x.r.id));if(!L.length)return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
+  const f=[POSF,q("hsClass").value&&"Class of "+q("hsClass").value,q("hsStatus").value,q("hsPri").checked&&"Starred only"].filter(Boolean).join(" · ");
   pdfHeader(doc,"Player Tool · HS Prospects",`${L.length} prospects${f?" · "+f:""}`);
   doc.autoTable(Object.assign({startY:76,head:[["#","Player","Pos","Class","High school","Status","Film","Testing","Score","Grade","Tier","40","vs MU","Offers"]],
-    body:L.map((x,i)=>{const r=x.r,s=x.s,o=official(r,"t40"),mu=num(((r.outside||{}).tf||{}).muPct);return [i+1,PT((r.priority?"* ":"")+r.name),r.pos||"",r.cls||"",PT([r.school,r.state].filter(Boolean).join(", ")),PT(r.status+(r.commitTo&&r.status!=="Committed"?" ("+r.commitTo+")":"")),
+    body:L.map((x,i)=>{const r=x.r,s=x.s,o=official(r,"t40"),mu=num(((r.outside||{}).tf||{}).muPct);return [i+1,PT(r.name+(r.star?" (Starred)":"")),r.pos||"",r.cls||"",PT([r.school,r.state].filter(Boolean).join(", ")),PT(r.status+(r.commitTo&&r.status!=="Committed"?" ("+r.commitTo+")":"")),
       s.F&&s.F.coaches?f1(s.F.score/10,1):"-",s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"-",s.score!=null?f1(s.score,1):"-",s.score!=null?PT(letter(s.score)):"-",s.score!=null?TN[tierOfHS(s.score)]:"",o?f1(+o.v,2):"-",mu!=null?Math.round(mu*100)+"%":"-",r.offers??"-"]}),
     columnStyles:{0:{halign:"right",cellWidth:24},1:{fontStyle:"bold"},8:{halign:"right",fontStyle:"bold"},10:{fontStyle:"bold"}},
     didParseCell:h=>{if(h.section==="body"&&(h.column.index===10||h.column.index===8)){const x=L[h.row.index];const t=x&&x.s.score!=null&&tierOfHS(x.s.score);if(t)h.cell.styles.textColor=tierRGB(t)}}},TSTY));
   await pdfSave(doc,`HS prospects ${new Date().toISOString().slice(0,10)}.pdf`)}
 async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);if(!p)return;const s=scoreOf(p),t=tierOfHS(s.score),tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
-  const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});const W=pdfHeader(doc,PT((p.priority?"* ":"")+p.name),PT([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state,p.status+(p.commitTo&&p.status!=="Committed"?" ("+p.commitTo+")":"")].filter(Boolean).join(" · ")));
+  const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});const W=pdfHeader(doc,PT(p.name+(p.star?" (Starred)":"")),PT([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state,p.status+(p.commitTo&&p.status!=="Committed"?" ("+p.commitTo+")":"")].filter(Boolean).join(" · ")));
   let y=84;const H=txt=>{if(y>700){doc.addPage();y=50}doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(txt,40,y);y+=6};
   const T=(head,body,cs)=>{doc.autoTable(Object.assign({startY:y,margin:{left:40,right:40},head:[head],body,columnStyles:cs||{}},TSTY));y=doc.lastAutoTable.finalY+18};
   doc.setFont("helvetica","bold");doc.setFontSize(26);doc.setTextColor(...(t?tierRGB(t):[24,32,26]));doc.text(s.score!=null?PT(letter(s.score)):"-",40,y+20);
@@ -3900,7 +3922,7 @@ async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);
   await pdfSave(doc,`${PT(p.name)} prospect card.pdf`)}
 async function printNeeds(){if(!pdfOk())return;const cl=needCls(),D=needData(cl);const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   pdfHeader(doc,"Player Tool · HS Needs","Class of "+cl);const st=d=>d.left>0?"Need "+d.left:d.left<0?"Over by "+(-d.left):"Full";
-  const nm=x=>PT((x.r.priority?"* ":"")+x.r.name)+(x.s.score!=null?` (${f1(x.s.score,1)})`:"");
+  const nm=x=>PT(x.r.name+(x.r.star?" (Starred)":""))+(x.s.score!=null?` (${f1(x.s.score,1)})`:"");
   doc.autoTable(Object.assign({startY:76,head:[["Pos","Need","Committed","Offered","Status","Commits","Top targets"]],body:D.map(d=>[d.p,d.need,d.com.length,d.off,st(d),d.com.map(nm).join("\n")||"-",d.tgt.slice(0,3).map(nm).join("\n")||"-"]),
     columnStyles:{0:{fontStyle:"bold",cellWidth:40},1:{halign:"right",cellWidth:40},2:{halign:"right",cellWidth:62},3:{halign:"right",cellWidth:52},4:{fontStyle:"bold",cellWidth:64}},
     didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[0,122,51]}}},TSTY));
@@ -3918,7 +3940,7 @@ function oval(p,src,k,t){const v=((p.outside||{})[src]||{})[k];if(v==null||v==="
 function readOutside(p){const o=JSON.parse(JSON.stringify(p.outside||{}));const fill=(src,list)=>{o[src]=o[src]||{};list.forEach(([k,,t])=>{const el=q(`hsO-${src}-${k}`);if(!el)return;const raw=el.value.trim();
     if(raw===String(oval(p,src,k,t)))return;if(raw===""){delete o[src][k];return}o[src][k]=t==="txt"?raw:t==="p"?num(raw)/100:num(raw)})};
   fill("tf",OF.tf);fill("ng",OF.ng);const rt=q("hsO-rating").value;if(rt)o.tf.rating=rt;else delete o.tf.rating;
-  ["tf","ng"].forEach(k=>{if(!Object.keys(o[k]).some(x=>!["src","at"].includes(x)))delete o[k]});return o}
+  ["tf","ng"].forEach(k=>{if(!Object.keys(o[k]).some(x=>!["src","at"].includes(x))&&!(p.outside||{})[k])delete o[k]});return o}
 function pct(v){return num(v)==null?"–":Math.round(num(v)*100)+"%"}
 function outsidePanel(p,s){const o=p.outside||{},T=o.tf||{},G=o.ng||{};if(!Object.keys(T).length&&!Object.keys(G).length)return "";
   const row=(n,pk,rk)=>`<tr><td>${n}</td><td class="num">${pct(T[pk])}</td><td class="num sub">${e_(T[rk]||"")}</td></tr>`;
@@ -3955,8 +3977,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   const canDel=id&&(isOwner()||p.addedBy===m.id);
   const others=s.F?s.F.G:[];
   dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div>
-    ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.priority}">${p.priority?"★ Priority":"☆ Mark priority"}</button><button class="btn" type="button" id="hsCmpBtn" aria-pressed="${CMP.includes(id)}">${CMP.includes(id)?"✓ In compare":"+ Compare"}</button><button class="btn" type="button" id="hsCardPrint">Print</button></div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
-  ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${f1(s.score,1)} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
+    ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.star}"><span style="color:#e0a100">${p.star?"★":"☆"}</span> ${p.star?"Starred":"Star"}</button><button class="btn" type="button" id="hsCardPrint">Print</button></div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
+  ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
     <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
   ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
@@ -3968,6 +3990,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   </div>`:""}
   ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
+    ${(p.ignoreTests||[]).length?`<p class="sub" style="margin:0">Not counted (staff call): ${p.ignoreTests.map(k=>TEST[k]?TEST[k].n:k).map(e_).join(", ")}.</p>`:""}
     <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
   ${id?notesBox(p,m):""}
   ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}
@@ -3979,7 +4002,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     <div class="grid2">${field("hsF-offers","Total offers",p.offers,"number")}${field("hsF-p4","P4 offers",p.p4,"number")}${field("hsF-r247","247 rating",p.r247,"number")}${field("hsF-gpa","GPA",p.gpa,"number"," step=\"0.01\"")}${field("hsF-act","ACT / SAT",p.act)}</div>
     <div class="grid2">${field("hsF-film","Film link",p.filmUrl,"url"," placeholder=\"Hudl or game film\"")}${field("hsF-offerList","Offer list",p.offerList)}</div>
     <fieldset><legend>Testing</legend><div class="tablewrap"><table class="hs-mini" id="hsTests"><thead><tr><th>Test</th><th>Result</th><th>Timing</th><th>Source</th><th>Date</th><th></th></tr></thead><tbody>${testRows(p)}</tbody></table></div>
-      <div class="btns"><button class="btn" type="button" id="hsAddTest">+ Add test result</button></div></fieldset>
+      <div class="btns"><button class="btn" type="button" id="hsAddTest">+ Add test result</button></div>
+      <div class="hs-ctl"><span class="sub">Don't count (staff call):</span>${TKEYS.map(k=>`<label class="check" style="font-size:13px"><input type="checkbox" data-ign="${k}"${(p.ignoreTests||[]).includes(k)?" checked":""}> ${TEST[k].n}</label>`).join("")}</div></fieldset>
     <fieldset><legend>Outside ratings</legend><div class="grid2">${sel("hsO-rating","Tracking Football rating",[["","–"],["PAI","PAI (track)"],["HS Combine","HS Combine"]],((p.outside||{}).tf||{}).rating)}${OF.tf.map(([k,n,t])=>field("hsO-tf-"+k,n,oval(p,"tf",k,t),"number"," step=\"0.1\"")).join("")}</div>
       <div class="grid2">${OF.ng.map(([k,n,t])=>field("hsO-ng-"+k,n,oval(p,"ng",k,t),t==="txt"?"text":"number"," step=\"0.01\"")).join("")}</div>
       <p class="sub" style="margin:0">Percentiles are 0–100. "vs Marshall" is his rating's percentile among Marshall players at his position; it fills in his testing score when he has no usable testing.</p></fieldset>
@@ -3989,8 +4013,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   let tests=JSON.parse(JSON.stringify(p.tests||[]));
   const readTests=()=>{tests=[...q("hsTests").querySelectorAll("tbody tr")].map(tr=>{const o={};tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim());o.v=num(o.v);return o}).filter(t=>t.v!=null)};
   q("hsX").onclick=()=>dlg.close();
-  if(id){q("hsPriBtn").onclick=()=>togglePri(id);q("hsCardPrint").onclick=()=>printCard(id);
-    q("hsCmpBtn").onclick=()=>{if(toggleCmp(id)){const on=CMP.includes(id);q("hsCmpBtn").setAttribute("aria-pressed",on);q("hsCmpBtn").textContent=on?"✓ In compare":"+ Compare"}};
+  if(id){q("hsPriBtn").onclick=()=>toggleStar(id);q("hsCardPrint").onclick=()=>printCard(id);
     q("hsNoteAdd").onclick=()=>{const v=q("hsNote").value;if(v.trim())noteSaveHS(id,"add",v)};
     dlg.querySelectorAll("[data-hsnd]").forEach(b=>b.onclick=()=>{if(confirm("Delete this note?"))noteSaveHS(id,"del",b.dataset.hsnd)})}
   q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
@@ -4003,7 +4026,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   q("hsForm").onsubmit=async ev=>{ev.preventDefault();readTests();const v=k=>q("hsF-"+k).value.trim();
     const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
       wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
-      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),tests,outside:readOutside(p)};
+      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),ignoreTests:[...q("hsForm").querySelectorAll("[data-ign]:checked")].map(el=>el.dataset.ign),tests,outside:readOutside(p)};
     if(id&&p.pulledAt){const man=new Set(p.manual||[]);const dflt={comp:"1.00",multi:false,age:""};const same=(a,b)=>String(a??"")===String(b??"");Object.keys(d).forEach(k=>{if(k==="outside"||k==="tests"){if(JSON.stringify(d[k]||[])!==JSON.stringify(p[k]||[]))man.add(k)}else if(k in dflt){if(!same(d[k],p[k]??dflt[k]))man.add(k)}else if(!same(d[k],p[k]))man.add(k)});d.manual=[...man]}
     if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
     try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
@@ -4034,14 +4057,15 @@ async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSO
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
   /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
      Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
-  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","priority","updatedBy","updatedAt"]);
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","star","ignoreTests","updatedBy","updatedAt"]);
   const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
   const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
   const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
   let add=0,upd=0,fill=0,skip=0;const news=[];msg.textContent=`Importing ${L.length}…`;
   for(const raw of L){if(!raw||!raw.name){skip++;continue}const d=Object.assign({},raw);delete d.id;delete d.film;delete d.notes;
     if(d.pulledAt&&!d.sources)d.sources="Tracking Football"+(d.src&&d.src.ng?" and NextGen Prospect":"")+", pulled "+d.pulledAt;
-    const ex=(d.src&&d.src.tf&&byTf.get(d.src.tf))||byName.get(key(d.name,d.cls));
+    const nm=byName.get(key(d.name,d.cls));const sameKid=nm&&(!nm.src||!nm.src.tf||!d.src||!d.src.tf)&&(!nm.pos||!d.pos||nm.pos===d.pos||String(nm.school||"").toLowerCase()===String(d.school||"").toLowerCase());
+    const ex=(d.src&&d.src.tf&&byTf.get(d.src.tf))||(sameKid?nm:null);
     try{
       if(ex&&ex.deleted){skip++;continue}
       if(!ex){await saveRow(null,d);add++;continue}
@@ -4066,7 +4090,7 @@ async function exportAll(){const out=JSON.stringify({exported:new Date().toISOSt
   try{const dl=await claude.use("downloads");await dl.save({filename:"hs-prospects-"+new Date().toISOString().slice(0,10)+".json",data:out})}catch(e){toast("Couldn't download.")}}
 
 /* ---------- wiring ---------- */
-function render(t){syncSwitch();cmpBar();if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
+function render(t){syncSwitch();if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
 function syncSwitch(){const hs=typeof TAB!=="undefined"&&String(TAB||"").startsWith("hs");document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.side==="hs")===hs)))}
 document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
   if(sw){const hs=sw.dataset.side==="hs";let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}go(hs?(pr.hsTab||"hsboard"):(pr.ptTab||"boards"));return}
@@ -4077,8 +4101,10 @@ document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]")
   const tag=ev.target.closest("#hsTbCols .tag");if(tag){const mv=ev.target.closest("[data-mv]"),k=tag.dataset.tk;
     if(mv){ev.stopPropagation();const ids=TBS[k].map(x=>x.r.id),i=ids.indexOf(tag.dataset.tid),j=i+(+mv.dataset.mv);if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];saveTags(k,ids);return}
     if(Date.now()-TB_DRAG<400)return;openCard(tag.dataset.tid);return}
-  const rm=ev.target.closest("[data-cmprm]");if(rm){toggleCmp(rm.dataset.cmprm);return}
-  if(ev.target.closest("#hsCmpGo")){openCompare();return}if(ev.target.closest("#hsCmpClr")){CMP=[];saveCmp();return}
+  const sb=ev.target.closest("[data-hstar]");if(sb){ev.stopPropagation();toggleStar(sb.dataset.hstar);return}
+  const pk=ev.target.closest("[data-hpick]");if(pk){const id=pk.dataset.hpick;if(pk.checked)PICKH.add(id);else PICKH.delete(id);pickUI();return}
+  if(ev.target.closest("#hsTbl td.pick"))return;
+  const pa=ev.target.closest("#hsPickAll");if(pa){const on=pa.checked;LAST_LIST.forEach(x=>on?PICKH.add(x.r.id):PICKH.delete(x.r.id));renderBoard();return}
   const co=ev.target.closest("[data-cmpopen]");if(co){q("hsCmpDlg").close();openCard(co.dataset.cmpopen);return}
   const nb=ev.target.closest("#hsNeedTbl [data-id]");if(nb){openCard(nb.dataset.id);return}
   const th=ev.target.closest("#hsTbl th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:["name","pos","status","cls"].includes(k)?1:-1};renderBoard();return}
@@ -4087,7 +4113,7 @@ document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]")
 ["hsBigClass","hsBigConf"].forEach(id=>q(id).addEventListener("change",renderBig));
 ["hsTbClass","hsTbShow"].forEach(id=>q(id).addEventListener("change",renderTags));
 q("hsTbPrint").onclick=printTags;
-q("hsPri").addEventListener("change",renderBoard);q("hsListPrint").onclick=printList;
+q("hsPri").addEventListener("change",renderBoard);q("hsListPrint").onclick=printList;q("hsCmpSel").onclick=openCompare;
 q("hsNeedClass").addEventListener("change",renderNeeds);q("hsNeedSave").onclick=saveNeeds;q("hsNeedPrint").onclick=printNeeds;
 q("hsSortReset").onclick=()=>{SORT={k:"commit",d:1};renderBoard()};
 q("hsAdd").onclick=()=>openCard(null);
