@@ -622,6 +622,40 @@ button.stag.st-Pass{color:#fff;border-color:transparent!important}
   #board tbody tr:hover td.pick,#board tbody tr:hover td.cn{background:var(--surface)}
   #board tr.line td.pick{box-shadow:inset 4px 0 0 var(--accent-fill)}
 }
+/* ---------- High School side (Portal / High School switch) ---------- */
+.sidesw{margin-left:16px;align-self:center;min-height:32px}
+.sidesw button{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:4px 12px}
+body:not(.mode-hs) #tabs [data-hs]{display:none}
+body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
+body.mode-hs .gsearch{display:none}
+.hs-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px}
+.hs-ctl{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}
+.hs-ctl input[type=search]{width:220px}
+.hs-ctl select{width:auto}
+#hsTbl td.cn,#hsBigTbl td.cn{white-space:normal;min-width:190px}
+#hsTbl tr[data-id],#hsBigTbl tr[data-id]{cursor:pointer}
+#hsTbl tr[data-id]:hover,#hsBigTbl tr[data-id]:hover{background:var(--sunk)}
+.hs-ltr{font:700 18px var(--display);letter-spacing:.02em}
+.hs-tag{font:700 9.5px var(--body);border:1px solid currentColor;border-radius:3px;padding:0 3px;margin-left:4px;vertical-align:1px;color:var(--muted)}
+.hs-tag.v{color:var(--accent-text)}
+.hs-tag.l{color:var(--pass)}
+.chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
+dialog#hsDlg{width:min(820px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
+.hsd{display:grid;gap:16px;padding:20px 22px 22px}
+.hsd-box{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
+.hsd-box h3{margin:0;font:700 13px var(--display);letter-spacing:.08em;text-transform:uppercase}
+.hsd-break{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.hsd-break div{display:grid;gap:2px}
+.hsd-break b{font:700 22px var(--display)}
+.hs-traits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.hs-flag{color:var(--pass);font-size:13px}
+table.hs-mini{min-width:0;font-size:13px}
+table.hs-mini th,table.hs-mini td{padding:5px 6px}
+table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
+.hs-set table{min-width:0}
+.hs-set td input{min-width:70px}
+@media (max-width:640px){header .brand{flex-wrap:wrap}.sidesw{margin:8px 0 0;flex:1 0 100%;display:flex}.sidesw button{flex:1}.hs-ctl input[type=search]{width:100%}}
 </style>
 </head>
 <body>
@@ -715,9 +749,10 @@ window.claude={use:async n=>{
         <div class="eyebrow">Staff Board</div>
         <h1>Player <span>Tool</span></h1>
       </div>
+      <span class="seg sidesw" role="group" aria-label="Portal or High School"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High School</button></span>
     </div>
     <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs">
-      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Overview</span><span class="ts">Overview</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="budget" id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button></div>
+      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Overview</span><span class="ts">Overview</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="budget" id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="hsset" data-hs id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">Settings</span></button></div>
       <span class="gsearch"><input id="gSearch" type="search" placeholder="Search all positions" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden aria-label="Sign out" title="Sign out" onclick="firebase.auth().signOut().then(()=>location.reload())"><svg class="hi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span class="lbl">Sign out</span></button></span>
   </header>
@@ -925,6 +960,63 @@ window.claude={use:async n=>{
     </section>
   </section>
 
+  <section id="hsboard" data-page="hsboard" style="display:grid;gap:10px">
+    <div class="hs-top">
+      <h2>High School Prospects</h2>
+      <span class="btns"><button class="btn primary" type="button" id="hsAdd">+ Add prospect</button></span>
+    </div>
+    <div class="pos" role="group" aria-label="Position" id="hsPosBar"></div>
+    <div class="hs-ctl">
+      <input id="hsSearch" type="search" placeholder="Search name or school" aria-label="Search prospects">
+      <select id="hsClass" aria-label="Class"></select>
+      <select id="hsStatus" aria-label="Status"><option value="">All statuses</option></select>
+      <span class="sub" id="hsCount"></span>
+    </div>
+    <div class="tablewrap"><table id="hsTbl"></table></div>
+    <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
+  </section>
+
+  <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
+    <div class="hs-top"><h2>HS Big Board</h2></div>
+    <div class="hs-ctl">
+      <span class="seg" role="group" aria-label="Side"><button type="button" data-hsside="all" aria-pressed="true">All</button><button type="button" data-hsside="off" aria-pressed="false">Offense</button><button type="button" data-hsside="def" aria-pressed="false">Defense</button></span>
+      <select id="hsBigClass" aria-label="Class"></select>
+      <select id="hsBigConf" aria-label="Confidence"><option value="">Any confidence</option><option value="Medium">Medium or High</option><option value="High">High only</option></select>
+    </div>
+    <div class="tablewrap"><table id="hsBigTbl"></table></div>
+  </section>
+
+  <section id="hsset" data-page="hsset" class="hs-set" style="display:grid;gap:14px">
+    <div class="hs-top"><h2>HS Settings</h2><span class="sub" id="hsSetNote"></span></div>
+    <details class="settings" open><summary><h2 style="font-size:18px">Film traits and blend</h2></summary>
+      <p class="note">Four traits per position in order of importance, graded 1–10 (7 = Marshall starter trait). Film share is how much of the score comes from film; the rest is testing.</p>
+      <div class="tablewrap"><table id="hsTraitTbl"></table></div>
+      <div class="grid2" style="margin-top:10px;max-width:520px">
+        <label>Trait weights (most to least important)<input id="hsTraitW" type="text"></label>
+        <label>Test weights (most to least important)<input id="hsTestW" type="text"></label>
+      </div>
+    </details>
+    <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
+      <p class="note">For each position group: the result that scores <b>70</b> (current Marshall roster median) and the result that scores <b>100</b> (roster best), from Tracking Football's high school data. Small samples are widened to a minimum spread so one great tester can't break the scale.</p>
+      <div class="tablewrap"><table id="hsBenchTbl"></table></div>
+    </details>
+    <details class="settings" open><summary><h2 style="font-size:18px">Grade cutoffs</h2></summary>
+      <div class="grid2" style="max-width:640px">
+        <label>Elite at<input id="hsCutE" type="number" step="1"></label>
+        <label>Impact at<input id="hsCutI" type="number" step="1"></label>
+        <label>Starter at<input id="hsCutS" type="number" step="1"></label>
+        <label>Rotation at<input id="hsCutR" type="number" step="1"></label>
+      </div>
+      <p class="note">Below the Rotation cutoff is NGE. Letter grades use the same A–F scale as the portal side.</p>
+    </details>
+    <div class="btns" id="hsOwnerBtns"><button class="btn primary" type="button" id="hsSaveCfg">Save settings</button><button class="btn" type="button" id="hsResetCfg">Reset to defaults</button></div>
+    <details class="settings" id="hsImportBox"><summary><h2 style="font-size:18px">Import prospects</h2></summary>
+      <p class="note">Load a prospect file (.json) exported from a recruiting pull. Prospects already on the board are matched by name and class, and only blank fields are filled; nothing you've entered is overwritten.</p>
+      <div class="btns"><input type="file" id="hsImportFile" accept=".json,application/json" style="width:auto"><button class="btn" type="button" id="hsExport">Download all prospects (.json)</button></div>
+      <p class="sub" id="hsImportMsg"></p>
+    </details>
+  </section>
+
   <details class="settings" id="modelSettings" data-page="settings" open>
     <summary>Model settings</summary>
     <div class="setbody">
@@ -1027,6 +1119,7 @@ window.claude={use:async n=>{
 </div>
 
 <dialog id="pcard" aria-label="Player card"></dialog>
+<dialog id="hsDlg" aria-label="Prospect card"></dialog>
 <dialog id="dcDlg" aria-label="Edit depth chart player"><form class="dcd" method="dialog">
   <h3>Depth chart player</h3>
   <label>Name<input id="dcdName" maxlength="60" required></label>
@@ -3421,10 +3514,10 @@ async function connect(){
   if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
   applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);watchAsks(db);$("budBtn").hidden=false;$("bbValBtn").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();startTabs();return}
-  DB=db;subscribe();startTabs();
+  DB=db;subscribe();startTabs();if(window.HS)HS.connect(db);
 }
 /* ---------- tabs: one section at a time; each has its own address (#depth), remembered between visits ---------- */
-const TABS=["boards","overview","bigboard","recruit","depth","budget","settings"],DEFAULT_TAB="boards";
+const TABS=["boards","overview","bigboard","recruit","depth","budget","settings","hsboard","hsbig","hsset"],DEFAULT_TAB="boards";
 let TAB=null,TABS_READY=false;
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||{}}catch(e){return {}}})();
 function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
@@ -3432,6 +3525,7 @@ function okTab(t){return TABS.includes(t)&&!(t==="budget"&&!OWNER_TAB())}
 function OWNER_TAB(){return !$("budBtn").hidden}
 function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PREF.tab||DEFAULT_TAB)}
 function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||t!=="budget")?DEFAULT_TAB:t;TAB=t;
+  const hsSide=t.startsWith("hs");document.body.classList.toggle("mode-hs",hsSide);if(hsSide)PREF.hsTab=t;else PREF.ptTab=t;if(window.HS)HS.syncSwitch();
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t){b.setAttribute("aria-current","page");const r=$("tabs");if(r.scrollWidth>r.clientWidth)r.scrollLeft=Math.max(0,b.offsetLeft-r.clientWidth/2+b.offsetWidth/2)}else b.removeAttribute("aria-current")});
   document.querySelectorAll("[data-page]").forEach(el=>el.classList.toggle("pg-off",el.dataset.page!==t));
   PREF.tab=t;savePref();
@@ -3444,6 +3538,7 @@ function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||t!=="budget")?DEFAULT_TAB:t
   else if(t==="depth")openDepth();
   else if(t==="budget"){$("budget").hidden=false;renderBudget()}
   else if(t==="settings"){if(!$("ownerTools").hidden)$("ownerTools").open=true}
+  else if(hsSide&&window.HS)HS.render(t);
 }
 /* slim header after scrolling; the gap between 8 and 90 keeps it from flickering as the header changes height */
 (()=>{const K="pt_sgrp",ph=matchMedia("(max-width:640px)").matches;let st={};try{st=JSON.parse(localStorage.getItem(K)||"{}")}catch(e){}
@@ -3474,6 +3569,243 @@ fillForm({});
 renderBoard();
 go(firstTab(),{render:false,push:false});
 if(window.claude&&claude.use) connect(); else {subscribe();startTabs()}
+</script>
+
+<script>
+/* ================= High School side =================
+   Prospects live in Firestore "hs_players" (staff read/write under the existing *_players rule).
+   Settings live in "config/hs" (staff read, owner write). No player data is ever stored in this file. */
+window.HS=(()=>{
+const POS=["QB","RB","WR","TE","OL","DT","DE","ILB","OLB","SAF","NIC","CB"];
+const OFF=new Set(["QB","RB","WR","TE","OL"]);
+const GROUP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"DB",NIC:"DB",CB:"DB"};
+const STATUSES=["Committed","Offered","Target","Evaluating","Pass"];
+const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.08},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
+  cone:{n:"3-Cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
+const TKEYS=Object.keys(TEST);
+const TIMING={laser:{n:"Laser / electronic",r:1,tag:"LASER",cls:"v"},event:{n:"Camp event (timing unknown)",r:2,tag:"CAMP",cls:"v"},
+  hand:{n:"Hand timed",r:3,tag:"HAND",cls:""},gps:{n:"Catapult / GPS",r:4,tag:"GPS",cls:""},listed:{n:"Listed / self-reported",r:5,tag:"LISTED",cls:"l"}};
+const COMP={"1.05":"Top classification, strong state","1.00":"Solid program (default)","0.97":"Mid-level program","0.92":"Small school / weak schedule"};
+const DEF={
+  traits:{QB:["Accuracy","Decision-making","Arm talent","Pocket movement / run threat"],RB:["Vision","Contact balance","Burst / long speed","Hands & pass pro"],
+    WR:["Separation","Hands / ball skills","Speed / YAC","Release vs. press"],TE:["Hands","Route running","Blocking at the point","Run after catch"],
+    OL:["Pass set & anchor","Run-block finish","Hand usage","Movement / pulling"],DT:["Get-off","Hands & shed","Play strength","Lateral range"],
+    DE:["Get-off / bend","Hand usage","Setting the edge","Motor"],ILB:["Read & trigger","Tackling","Range","Take-on / shed"],
+    OLB:["Range & pursuit","Tackling","Coverage","Edge / blitz"],SAF:["Range & angles","Ball skills","Tackling / run fits","Instincts"],
+    NIC:["Slot man coverage","Tackling","Zone instincts","Blitz"],CB:["Man coverage / mirror","Ball skills","Transition / recovery","Tackling"]},
+  traitW:[40,30,20,10],testW:[40,30,20,10],
+  filmW:{QB:75,RB:60,WR:60,TE:55,OL:50,DT:50,DE:55,ILB:60,OLB:60,SAF:60,NIC:60,CB:60},
+  tests:{QB:["shuttle","t40","vert","broad"],RB:["t40","shuttle","broad","vert"],WR:["t40","shuttle","vert","broad"],TE:["t40","shuttle","broad","vert"],
+    OL:["shuttle","t40","broad","vert"],DT:["t40","shuttle","broad","vert"],DE:["t40","shuttle","broad","vert"],ILB:["t40","shuttle","broad","vert"],
+    OLB:["t40","shuttle","broad","vert"],SAF:["t40","shuttle","vert","broad"],NIC:["t40","shuttle","vert","broad"],CB:["t40","shuttle","vert","broad"]},
+  /* [70 mark, 100 mark] from the current Marshall roster's high school testing (Tracking Football, Oct 2026) */
+  bench:{QB:{t40:[4.71,4.50],shuttle:[4.42,4.34],vert:[28.85,38.5],broad:[116,127],m100:[11.55,11.18]},
+    RB:{t40:[4.78,4.70],m100:[11.89,11.78]},
+    WR:{t40:[4.81,4.50],shuttle:[4.41,4.28],cone:[7.51,7.22],vert:[31.9,37.5],broad:[111.25,130.8],m100:[11.21,11.04]},
+    TE:{shuttle:[4.63,4.57],broad:[105.25,113]},
+    OL:{t40:[5.59,5.35],shuttle:[4.80,4.62],cone:[8.32,8.12],vert:[22,26],broad:[91.25,92.4]},
+    DT:{t40:[5.73,5.40],shuttle:[5.12,5.00],broad:[90,99]},
+    DE:{shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
+    LB:{t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
+    DB:{t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
+  cuts:{elite:90,impact:80,starter:70,rotation:60}
+};
+let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"score",d:-1},BIGSIDE="all",OPEN=null,ME_=null;
+try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null")}catch(e){}
+const q=id=>document.getElementById(id);
+const e_=s=>s==null?"":String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num=v=>{if(v===""||v==null)return null;const n=+v;return isFinite(n)?n:null};
+const f1=(v,d=1)=>v==null||!isFinite(v)?"–":(+v).toFixed(d);
+const toast=m=>{try{flash(m)}catch(e){}};
+const isOwner=()=>{try{return !!OWNER}catch(e){return false}};
+async function me(){if(ME_)return ME_;try{ME_=await whoAmI()}catch(e){ME_={id:"",name:""}}return ME_}
+function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
+  ["traitW","testW"].forEach(k=>{if(Array.isArray(c[k])&&c[k].length===4)o[k]=c[k].map(Number)});
+  ["traits","filmW","tests"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
+  if(c.bench)Object.keys(c.bench).forEach(g=>{o.bench[g]=Object.assign({},o.bench[g]||{},c.bench[g])});
+  if(c.cuts)Object.assign(o.cuts,c.cuts);return o}
+
+/* ---------- scoring ---------- */
+function official(p,k){const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
+  const T=TEST[k];L.sort((a,b)=>((TIMING[a.timing]||TIMING.listed).r-(TIMING[b.timing]||TIMING.listed).r)||(T.low?a.v-b.v:b.v-a.v));return L[0]}
+function bench(pos,k){const b=(CFG.bench[GROUP[pos]]||{})[k];if(!b||b[0]==null||b[1]==null)return null;let m70=+b[0],m100=+b[1];const T=TEST[k];
+  const dir=T.low?-1:1;if((m100-m70)*dir<T.span)m100=m70+dir*T.span;return [m70,m100]}
+function testScore(pos,k,v){const b=bench(pos,k);if(!b||v==null)return null;const s=70+30*(v-b[0])/(b[1]-b[0]);return Math.max(0,Math.min(100,s))}
+function filmStats(p){const tr=CFG.traits[p.pos]||[];const G=Object.entries(p.film||{}).map(([uid,f])=>({uid,name:f.name||"",at:f.at,g:(f.g||[]).map(num)})).filter(f=>f.g.filter(x=>x!=null).length);
+  const avg=[0,1,2,3].map(i=>{const v=G.map(f=>f.g[i]).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null});
+  const split=[0,1,2,3].filter(i=>{const v=G.map(f=>f.g[i]).filter(x=>x!=null);return v.length>1&&Math.max(...v)-Math.min(...v)>=3}).map(i=>tr[i]||("Trait "+(i+1)));
+  const full=G.filter(f=>f.g.slice(0,4).every(x=>x!=null)).length;
+  let tw=0,s=0;avg.forEach((a,i)=>{if(a!=null){tw+=CFG.traitW[i];s+=a*10*CFG.traitW[i]}});
+  return {G,avg,score:tw?s/tw:null,coaches:G.length,full,split}}
+function scoreOf(p){const pos=POS.includes(p.pos)?p.pos:null;if(!pos)return {score:null,why:"Pick a position"};
+  const F=filmStats(p);const keys=(CFG.tests[pos]||[]).slice(0,4);const parts=[];let tw=0,ts=0;
+  keys.forEach((k,i)=>{let kk=k,o=official(p,k);if(!o&&k==="t40"){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m}}
+    const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w:CFG.testW[i]});if(s!=null){tw+=CFG.testW[i];ts+=s*CFG.testW[i]}});
+  const Tm=tw?ts/tw:null;const w=(CFG.filmW[pos]??60)/100;
+  let base=F.score!=null&&Tm!=null?F.score*w+Tm*(1-w):F.score!=null?F.score:Tm;
+  const verified=parts.some(x=>x.o&&x.s!=null&&TIMING[x.o.timing]&&TIMING[x.o.timing].r<=2);
+  const anyTest=parts.some(x=>x.o&&x.s!=null&&x.o.timing!=="listed");
+  const conf=F.full>=2&&verified?"High":(F.full>=1&&(anyTest||verified))||F.full>=2?"Medium":"Low";
+  if(F.score==null)return {score:null,F,Tm,parts,conf:"–",why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
+  const comp=num(p.comp)||1,adj=(p.age==="young"?3:p.age==="old"?-3:0)+(p.multi?2:0);
+  let sc=Math.max(0,Math.min(100,base*comp+adj));const raw=sc;
+  if(conf==="Low")sc=Math.min(sc,79.9);else if(conf==="Medium")sc=Math.min(sc,89.9);
+  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,conf,comp,adj,capped:sc<raw}}
+function tierOfHS(s){const C=CFG.cuts;return s==null?null:s>=C.elite?"Elite":s>=C.impact?"Impact":s>=C.starter?"Starter":s>=C.rotation?"Rotation":"Pass"}
+const TN={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"NGE"};
+function letter(s){try{return letterOf(s)}catch(e){return s>=90?"A":s>=80?"B":s>=70?"C":s>=60?"D":"F"}}
+
+/* ---------- data ---------- */
+function connect(db){DBX=db;if(!db)return;
+  db.doc("config/hs").onSnapshot(s=>{CFG=mergeCfg(s.exists?s.data():null);rerender()},()=>{});
+  if(UNSUB)UNSUB();UNSUB=db.collection("hs_players").onSnapshot(s=>{ROWS=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(r=>!r.deleted);rerender();
+    if(OPEN){const r=ROWS.find(x=>x.id===OPEN);if(r&&q("hsDlg").open&&(REFRESH||!q("hsDlg").contains(document.activeElement))){REFRESH=false;openCard(r.id)}}},err=>{q("hsCount").textContent="Couldn't load prospects: "+(err&&err.code||"error")});
+  setOwnerUi()}
+function rerender(){if(typeof TAB!=="undefined"&&TAB&&String(TAB).startsWith("hs"))render(TAB)}
+async function saveRow(id,data){if(!DBX){toast("Not connected to the shared board.");return null}
+  const m=await me();data.updatedAt=new Date().toISOString();data.updatedBy=m.id||"";
+  if(id){await DBX.collection("hs_players").doc(id).set(data,{merge:true});return id}
+  data.addedBy=m.id||"";data.addedAt=data.updatedAt;const ref=await DBX.collection("hs_players").add(data);return ref.id}
+
+/* ---------- board ---------- */
+function classes(){const s=new Set(ROWS.map(r=>String(r.cls||"")).filter(Boolean));return [...s].sort()}
+function fillSelect(el,opts,cur,all){el.innerHTML=`<option value="">${all}</option>`+opts.map(o=>`<option${o===cur?" selected":""}>${e_(o)}</option>`).join("");el.value=cur||""}
+function posBar(){const el=q("hsPosBar");const cnt=p=>ROWS.filter(r=>r.pos===p).length;
+  el.innerHTML=`<button type="button" data-hp="" aria-pressed="${!POSF}">All <span class="sub">${ROWS.length}</span></button>`+POS.map(p=>`<button type="button" data-hp="${p}" aria-pressed="${POSF===p}">${p}${cnt(p)?` <span class="sub">${cnt(p)}</span>`:""}</button>`).join("")}
+function rowsFor(list){return list.map(r=>({r,s:scoreOf(r)}))}
+function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `<span class="hs-tag ${T.cls}" title="${e_(T.n+(o.src?" · "+o.src:"")+(o.date?" · "+o.date:""))}">${T.tag}</span>`}
+function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40");
+  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn"><b>${e_(r.name||"Unnamed")}</b><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}</div></td>
+  <td>${e_(r.pos||"–")}</td><td>${e_(r.cls||"")}</td><td class="num">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td>${e_(r.status||"")}</td>
+  <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num">${f1(s.Tm,0)}</td>
+  <td class="num"><b>${f1(s.score,1)}</b></td><td class="ctr"><span class="hs-ltr">${s.score!=null?letter(s.score):"–"}</span></td>
+  <td>${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td><td>${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
+  <td class="num">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
+const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":""}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
+function sortRows(L){const k=SORT.k,d=SORT.d;const val=x=>k==="score"?x.s.score:k==="film"?(x.s.F&&x.s.F.score):k==="test"?x.s.Tm:k==="t40"?(official(x.r,"t40")?-official(x.r,"t40").v:null):k==="offers"?num(x.r.offers):String(x.r[k]||"").toLowerCase();
+  return L.sort((a,b)=>{const A=val(a),B=val(b);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (A>B?1:A<B?-1:0)*d})}
+function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").value,"All classes");
+  if(q("hsStatus").options.length<2)q("hsStatus").innerHTML=`<option value="">All statuses</option>`+STATUSES.map(s=>`<option>${s}</option>`).join("");
+  const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value;
+  let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
+  L=sortRows(rowsFor(L));q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
+  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="13" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
+  q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})}
+function renderBig(){fillSelect(q("hsBigClass"),classes(),q("hsBigClass").value,"All classes");const cl=q("hsBigClass").value,cf=q("hsBigConf").value;
+  let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
+    .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
+  L.sort((a,b)=>b.s.score-a.s.score);
+  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="14" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
+
+/* ---------- prospect card ---------- */
+function field(id,label,val,type,extra){return `<label>${label}<input id="${id}" type="${type||"text"}" value="${e_(val??"")}"${extra||""}></label>`}
+function sel(id,label,opts,val){return `<label>${label}<select id="${id}">${opts.map(([v,n])=>`<option value="${e_(v)}"${String(v)===String(val??"")?" selected":""}>${e_(n)}</option>`).join("")}</select></label>`}
+function testRows(p){const L=(p.tests||[]);return L.map((t,i)=>`<tr data-i="${i}"><td><select data-f="k">${TKEYS.map(k=>`<option value="${k}"${k===t.k?" selected":""}>${TEST[k].n}</option>`).join("")}</select></td>
+  <td><input data-f="v" type="number" step="0.01" value="${e_(t.v??"")}"></td><td><select data-f="timing">${Object.entries(TIMING).map(([k,T])=>`<option value="${k}"${k===t.timing?" selected":""}>${T.n}</option>`).join("")}</select></td>
+  <td><input data-f="src" type="text" value="${e_(t.src||"")}" placeholder="Where (camp / site)"></td><td><input data-f="date" type="text" value="${e_(t.date||"")}" placeholder="Date"></td>
+  <td><button type="button" class="btn" data-del="${i}" aria-label="Remove">✕</button></td></tr>`).join("")}
+async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)){OPEN=id;REFRESH=true;return}const p=id?ROWS.find(r=>r.id===id):{pos:POSF||"",cls:String(new Date().getFullYear()+1),status:"Evaluating",tests:[],film:{}};
+  if(!p)return;OPEN=id||null;const s=scoreOf(p),t=tierOfHS(s.score),m=await me(),mine=(p.film||{})[m.id]||{},tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
+  const canDel=id&&(isOwner()||p.addedBy===m.id);
+  const others=s.F?s.F.G:[];
+  dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div></div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
+  ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${f1(s.score,1)} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
+    <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${f1(s.Tm,1)} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
+    ${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
+  ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
+    <div class="hs-traits">${tr.map((n,i)=>sel("hsG"+i,`${i+1}. ${e_(n)}`,[["","–"]].concat([10,9,8,7,6,5,4,3,2,1].map(v=>[v,v])),(mine.g||[])[i])).join("")}</div>
+    <div class="btns"><button class="btn primary" type="button" id="hsSaveG">Save my grades</button>${mine.g?`<button class="btn" type="button" id="hsClrG">Clear mine</button>`:""}</div>
+    ${others.length?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>Coach</th>${tr.map(n=>`<th class="num">${e_(n)}</th>`).join("")}<th>Updated</th></tr></thead><tbody>
+      ${others.map(f=>`<tr><td>${e_(f.uid===m.id?"You":f.name||"Coach")}</td>${[0,1,2,3].map(i=>`<td class="num">${f.g[i]??"–"}</td>`).join("")}<td class="sub">${e_((f.at||"").slice(0,10))}</td></tr>`).join("")}
+      <tr><td><b>Average</b></td>${s.F.avg.map(a=>`<td class="num"><b>${f1(a,1)}</b></td>`).join("")}<td></td></tr></tbody></table></div>`:`<p class="sub" style="margin:0">No coach has graded him yet.</p>`}
+  </div>`:""}
+  ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
+    ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
+    <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
+  <form class="hsd-box" id="hsForm" autocomplete="off"><h3>${id?"Profile":"Add prospect"}</h3>
+    <div class="grid2">${field("hsF-name","Name",p.name)}${sel("hsF-pos","Position",[["","Pick"]].concat(POS.map(x=>[x,x])),p.pos)}${field("hsF-cls","Class",p.cls,"number"," step=\"1\"")}${sel("hsF-status","Status",STATUSES.map(x=>[x,x]),p.status||"Evaluating")}</div>
+    <div class="grid2">${field("hsF-school","High school",p.school)}${field("hsF-city","City",p.city)}${field("hsF-state","State",p.state)}${sel("hsF-comp","Level of competition",Object.entries(COMP),p.comp||"1.00")}</div>
+    <div class="grid2">${field("hsF-ht","Height",p.ht,"text"," placeholder=\"6'2\"")}${field("hsF-wt","Weight",p.wt,"number")}${field("hsF-wing","Wingspan (in)",p.wing,"number"," step=\"0.125\"")}${field("hsF-arm","Arm (in)",p.arm,"number"," step=\"0.125\"")}${field("hsF-hand","Hand (in)",p.hand,"number"," step=\"0.125\"")}</div>
+    <div class="grid2">${sel("hsF-age","Age for class",[["","Typical"],["young","Young (+3)"],["old","Old (−3)"]],p.age||"")}<label class="check" style="align-self:end"><input id="hsF-multi" type="checkbox"${p.multi?" checked":""}> Multi-sport (+2)</label>${field("hsF-sports","Other sports",p.sports)}${field("hsF-mph","Game speed MPH",p.mph,"number"," step=\"0.01\"")}</div>
+    <div class="grid2">${field("hsF-offers","Total offers",p.offers,"number")}${field("hsF-p4","P4 offers",p.p4,"number")}${field("hsF-r247","247 rating",p.r247,"number")}${field("hsF-gpa","GPA",p.gpa,"number"," step=\"0.01\"")}${field("hsF-act","ACT / SAT",p.act)}</div>
+    <div class="grid2">${field("hsF-film","Film link",p.filmUrl,"url"," placeholder=\"Hudl or game film\"")}${field("hsF-offerList","Offer list",p.offerList)}</div>
+    <fieldset><legend>Testing</legend><div class="tablewrap"><table class="hs-mini" id="hsTests"><thead><tr><th>Test</th><th>Result</th><th>Timing</th><th>Source</th><th>Date</th><th></th></tr></thead><tbody>${testRows(p)}</tbody></table></div>
+      <div class="btns"><button class="btn" type="button" id="hsAddTest">+ Add test result</button></div></fieldset>
+    <label>Notes<textarea id="hsF-notes" rows="3">${e_(p.notes||"")}</textarea></label>
+    <div class="btns"><button class="btn primary" type="submit">${id?"Save profile":"Add prospect"}</button>${canDel?`<button class="btn" type="button" id="hsDel" style="margin-left:auto">Remove prospect</button>`:""}</div>
+    ${p.sources?`<p class="sub" style="margin:0">Sources: ${e_(p.sources)}</p>`:""}
+  </form></div>`;
+  let tests=JSON.parse(JSON.stringify(p.tests||[]));
+  const readTests=()=>{tests=[...q("hsTests").querySelectorAll("tbody tr")].map(tr=>{const o={};tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim());o.v=num(o.v);return o}).filter(t=>t.v!=null)};
+  q("hsX").onclick=()=>dlg.close();
+  q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
+  q("hsTests").addEventListener("click",ev=>{const b=ev.target.closest("[data-del]");if(!b)return;readTests();b.closest("tr").remove()});
+  if(q("hsSaveG"))q("hsSaveG").onclick=async()=>{const g=[0,1,2,3].map(i=>num(q("hsG"+i).value));if(g.every(x=>x==null)){toast("Pick at least one grade.");return}
+    const u=await me();if(!u.id){toast("Sign in to save grades.");return}
+    try{await DBX.collection("hs_players").doc(id).update({["film."+u.id]:{g,at:new Date().toISOString(),name:u.name||""},updatedAt:new Date().toISOString()});REFRESH=true;toast("Grades saved.")}catch(err){toast("Couldn't save grades.")}};
+  if(q("hsClrG"))q("hsClrG").onclick=async()=>{const u=await me();try{await DBX.collection("hs_players").doc(id).update({["film."+u.id]:firebase.firestore.FieldValue.delete()});REFRESH=true;toast("Your grades were cleared.")}catch(err){toast("Couldn't clear grades.")}};
+  if(q("hsDel"))q("hsDel").onclick=async()=>{if(!confirm(`Remove ${p.name||"this prospect"} from the board?`))return;try{await saveRow(id,{deleted:true});dlg.close();toast("Removed.")}catch(err){toast("Couldn't remove him.")}};
+  q("hsForm").onsubmit=async ev=>{ev.preventDefault();readTests();const v=k=>q("hsF-"+k).value.trim();
+    const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
+      wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
+      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),notes:q("hsF-notes").value.trim(),tests};
+    if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
+    try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
+  if(!dlg.open)dlg.showModal()}
+
+/* ---------- settings ---------- */
+function setOwnerUi(){const own=isOwner();q("hsOwnerBtns").hidden=!own;q("hsImportBox").hidden=!DBX;
+  q("hsSetNote").textContent=own?"Changes apply for the whole staff.":"Only the owner can change these.";
+  q("hsset").querySelectorAll("input:not([type=file]),select").forEach(el=>el.disabled=!own)}
+function renderSet(){
+  q("hsTraitTbl").innerHTML=`<thead><tr><th>Pos</th><th>Trait 1</th><th>Trait 2</th><th>Trait 3</th><th>Trait 4</th><th class="num">Film share %</th><th>Tests (in order)</th></tr></thead><tbody>${POS.map(p=>`<tr><td><b>${p}</b></td>${[0,1,2,3].map(i=>`<td><input data-tr="${p}" data-i="${i}" value="${e_(CFG.traits[p][i]||"")}"></td>`).join("")}<td><input type="number" data-fw="${p}" value="${CFG.filmW[p]}" min="0" max="100" style="width:80px"></td><td><input data-ts="${p}" value="${e_((CFG.tests[p]||[]).join(", "))}" title="Use: ${TKEYS.join(", ")}"></td></tr>`).join("")}</tbody>`;
+  q("hsTraitW").value=CFG.traitW.join(", ");q("hsTestW").value=CFG.testW.join(", ");
+  const groups=["QB","RB","WR","TE","OL","DT","DE","LB","DB"];
+  q("hsBenchTbl").innerHTML=`<thead><tr><th>Group</th>${TKEYS.map(k=>`<th class="num">${TEST[k].n}<div class="sub">70 / 100</div></th>`).join("")}</tr></thead><tbody>${groups.map(g=>`<tr><td><b>${g}</b></td>${TKEYS.map(k=>{const b=(CFG.bench[g]||{})[k]||[];return `<td><input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="0" value="${b[0]??""}" style="width:72px"> <input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="1" value="${b[1]??""}" style="width:72px"></td>`}).join("")}</tr>`).join("")}</tbody>`;
+  q("hsCutE").value=CFG.cuts.elite;q("hsCutI").value=CFG.cuts.impact;q("hsCutS").value=CFG.cuts.starter;q("hsCutR").value=CFG.cuts.rotation;setOwnerUi()}
+function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
+  document.querySelectorAll("[data-tr]").forEach(el=>{(c.traits[el.dataset.tr]=c.traits[el.dataset.tr]||["","","",""])[+el.dataset.i]=el.value.trim()});
+  document.querySelectorAll("[data-fw]").forEach(el=>c.filmW[el.dataset.fw]=Math.max(0,Math.min(100,num(el.value)??60)));
+  document.querySelectorAll("[data-ts]").forEach(el=>c.tests[el.dataset.ts]=el.value.split(/[,\s]+/).filter(k=>TEST[k]).slice(0,4));
+  document.querySelectorAll("[data-bg]").forEach(el=>{const g=el.dataset.bg,k=el.dataset.bk;c.bench[g]=c.bench[g]||{};const b=c.bench[g][k]=c.bench[g][k]||[null,null];b[+el.dataset.bi]=num(el.value)});
+  Object.keys(c.bench).forEach(g=>Object.keys(c.bench[g]).forEach(k=>{if(c.bench[g][k].some(x=>x==null))delete c.bench[g][k]}));
+  const w=s=>{const a=s.split(/[,\s]+/).map(Number).filter(x=>isFinite(x));return a.length===4?a:null};
+  c.traitW=w(q("hsTraitW").value)||CFG.traitW;c.testW=w(q("hsTestW").value)||CFG.testW;
+  c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};return c}
+
+/* ---------- import / export ---------- */
+async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSON.parse(await file.text())}catch(e){msg.textContent="That file isn't valid JSON.";return}
+  const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
+  let add=0,fill=0,skip=0;
+  for(const raw of L){if(!raw||!raw.name){skip++;continue}const d=Object.assign({},raw);delete d.id;delete d.film;
+    const ex=ROWS.find(r=>(r.name||"").toLowerCase().trim()===d.name.toLowerCase().trim()&&String(r.cls||"")===String(d.cls||""));
+    try{if(ex){const f={};Object.keys(d).forEach(k=>{const cur=ex[k];if(cur==null||cur===""||(Array.isArray(cur)&&!cur.length))f[k]=d[k]});if(Object.keys(f).length){await saveRow(ex.id,f);fill++}else skip++}
+      else{await saveRow(null,d);add++}}catch(e){skip++}}
+  msg.textContent=`Added ${add}, filled in ${fill}, skipped ${skip}.`;q("hsImportFile").value=""}
+async function exportAll(){const out=JSON.stringify({exported:new Date().toISOString(),prospects:ROWS},null,1);
+  try{const dl=await claude.use("downloads");await dl.save({filename:"hs-prospects-"+new Date().toISOString().slice(0,10)+".json",data:out})}catch(e){toast("Couldn't download.")}}
+
+/* ---------- wiring ---------- */
+function render(t){syncSwitch();if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsset")renderSet()}
+function syncSwitch(){const hs=typeof TAB!=="undefined"&&String(TAB||"").startsWith("hs");document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String((b.dataset.side==="hs")===hs)))}
+document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
+  if(sw){const hs=sw.dataset.side==="hs";let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}go(hs?(pr.hsTab||"hsboard"):(pr.ptTab||"boards"));return}
+  const hp=ev.target.closest("[data-hp]");if(hp){POSF=hp.dataset.hp||null;try{localStorage.setItem("hs_pos",JSON.stringify(POSF))}catch(e){}renderBoard();return}
+  const hb=ev.target.closest("[data-hsside]");if(hb){BIGSIDE=hb.dataset.hsside;document.querySelectorAll("[data-hsside]").forEach(b=>b.setAttribute("aria-pressed",String(b===hb)));renderBig();return}
+  const th=ev.target.closest("#hsTbl th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:["name","pos","status","cls"].includes(k)?1:-1};renderBoard();return}
+  const tr=ev.target.closest("#hsTbl tr[data-id],#hsBigTbl tr[data-id]");if(tr){openCard(tr.dataset.id)}});
+["hsSearch","hsClass","hsStatus"].forEach(id=>q(id).addEventListener(id==="hsSearch"?"input":"change",renderBoard));
+["hsBigClass","hsBigConf"].forEach(id=>q(id).addEventListener("change",renderBig));
+q("hsAdd").onclick=()=>openCard(null);
+q("hsDlg").addEventListener("close",()=>{OPEN=null});
+q("hsSaveCfg").onclick=async()=>{if(!isOwner()||!DBX)return;try{await DBX.doc("config/hs").set(readSet());toast("HS settings saved for the staff.")}catch(e){toast("Couldn't save settings.")}};
+q("hsResetCfg").onclick=async()=>{if(!isOwner()||!DBX||!confirm("Reset HS settings to the defaults?"))return;try{await DBX.doc("config/hs").set(JSON.parse(JSON.stringify(DEF)));toast("Reset to defaults.")}catch(e){toast("Couldn't reset.")}};
+q("hsImportFile").addEventListener("change",ev=>{const f=ev.target.files&&ev.target.files[0];if(f)importFile(f)});
+q("hsExport").onclick=exportAll;
+return {connect,render,syncSwitch,scoreOf,official,_cfg:()=>CFG,_rows:r=>{if(r)ROWS=r;return ROWS}};
+})();
+if(typeof DB!=="undefined"&&DB)HS.connect(DB);
+if(typeof TAB!=="undefined"&&TAB)HS.render(TAB);
 </script>
 
 <p id="status" class="toast" role="status" hidden></p>
