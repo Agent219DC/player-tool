@@ -1012,7 +1012,7 @@ window.claude={use:async n=>{
     </details>
     <div class="btns" id="hsOwnerBtns"><button class="btn primary" type="button" id="hsSaveCfg">Save settings</button><button class="btn" type="button" id="hsResetCfg">Reset to defaults</button></div>
     <details class="settings" id="hsImportBox"><summary><h2 style="font-size:18px">Import prospects</h2></summary>
-      <p class="note">Load a prospect file (.json) exported from a recruiting pull. Prospects already on the board are matched by name and class, and only blank fields are filled; nothing you've entered is overwritten.</p>
+      <p class="note">Load a prospect file (.json) from a Tracking Football / NextGen pull. New players are added; players already on the board get their source data refreshed. Film grades, notes, positions and statuses your staff set, and anything a coach corrected, are never overwritten.</p>
       <div class="btns"><input type="file" id="hsImportFile" accept=".json,application/json" style="width:auto"><button class="btn" type="button" id="hsExport">Download all prospects (.json)</button></div>
       <p class="sub" id="hsImportMsg"></p>
     </details>
@@ -3816,12 +3816,36 @@ function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
 /* ---------- import / export ---------- */
 async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSON.parse(await file.text())}catch(e){msg.textContent="That file isn't valid JSON.";return}
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
-  let add=0,fill=0,skip=0;
-  for(const raw of L){if(!raw||!raw.name){skip++;continue}const d=Object.assign({},raw);delete d.id;delete d.film;
-    const ex=ROWS.find(r=>(r.name||"").toLowerCase().trim()===d.name.toLowerCase().trim()&&String(r.cls||"")===String(d.cls||""));
-    try{if(ex){const f={};Object.keys(d).forEach(k=>{const cur=ex[k];if(cur==null||cur===""||(Array.isArray(cur)&&!cur.length))f[k]=d[k];else if(k==="outside"&&d.outside&&typeof cur==="object"){const m=JSON.parse(JSON.stringify(cur));let ch=false;["tf","ng"].forEach(src=>{if(!d.outside[src])return;m[src]=m[src]||{};Object.keys(d.outside[src]).forEach(x=>{if(m[src][x]==null||m[src][x]===""){m[src][x]=d.outside[src][x];ch=true}})});if(ch)f.outside=m}});if(Object.keys(f).length){await saveRow(ex.id,f);fill++}else skip++}
-      else{await saveRow(null,d);add++}}catch(e){skip++}}
-  msg.textContent=`Added ${add}, filled in ${fill}, skipped ${skip}.`;q("hsImportFile").value=""}
+  /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
+     Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","updatedBy","updatedAt"]);
+  const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
+  const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
+  const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
+  let add=0,upd=0,fill=0,skip=0;const news=[];msg.textContent=`Importing ${L.length}…`;
+  for(const raw of L){if(!raw||!raw.name){skip++;continue}const d=Object.assign({},raw);delete d.id;delete d.film;delete d.notes;
+    if(d.pulledAt&&!d.sources)d.sources="Tracking Football"+(d.src&&d.src.ng?" and NextGen Prospect":"")+", pulled "+d.pulledAt;
+    const ex=(d.src&&d.src.tf&&byTf.get(d.src.tf))||byName.get(key(d.name,d.cls));
+    try{
+      if(ex&&ex.deleted){skip++;continue}
+      if(!ex){await saveRow(null,d);add++;continue}
+      const f={};
+      if(d.pulledAt){const man=new Set(ex.manual||[]);
+        Object.keys(d).forEach(k=>{if(PROTECT.has(k)||man.has(k))return;if(k==="pos"&&ex.pos)return;
+          if(k==="status"&&ex.status&&!(["Offered","Evaluating","Target"].includes(ex.status)&&["Committed","Committed elsewhere"].includes(d.status)))return;
+          if(JSON.stringify(ex[k]??null)!==JSON.stringify(d[k]))f[k]=d[k]});
+        const n=[];if(f.offers!=null&&ex.offers!=null&&f.offers>ex.offers)n.push(`+${f.offers-ex.offers} offers`);
+        if(f.commitTo&&ex.commitTo&&f.commitTo!==ex.commitTo)n.push(`now committed to ${f.commitTo}`);
+        if(f.tests&&(f.tests.length>(ex.tests||[]).length))n.push(`+${f.tests.length-(ex.tests||[]).length} test results`);
+        if(n.length)news.push(d.name+": "+n.join(", "));
+        const real=Object.keys(f).filter(k=>!["pulledAt","sources"].includes(k));
+        if(Object.keys(f).length)await saveRow(ex.id,f);if(real.length)upd++;else skip++;
+      }else{
+        Object.keys(d).forEach(k=>{const cur=ex[k];if(cur==null||cur===""||(Array.isArray(cur)&&!cur.length))f[k]=d[k]});
+        if(Object.keys(f).length){await saveRow(ex.id,f);fill++}else skip++}
+    }catch(e){skip++}}
+  msg.innerHTML=e_(`Added ${add}, updated ${upd}${fill?`, filled in ${fill}`:""}, unchanged or skipped ${skip}.`)+(news.length?`<br><b>What's new:</b> ${news.slice(0,25).map(e_).join("; ")}${news.length>25?` and ${news.length-25} more`:""}`:"");
+  q("hsImportFile").value=""}
 async function exportAll(){const out=JSON.stringify({exported:new Date().toISOString(),prospects:ROWS},null,1);
   try{const dl=await claude.use("downloads");await dl.save({filename:"hs-prospects-"+new Date().toISOString().slice(0,10)+".json",data:out})}catch(e){toast("Couldn't download.")}}
 
