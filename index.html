@@ -973,7 +973,7 @@ window.claude={use:async n=>{
       <span class="sub" id="hsCount"></span>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
-    <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
+    <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. A <b>~</b> testing score is estimated from Tracking Football because he has no usable testing; <b>CHECK</b> means our testing and theirs disagree by 25+ points. <b>vs MU</b> is his Tracking Football athletic rating percentile among Marshall players at his position. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
@@ -1008,6 +1008,7 @@ window.claude={use:async n=>{
         <label>Rotation at<input id="hsCutR" type="number" step="1"></label>
       </div>
       <p class="note">Below the Rotation cutoff is NGE. Letter grades use the same A–F scale as the portal side.</p>
+      <label class="check"><input type="checkbox" id="hsUseOut"> When a prospect has no usable testing, estimate it from Tracking Football's vs. Marshall percentile (50th = 70, 100th = 100)</label>
     </details>
     <div class="btns" id="hsOwnerBtns"><button class="btn primary" type="button" id="hsSaveCfg">Save settings</button><button class="btn" type="button" id="hsResetCfg">Reset to defaults</button></div>
     <details class="settings" id="hsImportBox"><summary><h2 style="font-size:18px">Import prospects</h2></summary>
@@ -3608,7 +3609,7 @@ const DEF={
     DE:{shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
     LB:{t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
     DB:{t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
-  cuts:{elite:90,impact:80,starter:70,rotation:60}
+  cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true
 };
 let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"score",d:-1},BIGSIDE="all",OPEN=null,ME_=null;
 try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null")}catch(e){}
@@ -3623,7 +3624,7 @@ function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
   ["traitW","testW"].forEach(k=>{if(Array.isArray(c[k])&&c[k].length===4)o[k]=c[k].map(Number)});
   ["traits","filmW","tests"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
   if(c.bench)Object.keys(c.bench).forEach(g=>{o.bench[g]=Object.assign({},o.bench[g]||{},c.bench[g])});
-  if(c.cuts)Object.assign(o.cuts,c.cuts);return o}
+  if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;return o}
 
 /* ---------- scoring ---------- */
 function official(p,k){const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
@@ -3641,16 +3642,18 @@ function scoreOf(p){const pos=POS.includes(p.pos)?p.pos:null;if(!pos)return {sco
   const F=filmStats(p);const keys=(CFG.tests[pos]||[]).slice(0,4);const parts=[];let tw=0,ts=0;
   keys.forEach((k,i)=>{let kk=k,o=official(p,k);if(!o&&k==="t40"){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m}}
     const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w:CFG.testW[i]});if(s!=null){tw+=CFG.testW[i];ts+=s*CFG.testW[i]}});
-  const Tm=tw?ts/tw:null;const w=(CFG.filmW[pos]??60)/100;
+  const OT=(p.outside||{}).tf||{};const outEst=num(OT.muPct)!=null?Math.max(0,Math.min(100,70+(num(OT.muPct)*100-50)*0.6)):null;
+  let Tm=tw?ts/tw:null,estTm=false;if(Tm==null&&outEst!=null&&CFG.useOutside!==false){Tm=outEst;estTm=true}
+  const disagree=!estTm&&Tm!=null&&outEst!=null&&Math.abs(Tm-outEst)>=25;const w=(CFG.filmW[pos]??60)/100;
   let base=F.score!=null&&Tm!=null?F.score*w+Tm*(1-w):F.score!=null?F.score:Tm;
   const verified=parts.some(x=>x.o&&x.s!=null&&TIMING[x.o.timing]&&TIMING[x.o.timing].r<=2);
   const anyTest=parts.some(x=>x.o&&x.s!=null&&x.o.timing!=="listed");
   const conf=F.full>=2&&verified?"High":(F.full>=1&&(anyTest||verified))||F.full>=2?"Medium":"Low";
-  if(F.score==null)return {score:null,F,Tm,parts,conf:"–",why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
+  if(F.score==null)return {score:null,F,Tm,parts,conf:"–",estTm,outEst,disagree,why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
   const comp=num(p.comp)||1,adj=(p.age==="young"?3:p.age==="old"?-3:0)+(p.multi?2:0);
   let sc=Math.max(0,Math.min(100,base*comp+adj));const raw=sc;
   if(conf==="Low")sc=Math.min(sc,79.9);else if(conf==="Medium")sc=Math.min(sc,89.9);
-  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,conf,comp,adj,capped:sc<raw}}
+  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,conf,comp,adj,capped:sc<raw,estTm,outEst,disagree}}
 function tierOfHS(s){const C=CFG.cuts;return s==null?null:s>=C.elite?"Elite":s>=C.impact?"Impact":s>=C.starter?"Starter":s>=C.rotation?"Rotation":"Pass"}
 const TN={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"NGE"};
 function letter(s){try{return letterOf(s)}catch(e){return s>=90?"A":s>=80?"B":s>=70?"C":s>=60?"D":"F"}}
@@ -3677,25 +3680,46 @@ function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `
 function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40");
   return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn"><b>${e_(r.name||"Unnamed")}</b><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}</div></td>
   <td>${e_(r.pos||"–")}</td><td>${e_(r.cls||"")}</td><td class="num">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td>${e_(r.status||"")}</td>
-  <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num">${f1(s.Tm,0)}</td>
+  <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${s.estTm?"~":""}${f1(s.Tm,0)}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num"><b>${f1(s.score,1)}</b></td><td class="ctr"><span class="hs-ltr">${s.score!=null?letter(s.score):"–"}</span></td>
   <td>${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td><td>${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
-  <td class="num">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
-const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":""}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
-function sortRows(L){const k=SORT.k,d=SORT.d;const val=x=>k==="score"?x.s.score:k==="film"?(x.s.F&&x.s.F.score):k==="test"?x.s.Tm:k==="t40"?(official(x.r,"t40")?-official(x.r,"t40").v:null):k==="offers"?num(x.r.offers):String(x.r[k]||"").toLowerCase();
+  <td class="num">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num">${(r.outside&&r.outside.tf&&num(r.outside.tf.muPct)!=null)?Math.round(num(r.outside.tf.muPct)*100)+"%":"–"}</td><td class="num">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
+const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":""}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
+function sortRows(L){const k=SORT.k,d=SORT.d;const val=x=>k==="score"?x.s.score:k==="film"?(x.s.F&&x.s.F.score):k==="test"?x.s.Tm:k==="t40"?(official(x.r,"t40")?-official(x.r,"t40").v:null):k==="offers"?num(x.r.offers):k==="mu"?num(((x.r.outside||{}).tf||{}).muPct):String(x.r[k]||"").toLowerCase();
   return L.sort((a,b)=>{const A=val(a),B=val(b);if(A==null&&B==null)return 0;if(A==null)return 1;if(B==null)return -1;return (A>B?1:A<B?-1:0)*d})}
 function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").value,"All classes");
   if(q("hsStatus").options.length<2)q("hsStatus").innerHTML=`<option value="">All statuses</option>`+STATUSES.map(s=>`<option>${s}</option>`).join("");
   const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value;
   let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
   L=sortRows(rowsFor(L));q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
-  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="13" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
+  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="14" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
   q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})}
 function renderBig(){fillSelect(q("hsBigClass"),classes(),q("hsBigClass").value,"All classes");const cl=q("hsBigClass").value,cf=q("hsBigConf").value;
   let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
     .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
   L.sort((a,b)=>b.s.score-a.s.score);
-  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="14" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
+  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
+
+/* ---------- outside ratings (Tracking Football, NextGen / Catapult) ---------- */
+const OF={tf:[["pai","PAI","n"],["com","HS Combine score","n"],["hsPct","vs HS class %","p"],["diPct","vs D-I %","p"],["muPct","vs Marshall %","p"],["sbPct","vs Sun Belt %","p"],["nflPct","vs NFL Draft %","p"],["mph","Game speed MPH","n"]],
+  ng:[["xos","XOS rating","n"],["isr","ISR grade","n"],["lsr","LSR grade","n"],["topSpeed","Catapult top speed","n"],["offerScore","NextGen offer score","n"],["r247","247 rating","n"],["nat","247 national rank","txt"],["posRank","247 position rank","txt"]]};
+function oval(p,src,k,t){const v=((p.outside||{})[src]||{})[k];if(v==null||v==="")return "";return t==="p"?Math.round(num(v)*1000)/10:v}
+function readOutside(p){const o=JSON.parse(JSON.stringify(p.outside||{}));const fill=(src,list)=>{o[src]=o[src]||{};list.forEach(([k,,t])=>{const el=q(`hsO-${src}-${k}`);if(!el)return;const raw=el.value.trim();
+    if(raw===""){delete o[src][k];return}o[src][k]=t==="txt"?raw:t==="p"?num(raw)/100:num(raw)})};
+  fill("tf",OF.tf);fill("ng",OF.ng);const rt=q("hsO-rating").value;if(rt)o.tf.rating=rt;else delete o.tf.rating;
+  ["tf","ng"].forEach(k=>{if(!Object.keys(o[k]).some(x=>!["src","at"].includes(x)))delete o[k]});return o}
+function pct(v){return num(v)==null?"–":Math.round(num(v)*100)+"%"}
+function outsidePanel(p,s){const o=p.outside||{},T=o.tf||{},G=o.ng||{};if(!Object.keys(T).length&&!Object.keys(G).length)return "";
+  const row=(n,pk,rk)=>`<tr><td>${n}</td><td class="num">${pct(T[pk])}</td><td class="num sub">${e_(T[rk]||"")}</td></tr>`;
+  const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub">${n}</span><b>${e_(v)}</b></div>`;
+  return `<div class="hsd-box"><h3>Outside ratings</h3>
+  ${Object.keys(T).length?`<div class="hsd-break">${kv("Tracking Football PAI",T.pai)}${kv("HS Combine score",T.com)}${kv("Game speed MPH",T.mph)}${kv("Rating compared",T.rating)}</div>
+    ${num(T.muPct)!=null||num(T.hsPct)!=null?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>${e_(T.rating||"Rating")} vs.</th><th class="num">Percentile</th><th class="num">Rank</th></tr></thead><tbody>
+      ${row("HS class","hsPct","hsRank")}${row("Division I","diPct","diRank")}${row("<b>Marshall</b>","muPct","muRank")}${row("Sun Belt","sbPct","sbRank")}${row("NFL Draft","nflPct","nflRank")}</tbody></table></div>`:""}
+    ${T.parts?`<p class="sub" style="margin:0">${e_(T.parts)}</p>`:""}
+    ${s&&s.estTm?`<p class="sub" style="margin:0">No usable testing yet, so his testing score (~${f1(s.Tm,0)}) is estimated from the vs. Marshall percentile. It doesn't count as verified testing.</p>`:""}`:""}
+  ${Object.keys(G).length?`<div class="hsd-break">${kv("XOS rating",G.xos)}${kv("ISR grade",G.isr)}${kv("LSR grade",G.lsr)}${kv("Catapult top speed",G.topSpeed)}${kv("NextGen offer score",G.offerScore)}${kv("247 rating",G.r247)}${kv("247 national",G.nat&&"#"+G.nat)}${kv("247 position",G.posRank&&"#"+G.posRank)}</div>`:""}
+  <p class="sub" style="margin:0">${[T.src&&T.at?T.src+" ("+T.at+")":T.src,G.src&&G.at?G.src+" ("+G.at+")":G.src].filter(Boolean).map(e_).join(" · ")}</p></div>`}
 
 /* ---------- prospect card ---------- */
 function field(id,label,val,type,extra){return `<label>${label}<input id="${id}" type="${type||"text"}" value="${e_(val??"")}"${extra||""}></label>`}
@@ -3710,8 +3734,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   const others=s.F?s.F.G:[];
   dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div></div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
   ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${f1(s.score,1)} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
-    <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${f1(s.Tm,1)} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
-    ${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
+    <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
+    ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
   ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
     <div class="hs-traits">${tr.map((n,i)=>sel("hsG"+i,`${i+1}. ${e_(n)}`,[["","–"]].concat([10,9,8,7,6,5,4,3,2,1].map(v=>[v,v])),(mine.g||[])[i])).join("")}</div>
     <div class="btns"><button class="btn primary" type="button" id="hsSaveG">Save my grades</button>${mine.g?`<button class="btn" type="button" id="hsClrG">Clear mine</button>`:""}</div>
@@ -3722,6 +3746,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
     <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
+  ${id?outsidePanel(p,s):""}
   <form class="hsd-box" id="hsForm" autocomplete="off"><h3>${id?"Profile":"Add prospect"}</h3>
     <div class="grid2">${field("hsF-name","Name",p.name)}${sel("hsF-pos","Position",[["","Pick"]].concat(POS.map(x=>[x,x])),p.pos)}${field("hsF-cls","Class",p.cls,"number"," step=\"1\"")}${sel("hsF-status","Status",STATUSES.map(x=>[x,x]),p.status||"Evaluating")}</div>
     <div class="grid2">${field("hsF-school","High school",p.school)}${field("hsF-city","City",p.city)}${field("hsF-state","State",p.state)}${sel("hsF-comp","Level of competition",Object.entries(COMP),p.comp||"1.00")}</div>
@@ -3731,6 +3756,9 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     <div class="grid2">${field("hsF-film","Film link",p.filmUrl,"url"," placeholder=\"Hudl or game film\"")}${field("hsF-offerList","Offer list",p.offerList)}</div>
     <fieldset><legend>Testing</legend><div class="tablewrap"><table class="hs-mini" id="hsTests"><thead><tr><th>Test</th><th>Result</th><th>Timing</th><th>Source</th><th>Date</th><th></th></tr></thead><tbody>${testRows(p)}</tbody></table></div>
       <div class="btns"><button class="btn" type="button" id="hsAddTest">+ Add test result</button></div></fieldset>
+    <fieldset><legend>Outside ratings</legend><div class="grid2">${sel("hsO-rating","Tracking Football rating",[["","–"],["PAI","PAI (track)"],["HS Combine","HS Combine"]],((p.outside||{}).tf||{}).rating)}${OF.tf.map(([k,n,t])=>field("hsO-tf-"+k,n,oval(p,"tf",k,t),"number"," step=\"0.1\"")).join("")}</div>
+      <div class="grid2">${OF.ng.map(([k,n,t])=>field("hsO-ng-"+k,n,oval(p,"ng",k,t),t==="txt"?"text":"number"," step=\"0.01\"")).join("")}</div>
+      <p class="sub" style="margin:0">Percentiles are 0–100. "vs Marshall" is his rating's percentile among Marshall players at his position; it fills in his testing score when he has no usable testing.</p></fieldset>
     <label>Notes<textarea id="hsF-notes" rows="3">${e_(p.notes||"")}</textarea></label>
     <div class="btns"><button class="btn primary" type="submit">${id?"Save profile":"Add prospect"}</button>${canDel?`<button class="btn" type="button" id="hsDel" style="margin-left:auto">Remove prospect</button>`:""}</div>
     ${p.sources?`<p class="sub" style="margin:0">Sources: ${e_(p.sources)}</p>`:""}
@@ -3748,7 +3776,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   q("hsForm").onsubmit=async ev=>{ev.preventDefault();readTests();const v=k=>q("hsF-"+k).value.trim();
     const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
       wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
-      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),notes:q("hsF-notes").value.trim(),tests};
+      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),notes:q("hsF-notes").value.trim(),tests,outside:readOutside(p)};
     if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
     try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
   if(!dlg.open)dlg.showModal()}
@@ -3762,7 +3790,7 @@ function renderSet(){
   q("hsTraitW").value=CFG.traitW.join(", ");q("hsTestW").value=CFG.testW.join(", ");
   const groups=["QB","RB","WR","TE","OL","DT","DE","LB","DB"];
   q("hsBenchTbl").innerHTML=`<thead><tr><th>Group</th>${TKEYS.map(k=>`<th class="num">${TEST[k].n}<div class="sub">70 / 100</div></th>`).join("")}</tr></thead><tbody>${groups.map(g=>`<tr><td><b>${g}</b></td>${TKEYS.map(k=>{const b=(CFG.bench[g]||{})[k]||[];return `<td><input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="0" value="${b[0]??""}" style="width:72px"> <input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="1" value="${b[1]??""}" style="width:72px"></td>`}).join("")}</tr>`).join("")}</tbody>`;
-  q("hsCutE").value=CFG.cuts.elite;q("hsCutI").value=CFG.cuts.impact;q("hsCutS").value=CFG.cuts.starter;q("hsCutR").value=CFG.cuts.rotation;setOwnerUi()}
+  q("hsCutE").value=CFG.cuts.elite;q("hsCutI").value=CFG.cuts.impact;q("hsCutS").value=CFG.cuts.starter;q("hsCutR").value=CFG.cuts.rotation;q("hsUseOut").checked=CFG.useOutside!==false;setOwnerUi()}
 function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
   document.querySelectorAll("[data-tr]").forEach(el=>{(c.traits[el.dataset.tr]=c.traits[el.dataset.tr]||["","","",""])[+el.dataset.i]=el.value.trim()});
   document.querySelectorAll("[data-fw]").forEach(el=>c.filmW[el.dataset.fw]=Math.max(0,Math.min(100,num(el.value)??60)));
@@ -3771,7 +3799,7 @@ function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
   Object.keys(c.bench).forEach(g=>Object.keys(c.bench[g]).forEach(k=>{if(c.bench[g][k].some(x=>x==null))delete c.bench[g][k]}));
   const w=s=>{const a=s.split(/[,\s]+/).map(Number).filter(x=>isFinite(x));return a.length===4?a:null};
   c.traitW=w(q("hsTraitW").value)||CFG.traitW;c.testW=w(q("hsTestW").value)||CFG.testW;
-  c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};return c}
+  c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};c.useOutside=q("hsUseOut").checked;return c}
 
 /* ---------- import / export ---------- */
 async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSON.parse(await file.text())}catch(e){msg.textContent="That file isn't valid JSON.";return}
@@ -3779,7 +3807,7 @@ async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSO
   let add=0,fill=0,skip=0;
   for(const raw of L){if(!raw||!raw.name){skip++;continue}const d=Object.assign({},raw);delete d.id;delete d.film;
     const ex=ROWS.find(r=>(r.name||"").toLowerCase().trim()===d.name.toLowerCase().trim()&&String(r.cls||"")===String(d.cls||""));
-    try{if(ex){const f={};Object.keys(d).forEach(k=>{const cur=ex[k];if(cur==null||cur===""||(Array.isArray(cur)&&!cur.length))f[k]=d[k]});if(Object.keys(f).length){await saveRow(ex.id,f);fill++}else skip++}
+    try{if(ex){const f={};Object.keys(d).forEach(k=>{const cur=ex[k];if(cur==null||cur===""||(Array.isArray(cur)&&!cur.length))f[k]=d[k];else if(k==="outside"&&d.outside&&typeof cur==="object"){const m=JSON.parse(JSON.stringify(cur));let ch=false;["tf","ng"].forEach(src=>{if(!d.outside[src])return;m[src]=m[src]||{};Object.keys(d.outside[src]).forEach(x=>{if(m[src][x]==null||m[src][x]===""){m[src][x]=d.outside[src][x];ch=true}})});if(ch)f.outside=m}});if(Object.keys(f).length){await saveRow(ex.id,f);fill++}else skip++}
       else{await saveRow(null,d);add++}}catch(e){skip++}}
   msg.textContent=`Added ${add}, filled in ${fill}, skipped ${skip}.`;q("hsImportFile").value=""}
 async function exportAll(){const out=JSON.stringify({exported:new Date().toISOString(),prospects:ROWS},null,1);
