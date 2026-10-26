@@ -694,6 +694,7 @@ dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
 .hsd-break{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
 .hsd-break div{display:grid;gap:2px}
 .hsd-break b{font:700 22px var(--display)}
+.meas-chip{font:600 11px var(--body);vertical-align:middle;color:var(--accent-text);border-color:currentColor} .meas-ok{color:var(--accent-text);font-weight:700}
 .hs-traits{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
 .hs-flag{color:var(--pass);font-size:13px}
 table.hs-mini{min-width:0;font-size:13px}
@@ -3796,7 +3797,7 @@ function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"
   const tm=s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"–";
   return `<tr data-id="${id}">${rank?`<td class="num crk">${rank}</td>`:`<td class="pick"><input type="checkbox" data-hpick="${id}" aria-label="Select ${e_(r.name)}"${PICKH.has(r.id)?" checked":""}></td>`}
   <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}${hudlOf(r)?`<a class="hudlmk" href="${e_(hudlOf(r))}" target="_blank" rel="noopener" title="Watch his Hudl" aria-label="Watch ${e_(r.name)} on Hudl">▶ Hudl</a>`:""}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&!isCom(r.status)?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
-  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td class="cst">${st}</td>
+  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}${r.meas?`<span class="meas-ok" title="Measured by us: ${e_(measWhen(r.meas))}"> ✓</span>`:""}</td><td class="cst">${st}</td>
   <td class="num cf">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num ctm"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${tm}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num cg${t?" tc-"+t:""}" data-l="${s.score!=null?e_(L):""}">${s.score!=null?`<b>${f1(s.score,1)}</b>`:`<span class="mtest sub">${s.Tm!=null?"Test "+tm:"No grade"}</span><span class="dtest">–</span>`}</td><td class="ctr cle"><span class="letter${t?" tc-"+t:""}">${L}</span></td>
   <td class="ct">${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}<span class="mstat">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</span></td><td class="ccf">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
@@ -4024,7 +4025,7 @@ async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);
   const G=s.F?s.F.G:[];if(G.length){H("Film grades (1-10)");T(["Coach",...tr.map(PT),"Updated"],G.map(f=>[PT(f.name||"Coach"),...[0,1,2,3].map(i=>f.g[i]??"-"),(f.at||"").slice(0,10)]).concat([["Average",...s.F.avg.map(a=>f1(a,1)),""]]))}
   if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight","Counts"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%",x.o&&x.s!=null?Math.round(x.rel*100)+"%":"-"]))}
   const o=p.outside||{},TF=o.tf||{},NG=o.ng||{},kv=[];const add=(k,v)=>{if(v!=null&&v!=="")kv.push([k,PT(v)])};
-  add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / "));add("Hudl",hudlOf(p));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
+  add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / ")+(p.meas?` (measured by us${p.meas.date?" "+fmtDate(p.meas.date):""})`:""));if(p.meas)add("Wingspan / arm / hand",[p.wing,p.arm,p.hand].map(x=>x!=null&&x!==""?x+'"':"-").join(" / "));add("Hudl",hudlOf(p));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
   add("Tracking Football PAI",TF.pai);add("HS Combine score",TF.com);add("vs Marshall",num(TF.muPct)!=null?Math.round(TF.muPct*100)+"%":"");add("vs D-I",num(TF.diPct)!=null?Math.round(TF.diPct*100)+"%":"");add("Game speed MPH",TF.mph);
   add("XOS rating",NG.xos);add("ISR grade",NG.isr);add("LSR grade",NG.lsr);add("Catapult top speed",NG.topSpeed);add("247 rating",NG.r247);
   if(kv.length){H("Profile and outside ratings");T(["Item","Value"],kv,{0:{fontStyle:"bold",cellWidth:180}})}
@@ -4076,6 +4077,27 @@ function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub"
   ${p.pulledAt?`<p class="sub" style="margin:0">Last pulled from Tracking Football${p.src&&p.src.ng?" and NextGen":""} on ${e_(String(p.pulledAt).slice(0,10))}.</p>`:""}</div>`}
 
 /* ---------- prospect card ---------- */
+/* Our measurements (taken on a visit): saved into ht/wt/wing/arm/hand, marked manual so imports never overwrite them; meas keeps when, where, who and the listed numbers they replaced */
+const MK=[["ht","Height"],["wt","Weight"],["wing","Wingspan"],["arm","Arm"],["hand","Hand"]];
+function measFmt(k,v){if(v==null||v==="")return "–";if(k==="ht"){const m=String(v).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)\s*(\d{1,2}(?:\.\d+)?)/);return m?`${m[1]}'${+m[2]}"`:fmtHt(v)}return k==="wt"?v+" lbs":v+'"'}
+function measWhen(M){return M?[M.date?fmtDate(M.date):"",M.where||"",M.byName||""].filter(Boolean).join(" · "):""}
+function measBox(p){const M=p.meas,W=(M&&M.was)||{},td=new Date().toISOString().slice(0,10);
+  return `<div class="hsd-box" id="hsMeasBox"><h3>Measurements ${M?`<span class="chip meas-chip">Measured by us</span>`:""}</h3>
+  <p class="sub" style="margin:0">${M?e_(measWhen(M)):"From recruiting sources. Update after we measure him on a visit."}</p>
+  <div class="hsd-break">${MK.map(([k,n])=>`<div><span class="sub">${n}</span><b style="font-size:16px">${e_(measFmt(k,p[k]))}</b>${W[k]!=null&&String(W[k])!==String(p[k]??"")?`<span class="sub">listed ${e_(measFmt(k,W[k]))}</span>`:""}</div>`).join("")}</div>
+  <div class="btns" id="hsMeasBtns"><button class="btn" type="button" id="hsMeasEdit">${M?"Update measurements":"+ Add our measurements"}</button></div>
+  <div id="hsMeasForm" hidden style="display:grid;gap:10px"><div class="grid2">${field("hsM-ht","Height",p.ht,"text"," placeholder=\"6'2\"")}${field("hsM-wt","Weight (lbs)",p.wt,"number")}${field("hsM-wing","Wingspan (in)",p.wing,"number"," step=\"0.125\"")}${field("hsM-arm","Arm (in)",p.arm,"number"," step=\"0.125\"")}${field("hsM-hand","Hand (in)",p.hand,"number"," step=\"0.125\"")}</div>
+    <div class="grid2">${field("hsM-date","Date measured",td,"date")}${field("hsM-where","Where",(M&&M.where)||"Marshall visit")}</div>
+    <div class="btns"><button class="btn primary" type="button" id="hsMeasSave">Save measurements</button><button class="btn" type="button" id="hsMeasCancel">Cancel</button></div></div></div>`}
+async function saveMeas(id){const p=ROWS.find(r=>r.id===id);if(!p)return;const v=k=>q("hsM-"+k).value.trim();
+  const vals={ht:v("ht")||null,wt:num(v("wt")),wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand"))};
+  const keys=MK.map(([k])=>k).filter(k=>vals[k]!=null);if(!keys.length){toast("Enter at least one measurement.");return}
+  const u=await me();const was=Object.assign({},(p.meas&&p.meas.was)||{});
+  keys.forEach(k=>{if(!(k in was)&&p[k]!=null&&p[k]!==""&&String(p[k])!==String(vals[k]))was[k]=p[k]});
+  const d={};keys.forEach(k=>d[k]=vals[k]);
+  d.meas={date:v("date")||new Date().toISOString().slice(0,10),where:v("where"),by:u.id||"",byName:u.name||"",at:new Date().toISOString(),was};
+  d.manual=[...new Set([...(p.manual||[]),...keys])];
+  try{REFRESH=true;await saveRow(id,d);toast("Measurements saved.")}catch(err){REFRESH=false;toast("Couldn't save. You may not have edit access.")}}
 function field(id,label,val,type,extra){return `<label>${label}<input id="${id}" type="${type||"text"}" value="${e_(val??"")}"${extra||""}></label>`}
 function sel(id,label,opts,val){return `<label>${label}<select id="${id}">${opts.map(([v,n])=>`<option value="${e_(v)}"${String(v)===String(val??"")?" selected":""}>${e_(n)}</option>`).join("")}</select></label>`}
 function testRows(p){const L=(p.tests||[]);return L.map((t,i)=>`<tr data-i="${i}"><td><select data-f="k">${TKEYS.map(k=>`<option value="${k}"${k===t.k?" selected":""}>${TEST[k].n}</option>`).join("")}</select></td>
@@ -4092,6 +4114,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
     <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.TmRaw,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${Math.round(100*(1-s.tShare))}% film / ${Math.round(100*s.tShare)}% testing${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
+  ${id?measBox(p):""}
   ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
     <div class="hs-traits">${tr.map((n,i)=>sel("hsG"+i,`${i+1}. ${e_(n)}`,[["","–"]].concat([10,9,8,7,6,5,4,3,2,1].map(v=>[v,v])),(mine.g||[])[i])).join("")}</div>
     <div class="btns"><button class="btn primary" type="button" id="hsSaveG">Save my grades</button>${mine.g?`<button class="btn" type="button" id="hsClrG">Clear mine</button>`:""}</div>
@@ -4131,6 +4154,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     q("hsHudlEdit").onclick=()=>{q("hsHudlRow").hidden=false;q("hsHudl").focus()};
     q("hsHudlSave").onclick=()=>saveHudl(id,q("hsHudl").value);q("hsHudl").onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();saveHudl(id,q("hsHudl").value)}};
     if(q("hsHudlClr"))q("hsHudlClr").onclick=()=>saveHudl(id,"");wireRec(id);
+    q("hsMeasEdit").onclick=()=>{q("hsMeasForm").hidden=false;q("hsMeasBtns").hidden=true;q("hsM-ht").focus()};
+    q("hsMeasCancel").onclick=()=>{q("hsMeasForm").hidden=true;q("hsMeasBtns").hidden=false};q("hsMeasSave").onclick=()=>saveMeas(id);
     q("hsNoteAdd").onclick=()=>{const v=q("hsNote").value;if(v.trim())noteSaveHS(id,"add",v)};
     dlg.querySelectorAll("[data-hsnd]").forEach(b=>b.onclick=()=>{if(confirm("Delete this note?"))noteSaveHS(id,"del",b.dataset.hsnd)})}
   q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
@@ -4178,7 +4203,7 @@ async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSO
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
   /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
      Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
-  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","star","ignoreTests","hudl","rec","visits","updatedBy","updatedAt"]);
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","star","ignoreTests","hudl","rec","visits","meas","updatedBy","updatedAt"]);
   const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
   const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
   const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
