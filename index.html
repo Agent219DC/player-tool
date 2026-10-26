@@ -968,7 +968,7 @@ window.claude={use:async n=>{
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px">
         <h2 id="boardTitle">QB Board</h2>
-        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;max-width:190px;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option>On Roster</option><option value="working">Working (Target + Contacted)</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option><option value="none">No status</option></select>
+        <select id="statusFilter" aria-label="Filter by recruiting status" style="width:auto;max-width:190px;font-family:var(--body);font-size:14px"><option value="">All statuses</option><option value="portal">Portal only (hide our roster)</option><option>On Roster</option><option value="working">Working (Target + Contacted)</option><option>Target</option><option>Contacted</option><option>Offered</option><option>Committed</option><option>NIP</option><option>Pass</option><option value="none">No status</option></select>
         <input id="boardSearch" type="search" placeholder="Search players" aria-label="Search the board" style="width:180px;max-width:100%;font-family:var(--body)">
         <button class="btn primary" type="button" id="addPlayer" title="Add a new player, or click a name on the board to open his card">+ Add player</button>
         <div class="seg" role="group" aria-label="Filter by role" id="roleFilter" hidden>
@@ -1761,7 +1761,7 @@ function eligLong(p){return p.elig===0?"0 yrs left":p.elig?p.elig+(p.elig===1?" 
 function eligShort(p){return p.elig===0?"0":p.elig?String(p.elig):"—"}
 function recruitLine(p,noElig){const a=[];if(!noElig&&eligLong(p))a.push(eligLong(p));if(p.pdate)a.push("In portal since "+fmtDate(p.pdate));else if(p.portal==="Yes")a.push("In portal");if(p.visit){const vd=p.vdate?" "+fmtDate(p.vdate):"";a.push(p.visit==="Completed"?"Visited"+vd:p.visit==="Canceled"?"Visit canceled"+vd:"Visit"+(vd||" scheduled"))}return a.join(" · ")}
 function trendHtml(x){if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;if(Math.abs(d)<0.1)return"";return `<span class="trend ${d>0?"up":"dn"}" title="Was ${fmt(x.p.prevGrade)} before the last update">${d>0?"▲":"▼"}${fmt(Math.abs(d))}</span>`}
-function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="none"?!!p.status:sf==="working"?!(p.status==="Target"||p.status==="Contacted"):p.status!==sf)return false}
+function matchSearch(p){if(STARONLY&&!p.star)return false;const sf=$("statusFilter").value;if(sf){if(sf==="portal"?isOurs(p):sf==="none"?!!p.status:sf==="working"?!(p.status==="Target"||p.status==="Contacted"):p.status!==sf)return false}
   const q=($("boardSearch").value||"").trim().toLowerCase();if(!q)return true;return [p.name,p.school,p.home,p.st,p.hs].filter(Boolean).join(" ").toLowerCase().includes(q)}
 const blendYr=p=>p.prior&&p.prior.db?(Number(p.season)?Number(p.season)-1:"last"):null;
 function behindBy(p){const g=Number(p.thru);return S.mode==="mid"&&g&&String(p.season)===String(CUR_SEASON)&&tg()-g>=2?tg()-g:0}
@@ -1775,7 +1775,7 @@ function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+"
 function filtersOn(){return STARONLY||!!$("statusFilter").value||!!($("boardSearch").value||"").trim()||(P.roles&&ROLEF!=="All")}
 function updateBoardTitle(){const sf=$("statusFilter").value,bits=[];
   if(P.roles&&ROLEF!=="All")bits.push(ROLEF==="Slot"?"SLOT":"WR");
-  if(sf)bits.push(sf==="none"?"No status":sf==="working"?"Working":sf);
+  if(sf)bits.push(sf==="portal"?"Portal only":sf==="none"?"No status":sf==="working"?"Working":sf);
   if(STARONLY)bits.push("★ Starred");
   const q=($("boardSearch").value||"").trim();if(q)bits.push(`“${q}”`);
   $("boardTitle").textContent=P.label+" Board"+(bits.length?" · "+bits.join(" · "):"");}
