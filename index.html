@@ -663,6 +663,9 @@ body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
 .hs-tag.cm{color:#fff;background:var(--accent);border-color:var(--accent)}
 .tag.tb-none{border-left-style:dashed}
 .hs-star{color:#e0a100;margin-right:3px}
+.hudlmk{display:inline-block;margin-left:6px;font:700 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;color:var(--accent-text);border:1px solid currentColor;border-radius:4px;padding:0 5px;text-decoration:none;vertical-align:1px}.hudlmk:hover{background:var(--sunk)}
+.hudl-row{margin-top:8px}
+.hs-acts a.btn{text-decoration:none;display:inline-flex;align-items:center}
 .hs-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hs-acts .btn{font-size:13px;padding:5px 10px}
 .hs-acts .btn[aria-pressed=true]{border-color:#e0a100}
 dialog#hsCmpDlg{width:min(1100px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
@@ -3761,7 +3764,7 @@ function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"
   const st=r.status?`<span class="stag st-${e_(r.status.replace(/\s+/g,""))}">${e_(r.status)}</span>`:"";
   const tm=s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"–";
   return `<tr data-id="${id}">${rank?`<td class="num crk">${rank}</td>`:`<td class="pick"><input type="checkbox" data-hpick="${id}" aria-label="Select ${e_(r.name)}"${PICKH.has(r.id)?" checked":""}></td>`}
-  <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
+  <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}${hudlOf(r)?`<a class="hudlmk" href="${e_(hudlOf(r))}" target="_blank" rel="noopener" title="Watch his Hudl" aria-label="Watch ${e_(r.name)} on Hudl">▶ Hudl</a>`:""}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
   <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td class="cst">${st}</td>
   <td class="num cf">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num ctm"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${tm}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num cg${t?" tc-"+t:""}" data-l="${s.score!=null?e_(L):""}">${s.score!=null?`<b>${f1(s.score,1)}</b>`:`<span class="mtest sub">${s.Tm!=null?"Test "+tm:"No grade"}</span><span class="dtest">–</span>`}</td><td class="ctr cle"><span class="letter${t?" tc-"+t:""}">${L}</span></td>
@@ -3835,6 +3838,12 @@ async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF)
         const g=t.s.score!=null?`${f1(t.s.score,1)} ${T(letter(t.s.score))}`:"–";doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.r.school,t.r.state].filter(Boolean).join(", ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`HS prospect board ${new Date().toISOString().slice(0,10)}.pdf`)}
+
+/* ---------- Hudl link (staff-set; a Hudl film link from the import counts until one is set) ---------- */
+function hudlOf(p){const h=String(p&&p.hudl||"").trim();if(h)return h;const f=String(p&&p.filmUrl||"");return /hudl\.com/i.test(f)?f:""}
+function cleanHudl(v){v=String(v||"").trim();if(!v)return "";if(!/^https?:\/\//i.test(v))v="https://"+v;try{const u=new URL(v);return /(^|\.)hudl\.com$/i.test(u.hostname)?u.href:null}catch(e){return null}}
+async function saveHudl(id,raw){const v=cleanHudl(raw);if(v===null){toast("That isn't a Hudl link. Paste the link from hudl.com.");return false}
+  try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({hudl:v,updatedAt:new Date().toISOString()});toast(v?"Hudl link saved.":"Hudl link removed.");return true}catch(e){REFRESH=false;toast("Couldn't save the link.");return false}}
 
 /* ---------- coach notes on prospects (notes[] like the portal; an old single text note shows as "Profile note") ---------- */
 function hsNotes(p){const n=p&&p.notes;if(Array.isArray(n))return n.filter(x=>x&&x.t);if(typeof n==="string"&&n.trim())return [{id:"legacy",t:n.trim(),at:p.addedAt||"",byName:"Profile note"}];return []}
@@ -3929,7 +3938,7 @@ async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);
   const G=s.F?s.F.G:[];if(G.length){H("Film grades (1-10)");T(["Coach",...tr.map(PT),"Updated"],G.map(f=>[PT(f.name||"Coach"),...[0,1,2,3].map(i=>f.g[i]??"-"),(f.at||"").slice(0,10)]).concat([["Average",...s.F.avg.map(a=>f1(a,1)),""]]))}
   if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%"]))}
   const o=p.outside||{},TF=o.tf||{},NG=o.ng||{},kv=[];const add=(k,v)=>{if(v!=null&&v!=="")kv.push([k,PT(v)])};
-  add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / "));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
+  add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / "));add("Hudl",hudlOf(p));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
   add("Tracking Football PAI",TF.pai);add("HS Combine score",TF.com);add("vs Marshall",num(TF.muPct)!=null?Math.round(TF.muPct*100)+"%":"");add("vs D-I",num(TF.diPct)!=null?Math.round(TF.diPct*100)+"%":"");add("Game speed MPH",TF.mph);
   add("XOS rating",NG.xos);add("ISR grade",NG.isr);add("LSR grade",NG.lsr);add("Catapult top speed",NG.topSpeed);add("247 rating",NG.r247);
   if(kv.length){H("Profile and outside ratings");T(["Item","Value"],kv,{0:{fontStyle:"bold",cellWidth:180}})}
@@ -3975,7 +3984,7 @@ function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub"
   if(!items&&!tr.length&&!ol.length&&!p.filmUrl&&!p.history)return "";
   return `<div class="hsd-box"><h3>Background</h3>${items?`<div class="hsd-break">${items}</div>`:""}
   ${p.history?`<p class="sub" style="margin:0">${e_(p.history)}</p>`:""}
-  ${p.filmUrl?`<p style="margin:0"><a href="${e_(p.filmUrl)}" target="_blank" rel="noopener">Watch film clip</a></p>`:""}
+  ${p.filmUrl&&p.filmUrl!==hudlOf(p)?`<p style="margin:0"><a href="${e_(p.filmUrl)}" target="_blank" rel="noopener">Watch film clip</a> <span class="sub">(Tracking Football)</span></p>`:""}
   ${tr.length?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>Track & field</th><th class="num">Mark</th><th>Meet</th><th>Date</th><th class="num">vs Marshall</th></tr></thead><tbody>${tr.map(t=>`<tr><td>${e_(t.e)}</td><td class="num">${e_(t.v)}</td><td class="sub">${e_(t.meet||"")}</td><td class="sub">${e_(t.date||"")}</td><td class="num">${t.mu!=null?Math.round(t.mu*100)+"%":"–"}</td></tr>`).join("")}</tbody></table></div>`:""}
   ${ol.length?`<details><summary class="sub">Offer list (${ol.length})</summary><p class="sub" style="margin:6px 0 0">${ol.map(o=>e_(o.s)+(o.c?" ✓":"")+(o.d?` <span style="opacity:.7">(${e_(o.d)})</span>`:"")).join(", ")}</p></details>`:p.offerList?`<details><summary class="sub">Offer list</summary><p class="sub" style="margin:6px 0 0">${e_(p.offerList)}</p></details>`:""}
   ${p.pulledAt?`<p class="sub" style="margin:0">Last pulled from Tracking Football${p.src&&p.src.ng?" and NextGen":""} on ${e_(String(p.pulledAt).slice(0,10))}.</p>`:""}</div>`}
@@ -3992,7 +4001,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   const canDel=id&&(isOwner()||p.addedBy===m.id);
   const others=s.F?s.F.G:[];
   dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div>
-    ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.star}"><span style="color:#e0a100">${p.star?"★":"☆"}</span> ${p.star?"Starred":"Star"}</button><button class="btn" type="button" id="hsCardPrint">Print</button></div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
+    ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.star}"><span style="color:#e0a100">${p.star?"★":"☆"}</span> ${p.star?"Starred":"Star"}</button><button class="btn" type="button" id="hsCardPrint">Print</button>${hudlOf(p)?`<a class="btn primary" href="${e_(hudlOf(p))}" target="_blank" rel="noopener">▶ Watch Hudl</a><button class="btn" type="button" id="hsHudlEdit">Change Hudl link</button>`:`<button class="btn" type="button" id="hsHudlEdit">+ Hudl link</button>`}</div>
+    <div class="hs-ctl hudl-row" id="hsHudlRow" hidden><input id="hsHudl" type="url" inputmode="url" placeholder="Paste his Hudl link (hudl.com/profile/…)" value="${e_(p.hudl||"")}" style="flex:1;min-width:200px"><button class="btn primary" type="button" id="hsHudlSave">Save</button>${p.hudl?`<button class="btn" type="button" id="hsHudlClr">Remove</button>`:""}</div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
   ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
     <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
@@ -4016,7 +4026,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     <div class="grid2">${field("hsF-ht","Height",p.ht,"text"," placeholder=\"6'2\"")}${field("hsF-wt","Weight",p.wt,"number")}${field("hsF-wing","Wingspan (in)",p.wing,"number"," step=\"0.125\"")}${field("hsF-arm","Arm (in)",p.arm,"number"," step=\"0.125\"")}${field("hsF-hand","Hand (in)",p.hand,"number"," step=\"0.125\"")}</div>
     <div class="grid2">${sel("hsF-age","Age for class",[["","Typical"],["young","Young (+3)"],["old","Old (−3)"]],p.age||"")}<label class="check" style="align-self:end"><input id="hsF-multi" type="checkbox"${p.multi?" checked":""}> Multi-sport (+2)</label>${field("hsF-sports","Other sports",p.sports)}${field("hsF-mph","Game speed MPH",p.mph,"number"," step=\"0.01\"")}</div>
     <div class="grid2">${field("hsF-offers","Total offers",p.offers,"number")}${field("hsF-p4","P4 offers",p.p4,"number")}${field("hsF-r247","247 rating",p.r247,"number")}${field("hsF-gpa","GPA",p.gpa,"number"," step=\"0.01\"")}${field("hsF-act","ACT / SAT",p.act)}</div>
-    <div class="grid2">${field("hsF-film","Film link",p.filmUrl,"url"," placeholder=\"Hudl or game film\"")}${field("hsF-offerList","Offer list",p.offerList)}</div>
+    <div class="grid2">${field("hsF-hudl","Hudl link",p.hudl,"url"," placeholder=\"hudl.com/profile/…\"")}${field("hsF-film","Film clip link (Tracking Football)",p.filmUrl,"url")}${field("hsF-offerList","Offer list",p.offerList)}</div>
     <fieldset><legend>Testing</legend><div class="tablewrap"><table class="hs-mini" id="hsTests"><thead><tr><th>Test</th><th>Result</th><th>Timing</th><th>Source</th><th>Date</th><th></th></tr></thead><tbody>${testRows(p)}</tbody></table></div>
       <div class="btns"><button class="btn" type="button" id="hsAddTest">+ Add test result</button></div>
       <div class="hs-ctl"><span class="sub">Don't count (staff call):</span>${TKEYS.map(k=>`<label class="check" style="font-size:13px"><input type="checkbox" data-ign="${k}"${(p.ignoreTests||[]).includes(k)?" checked":""}> ${TEST[k].n}</label>`).join("")}</div></fieldset>
@@ -4030,6 +4040,9 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   const readTests=()=>{tests=[...q("hsTests").querySelectorAll("tbody tr")].map(tr=>{const o={};tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim());o.v=num(o.v);return o}).filter(t=>t.v!=null)};
   q("hsX").onclick=()=>dlg.close();
   if(id){q("hsPriBtn").onclick=()=>toggleStar(id);q("hsCardPrint").onclick=()=>printCard(id);
+    q("hsHudlEdit").onclick=()=>{q("hsHudlRow").hidden=false;q("hsHudl").focus()};
+    q("hsHudlSave").onclick=()=>saveHudl(id,q("hsHudl").value);q("hsHudl").onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();saveHudl(id,q("hsHudl").value)}};
+    if(q("hsHudlClr"))q("hsHudlClr").onclick=()=>saveHudl(id,"");
     q("hsNoteAdd").onclick=()=>{const v=q("hsNote").value;if(v.trim())noteSaveHS(id,"add",v)};
     dlg.querySelectorAll("[data-hsnd]").forEach(b=>b.onclick=()=>{if(confirm("Delete this note?"))noteSaveHS(id,"del",b.dataset.hsnd)})}
   q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
@@ -4042,8 +4055,9 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   q("hsForm").onsubmit=async ev=>{ev.preventDefault();readTests();const v=k=>q("hsF-"+k).value.trim();
     const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
       wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
-      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),ignoreTests:[...q("hsForm").querySelectorAll("[data-ign]:checked")].map(el=>el.dataset.ign),tests,outside:readOutside(p)};
+      r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),hudl:cleanHudl(v("hudl")),filmUrl:v("film"),offerList:v("offerList"),ignoreTests:[...q("hsForm").querySelectorAll("[data-ign]:checked")].map(el=>el.dataset.ign),tests,outside:readOutside(p)};
     if(id&&p.pulledAt){const man=new Set(p.manual||[]);const dflt={comp:"1.00",multi:false,age:""};const same=(a,b)=>String(a??"")===String(b??"");Object.keys(d).forEach(k=>{if(k==="outside"||k==="tests"){if(JSON.stringify(d[k]||[])!==JSON.stringify(p[k]||[]))man.add(k)}else if(k in dflt){if(!same(d[k],p[k]??dflt[k]))man.add(k)}else if(!same(d[k],p[k]))man.add(k)});d.manual=[...man]}
+    if(d.hudl===null){toast("That Hudl link isn't from hudl.com.");return}
     if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
     try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
   if(!dlg.open)dlg.showModal();dlg.scrollTop=keepTop}
@@ -4076,7 +4090,7 @@ async function importFile(file){const msg=q("hsImportMsg");let data;try{data=JSO
   const L=Array.isArray(data)?data:Array.isArray(data.prospects)?data.prospects:null;if(!L){msg.textContent="No prospects found in that file.";return}
   /* Pulled records (with pulledAt) refresh what the sources own; hand-entered files only fill blanks.
      Never touched: film grades, notes, a position or status the staff set, and anything a coach corrected (manual). */
-  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","star","ignoreTests","updatedBy","updatedAt"]);
+  const PROTECT=new Set(["id","film","notes","addedBy","addedAt","deleted","manual","comp","age","hsRank","star","ignoreTests","hudl","updatedBy","updatedAt"]);
   const key=(n,c)=>String(n||"").toLowerCase().replace(/[^a-z]/g,"")+"|"+String(c||"");
   const all=DBX?(await DBX.collection("hs_players").get()).docs.map(d=>Object.assign({id:d.id},d.data())):ROWS;
   const byTf=new Map(),byName=new Map();all.forEach(r=>{if(r.src&&r.src.tf)byTf.set(r.src.tf,r);byName.set(key(r.name,r.cls),r)});
@@ -4127,6 +4141,7 @@ document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]")
   const co=ev.target.closest("[data-cmpopen]");if(co){q("hsCmpDlg").close();openCard(co.dataset.cmpopen);return}
   const nb=ev.target.closest("#hsNeedTbl [data-id]");if(nb){openCard(nb.dataset.id);return}
   const th=ev.target.closest("#hsTbl th[data-k]");if(th){const k=th.dataset.k;SORT=SORT.k===k?{k,d:-SORT.d}:{k,d:["name","pos","status","cls"].includes(k)?1:-1};renderBoard();return}
+  if(ev.target.closest("a[href]"))return;
   const tr=ev.target.closest("#hsTbl tr[data-id],#hsBigTbl tr[data-id]");if(tr){openCard(tr.dataset.id)}});
 ["hsSearch","hsClass","hsStatus"].forEach(id=>q(id).addEventListener(id==="hsSearch"?"input":"change",renderBoard));
 ["hsBigClass","hsBigConf"].forEach(id=>q(id).addEventListener("change",renderBig));
