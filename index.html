@@ -3580,7 +3580,7 @@ window.HS=(()=>{
 const POS=["QB","RB","WR","TE","OL","DT","DE","ILB","OLB","SAF","NIC","CB"];
 const OFF=new Set(["QB","RB","WR","TE","OL"]);
 const GROUP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"DB",NIC:"DB",CB:"DB"};
-const STATUSES=["Committed","Offered","Target","Evaluating","Pass"];
+const STATUSES=["Committed","Offered","Committed elsewhere","Target","Evaluating","Pass"];
 const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.08},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
   cone:{n:"3-Cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
 const TKEYS=Object.keys(TEST);
@@ -3678,7 +3678,7 @@ function posBar(){const el=q("hsPosBar");const cnt=p=>ROWS.filter(r=>r.pos===p).
 function rowsFor(list){return list.map(r=>({r,s:scoreOf(r)}))}
 function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `<span class="hs-tag ${T.cls}" title="${e_(T.n+(o.src?" · "+o.src:"")+(o.date?" · "+o.date:""))}">${T.tag}</span>`}
 function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40");
-  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn"><b>${e_(r.name||"Unnamed")}</b><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}</div></td>
+  return `<tr data-id="${e_(r.id)}">${rank?`<td class="num">${rank}</td>`:""}<td class="cn"><b>${e_(r.name||"Unnamed")}</b><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&r.status!=="Committed"?` · <b>${e_(r.commitTo)}</b>`:""}</div></td>
   <td>${e_(r.pos||"–")}</td><td>${e_(r.cls||"")}</td><td class="num">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}</td><td>${e_(r.status||"")}</td>
   <td class="num">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${s.estTm?"~":""}${f1(s.Tm,0)}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num"><b>${f1(s.score,1)}</b></td><td class="ctr"><span class="hs-ltr">${s.score!=null?letter(s.score):"–"}</span></td>
@@ -3695,7 +3695,7 @@ function renderBoard(){posBar();fillSelect(q("hsClass"),classes(),q("hsClass").v
   q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="14" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
   q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"})}
 function renderBig(){fillSelect(q("hsBigClass"),classes(),q("hsBigClass").value,"All classes");const cl=q("hsBigClass").value,cf=q("hsBigConf").value;
-  let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
+  let L=rowsFor(ROWS.filter(r=>r.status!=="Pass"&&r.status!=="Committed elsewhere"&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
     .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
   L.sort((a,b)=>b.s.score-a.s.score);
   q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody scored yet. Prospects need film grades or testing to rank.</td></tr>`}</tbody>`}
@@ -3705,7 +3705,7 @@ const OF={tf:[["pai","PAI","n"],["com","HS Combine score","n"],["hsPct","vs HS c
   ng:[["xos","XOS rating","n"],["isr","ISR grade","n"],["lsr","LSR grade","n"],["topSpeed","Catapult top speed","n"],["offerScore","NextGen offer score","n"],["r247","247 rating","n"],["nat","247 national rank","txt"],["posRank","247 position rank","txt"]]};
 function oval(p,src,k,t){const v=((p.outside||{})[src]||{})[k];if(v==null||v==="")return "";return t==="p"?Math.round(num(v)*1000)/10:v}
 function readOutside(p){const o=JSON.parse(JSON.stringify(p.outside||{}));const fill=(src,list)=>{o[src]=o[src]||{};list.forEach(([k,,t])=>{const el=q(`hsO-${src}-${k}`);if(!el)return;const raw=el.value.trim();
-    if(raw===""){delete o[src][k];return}o[src][k]=t==="txt"?raw:t==="p"?num(raw)/100:num(raw)})};
+    if(raw===String(oval(p,src,k,t)))return;if(raw===""){delete o[src][k];return}o[src][k]=t==="txt"?raw:t==="p"?num(raw)/100:num(raw)})};
   fill("tf",OF.tf);fill("ng",OF.ng);const rt=q("hsO-rating").value;if(rt)o.tf.rating=rt;else delete o.tf.rating;
   ["tf","ng"].forEach(k=>{if(!Object.keys(o[k]).some(x=>!["src","at"].includes(x)))delete o[k]});return o}
 function pct(v){return num(v)==null?"–":Math.round(num(v)*100)+"%"}
@@ -3720,6 +3720,17 @@ function outsidePanel(p,s){const o=p.outside||{},T=o.tf||{},G=o.ng||{};if(!Objec
     ${s&&s.estTm?`<p class="sub" style="margin:0">No usable testing yet, so his testing score (~${f1(s.Tm,0)}) is estimated from the vs. Marshall percentile. It doesn't count as verified testing.</p>`:""}`:""}
   ${Object.keys(G).length?`<div class="hsd-break">${kv("XOS rating",G.xos)}${kv("ISR grade",G.isr)}${kv("LSR grade",G.lsr)}${kv("Catapult top speed",G.topSpeed)}${kv("NextGen offer score",G.offerScore)}${kv("247 rating",G.r247)}${kv("247 national",G.nat&&"#"+G.nat)}${kv("247 position",G.posRank&&"#"+G.posRank)}</div>`:""}
   <p class="sub" style="margin:0">${[T.src&&T.at?T.src+" ("+T.at+")":T.src,G.src&&G.at?G.src+" ("+G.at+")":G.src].filter(Boolean).map(e_).join(" · ")}</p></div>`}
+
+function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub">${n}</span><b style="font-size:16px">${v}</b></div>`;
+  const tr=Array.isArray(p.track)?p.track:[];const ol=Array.isArray(p.offerTimeline)?p.offerTimeline:[];
+  const items=[kv("Committed to",e_(p.commitTo||"")),kv("Offers",p.offers!=null?e_(p.offers)+(p.p4?` (${e_(p.p4)} P4)`:""):""),kv("GPA",e_(p.gpa??"")),kv("ACT / SAT",e_(p.act||"")),kv("Height %ile",e_(p.htp||"")),kv("Weight %ile",e_(p.wtp||"")),kv("Other sports",e_(p.sports||""))].join("");
+  if(!items&&!tr.length&&!ol.length&&!p.filmUrl&&!p.history)return "";
+  return `<div class="hsd-box"><h3>Background</h3>${items?`<div class="hsd-break">${items}</div>`:""}
+  ${p.history?`<p class="sub" style="margin:0">${e_(p.history)}</p>`:""}
+  ${p.filmUrl?`<p style="margin:0"><a href="${e_(p.filmUrl)}" target="_blank" rel="noopener">Watch film clip</a></p>`:""}
+  ${tr.length?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>Track & field</th><th class="num">Mark</th><th>Meet</th><th>Date</th><th class="num">vs Marshall</th></tr></thead><tbody>${tr.map(t=>`<tr><td>${e_(t.e)}</td><td class="num">${e_(t.v)}</td><td class="sub">${e_(t.meet||"")}</td><td class="sub">${e_(t.date||"")}</td><td class="num">${t.mu!=null?Math.round(t.mu*100)+"%":"–"}</td></tr>`).join("")}</tbody></table></div>`:""}
+  ${ol.length?`<details><summary class="sub">Offer list (${ol.length})</summary><p class="sub" style="margin:6px 0 0">${ol.map(o=>e_(o.s)+(o.c?" ✓":"")+(o.d?` <span style="opacity:.7">(${e_(o.d)})</span>`:"")).join(", ")}</p></details>`:p.offerList?`<details><summary class="sub">Offer list</summary><p class="sub" style="margin:6px 0 0">${e_(p.offerList)}</p></details>`:""}
+  ${p.pulledAt?`<p class="sub" style="margin:0">Last pulled from Tracking Football${p.src&&p.src.ng?" and NextGen":""} on ${e_(String(p.pulledAt).slice(0,10))}.</p>`:""}</div>`}
 
 /* ---------- prospect card ---------- */
 function field(id,label,val,type,extra){return `<label>${label}<input id="${id}" type="${type||"text"}" value="${e_(val??"")}"${extra||""}></label>`}
@@ -3746,8 +3757,8 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
     <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
-  ${id?outsidePanel(p,s):""}
-  <form class="hsd-box" id="hsForm" autocomplete="off"><h3>${id?"Profile":"Add prospect"}</h3>
+  ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}
+  ${id&&p.pulledAt?`<details class="hsd-box" id="hsEditBox"><summary><h3 style="display:inline">Edit profile</h3> <span class="sub">filled from sources; change only to correct something. Your corrections stick through refreshes.</span></summary>`:""}<form class="${id&&p.pulledAt?"":"hsd-box"}" id="hsForm" autocomplete="off" style="display:grid;gap:10px">${id&&p.pulledAt?"":`<h3>${id?"Profile":"Add prospect"}</h3>`}
     <div class="grid2">${field("hsF-name","Name",p.name)}${sel("hsF-pos","Position",[["","Pick"]].concat(POS.map(x=>[x,x])),p.pos)}${field("hsF-cls","Class",p.cls,"number"," step=\"1\"")}${sel("hsF-status","Status",STATUSES.map(x=>[x,x]),p.status||"Evaluating")}</div>
     <div class="grid2">${field("hsF-school","High school",p.school)}${field("hsF-city","City",p.city)}${field("hsF-state","State",p.state)}${sel("hsF-comp","Level of competition",Object.entries(COMP),p.comp||"1.00")}</div>
     <div class="grid2">${field("hsF-ht","Height",p.ht,"text"," placeholder=\"6'2\"")}${field("hsF-wt","Weight",p.wt,"number")}${field("hsF-wing","Wingspan (in)",p.wing,"number"," step=\"0.125\"")}${field("hsF-arm","Arm (in)",p.arm,"number"," step=\"0.125\"")}${field("hsF-hand","Hand (in)",p.hand,"number"," step=\"0.125\"")}</div>
@@ -3762,7 +3773,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     <label>Notes<textarea id="hsF-notes" rows="3">${e_(p.notes||"")}</textarea></label>
     <div class="btns"><button class="btn primary" type="submit">${id?"Save profile":"Add prospect"}</button>${canDel?`<button class="btn" type="button" id="hsDel" style="margin-left:auto">Remove prospect</button>`:""}</div>
     ${p.sources?`<p class="sub" style="margin:0">Sources: ${e_(p.sources)}</p>`:""}
-  </form></div>`;
+  </form>${id&&p.pulledAt?"</details>":""}</div>`;
   let tests=JSON.parse(JSON.stringify(p.tests||[]));
   const readTests=()=>{tests=[...q("hsTests").querySelectorAll("tbody tr")].map(tr=>{const o={};tr.querySelectorAll("[data-f]").forEach(el=>o[el.dataset.f]=el.value.trim());o.v=num(o.v);return o}).filter(t=>t.v!=null)};
   q("hsX").onclick=()=>dlg.close();
@@ -3777,6 +3788,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     const d={name:v("name"),pos:v("pos"),cls:v("cls"),status:v("status"),school:v("school"),city:v("city"),state:v("state").toUpperCase(),comp:v("comp"),ht:v("ht"),wt:num(v("wt")),
       wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand")),age:v("age"),multi:q("hsF-multi").checked,sports:v("sports"),mph:num(v("mph")),offers:num(v("offers")),p4:num(v("p4")),
       r247:num(v("r247")),gpa:num(v("gpa")),act:v("act"),filmUrl:v("film"),offerList:v("offerList"),notes:q("hsF-notes").value.trim(),tests,outside:readOutside(p)};
+    if(id&&p.pulledAt){const man=new Set(p.manual||[]);const dflt={comp:"1.00",multi:false,age:""};const same=(a,b)=>String(a??"")===String(b??"");Object.keys(d).forEach(k=>{if(k==="outside"||k==="tests"){if(JSON.stringify(d[k]||[])!==JSON.stringify(p[k]||[]))man.add(k)}else if(k in dflt){if(!same(d[k],p[k]??dflt[k]))man.add(k)}else if(!same(d[k],p[k]))man.add(k)});d.manual=[...man]}
     if(!d.name){toast("Add his name first.");return}if(!d.pos){toast("Pick a position.");return}
     try{REFRESH=true;const nid=await saveRow(id,d);toast(id?"Saved.":"Added. Now add film grades.");if(!id)openCard(nid)}catch(err){toast("Couldn't save. Check your connection.")}};
   if(!dlg.open)dlg.showModal()}
