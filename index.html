@@ -1056,7 +1056,7 @@ window.claude={use:async n=>{
       </div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing weights by position</h2></summary>
-      <p class="note">How much each test counts toward a position's testing score (each row adds up to 100). Linemen lean on the 10-yd split, shuttle and broad jump; receivers and DBs lean on the 40. A 100m stands in for a missing 40. If a prospect's tests cover less than half of his position's weight, the gap is filled with his Tracking Football estimate (or a neutral 70), so one test can't carry his score.</p>
+      <p class="note">How much each test counts toward a position's testing score (each row adds up to 100). Linemen lean on the 10-yd split, shuttle and broad jump; receivers and DBs lean on the 40. A 100m stands in for a missing 40. Results count by reliability (camp/laser 100%, hand 85%, GPS 70%, listed 40%; a 100m standing in for the 40 and anything older than 18 months count less). Testing gets its full share of a prospect's score (100 minus film share) once 60% of his position's weight is measured reliably; thinner or shakier testing hands the rest to film.</p>
       <div class="tablewrap"><table id="hsTestWTbl"></table></div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
@@ -3675,14 +3675,15 @@ const DEF={
     OLB:{t10:15,t40:30,shuttle:20,cone:10,vert:10,broad:15},SAF:{t10:10,t40:35,shuttle:20,cone:10,vert:15,broad:10},
     NIC:{t10:10,t40:30,shuttle:25,cone:15,vert:10,broad:10},CB:{t10:10,t40:40,shuttle:20,cone:10,vert:10,broad:10}},
   /* [70 mark, 100 mark] from the current Marshall roster's high school testing (Tracking Football, Oct 2026).
+     DE and TE 40 marks are estimates (no roster 40s): DE = midpoint of the DT and LB marks, TE = midpoint of the WR and OL marks.
      10-yd split marks are 0.364 x the 40 marks (the roster has no splits; across 217 prospects the split runs 36.4% of the 40 at every position) */
   bench:{QB:{t10:[1.71,1.64],t40:[4.71,4.50],shuttle:[4.42,4.34],vert:[28.85,38.5],broad:[116,127],m100:[11.55,11.18]},
     RB:{t10:[1.74,1.71],t40:[4.78,4.70],m100:[11.89,11.78]},
     WR:{t10:[1.75,1.64],t40:[4.81,4.50],shuttle:[4.41,4.28],cone:[7.51,7.22],vert:[31.9,37.5],broad:[111.25,130.8],m100:[11.21,11.04]},
-    TE:{shuttle:[4.63,4.57],broad:[105.25,113]},
+    TE:{t10:[1.89,1.79],t40:[5.20,4.93],shuttle:[4.63,4.57],broad:[105.25,113]},
     OL:{t10:[2.03,1.95],t40:[5.59,5.35],shuttle:[4.80,4.62],cone:[8.32,8.12],vert:[22,26],broad:[91.25,92.4]},
     DT:{t10:[2.09,1.97],t40:[5.73,5.40],shuttle:[5.12,5.00],broad:[90,99]},
-    DE:{shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
+    DE:{t10:[1.94,1.87],t40:[5.33,5.15],shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
     LB:{t10:[1.79,1.78],t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
     DB:{t10:[1.79,1.64],t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
   cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true,needs:{}
@@ -3718,25 +3719,31 @@ function filmStats(p){const tr=CFG.traits[p.pos]||[];const G=Object.entries(p.fi
   const full=G.filter(f=>f.g.slice(0,4).every(x=>x!=null)).length;
   let tw=0,s=0;avg.forEach((a,i)=>{if(a!=null){tw+=CFG.traitW[i];s+=a*10*CFG.traitW[i]}});
   return {G,avg,score:tw?s/tw:null,coaches:G.length,full,split}}
+/* how much a single result can be trusted: timing method, a 100m standing in for the 40, and age (older than 18 months counts less) */
+const REL={laser:1,event:1,hand:.85,gps:.7,listed:.4};
+function relOf(o,proxy){let r=REL[o&&o.timing]??.4;if(proxy)r*=.6;const d=o&&o.date?new Date(o.date):null;if(d&&!isNaN(d)&&Date.now()-d>548*864e5)r*=.6;return r}
 function scoreOf(p){const pos=POS.includes(p.pos)?p.pos:null;if(!pos)return {score:null,why:"Pick a position"};
   const F=filmStats(p);const WT=CFG.testWt[pos]||{};const parts=[];let tw=0,ts=0,bw=0;
-  Object.keys(WT).filter(k=>WT[k]>0).sort((a,b)=>WT[b]-WT[a]).forEach(k=>{let kk=k,o=official(p,k);if(k==="t40"&&(!o||!bench(pos,"t40"))){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m}}
-    const w=WT[k],has=!!bench(pos,kk);if(has)bw+=w;const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w});if(s!=null){tw+=w;ts+=s*w}});
-  const OT=(p.outside||{}).tf||{};const outEst=num(OT.muPct)!=null?Math.max(0,Math.min(100,70+(num(OT.muPct)*100-50)*0.6)):null;
-  /* at least half of a position's testing weight has to be measured; the gap is filled with the Tracking Football estimate (or a neutral 70) so one test can't carry the whole score */
-  let Tm=tw?ts/tw:null,estTm=false,fill=null;
-  if(Tm!=null&&bw&&tw<bw/2){const pr=outEst!=null&&CFG.useOutside!==false?outEst:70;fill={share:Math.round(100*(1-2*tw/bw)),src:outEst!=null&&CFG.useOutside!==false?"Tracking Football estimate":"neutral 70"};Tm=(ts+(bw/2-tw)*pr)/(bw/2)}
-  if(Tm==null&&outEst!=null&&CFG.useOutside!==false){Tm=outEst;estTm=true}
-  const nCounted=parts.filter(x=>x.o&&x.s!=null).length;const disagree=!estTm&&nCounted>=2&&Tm!=null&&outEst!=null&&Math.abs(Tm-outEst)>=25;const w=(CFG.filmW[pos]??60)/100;
-  let base=F.score!=null&&Tm!=null?F.score*w+Tm*(1-w):F.score!=null?F.score:Tm;
+  Object.keys(WT).filter(k=>WT[k]>0).sort((a,b)=>WT[b]-WT[a]).forEach(k=>{let kk=k,o=official(p,k),proxy=false;if(k==="t40"&&(!o||!bench(pos,"t40"))){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m;proxy=true}}
+    const w=WT[k];if(bench(pos,kk))bw+=w;const sc=o?testScore(pos,kk,+o.v):null;const rel=o?relOf(o,proxy):0;parts.push({k:kk,o,s:sc,w,rel});if(sc!=null){tw+=w*rel;ts+=sc*w*rel}});
+  const OT=(p.outside||{}).tf||{};const outEst=num(OT.muPct)!=null?Math.max(0,Math.min(100,70+(num(OT.muPct)*100-50)*0.6)):null;const useOut=outEst!=null&&CFG.useOutside!==false;
+  /* coverage = share of the position's testing weight we have, discounted by reliability (a listed 40 counts 40%, an old track time less) */
+  let TmRaw=tw?ts/tw:null,cov=bw?tw/bw:0,estTm=false,fill=null,Tm=TmRaw;
+  if(TmRaw!=null&&cov<.5){const pr=useOut?outEst:70;fill={share:Math.round(100*(1-2*cov)),src:useOut?"Tracking Football estimate":"neutral 70"};Tm=(ts+(bw/2-tw)*pr)/(bw/2)}
+  if(TmRaw==null&&useOut){Tm=TmRaw=outEst;estTm=true;cov=.3}
+  const nCounted=parts.filter(x=>x.o&&x.s!=null).length;const disagree=!estTm&&nCounted>=2&&TmRaw!=null&&outEst!=null&&Math.abs(TmRaw-outEst)>=25;
+  /* testing's share of the score grows with coverage: full share (100 - film share) once 60% of the testing weight is measured reliably; thin or shaky testing hands the rest to film */
+  const maxT=1-(CFG.filmW[pos]??60)/100;const tShare=TmRaw!=null?maxT*Math.min(1,cov/.6):0;
+  let base=F.score!=null?(TmRaw!=null?F.score*(1-tShare)+TmRaw*tShare:F.score):Tm;
   const verified=parts.some(x=>x.o&&x.s!=null&&TIMING[x.o.timing]&&TIMING[x.o.timing].r<=2);
   const anyTest=parts.some(x=>x.o&&x.s!=null&&x.o.timing!=="listed");
   const conf=F.full>=2&&verified?"High":(F.full>=1&&(anyTest||verified))||F.full>=2?"Medium":"Low";
-  if(F.score==null)return {score:null,F,Tm,parts,fill,conf:"–",estTm,outEst,disagree,why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
+  const extra={Tm,TmRaw,cov,tShare,maxT,parts,fill,estTm,outEst,disagree};
+  if(F.score==null)return Object.assign({score:null,F,conf:"–",why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"},extra);
   const comp=num(p.comp)||1,adj=(p.age==="young"?3:p.age==="old"?-3:0)+(p.multi?2:0);
   let sc=Math.max(0,Math.min(100,base*comp+adj));const raw=sc;
   if(conf==="Low")sc=Math.min(sc,79.9);else if(conf==="Medium")sc=Math.min(sc,89.9);
-  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,fill,conf,comp,adj,capped:sc<raw,estTm,outEst,disagree}}
+  return Object.assign({score:Math.round(sc*10)/10,raw,base,F,conf,comp,adj,capped:sc<raw},extra)}
 function tierOfHS(s){const C=CFG.cuts;return s==null?null:s>=C.elite?"Elite":s>=C.impact?"Impact":s>=C.starter?"Starter":s>=C.rotation?"Rotation":"Pass"}
 const TN={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"NGE"};
 function letter(s){try{return letterOf(s)}catch(e){return s>=90?"A":s>=80?"B":s>=70?"C":s>=60?"D":"F"}}
@@ -3934,9 +3941,9 @@ async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);
   const T=(head,body,cs)=>{doc.autoTable(Object.assign({startY:y,margin:{left:40,right:40},head:[head],body,columnStyles:cs||{}},TSTY));y=doc.lastAutoTable.finalY+18};
   doc.setFont("helvetica","bold");doc.setFontSize(26);doc.setTextColor(...(t?tierRGB(t):[24,32,26]));doc.text(s.score!=null?PT(letter(s.score)):"-",40,y+20);
   doc.setFontSize(14);doc.text(s.score!=null?`${f1(s.score,1)}  ${TN[t]}`:"Not graded yet",90,y+8);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);
-  doc.text(PT(s.score==null?(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)} · ${CFG.filmW[p.pos]??60}% film · ${s.conf} confidence`),90,y+22);y+=44;
+  doc.text(PT(s.score==null?(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.TmRaw,1)} · ${Math.round(100*(1-s.tShare))}% film / ${Math.round(100*s.tShare)}% testing · ${s.conf} confidence`),90,y+22);y+=44;
   const G=s.F?s.F.G:[];if(G.length){H("Film grades (1-10)");T(["Coach",...tr.map(PT),"Updated"],G.map(f=>[PT(f.name||"Coach"),...[0,1,2,3].map(i=>f.g[i]??"-"),(f.at||"").slice(0,10)]).concat([["Average",...s.F.avg.map(a=>f1(a,1)),""]]))}
-  if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%"]))}
+  if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight","Counts"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%",x.o&&x.s!=null?Math.round(x.rel*100)+"%":"-"]))}
   const o=p.outside||{},TF=o.tf||{},NG=o.ng||{},kv=[];const add=(k,v)=>{if(v!=null&&v!=="")kv.push([k,PT(v)])};
   add("Height / weight",[fmtHt(p.ht),p.wt].filter(Boolean).join(" / "));add("Hudl",hudlOf(p));add("Offers",p.offers!=null?p.offers+(p.p4?` (${p.p4} P4)`:""):"");add("GPA",p.gpa);add("Other sports",p.sports);
   add("Tracking Football PAI",TF.pai);add("HS Combine score",TF.com);add("vs Marshall",num(TF.muPct)!=null?Math.round(TF.muPct*100)+"%":"");add("vs D-I",num(TF.diPct)!=null?Math.round(TF.diPct*100)+"%":"");add("Game speed MPH",TF.mph);
@@ -4004,7 +4011,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.star}"><span style="color:#e0a100">${p.star?"★":"☆"}</span> ${p.star?"Starred":"Star"}</button><button class="btn" type="button" id="hsCardPrint">Print</button>${hudlOf(p)?`<a class="btn primary" href="${e_(hudlOf(p))}" target="_blank" rel="noopener">▶ Watch Hudl</a><button class="btn" type="button" id="hsHudlEdit">Change Hudl link</button>`:`<button class="btn" type="button" id="hsHudlEdit">+ Hudl link</button>`}</div>
     <div class="hs-ctl hudl-row" id="hsHudlRow" hidden><input id="hsHudl" type="url" inputmode="url" placeholder="Paste his Hudl link (hudl.com/profile/…)" value="${e_(p.hudl||"")}" style="flex:1;min-width:200px"><button class="btn primary" type="button" id="hsHudlSave">Save</button>${p.hudl?`<button class="btn" type="button" id="hsHudlClr">Remove</button>`:""}</div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
   ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
-    <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.Tm,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${CFG.filmW[p.pos]??60}% film${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
+    <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.TmRaw,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${Math.round(100*(1-s.tShare))}% film / ${Math.round(100*s.tShare)}% testing${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
   ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
     <div class="hs-traits">${tr.map((n,i)=>sel("hsG"+i,`${i+1}. ${e_(n)}`,[["","–"]].concat([10,9,8,7,6,5,4,3,2,1].map(v=>[v,v])),(mine.g||[])[i])).join("")}</div>
@@ -4013,11 +4020,12 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
       ${others.map(f=>`<tr><td>${e_(f.uid===m.id?"You":f.name||"Coach")}</td>${[0,1,2,3].map(i=>`<td class="num">${f.g[i]??"–"}</td>`).join("")}<td class="sub">${e_((f.at||"").slice(0,10))}</td></tr>`).join("")}
       <tr><td><b>Average</b></td>${s.F.avg.map(a=>`<td class="num"><b>${f1(a,1)}</b></td>`).join("")}<td></td></tr></tbody></table></div>`:`<p class="sub" style="margin:0">No coach has graded him yet.</p>`}
   </div>`:""}
-  ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
-    ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
-    ${s.fill?`<p class="sub" style="margin:0">His tests cover less than half of the ${e_(p.pos)} testing weight, so ${s.fill.share}% of his testing score comes from the ${e_(s.fill.src)} until he tests more.</p>`:""}
+  ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th><th class="num" title="How much this result is trusted: timing method, a 100m standing in for the 40, and age">Counts</th></tr></thead><tbody>
+    ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td><td class="num">${x.o&&x.s!=null?Math.round(x.rel*100)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
+    ${s.score!=null&&!s.estTm?`<p class="sub" style="margin:0">Testing counts <b>${Math.round(100*s.tShare)}%</b> of his score (up to ${Math.round(100*s.maxT)}% at ${e_(p.pos)}). It reaches the full share once 60% of the ${e_(p.pos)} testing weight is measured reliably; he's at ${Math.round(100*s.cov)}%, so film carries the rest.</p>`:""}
+    ${s.score==null&&s.fill?`<p class="sub" style="margin:0">His tests cover less than half of the ${e_(p.pos)} testing weight, so ${s.fill.share}% of his testing score comes from the ${e_(s.fill.src)} until he tests more.</p>`:""}
     ${(p.ignoreTests||[]).length?`<p class="sub" style="margin:0">Not counted (staff call): ${p.ignoreTests.map(k=>TEST[k]?TEST[k].n:k).map(e_).join(", ")}.</p>`:""}
-    <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
+    <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed. <b>Counts</b>: laser and camp results count fully, hand 85%, GPS 70%, listed/self-reported 40%; a 100m standing in for the 40 counts 60% of that, and anything older than 18 months counts 60% of that.</p></div>`:""}
   ${id?notesBox(p,m):""}
   ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}
   ${id&&p.pulledAt?`<details class="hsd-box" id="hsEditBox"><summary><h3 style="display:inline">Edit profile</h3> <span class="sub">filled from sources; change only to correct something. Your corrections stick through refreshes.</span></summary>`:""}<form class="${id&&p.pulledAt?"":"hsd-box"}" id="hsForm" autocomplete="off" style="display:grid;gap:10px">${id&&p.pulledAt?"":`<h3>${id?"Profile":"Add prospect"}</h3>`}
