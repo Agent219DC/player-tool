@@ -1050,8 +1050,11 @@ window.claude={use:async n=>{
       <div class="tablewrap"><table id="hsTraitTbl"></table></div>
       <div class="grid2" style="margin-top:10px;max-width:520px">
         <label>Trait weights (most to least important)<input id="hsTraitW" type="text"></label>
-        <label>Test weights (most to least important)<input id="hsTestW" type="text"></label>
       </div>
+    </details>
+    <details class="settings" open><summary><h2 style="font-size:18px">Testing weights by position</h2></summary>
+      <p class="note">How much each test counts toward a position's testing score (each row adds up to 100). Linemen lean on the 10-yd split, shuttle and broad jump; receivers and DBs lean on the 40. A 100m stands in for a missing 40. If a prospect's tests cover less than half of his position's weight, the gap is filled with his Tracking Football estimate (or a neutral 70), so one test can't carry his score.</p>
+      <div class="tablewrap"><table id="hsTestWTbl"></table></div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
       <p class="note">For each position group: the result that scores <b>70</b> (current Marshall roster median) and the roster's best (the <b>100 mark</b>), from Tracking Football's high school data. Scores ease off above 90: matching the roster best lands near 95, and only results well past it approach 100, so top testers keep their order. Small samples are widened to a minimum spread so one great tester can't break the scale.</p>
@@ -3645,7 +3648,7 @@ const POS=["QB","RB","WR","TE","OL","DT","DE","ILB","OLB","SAF","NIC","CB"];
 const OFF=new Set(["QB","RB","WR","TE","OL"]);
 const GROUP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"DB",NIC:"DB",CB:"DB"};
 const STATUSES=["Committed","Offered","Committed elsewhere","Target","Evaluating","Pass"];
-const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.08},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
+const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.05},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
   cone:{n:"3-Cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
 const TKEYS=Object.keys(TEST);
 const TIMING={laser:{n:"Laser / electronic",r:1,tag:"LASER",cls:"v"},event:{n:"Camp event (timing unknown)",r:2,tag:"CAMP",cls:"v"},
@@ -3658,21 +3661,27 @@ const DEF={
     DE:["Get-off / bend","Hand usage","Setting the edge","Motor"],ILB:["Read & trigger","Tackling","Range","Take-on / shed"],
     OLB:["Range & pursuit","Tackling","Coverage","Edge / blitz"],SAF:["Range & angles","Ball skills","Tackling / run fits","Instincts"],
     NIC:["Slot man coverage","Tackling","Zone instincts","Blitz"],CB:["Man coverage / mirror","Ball skills","Transition / recovery","Tackling"]},
-  traitW:[40,30,20,10],testW:[40,30,20,10],
-  filmW:{QB:75,RB:60,WR:60,TE:55,OL:50,DT:50,DE:55,ILB:60,OLB:60,SAF:60,NIC:60,CB:60},
-  tests:{QB:["shuttle","t40","vert","broad"],RB:["t40","shuttle","broad","vert"],WR:["t40","shuttle","vert","broad"],TE:["t40","shuttle","broad","vert"],
-    OL:["shuttle","t40","broad","vert"],DT:["t40","shuttle","broad","vert"],DE:["t40","shuttle","broad","vert"],ILB:["t40","shuttle","broad","vert"],
-    OLB:["t40","shuttle","broad","vert"],SAF:["t40","shuttle","vert","broad"],NIC:["t40","shuttle","vert","broad"],CB:["t40","shuttle","vert","broad"]},
-  /* [70 mark, 100 mark] from the current Marshall roster's high school testing (Tracking Football, Oct 2026) */
-  bench:{QB:{t40:[4.71,4.50],shuttle:[4.42,4.34],vert:[28.85,38.5],broad:[116,127],m100:[11.55,11.18]},
-    RB:{t40:[4.78,4.70],m100:[11.89,11.78]},
-    WR:{t40:[4.81,4.50],shuttle:[4.41,4.28],cone:[7.51,7.22],vert:[31.9,37.5],broad:[111.25,130.8],m100:[11.21,11.04]},
+  traitW:[40,30,20,10],
+  filmW:{QB:75,RB:60,WR:60,TE:55,OL:65,DT:60,DE:55,ILB:60,OLB:60,SAF:60,NIC:60,CB:60},
+  /* % of the testing score each test carries, by position (missing tests drop out and the rest scale up; a 100m stands in for a missing 40).
+     Big men lean on short-area burst (10-yd split, shuttle, broad); skill players and DBs lean on the 40 */
+  testWt:{QB:{t10:0,t40:20,shuttle:30,cone:15,vert:15,broad:20},RB:{t10:15,t40:30,shuttle:20,cone:10,vert:10,broad:15},
+    WR:{t10:10,t40:40,shuttle:20,cone:10,vert:10,broad:10},TE:{t10:10,t40:25,shuttle:20,cone:10,vert:15,broad:20},
+    OL:{t10:25,t40:10,shuttle:30,cone:10,vert:5,broad:20},DT:{t10:30,t40:10,shuttle:25,cone:5,vert:5,broad:25},
+    DE:{t10:25,t40:20,shuttle:20,cone:10,vert:10,broad:15},ILB:{t10:15,t40:25,shuttle:25,cone:10,vert:10,broad:15},
+    OLB:{t10:15,t40:30,shuttle:20,cone:10,vert:10,broad:15},SAF:{t10:10,t40:35,shuttle:20,cone:10,vert:15,broad:10},
+    NIC:{t10:10,t40:30,shuttle:25,cone:15,vert:10,broad:10},CB:{t10:10,t40:40,shuttle:20,cone:10,vert:10,broad:10}},
+  /* [70 mark, 100 mark] from the current Marshall roster's high school testing (Tracking Football, Oct 2026).
+     10-yd split marks are 0.364 x the 40 marks (the roster has no splits; across 217 prospects the split runs 36.4% of the 40 at every position) */
+  bench:{QB:{t10:[1.71,1.64],t40:[4.71,4.50],shuttle:[4.42,4.34],vert:[28.85,38.5],broad:[116,127],m100:[11.55,11.18]},
+    RB:{t10:[1.74,1.71],t40:[4.78,4.70],m100:[11.89,11.78]},
+    WR:{t10:[1.75,1.64],t40:[4.81,4.50],shuttle:[4.41,4.28],cone:[7.51,7.22],vert:[31.9,37.5],broad:[111.25,130.8],m100:[11.21,11.04]},
     TE:{shuttle:[4.63,4.57],broad:[105.25,113]},
-    OL:{t40:[5.59,5.35],shuttle:[4.80,4.62],cone:[8.32,8.12],vert:[22,26],broad:[91.25,92.4]},
-    DT:{t40:[5.73,5.40],shuttle:[5.12,5.00],broad:[90,99]},
+    OL:{t10:[2.03,1.95],t40:[5.59,5.35],shuttle:[4.80,4.62],cone:[8.32,8.12],vert:[22,26],broad:[91.25,92.4]},
+    DT:{t10:[2.09,1.97],t40:[5.73,5.40],shuttle:[5.12,5.00],broad:[90,99]},
     DE:{shuttle:[4.43,4.38],cone:[7.62,7.44],vert:[28.3,28.7],broad:[103.5,108],m100:[11.84,11.36]},
-    LB:{t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
-    DB:{t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
+    LB:{t10:[1.79,1.78],t40:[4.92,4.90],shuttle:[4.50,4.43],vert:[30.6,36],broad:[107,109],m100:[11.80,11.52]},
+    DB:{t10:[1.79,1.64],t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
   cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true,needs:{}
 };
 const NEED_DEF={QB:1,RB:2,WR:4,TE:2,OL:5,DT:2,DE:2,ILB:2,OLB:1,SAF:2,NIC:1,CB:3};
@@ -3686,8 +3695,9 @@ const toast=m=>{try{flash(m)}catch(e){}};
 const isOwner=()=>{try{return !!OWNER}catch(e){return false}};
 async function me(){if(ME_)return ME_;try{ME_=await whoAmI()}catch(e){ME_={id:"",name:""}}return ME_}
 function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
-  ["traitW","testW"].forEach(k=>{if(Array.isArray(c[k])&&c[k].length===4)o[k]=c[k].map(Number)});
-  ["traits","filmW","tests"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
+  if(Array.isArray(c.traitW)&&c.traitW.length===4)o.traitW=c.traitW.map(Number);
+  if(c.testWt)POS.forEach(p=>{if(c.testWt[p])o.testWt[p]=Object.assign({},o.testWt[p],c.testWt[p])});
+  ["traits","filmW"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
   if(c.bench)Object.keys(c.bench).forEach(g=>{o.bench[g]=Object.assign({},o.bench[g]||{},c.bench[g])});
   if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;if(c.needs&&typeof c.needs==="object")o.needs=c.needs;return o}
 
@@ -3706,21 +3716,24 @@ function filmStats(p){const tr=CFG.traits[p.pos]||[];const G=Object.entries(p.fi
   let tw=0,s=0;avg.forEach((a,i)=>{if(a!=null){tw+=CFG.traitW[i];s+=a*10*CFG.traitW[i]}});
   return {G,avg,score:tw?s/tw:null,coaches:G.length,full,split}}
 function scoreOf(p){const pos=POS.includes(p.pos)?p.pos:null;if(!pos)return {score:null,why:"Pick a position"};
-  const F=filmStats(p);const keys=(CFG.tests[pos]||[]).slice(0,4);const parts=[];let tw=0,ts=0;
-  keys.forEach((k,i)=>{let kk=k,o=official(p,k);if(!o&&k==="t40"){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m}}
-    const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w:CFG.testW[i]});if(s!=null){tw+=CFG.testW[i];ts+=s*CFG.testW[i]}});
+  const F=filmStats(p);const WT=CFG.testWt[pos]||{};const parts=[];let tw=0,ts=0,bw=0;
+  Object.keys(WT).filter(k=>WT[k]>0).sort((a,b)=>WT[b]-WT[a]).forEach(k=>{let kk=k,o=official(p,k);if(k==="t40"&&(!o||!bench(pos,"t40"))){const m=official(p,"m100");if(m&&bench(pos,"m100")){kk="m100";o=m}}
+    const w=WT[k],has=!!bench(pos,kk);if(has)bw+=w;const s=o?testScore(pos,kk,+o.v):null;parts.push({k:kk,o,s,w});if(s!=null){tw+=w;ts+=s*w}});
   const OT=(p.outside||{}).tf||{};const outEst=num(OT.muPct)!=null?Math.max(0,Math.min(100,70+(num(OT.muPct)*100-50)*0.6)):null;
-  let Tm=tw?ts/tw:null,estTm=false;if(Tm==null&&outEst!=null&&CFG.useOutside!==false){Tm=outEst;estTm=true}
+  /* at least half of a position's testing weight has to be measured; the gap is filled with the Tracking Football estimate (or a neutral 70) so one test can't carry the whole score */
+  let Tm=tw?ts/tw:null,estTm=false,fill=null;
+  if(Tm!=null&&bw&&tw<bw/2){const pr=outEst!=null&&CFG.useOutside!==false?outEst:70;fill={share:Math.round(100*(1-2*tw/bw)),src:outEst!=null&&CFG.useOutside!==false?"Tracking Football estimate":"neutral 70"};Tm=(ts+(bw/2-tw)*pr)/(bw/2)}
+  if(Tm==null&&outEst!=null&&CFG.useOutside!==false){Tm=outEst;estTm=true}
   const nCounted=parts.filter(x=>x.o&&x.s!=null).length;const disagree=!estTm&&nCounted>=2&&Tm!=null&&outEst!=null&&Math.abs(Tm-outEst)>=25;const w=(CFG.filmW[pos]??60)/100;
   let base=F.score!=null&&Tm!=null?F.score*w+Tm*(1-w):F.score!=null?F.score:Tm;
   const verified=parts.some(x=>x.o&&x.s!=null&&TIMING[x.o.timing]&&TIMING[x.o.timing].r<=2);
   const anyTest=parts.some(x=>x.o&&x.s!=null&&x.o.timing!=="listed");
   const conf=F.full>=2&&verified?"High":(F.full>=1&&(anyTest||verified))||F.full>=2?"Medium":"Low";
-  if(F.score==null)return {score:null,F,Tm,parts,conf:"–",estTm,outEst,disagree,why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
+  if(F.score==null)return {score:null,F,Tm,parts,fill,conf:"–",estTm,outEst,disagree,why:Tm!=null?"Testing only so far. Add film grades to grade him.":"No film grades or testing yet"};
   const comp=num(p.comp)||1,adj=(p.age==="young"?3:p.age==="old"?-3:0)+(p.multi?2:0);
   let sc=Math.max(0,Math.min(100,base*comp+adj));const raw=sc;
   if(conf==="Low")sc=Math.min(sc,79.9);else if(conf==="Medium")sc=Math.min(sc,89.9);
-  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,conf,comp,adj,capped:sc<raw,estTm,outEst,disagree}}
+  return {score:Math.round(sc*10)/10,raw,base,F,Tm,parts,fill,conf,comp,adj,capped:sc<raw,estTm,outEst,disagree}}
 function tierOfHS(s){const C=CFG.cuts;return s==null?null:s>=C.elite?"Elite":s>=C.impact?"Impact":s>=C.starter?"Starter":s>=C.rotation?"Rotation":"Pass"}
 const TN={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation:"Rotation",Pass:"NGE"};
 function letter(s){try{return letterOf(s)}catch(e){return s>=90?"A":s>=80?"B":s>=70?"C":s>=60?"D":"F"}}
@@ -3992,6 +4005,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   </div>`:""}
   ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td></tr>`}).join("")}</tbody></table></div>
+    ${s.fill?`<p class="sub" style="margin:0">His tests cover less than half of the ${e_(p.pos)} testing weight, so ${s.fill.share}% of his testing score comes from the ${e_(s.fill.src)} until he tests more.</p>`:""}
     ${(p.ignoreTests||[]).length?`<p class="sub" style="margin:0">Not counted (staff call): ${p.ignoreTests.map(k=>TEST[k]?TEST[k].n:k).map(e_).join(", ")}.</p>`:""}
     <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed.</p></div>`:""}
   ${id?notesBox(p,m):""}
@@ -4039,19 +4053,22 @@ function setOwnerUi(){const own=isOwner();q("hsOwnerBtns").hidden=!own;q("hsImpo
   q("hsSetNote").textContent=own?"Changes apply for the whole staff.":"Only the owner can change these.";
   q("hsset").querySelectorAll("input:not([type=file]),select").forEach(el=>el.disabled=!own)}
 function renderSet(){
-  q("hsTraitTbl").innerHTML=`<thead><tr><th>Pos</th><th>Trait 1</th><th>Trait 2</th><th>Trait 3</th><th>Trait 4</th><th class="num">Film share %</th><th>Tests (in order)</th></tr></thead><tbody>${POS.map(p=>`<tr><td><b>${p}</b></td>${[0,1,2,3].map(i=>`<td><input data-tr="${p}" data-i="${i}" value="${e_(CFG.traits[p][i]||"")}"></td>`).join("")}<td><input type="number" data-fw="${p}" value="${CFG.filmW[p]}" min="0" max="100" style="width:80px"></td><td><input data-ts="${p}" value="${e_((CFG.tests[p]||[]).join(", "))}" title="Use: ${TKEYS.join(", ")}"></td></tr>`).join("")}</tbody>`;
-  q("hsTraitW").value=CFG.traitW.join(", ");q("hsTestW").value=CFG.testW.join(", ");
+  q("hsTraitTbl").innerHTML=`<thead><tr><th>Pos</th><th>Trait 1</th><th>Trait 2</th><th>Trait 3</th><th>Trait 4</th><th class="num">Film share %</th></tr></thead><tbody>${POS.map(p=>`<tr><td><b>${p}</b></td>${[0,1,2,3].map(i=>`<td><input data-tr="${p}" data-i="${i}" value="${e_(CFG.traits[p][i]||"")}"></td>`).join("")}<td><input type="number" data-fw="${p}" value="${CFG.filmW[p]}" min="0" max="100" style="width:80px"></td></tr>`).join("")}</tbody>`;
+  q("hsTraitW").value=CFG.traitW.join(", ");
+  const WK=["t10","t40","shuttle","cone","vert","broad"];
+  q("hsTestWTbl").innerHTML=`<thead><tr><th>Pos</th>${WK.map(k=>`<th class="num">${TEST[k].n}</th>`).join("")}<th class="num">Total</th></tr></thead><tbody>${POS.map(p=>{const W=CFG.testWt[p]||{};const t=WK.reduce((a,k)=>a+(+W[k]||0),0);
+    return `<tr><td><b>${p}</b></td>${WK.map(k=>`<td><input type="number" min="0" max="100" step="5" data-tw="${p}" data-tk="${k}" value="${W[k]??0}" style="width:70px"></td>`).join("")}<td class="num${t===100?"":" sub"}" data-twt="${p}">${t}</td></tr>`}).join("")}</tbody>`;
   const groups=["QB","RB","WR","TE","OL","DT","DE","LB","DB"];
   q("hsBenchTbl").innerHTML=`<thead><tr><th>Group</th>${TKEYS.map(k=>`<th class="num">${TEST[k].n}<div class="sub">70 / 100</div></th>`).join("")}</tr></thead><tbody>${groups.map(g=>`<tr><td><b>${g}</b></td>${TKEYS.map(k=>{const b=(CFG.bench[g]||{})[k]||[];return `<td><input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="0" value="${b[0]??""}" style="width:72px"> <input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="1" value="${b[1]??""}" style="width:72px"></td>`}).join("")}</tr>`).join("")}</tbody>`;
   q("hsCutE").value=CFG.cuts.elite;q("hsCutI").value=CFG.cuts.impact;q("hsCutS").value=CFG.cuts.starter;q("hsCutR").value=CFG.cuts.rotation;q("hsUseOut").checked=CFG.useOutside!==false;setOwnerUi()}
-function readSet(){const c={traits:{},filmW:{},tests:{},bench:{},cuts:{}};
+function readSet(){const c={traits:{},filmW:{},testWt:{},bench:{},cuts:{}};
   document.querySelectorAll("[data-tr]").forEach(el=>{(c.traits[el.dataset.tr]=c.traits[el.dataset.tr]||["","","",""])[+el.dataset.i]=el.value.trim()});
   document.querySelectorAll("[data-fw]").forEach(el=>c.filmW[el.dataset.fw]=Math.max(0,Math.min(100,num(el.value)??60)));
-  document.querySelectorAll("[data-ts]").forEach(el=>c.tests[el.dataset.ts]=el.value.split(/[,\s]+/).filter(k=>TEST[k]).slice(0,4));
+  document.querySelectorAll("[data-tw]").forEach(el=>{(c.testWt[el.dataset.tw]=c.testWt[el.dataset.tw]||{})[el.dataset.tk]=Math.max(0,num(el.value)??0)});
   document.querySelectorAll("[data-bg]").forEach(el=>{const g=el.dataset.bg,k=el.dataset.bk;c.bench[g]=c.bench[g]||{};const b=c.bench[g][k]=c.bench[g][k]||[null,null];b[+el.dataset.bi]=num(el.value)});
   Object.keys(c.bench).forEach(g=>Object.keys(c.bench[g]).forEach(k=>{if(c.bench[g][k].some(x=>x==null))delete c.bench[g][k]}));
   const w=s=>{const a=s.split(/[,\s]+/).map(Number).filter(x=>isFinite(x));return a.length===4?a:null};
-  c.traitW=w(q("hsTraitW").value)||CFG.traitW;c.testW=w(q("hsTestW").value)||CFG.testW;
+  c.traitW=w(q("hsTraitW").value)||CFG.traitW;
   c.cuts={elite:num(q("hsCutE").value)??90,impact:num(q("hsCutI").value)??80,starter:num(q("hsCutS").value)??70,rotation:num(q("hsCutR").value)??60};c.useOutside=q("hsUseOut").checked;c.needs=CFG.needs||{};return c}
 
 /* ---------- import / export ---------- */
@@ -4120,6 +4137,7 @@ q("hsNeedClass").addEventListener("change",renderNeeds);q("hsNeedSave").onclick=
 q("hsSortReset").onclick=()=>{SORT={k:"commit",d:1};renderBoard()};
 q("hsAdd").onclick=()=>openCard(null);
 q("hsDlg").addEventListener("close",()=>{OPEN=null});
+q("hsset").addEventListener("input",ev=>{const el=ev.target.closest("[data-tw]");if(!el)return;const p=el.dataset.tw;const t=[...document.querySelectorAll(`[data-tw="${p}"]`)].reduce((a,x)=>a+(num(x.value)||0),0);const c=document.querySelector(`[data-twt="${p}"]`);c.textContent=t;c.classList.toggle("sub",t!==100)});
 q("hsSaveCfg").onclick=async()=>{if(!isOwner()||!DBX)return;try{await DBX.doc("config/hs").set(readSet());toast("HS settings saved for the staff.")}catch(e){toast("Couldn't save settings.")}};
 q("hsResetCfg").onclick=async()=>{if(!isOwner()||!DBX||!confirm("Reset HS settings to the defaults?"))return;try{await DBX.doc("config/hs").set(JSON.parse(JSON.stringify(DEF)));toast("Reset to defaults.")}catch(e){toast("Couldn't reset.")}};
 q("hsImportFile").addEventListener("change",ev=>{const f=ev.target.files&&ev.target.files[0];if(f)importFile(f)});
