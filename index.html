@@ -4369,7 +4369,7 @@ async function exportAll(){const out=JSON.stringify({exported:new Date().toISOSt
 function render(t){syncSwitch();if(t==="hsrec")renderRec();else if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
 function syncSwitch(){const t=typeof TAB!=="undefined"?String(TAB||""):"";const side=t.startsWith("hs")?"hs":["sbc","budget","settings"].includes(t)?"gm":"portal";document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===side)))}
 document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
-  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}go(sd==="hs"?(pr.hsTab||"hsboard"):sd==="gm"?(pr.gmTab||"sbc"):(pr.ptTab||"boards"));return}
+  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}const GMT=["sbc","budget","settings"],ok=(v,f)=>v&&(sd==="gm")===GMT.includes(v)&&String(v).startsWith("hs")===(sd==="hs")?v:f;go(sd==="hs"?ok(pr.hsTab,"hsboard"):sd==="gm"?ok(pr.gmTab,"sbc"):ok(pr.ptTab,"boards"));return}
   const hp=ev.target.closest("[data-hp]");if(hp){POSF=hp.dataset.hp||null;try{localStorage.setItem("hs_pos",JSON.stringify(POSF))}catch(e){}renderBoard();return}
   const hb=ev.target.closest("[data-hsside]");if(hb){BIGSIDE=hb.dataset.hsside;document.querySelectorAll("[data-hsside]").forEach(b=>b.setAttribute("aria-pressed",String(b===hb)));renderBig();return}
   const bv=ev.target.closest("[data-hsview]");if(bv){BIGVIEW=bv.dataset.hsview;try{localStorage.setItem("hs_bbv",BIGVIEW)}catch(e){}renderBig();return}
