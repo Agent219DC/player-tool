@@ -2437,7 +2437,7 @@ function openEditor(){if(TAB!=="boards")go("boards");const ed=$("editor");EDIT_O
 $("addPlayer").addEventListener("click",()=>{if($("editor").open){$("editor").open=false;return}fillForm({});openEditor()});
 $("editor").addEventListener("toggle",()=>{const o=$("editor").open;if(o&&!EDIT_OPEN)fillForm({});EDIT_OPEN=false;$("editorBtn").textContent=o?"Close player panel":"+ Add player";$("editorNote").hidden=o;$("addPlayer").textContent=o?"Close player panel":"+ Add player"});
 /* ---------- player card: read-only view of a player; Edit opens the player panel ---------- */
-/* ---------- market price range (survey data in config/market; staff can read, owner loads it) ---------- */
+/* ---------- market price range (survey data in config/market; owner only: the rules block staff reads) ---------- */
 let MARKET=null;
 const MKT_POS={QB:"QB",RB:"RB",WR:"WR",TE:"TE",IOL:"IOL",OT:"OT",DT:"IDL",DE:"DE",LB:"LB",SAF:"SAF",CB:"CB",NIC:"CB"};
 const money=v=>v==null?"–":v>=1e6?"$"+(v/1e6).toFixed(v>=1e7?0:2).replace(/\.?0+$/,"")+"M":v>=1000?"$"+Math.round(v/1000)+"k":"$"+Math.round(v);
@@ -3725,8 +3725,8 @@ async function connect(){
   let db=null;try{db=await claude.use("db")}catch(e){}
   try{USER=await claude.use("user")}catch(e){}
   try{OWNER=USER?await USER.isOwner():true}catch(e){OWNER=true}
-  if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});watchSeason(db)}
-  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);watchAsks(db);$("budBtn").hidden=false;$("bbValBtn").hidden=false;$("gmSide").hidden=false;$("navGm").hidden=false;$("navBud").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
+  if(db){db.doc("shared/season").onSnapshot(s=>{const d=s.exists?s.data():{};if(d.currentSeason&&+d.currentSeason!==CUR_SEASON){CUR_SEASON=+d.currentSeason;buildSeasonOptions();if(!LOADED_KEY)$("p-season").value=String(CUR_SEASON)}if(d.teamGames){TG=d.teamGames;$("teamGames").value=TG;update()}},()=>{});if(OWNER)watchSeason(db)}
+  applyLock();$("ownerTools").hidden=!(OWNER&&db);if(db)watchStaff(db);if(db&&OWNER)watchMarket(db);if(db)watchDepth(db);if(db&&OWNER){watchBudget(db);watchAsks(db);$("budBtn").hidden=false;$("bbValBtn").hidden=false;$("gmSide").hidden=false;$("navGm").hidden=false;$("navBud").hidden=false}if(db&&OWNER&&USER)watchBackup(db);
   if(!db){$("shareNote").hidden=false;$("shareNote").textContent="Shared board unavailable in this view. Players saved now last only for this visit.";subscribe();startTabs();return}
   DB=db;subscribe();startTabs();if(window.HS)HS.connect(db);
 }
