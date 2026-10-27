@@ -3683,7 +3683,7 @@ function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PR
    Owner only (GM side): players, records and as-of dates live in the single doc owner/sbc. */
 const SBC_W={QB:3},SBC_BACKUP=0.25,SBC_OFF=new Set(["QB","RB","WR","TE","OT","IOL"]);
 const SBC_GRP=[["QB","Quarterback"],["RB","Running back"],["SK","Receivers / tight ends"],["OL","Offensive line"],["FR","Front seven"],["DB","Secondary"]];
-let SBC=null,SBC_PAGE="talent",SBC_BSORT="wab",SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
+let SBC=null,SBC_YR="2026",SBC_CACHE={},SBC_PAGE="talent",SBC_BSORT="wab",SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
 /* team overview on the field, laid out like our Overview: each spot shows the starter and his backup.
    Players fill spots by their PFF position first (T at OT, G/C at IOL, DI at DT, ED at DE, slot CB at NIC); anyone left over takes an open spot in his group and the card shows his own position */
 const SBC_FIELD={off:{cols:9,los:"top",spots:[["WO",1,1,"WR"],["OT",1,3,"OT"],["IOL",1,4,"IOL"],["IOL",1,5,"IOL"],["IOL",1,6,"IOL"],["OT",1,7,"OT"],["TE",1,8,"TE"],["WO",1,9,"WR"],["SL",2,2,"SLOT"],["QB",2,5,"QB"],["RB",3,5,"RB"]]},
@@ -3718,9 +3718,11 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
     return `<div class="ovcard sbc-card${NX&&!a?" sbc-open":""}" style="${pos}"><div class="ovc-h"><b>${esc(show)}</b>${NX&&!a?`<span class="chip sbc-openchip">Open</span>`:a&&a.r&&a.r.tier?`<span class="chip t-${a.r.tier}">${TIERNAME[a.r.tier]}</span>`:""}</div>${lostTxt}${ln(NX&&a&&a.dep===2&&!a.inc?"Starter · moves up":"Starter",a)}${ln("Backup",b,k)}</div>`}).join("");
   const maxR=Math.max(...F.spots.map(s=>s[1]));
   return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
-async function loadSbc(force){if(SBC&&!force)return SBC;
+/* one doc per season: owner/sbc is this season (2026), owner/sbc2025 is last season's final snapshot (two-deep, records; no portal/budget/next season) */
+const SBC_DOC=()=>SBC_YR==="2026"?"owner/sbc":"owner/sbc"+SBC_YR;
+async function loadSbc(force){if(SBC_CACHE[SBC_YR]&&!force){SBC=SBC_CACHE[SBC_YR];return SBC}
   /* owner-only: everything lives in one doc under owner/ (Firestore rules: owner reads and writes, nobody else) */
-  const sh=await DB.doc("owner/sbc").get();const meta=sh.exists?sh.data():{};
+  const sh=await DB.doc(SBC_DOC()).get();const meta=sh.exists?sh.data():{};
   const players=(meta.players||[]).map(p=>Object.assign({id:p.fid+"-"+p.pffId},p));
   const ks=[...new Set(players.map(p=>p.k))].filter(k=>POSITIONS[k]);const all=await loadAllPositions(ks);const cfg=Object.fromEntries(all.map(g=>[g.k,g.cfg]));
   players.forEach(p=>{const r=POSITIONS[p.k]?withPos(p.k,cfg[p.k],()=>{try{return score(p)}catch(e){return null}}):null;p.r=r;p.g=r&&r.grade!=null?r.grade:null});
@@ -3731,12 +3733,12 @@ async function loadSbc(force){if(SBC&&!force)return SBC;
   portal.forEach(x=>{x.yr=x.y25&&x.y25.season||"2025";x.r25=gr(x.k,x.y25&&{name:x.name,level:x.y25.level,season:x.yr,thru:"full",db:x.y25.db,m:x.y25.m});x.r26=gr(x.k,x.y26&&{name:x.name,level:"G6",season:"2026",thru:x.y26.thru,db:x.y26.db,m:x.y26.m});
     x.g25=x.r25?x.r25.grade:null;x.g26=x.r26?x.r26.grade:null;x.v=sbcVerdictOf(x)});
   /* our committed portal players join next season at their profile's typical grade (portal odds), not their board grade */
-  const inc=[];const us=Object.entries(meta.teams||{}).find(([f,t])=>sbcOurs(t));await loadOdds();
-  if(us&&PODDS){const PP={QB:"QB",RB:"HB",WR:"WR",TE:"TE",OT:"T",IOL:"G",DT:"DI",DE:"ED",LB:"LB",SAF:"S",CB:"CB"},GR={QB:"QB",RB:"RB",WR:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",CB:"DB"};
+  const inc=[];const us=Object.entries(meta.teams||{}).find(([f,t])=>sbcOurs(t));if(SBC_YR==="2026")await loadOdds();
+  if(us&&PODDS&&SBC_YR==="2026"){const PP={QB:"QB",RB:"HB",WR:"WR",TE:"TE",OT:"T",IOL:"G",DT:"DI",DE:"ED",LB:"LB",SAF:"S",CB:"CB"},GR={QB:"QB",RB:"RB",WR:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",CB:"DB"};
     for(const k of Object.keys(POSITIONS)){try{const s=await DB.collection(k.toLowerCase()+"_players").where("status","==","Committed").get();
       s.forEach(d=>{const q=d.data();if(q.deleted||!PP[k])return;const o=oddsFor(q.level,oddsRole(k,q.db,oddsGames(q.thru),PODDS.bench));if(!o||o.avg==null)return;
         inc.push({id:"in-"+d.id,fid:+us[0],name:q.name,k,pos:PP[k],grp:GR[k],g:o.avg,r:{tier:"",letter:"proj."},inc:true,prev:q.school||"",odds:o,dep:2,snaps:0})})}catch(e){}}}
-  SBC={players,meta,portal,inc};return SBC}
+  SBC={players,meta,portal:SBC_YR==="2026"?portal:null,inc};SBC_CACHE[SBC_YR]=SBC;return SBC}
 /* Portal odds from this season's Sun Belt transfers: bucket by old level and old role (his last-season volume vs. a Sun Belt starter's per game),
    then count how each bucket turned out here. Saved to config/portalOdds (owner writes, staff read) for the portal cards. */
 function sbcOddsCalc(){const bench={};const by={};SBC.players.filter(p=>p.dep===1&&p.db!=null&&+p.thru>0&&POSITIONS[p.k]).forEach(p=>(by[p.k]=by[p.k]||[]).push(p.db/p.thru));
@@ -3829,10 +3831,11 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
   try{await loadSbc(force)}catch(e){el.innerHTML='<p class="sub">Couldn\'t load the Sun Belt data. Check your connection.</p>';return}
   if(!SBC.players.length||!SBC.meta.teams){el.innerHTML='<p class="sub">No Sun Belt data yet.</p>';return}
   const {rows,fit}=sbcCalc();const m=SBC.meta;
-  $("sbcMeta").textContent=[m.dataAsOf?"PFF data through "+fmtDate(m.dataAsOf):"",m.recAsOf?"records as of "+fmtDate(m.recAsOf):""].filter(Boolean).join(" · ");
+  $("sbcMeta").textContent=[SBC_YR!=="2026"?`${SBC_YR} final · PFF full season`:m.dataAsOf?"PFF data through "+fmtDate(m.dataAsOf):"",m.recAsOf?"records as of "+fmtDate(m.recAsOf):""].filter(Boolean).join(" · ");
   const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT];const R=[...rows].sort((a,b)=>key(b)-key(a));
   if(!SBC_TEAM||!rows.some(r=>r.fid===SBC_TEAM))SBC_TEAM=(rows.find(sbcOurs)||rows[0]).fid;
-  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span></div>`;
+  if(SBC_YR!=="2026"){SBC_PAGE="talent";SBC_SZN="now"}
+  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Season">${["2025","2026"].map(y=>`<button type="button" data-sbcyr="${y}" aria-pressed="${SBC_YR===y}">${y}</button>`).join("")}</span>${SBC_YR==="2026"?`<span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span>`:`<span class="sub">2025 final: full-season two-deep and records, for reference</span>`}</div>`;
   $("sbcEdit").textContent=SBC_PAGE==="budget"?"Edit budgets":"Edit records";
   if(SBC_PAGE==="budget"){el.innerHTML=pageSeg+sbcBudgetView(rows);return}
   const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
@@ -3848,18 +3851,20 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     ${sbcChart(rows,fit)}
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?(SBC_SZN==="next"?(()=>{const n=sbcNext(SBC_TEAM);const ch=(a,b)=>a==null||b==null?"":` <span class="${a-b>=0?"sbc-up":"sbc-dn"}">(${a-b>=0?"+":"−"}${Math.abs(a-b).toFixed(1)})</span>`;return `<span class="sub">Next season · grade <b>${fmt(n.grade)}</b>${ch(n.grade,t.grade)} · starters ${fmt(n.st)}${ch(n.st,t.st)} · offense <b>${fmt(n.off)}</b>${ch(n.off,t.off)} · defense <b>${fmt(n.def)}</b>${ch(n.def,t.def)}</span>`})():`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`):""}</div>
-    <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span><span class="seg" role="group" aria-label="Season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
+    <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span>${SBC_YR==="2026"?`<span class="seg" role="group" aria-label="This or next season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>`:""}${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
     ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);const nin=(SBC.inc||[]).filter(p=>String(p.fid)===String(SBC_TEAM)).length;return `<p style="margin:4px 0"><b>Next season:</b>${nin?` adding <b>${nin}</b> portal commit${nin===1?"":"s"} (projected at their profile's typical grade) ·`:""} losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
     <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
+    ${SBC_YR==="2026"?`
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 style="margin:0">2026 portal class</h3><button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button><select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
     <p class="note">Every 2026 transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not 2025). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. Hit rate skips K/P/LS and players who left.</p>
     <h3 style="margin:14px 0 0">Next season snapshot</h3>${sbcNextLeague()}
-    <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`}
+    <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`:""}`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
   if(e.target.id==="sbcOddsSave"){const o=sbcOddsCalc();DB.doc("config/portalOdds").set(o).then(()=>{PODDS=o;flash(`Portal odds saved (${o.n} transfers).`)}).catch(()=>flash("Couldn't save the portal odds."));return}
   const ev=e.target.closest("[data-sbcev]");if(ev){const row=ev.closest("tr").nextElementSibling;if(row&&row.classList.contains("sbc-evrow")){row.hidden=!row.hidden;ev.setAttribute("aria-expanded",String(!row.hidden))}return}
+  const yr=e.target.closest("[data-sbcyr]");if(yr){if(SBC_YR!==yr.dataset.sbcyr){SBC_YR=yr.dataset.sbcyr;SBC_EDIT=false;renderSbc()}return}
   const pg=e.target.closest("[data-sbcpage]");if(pg){SBC_PAGE=pg.dataset.sbcpage;SBC_EDIT=false;renderSbc();return}
   const bs=e.target.closest("[data-sbcbsort]");if(bs){SBC_BSORT=bs.dataset.sbcbsort;renderSbc();return}
   if(e.target.id==="sbcSaveBud"){const up={};let bad=0;$("sbcBody").querySelectorAll("[data-sbcbud]").forEach(i=>{const v=i.value.trim();if(v===""){up[`teams.${i.dataset.sbcbud}.budget`]=null;return}const n=parseFloat(v);if(isFinite(n)&&n>=0)up[`teams.${i.dataset.sbcbud}.budget`]=Math.round(n*100)/100;else bad++});
@@ -3873,7 +3878,7 @@ $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsor
   const t=e.target.closest("[data-sbct]");if(t){SBC_TEAM=t.dataset.sbct;renderSbc();$("sbcTeamSel").scrollIntoView({behavior:"smooth",block:"center"});return}
   if(e.target.id==="sbcCancelRec"){SBC_EDIT=false;renderSbc();return}
   if(e.target.id==="sbcSaveRec"){const up={};$("sbcBody").querySelectorAll("[data-sbcw]").forEach(i=>{const f=i.dataset.sbcw,l=$("sbcBody").querySelector(`[data-sbcl="${f}"]`);const w=parseInt(i.value,10),ll=parseInt(l.value,10);if(isFinite(w)&&isFinite(ll)){up[`teams.${f}.w`]=w;up[`teams.${f}.l`]=ll}});
-    up.recAsOf=new Date().toISOString().slice(0,10);DB.doc("owner/sbc").update(up).then(()=>{SBC_EDIT=false;flash("Records saved.");renderSbc(true)}).catch(()=>flash("Couldn't save the records."));}});
+    up.recAsOf=new Date().toISOString().slice(0,10);DB.doc(SBC_DOC()).update(up).then(()=>{SBC_EDIT=false;flash("Records saved.");renderSbc(true)}).catch(()=>flash("Couldn't save the records."));}});
 $("sbcBody").addEventListener("change",e=>{if(e.target.id==="sbcTeamSel"){SBC_TEAM=e.target.value;renderSbc()}
   if(e.target.id==="sbcClsSel"){const v=e.target.value;if(v==="league")SBC_CLS="league";else{SBC_CLS="team";SBC_CLS_TEAM=v}renderSbc();$("sbcClsSel").scrollIntoView({block:"center"})}});
 $("sbcEdit").addEventListener("click",()=>{SBC_EDIT=!SBC_EDIT;renderSbc()});
@@ -3888,7 +3893,7 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
     doc.text(doc.splitTextToSize(`Expected W = wins that budget usually gets (league fit${fw?", explains "+Math.round(fw.r2*100)+"% of record":""}). Wins vs. budget = actual - expected. Talent vs. budget = team grade vs. what that money usually buys. Budgets: ${m.budgetSrc||"staff"}.`,doc.internal.pageSize.getWidth()-80),40,y);
     await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
   const {rows,fit}=sbcCalc();/* same order as the Sort by buttons on the page */const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT]||(r=>r.waa??-99);const R=[...rows].sort((a,b)=>key(b)-key(a));const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  pdfHeader(doc,"Player Tool · Sun Belt snapshot",$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
+  pdfHeader(doc,`Player Tool · ${SBC_YR} Sun Belt snapshot`,$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
     body:R.map((r,i)=>[i+1,r.name,r.div,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.grade!=null?r.grade.toFixed(1)+"  (#"+r.gradeRk+")":"-",fmt(r.off),fmt(r.def),r.xw!=null?r.xw.toFixed(1):"-",sg(r.waa),r.waa>=1?"Overperforming":r.waa<=-1?"Underperforming":"About right"]),
     styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
