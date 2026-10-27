@@ -1,6 +1,6 @@
 {
-  "name": "Player Tool",
-  "short_name": "Player Tool",
+  "name": "Roster Lab",
+  "short_name": "Roster Lab",
   "description": "Transfer-portal grading board for football staff.",
   "start_url": "./",
   "scope": "./",

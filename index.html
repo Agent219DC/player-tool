@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Player Tool</title>
+<title>Roster Lab</title>
 <meta name="description" content="Transfer-portal grading board for football staff. Staff sign-in required.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Player Tool">
+<meta property="og:title" content="Roster Lab">
 <meta property="og:description" content="Transfer-portal grading board for football staff. Staff sign-in required.">
 <meta property="og:url" content="https://agent219dc.github.io/player-tool/">
 <meta property="og:image" content="https://agent219dc.github.io/player-tool/icon-512.png">
@@ -18,7 +18,7 @@
 <meta name="theme-color" content="#18201a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Player Tool">
+<meta name="apple-mobile-web-app-title" content="Roster Lab">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -757,7 +757,7 @@ table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
 <div id="gate">
   <div class="card">
     <div class="eyebrow">Staff board</div>
-    <h1>Player <span>Tool</span></h1>
+    <h1>Roster <span>Lab</span></h1>
     <p class="msg" id="gateMsg">Sign in with your staff account.</p>
     <button class="btn primary" type="button" id="gGoogle">Sign in with Google</button>
     <div class="or">or get a sign-in link by email</div>
@@ -826,7 +826,7 @@ window.claude={use:async n=>{
       <img class="brandlogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="68" height="68" onerror="this.remove()"><img class="brandlogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="68" height="68" onerror="this.remove()">
       <div>
         <div class="eyebrow">Staff board</div>
-        <h1>Player <span>Tool</span></h1>
+        <h1>Roster <span>Lab</span></h1>
       </div>
       <span class="seg sidesw" role="group" aria-label="Portal, high school or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High school</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
     </div>
@@ -1894,7 +1894,7 @@ async function printSelected(){
   const pdfTxt=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
-  doc.text(pdfTxt("Player Tool · "+($("boardTitle").textContent||P.label+" board")),40,44);
+  doc.text(pdfTxt("Roster Lab · "+($("boardTitle").textContent||P.label+" board")),40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
@@ -1946,7 +1946,7 @@ async function printOverview(){
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
   const title=(OV_SIDE==="def"?"Defensive overview":"Offensive overview")+(OV_MODE==="next"?" - Next season":"");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
-  doc.text(`Player Tool · ${title}`,40,44);
+  doc.text(`Roster Lab · ${title}`,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
@@ -2047,7 +2047,7 @@ async function printCompare(){
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const role=CMP_CTX&&CMP_CTX.role==="Slot"?"SLOT":P.label;
-  const W=pdfHeader(doc,T(`Player Tool · ${CMP_CTX?"Ours vs. Target":"Compare"} · ${role}`),"");
+  const W=pdfHeader(doc,T(`Roster Lab · ${CMP_CTX?"Ours vs. Target":"Compare"} · ${role}`),"");
   let y=80;const v=cmpVerdict(rows);
   if(v){doc.setFont("helvetica","bold");doc.setFontSize(10.5);const ls=doc.splitTextToSize(T(v.text),W-100),bh=12+ls.length*12;
     doc.setFillColor(243,245,242);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(0,177,64);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
@@ -2121,13 +2121,13 @@ async function exportAll(){
     }));
     const wb=XL.utils.book_new();
     const sum=[["Position","Players on board"],...sheets.map(s=>[s.k,s.n])];
-    const ws0=XL.utils.aoa_to_sheet([["Player Tool · all positions"],["Exported "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})],[],...sum]);ws0["!cols"]=[{wch:16},{wch:18}];
+    const ws0=XL.utils.aoa_to_sheet([["Roster Lab · all positions"],["Exported "+new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})],[],...sum]);ws0["!cols"]=[{wch:16},{wch:18}];
     XL.utils.book_append_sheet(wb,ws0,"Summary");
     sheets.forEach(s=>{const ws=XL.utils.aoa_to_sheet([s.T.head,...s.T.data]);ws["!cols"]=s.T.head.map((h,i)=>({wch:Math.min(28,Math.max(String(h).length,...s.T.data.map(r=>String(r[i]??"").length))+2)}));XL.utils.book_append_sheet(wb,ws,s.k)});
     const buf=XL.write(wb,{bookType:"xlsx",type:"array"});
     let dl=null;try{dl=await claude.use("downloads")}catch(e){}
     if(!dl){flash("Saving files isn't available in this view.");return}
-    try{await dl.save({filename:`Player Tool all positions ${new Date().toISOString().slice(0,10)}.xlsx`,data:new Blob([buf])});flash("Spreadsheet ready: one tab per position.")}
+    try{await dl.save({filename:`Roster Lab all positions ${new Date().toISOString().slice(0,10)}.xlsx`,data:new Blob([buf])});flash("Spreadsheet ready: one tab per position.")}
     catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the spreadsheet. Try again.")}
   }finally{btn.disabled=false;btn.textContent=old}
 }
@@ -2176,7 +2176,7 @@ function rowToPlayer(h,r){
   return{p}}
 $("impFile").addEventListener("change",async e=>{
   const file=e.target.files&&e.target.files[0];if(!file)return;
-  if(!DB){flash("Importing needs the shared board. Open the Player Tool in the Claude app or a browser.");return}
+  if(!DB){flash("Importing needs the shared board. Open the Roster Lab in the Claude app or a browser.");return}
   let rows;try{rows=parseCSV(await file.text())}catch(err){flash("Couldn't read that file. Save it as a CSV and try again.");return}
   if(rows.length<2){flash("That file has no player rows.");return}
   const h=rows[0].map(x=>String(x).trim().toLowerCase());
@@ -2694,7 +2694,7 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
-  pdfHeader(doc,"Player Tool · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
+  pdfHeader(doc,"Roster Lab · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
   const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[0,122,51]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
@@ -2746,7 +2746,7 @@ document.querySelectorAll("[data-bbview]").forEach(b=>b.addEventListener("click"
 async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
-    const W=pdfHeader(doc,"Player Tool · Portal Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
+    const W=pdfHeader(doc,"Roster Lab · Portal Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
       const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
       list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[24,32,26];
@@ -3028,7 +3028,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       doc.setFontSize(8.5);doc.text(t!=null?`${have} / ${t}`:String(have),x+bw-4,y+9,{align:"right"});
       if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[0,135,58]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
     top=y+24+12};
-  let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Player Tool · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend();if(!cont)rosterStrip()};
+  let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Roster Lab · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend();if(!cont)rosterStrip()};
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{
     /* special teams shares the defense page when it fits */
     const stH=sd==="st"?40+Math.max(1,...["K","P","LS","STP"].map(k=>(G[k]||[]).length))*24:0;
@@ -3133,7 +3133,7 @@ $("budBody").addEventListener("click",e=>{if(!BUDGET)return;const rm=e.target.cl
 async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budget first.");return}
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
-  const W=pdfHeader(doc,"Player Tool · Budget","Confidential: owner only"+(BUD_MO()?" · right column = per month on a 12-month deal":"")),PH=doc.internal.pageSize.getHeight();
+  const W=pdfHeader(doc,"Roster Lab · Budget","Confidential: owner only"+(BUD_MO()?" · right column = per month on a 12-month deal":"")),PH=doc.internal.pageSize.getHeight();
   const Tt=+b.total||0,rows=budRows(),sum=f=>rows.filter(f).reduce((a,x)=>a+(+x.amt||0),0),held=sum(x=>x.name),open=sum(x=>!x.name),left=Tt-held-open,pct=v=>Tt?(v/Tt*100).toFixed(1)+"%":"-";
   const nH=rows.filter(x=>x.name).length;
   /* summary boxes */
@@ -3146,12 +3146,12 @@ async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budge
   const goals=b.goals||{},cols=4,cw=(W-80-(cols-1)*10)/cols,colY=Array(cols).fill(136);
   budSides(b).forEach((sd,si)=>{let y=Math.max(...colY)+(si?6:0);const st=sd.idx.reduce((a,gi)=>a+(b.groups[gi].rows||[]).reduce((c,x)=>c+(+x.amt||0),0),0);
     const stks=budStacks(b,sd.idx,cols),hNeed=Math.max(...stks.map(k=>k.reduce((a,gi)=>a+24+(b.groups[gi].rows||[]).length*14+16+12,0)));
-    if(y+18+Math.min(hNeed,PH-130)>PH-30){doc.addPage();pdfHeader(doc,"Player Tool · Budget (cont.)","Confidential: owner only");y=80}
+    if(y+18+Math.min(hNeed,PH-130)>PH-30){doc.addPage();pdfHeader(doc,"Roster Lab · Budget (cont.)","Confidential: owner only");y=80}
     doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(T(sd.label.toUpperCase()),40,y+8);
     doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);doc.text(T(money(st)+" · "+pct(st)+(BUD_MO()?" · "+perMo(st):"")),W-40,y+8,{align:"right"});
     doc.setDrawColor(24,32,26);doc.setLineWidth(1.2);doc.line(40,y+12,W-40,y+12);colY.fill(y+18);
   stks.forEach((k,ci)=>k.forEach(gi=>{const g=b.groups[gi];const gr=g.rows||[],t=gr.reduce((a,x)=>a+(+x.amt||0),0);const need=24+gr.length*14+16;
-    let c=ci;if(colY[c]+need>PH-30){doc.addPage();pdfHeader(doc,"Player Tool · Budget (cont.)","Confidential: owner only");colY.fill(80);c=0}
+    let c=ci;if(colY[c]+need>PH-30){doc.addPage();pdfHeader(doc,"Roster Lab · Budget (cont.)","Confidential: owner only");colY.fill(80);c=0}
     const x=40+c*(cw+10);
     doc.autoTable({startY:colY[c],margin:{left:x},tableWidth:cw,theme:"grid",
       head:[[{content:T(g.name),colSpan:2,styles:{halign:"left"}},{content:money(t),styles:{halign:"right"}},{content:BUD_MO()?perMo(t).replace("/mo",""):pct(t),styles:{halign:"right"}}]],
@@ -3270,7 +3270,7 @@ $("visitList").addEventListener("keydown",e=>{if(e.key==="Enter"){const r=e.targ
 
 async function pdfSave(doc,fname){
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
-  if(!dl){flash("Saving files isn't available in this view. Open the Player Tool in the Claude app or a browser to print.");return}
+  if(!dl){flash("Saving files isn't available in this view. Open the Roster Lab in the Claude app or a browser to print.");return}
   try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
 }
@@ -3287,7 +3287,7 @@ async function printRecruit(){
   if(!REC)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Player Tool · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
+  const W=pdfHeader(doc,"Roster Lab · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
   if(!v.length){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(91,102,93);doc.text(VMODE==="up"?"No upcoming visits.":"No visits set.",40,90)}
   else doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos","Player","School","Status","Visit","Elig.","Grade","Tier"]],
@@ -3318,7 +3318,7 @@ async function printReport(){
   const p=readForm();if(!p.name)p.name=P.unnamed;const r=score(p);if(!r)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Player Tool · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
+  const W=pdfHeader(doc,"Roster Lab · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
   const ink=[24,32,26],mut=[91,102,93];
   {const id=teamIdFor(p),lg=id?(await logosFor([id]))[id]:null;if(lg)pdfLogo(doc,lg,W-40-46,74,46)}
   doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(...ink);doc.text(p.name,40,100);
@@ -3426,7 +3426,7 @@ $("bkDown").addEventListener("click",async()=>{
   if(!OWNER||!DB)return;const b=$("bkDown");b.disabled=true;
   try{const data=await backupData();let dl=null;try{dl=await claude.use("downloads")}catch(e){}
     if(!dl){flash("Saving files isn't available in this view.");return}
-    await dl.save({filename:`Player Tool backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.");
+    await dl.save({filename:`Roster Lab backup ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Backup ready. Keep it somewhere safe.");
     DB.doc("config/backup").set({last:new Date().toISOString()},{merge:true}).catch(()=>{})}
   catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make the backup. Try again.")}
   finally{b.disabled=false}
@@ -3435,15 +3435,15 @@ $("bkOwn").addEventListener("click",async()=>{if(!OWNER||!DB)return;
   try{const [bd,as]=await Promise.all([DB.doc("owner/budget").get(),DB.doc("owner/asks").get()]);
     const data={format:"player-tool-owner-backup",exported:new Date().toISOString(),budget:bd.exists?bd.data():null,asks:as.exists?as.data():null};
     let dl=null;try{dl=await claude.use("downloads")}catch(e){}if(!dl){flash("Saving files isn't available in this view.");return}
-    await dl.save({filename:`Player Tool budget and asks ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Saved. Keep this file private; it has your budget and asking prices.")}
+    await dl.save({filename:`Roster Lab budget and asks ${new Date().toISOString().slice(0,10)}.json`,data:JSON.stringify(data,null,1)});flash("Saved. Keep this file private; it has your budget and asking prices.")}
   catch(err){if(!(err&&err.code==="declined"))flash("Couldn't make that file. Try again.")}});
 $("bkUp").addEventListener("click",()=>{if(OWNER&&DB)$("bkFile").click()});
 $("bkFile").addEventListener("change",async e=>{
   const file=e.target.files[0];e.target.value="";if(!file)return;
-  let data;try{data=JSON.parse(await file.text())}catch(_){flash("That file isn't a Player Tool backup.");return}
+  let data;try{data=JSON.parse(await file.text())}catch(_){flash("That file isn't a Roster Lab backup.");return}
   if(data&&data.format==="player-tool-owner-backup"){if(!OWNER){flash("Only the owner can restore that file.");return}
     try{if(data.budget)await DB.doc("owner/budget").set(data.budget);if(data.asks)await DB.doc("owner/asks").set(data.asks);flash("Budget and asking prices restored.")}catch(e){flash("Couldn't restore. Publish the latest database rules first.")}return}
-  if(!data||data.format!=="marshall-player-tool-backup"||!data.collections){flash("That file isn't a Player Tool backup.");return}
+  if(!data||data.format!=="marshall-player-tool-backup"||!data.collections){flash("That file isn't a Roster Lab backup.");return}
   const C=data.collections;const okColl=c=>/^[a-z]+_players$/.test(c)||c==="config"||c==="shared";
   let n=0,bad=0;const b=$("bkUp");b.disabled=true;b.textContent="Restoring…";
   for(const [c,docs] of Object.entries(C)){if(!okColl(c))continue;
@@ -3589,7 +3589,7 @@ $("form").addEventListener("submit",async e=>{e.preventDefault();const p=readFor
       const sid=ex&&ex.id?ex.id:slug(p.name+"-"+p.school+"-"+p.season);
       await DB.collection(coll()).doc(sid).set(p);LOADED_KEY=pkey(p);flash(p.name+(ex?" updated on":" saved to")+" the shared board.");
       $("editor").open=false;openCard(Object.assign({id:sid},p))}
-    catch(err){flash("Couldn't save. You may have view-only access to this Player Tool.")}
+    catch(err){flash("Couldn't save. You may have view-only access to this Roster Lab.")}
   }else{const i=BOARD.findIndex(b=>b.name===p.name&&b.school===p.school&&(b.season||"")===(p.season||""));if(i>=0)BOARD[i]=p;else BOARD.push(p);renderBoard();flash(p.name+" added for this visit only (shared board unavailable).")}
 });
 $("clear").addEventListener("click",()=>fillForm({}));
@@ -3960,7 +3960,7 @@ $("sbcEdit").addEventListener("click",()=>{SBC_EDIT=!SBC_EDIT;renderSbc()});
 $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Belt page first.");return}if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh and try again.");return}
   if(SBC_PAGE==="budget"){const {rows:B,fw}=sbcBudgetCalc(sbcCalc().rows);const key={wab:r=>r.wab??-99,budget:r=>r.budget??-1,pct:r=>r.pct??-1,gab:r=>r.gab??-99}[SBC_BSORT]||(r=>r.wab??-99);const R=[...B].sort((a,b)=>key(b)-key(a));
     const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
-    pdfHeader(doc,"Player Tool · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
+    pdfHeader(doc,"Roster Lab · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
     doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Record","Win %","Roster budget","Expected W","Wins vs. budget","Verdict","Team grade","Talent vs. budget","Cost per win"]],
       body:R.map((r,i)=>[i+1,r.name,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.budget!=null?sbcMoney(r.budget)+"  (#"+r.budgetRk+")":"-",r.xwB!=null?r.xwB.toFixed(1):"-",sg(r.wab),r.wab==null?"-":r.wab>=1?"Overperforming":r.wab<=-1?"Underperforming":"About right",r.grade!=null?r.grade.toFixed(1):"-",sg(r.gab),r.perWin!=null?sbcMoney(r.perWin):"-"]),
       styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
@@ -3968,7 +3968,7 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
     doc.text(doc.splitTextToSize(`Expected W = wins that budget usually gets (league fit${fw?", explains "+Math.round(fw.r2*100)+"% of record":""}). Wins vs. budget = actual - expected. Talent vs. budget = team grade vs. what that money usually buys. Budgets: ${m.budgetSrc||"staff"}.`,doc.internal.pageSize.getWidth()-80),40,y);
     await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
   const {rows,fit}=sbcCalc();/* same order as the Sort by buttons on the page */const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT]||(r=>r.waa??-99);const R=[...rows].sort((a,b)=>key(b)-key(a));const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  pdfHeader(doc,`Player Tool · ${SBC_YR} Sun Belt snapshot`,$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
+  pdfHeader(doc,`Roster Lab · ${SBC_YR} Sun Belt snapshot`,$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
     body:R.map((r,i)=>[i+1,r.name,r.div,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.grade!=null?r.grade.toFixed(1)+"  (#"+r.gradeRk+")":"-",fmt(r.off),fmt(r.def),r.xw!=null?r.xw.toFixed(1):"-",sg(r.waa),r.waa>=1?"Overperforming":r.waa<=-1?"Underperforming":"About right"]),
     styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
@@ -4225,7 +4225,7 @@ async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF)
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const RGB=(typeof TIERRGB!=="undefined"&&TIERRGB)||{};
   [[TB_OFF,"Offense"],[TB_DEF,"Defense"]].forEach(([keys,nm],pi)=>{if(pi)doc.addPage();
-    const W=pdfHeader(doc,"Player Tool · HS Prospect Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-(keys.length-1)*8)/keys.length;
+    const W=pdfHeader(doc,"Roster Lab · HS Prospect Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-(keys.length-1)*8)/keys.length;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
       const L=TBS[k]||[];if(!L.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No prospects",x+5,y+6);return}
       L.forEach((t,i)=>{if(y>PH-44)return;const tier=tierOfHS(t.s.score);const rgb=RGB[tier]||[140,148,140];
@@ -4352,7 +4352,7 @@ function renderRec(){document.querySelectorAll("[data-hsrg]").forEach(b=>b.setAt
     return `<tr><td><b>${e_(k)}</b></td><td class="num">${g.com.length}</td><td class="num">${g.tgt.length}</td><td class="num">${g.up}</td><td><div class="nl">${g.com.concat(g.tgt.slice(0,12)).map(nm).join("")}${g.tgt.length>12?`<span class="sub">+${g.tgt.length-12} more</span>`:""}</div></td></tr>`}).join("")||`<tr><td colspan="5" class="sub">No commits or realistic targets yet.</td></tr>`}</tbody>`;
   const V=visitList();const fd=d=>d?d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"No date";
   q("hsVisitTbl").innerHTML=`<thead><tr><th>Date</th><th>Type</th><th>Prospect</th><th>Status</th><th>Recruiter</th><th>Note</th></tr></thead><tbody>${V.map(({r,v,d})=>`<tr><td><b>${fd(d)}</b></td><td>${e_(v.type||"")}</td><td><button type="button" class="lk" data-id="${e_(r.id)}"><b>${e_(r.name)}</b></button> <span class="sub">${e_([r.pos,r.school].filter(Boolean).join(" · "))}</span></td><td>${r.status?`<span class="stag st-${e_(r.status.replace(/\s+/g,""))}" style="margin-left:0">${e_(r.status)}</span>`:""}</td><td>${e_((r.rec||{}).recruiter||"")}</td><td class="sub">${e_(v.note||"")}</td></tr>`).join("")||`<tr><td colspan="6" class="sub">${VM==="up"?"No upcoming visits or camps.":"No visits or camps entered yet."}</td></tr>`}</tbody>`}
-async function printRec(){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Player Tool · HS Recruiting",VM==="up"?"Upcoming visits":"All visits");
+async function printRec(){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Roster Lab · HS Recruiting",VM==="up"?"Upcoming visits":"All visits");
   const V=visitList();doc.autoTable(Object.assign({startY:76,head:[["Date","Type","Prospect","Pos","School","Status","Recruiter","Note"]],body:V.length?V.map(({r,v,d})=>[d?d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"No date",v.type||"",PT(r.name),r.pos||"",PT(r.school||""),r.status||"",PT((r.rec||{}).recruiter||""),PT(v.note||"")]):[["No visits","","","","","","",""]],columnStyles:{0:{fontStyle:"bold",cellWidth:105}}},TSTY));
   await pdfSave(doc,`HS recruiting ${new Date().toISOString().slice(0,10)}.pdf`)}
 
@@ -4374,7 +4374,7 @@ const TSTY={styles:{font:"helvetica",fontSize:8.6,cellPadding:4,lineColor:[207,2
 const tierRGB=t=>((typeof TIERRGB!=="undefined"&&TIERRGB)||{})[t]||[24,32,26];
 async function printList(){if(!pdfOk())return;const L=LAST_LIST.filter(x=>PICKH.has(x.r.id));if(!L.length)return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const f=[POSF,q("hsClass").value&&"Class of "+q("hsClass").value,q("hsStatus").value,q("hsPri").checked&&"Starred only"].filter(Boolean).join(" · ");
-  pdfHeader(doc,"Player Tool · HS Prospects",`${L.length} prospects${f?" · "+f:""}`);
+  pdfHeader(doc,"Roster Lab · HS Prospects",`${L.length} prospects${f?" · "+f:""}`);
   doc.autoTable(Object.assign({startY:76,head:[["#","Player","Pos","Class","High school","Status","Film","Testing","Score","Grade","Tier","40","vs MU","Offers"]],
     body:L.map((x,i)=>{const r=x.r,s=x.s,o=official(r,"t40"),mu=num(((r.outside||{}).tf||{}).muPct);return [i+1,PT(r.name+(r.star?" (Starred)":"")),r.pos||"",r.cls||"",PT([r.school,r.state].filter(Boolean).join(", ")),PT(r.status+(r.commitTo&&!isCom(r.status)?" ("+r.commitTo+")":"")),
       s.F&&s.F.coaches?f1(s.F.score/10,1):"-",s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"-",s.score!=null?f1(s.score,1):"-",s.score!=null?PT(letter(s.score)):"-",s.score!=null?TN[tierOfHS(s.score)]:"",o?f1(+o.v,2):"-",mu!=null?Math.round(mu*100)+"%":"-",r.offers??"-"]}),
@@ -4398,13 +4398,13 @@ async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);
   const N=hsNotes(p).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at)));if(N.length){H("Coach notes");T(["Note","By"],N.map(n=>[PT(n.t),PT((n.byName||"Staff")+(n.at?"\n"+String(n.at).slice(0,10):""))]),{1:{cellWidth:110}})}
   await pdfSave(doc,`${PT(p.name)} prospect card.pdf`)}
 async function printNeeds(){if(!pdfOk())return;const cl=needCls(),D=needData(cl);const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  pdfHeader(doc,"Player Tool · HS Needs","Class of "+cl);const st=d=>d.left>0?"Need "+d.left:d.left<0?"Over by "+(-d.left):"Full";
+  pdfHeader(doc,"Roster Lab · HS Needs","Class of "+cl);const st=d=>d.left>0?"Need "+d.left:d.left<0?"Over by "+(-d.left):"Full";
   const nm=x=>PT(x.r.name+(x.r.star?" (Starred)":""))+(x.s.score!=null?` (${f1(x.s.score,1)})`:"");
   doc.autoTable(Object.assign({startY:76,head:[["Pos","Need","Committed","Offered","Status","Commits","Top targets"]],body:D.map(d=>[d.p,d.need,d.com.length,d.off,st(d),d.com.map(nm).join("\n")||"-",d.tgt.slice(0,3).map(nm).join("\n")||"-"]),
     columnStyles:{0:{fontStyle:"bold",cellWidth:40},1:{halign:"right",cellWidth:40},2:{halign:"right",cellWidth:62},3:{halign:"right",cellWidth:52},4:{fontStyle:"bold",cellWidth:64}},
     didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[0,122,51]}}},TSTY));
   await pdfSave(doc,`HS needs ${cl} ${new Date().toISOString().slice(0,10)}.pdf`)}
-async function printCompare(L){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Player Tool · Compare prospects",L.map(x=>PT(x.r.name)).join(" vs. "));
+async function printCompare(L){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Roster Lab · Compare prospects",L.map(x=>PT(x.r.name)).join(" vs. "));
   const body=[];cmpRows(L).forEach(row=>{if(row[0]==="grp"){body.push([{content:row[1],colSpan:L.length+1,styles:{fillColor:[230,234,229],fontStyle:"bold"}}]);return}
     const [lab,fn,,dp,sub,suf]=row;const v=L.map(fn);if(v.every(x=>x==null||x===""||x==="–"))return;body.push([lab,...v.map((x,i)=>(x==null?"-":typeof x==="number"?f1(x,dp??1)+(suf||""):PT(x))+(sub&&sub(L[i])?" "+PT(sub(L[i])):""))])});
   doc.autoTable(Object.assign({startY:76,head:[["",...L.map(x=>PT(x.r.name))]],body,columnStyles:{0:{fontStyle:"bold",cellWidth:150}}},TSTY));
