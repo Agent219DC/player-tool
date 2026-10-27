@@ -1044,7 +1044,7 @@ window.claude={use:async n=>{
       <div class="btns"><button class="btn" type="button" id="hsCmpSel" disabled>Compare selected</button><button class="btn primary" type="button" id="hsListPrint" disabled>Print selected</button></div>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
-    <p class="note">Score: film grades and testing blended by position, 70 = a Marshall starter. A prospect gets an overall grade once a coach grades his film; until then only his testing score shows. A <b>~</b> testing score is estimated from Tracking Football because he has no usable testing; <b>CHECK</b> means our testing and theirs disagree by 25+ points. <b>vs MU</b> is his Tracking Football athletic rating percentile among Marshall players at his position. <b>Confidence</b> is High with film from 2+ coaches and verified testing, Medium with some of each, Low otherwise. Medium is capped at a B, Low at a C. Tap a prospect for his card.</p>
+    <p class="note">Score = film + testing by position (70 = a Marshall starter); testing only until a coach grades film. <b>~</b> = testing estimated from Tracking Football · <b>CHECK</b> = ours and theirs differ by 25+ · <b>vs MU</b> = athletic percentile vs. our players at his spot. <b>Confidence</b>: High = 2+ coaches' film and verified testing; Medium caps at B, Low at C.</p>
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
@@ -1055,7 +1055,7 @@ window.claude={use:async n=>{
         <select id="hsTbShow" aria-label="Show"><option value="">Commits and realistic targets</option><option value="Committed">Commits and signees</option><option value="Offered">Offers only</option><option value="star">Starred only</option></select>
         <span class="sub" id="hsTbCount"></span></div>
       <div class="tb-cols" id="hsTbCols"></div>
-      <p class="note">Drag tags or use the arrows to rank each position; everyone sees the same order. Commits start at the top, then everyone else by score. New prospects start below anyone you've ranked. Tap a tag for his card. Left off: committed elsewhere, Pass, and anyone holding a P4 offer.</p>
+      <p class="note">Drag or use the arrows to rank; everyone sees the same order. Commits first, then by score. Left off: committed elsewhere, Pass, P4 offers.</p>
     </div>
     <div class="hs-ctl" id="hsListCtl">
       <span class="seg" role="group" aria-label="Side"><button type="button" data-hsside="all" aria-pressed="true">All</button><button type="button" data-hsside="off" aria-pressed="false">Offense</button><button type="button" data-hsside="def" aria-pressed="false">Defense</button></span>
@@ -1068,7 +1068,7 @@ window.claude={use:async n=>{
   <section id="hsneeds" data-page="hsneeds" style="display:grid;gap:10px">
     <div class="hs-top"><h2>HS Needs</h2><span class="btns"><select id="hsNeedClass" aria-label="Class" style="width:auto"></select><button class="btn primary" type="button" id="hsNeedSave" hidden>Save needs</button><button class="btn" type="button" id="hsNeedPrint">Print</button></span></div>
     <div class="tablewrap"><table id="hsNeedTbl"></table></div>
-    <p class="note">How many we want at each position in this class, against who's committed. Top targets follow the order on the Prospect board. Only the owner can change the numbers. Tap a name for his card.</p>
+    <p class="note">Wanted vs. committed at each position. Targets follow the Prospect board order. Owner sets the numbers.</p>
   </section>
 
   <section id="hsrec" data-page="hsrec" style="display:grid;gap:10px">
@@ -1089,11 +1089,11 @@ window.claude={use:async n=>{
       </div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing weights by position</h2></summary>
-      <p class="note">How much each test counts toward a position's testing score (each row adds up to 100). Linemen lean on the 10-yd split, shuttle and broad jump; receivers and DBs lean on the 40. A 100m stands in for a missing 40. Results count by reliability (camp/laser 100%, hand 85%, GPS 70%, listed 40%; a 100m standing in for the 40 and anything older than 18 months count less). Testing gets its full share of a prospect's score (100 minus film share) once 60% of his position's weight is measured reliably; thinner or shakier testing hands the rest to film.</p>
+      <p class="note">How much each test counts by position (rows add to 100). Results count by reliability: laser 100%, hand 85%, GPS 70%, listed 40%; a 100m for the 40 or results over 18 months old count less. Thin testing shifts weight to film.</p>
       <div class="tablewrap"><table id="hsTestWTbl"></table></div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
-      <p class="note">For each position group: the result that scores <b>70</b> (current Marshall roster median) and the roster's best (the <b>100 mark</b>), from Tracking Football's high school data. Scores ease off above 90: matching the roster best lands near 95, and only results well past it approach 100, so top testers keep their order. Small samples are widened to a minimum spread so one great tester can't break the scale.</p>
+      <p class="note"><b>70</b> = Marshall roster median, <b>100 mark</b> = roster best (Tracking Football HS data). Scores ease off above 90, so matching the best lands near 95.</p>
       <div class="tablewrap"><table id="hsBenchTbl"></table></div>
     </details>
     <details class="settings" open><summary><h2 style="font-size:18px">Grade cutoffs</h2></summary>
@@ -1108,7 +1108,7 @@ window.claude={use:async n=>{
     </details>
     <div class="btns" id="hsOwnerBtns"><button class="btn primary" type="button" id="hsSaveCfg">Save settings</button><button class="btn" type="button" id="hsResetCfg">Reset to defaults</button></div>
     <details class="settings" id="hsImportBox"><summary><h2 style="font-size:18px">Import prospects</h2></summary>
-      <p class="note">Load a prospect file (.json) from a Tracking Football / NextGen pull. New players are added; players already on the board get their source data refreshed. Film grades, notes, positions and statuses your staff set, and anything a coach corrected, are never overwritten.</p>
+      <p class="note">Load a Tracking Football / NextGen file (.json). New players are added and existing ones refreshed; staff edits (film, notes, positions, statuses, corrections) are never overwritten.</p>
       <div class="btns"><input type="file" id="hsImportFile" accept=".json,application/json" style="width:auto"><button class="btn" type="button" id="hsExport">Download all prospects (.json)</button></div>
       <p class="sub" id="hsImportMsg"></p>
     </details>
@@ -3642,7 +3642,7 @@ function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PR
    Owner only (GM side): players, records and as-of dates live in the single doc owner/sbc. */
 const SBC_W={QB:3},SBC_BACKUP=0.25,SBC_OFF=new Set(["QB","RB","WR","TE","OT","IOL"]);
 const SBC_GRP=[["QB","Quarterback"],["RB","Running back"],["SK","Receivers / tight ends"],["OL","Offensive line"],["FR","Front seven"],["DB","Secondary"]];
-let SBC=null,SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
+let SBC=null,SBC_PAGE="talent",SBC_BSORT="wab",SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
 /* team overview on the field, laid out like our Overview: each spot shows the starter and his backup.
    Players fill spots by their PFF position first (T at OT, G/C at IOL, DI at DT, ED at DE, slot CB at NIC); anyone left over takes an open spot in his group and the card shows his own position */
 const SBC_FIELD={off:{cols:9,los:"top",spots:[["WO",1,1,"WR"],["OT",1,3,"OT"],["IOL",1,4,"IOL"],["IOL",1,5,"IOL"],["IOL",1,6,"IOL"],["OT",1,7,"OT"],["TE",1,8,"TE"],["WO",1,9,"WR"],["SL",2,2,"SLOT"],["QB",2,5,"QB"],["RB",3,5,"RB"]]},
@@ -3718,22 +3718,47 @@ function sbcCalc(){const {players,meta}=SBC;const T=meta.teams||{};
   return {rows,fit:{a,b,r2,n}}}
 const sbcOurs=r=>/marshall/i.test(r.name||r.team||"");
 function sbcVerdict(w){return w==null?"":w>=1?`<span class="sbc-up">Overperforming</span>`:w<=-1?`<span class="sbc-dn">Underperforming</span>`:`<span class="sub">About right</span>`}
-function sbcChart(rows,fit){const P=rows.filter(r=>r.grade!=null&&r.pct!=null);if(P.length<3)return "";
-  const W=760,H=360,L=46,R=16,T=14,B=40;const xs=P.map(r=>r.grade),x0=Math.floor(Math.min(...xs)-2),x1=Math.ceil(Math.max(...xs)+2);
+/* scatter of win % against x (team grade by default; roster budget on the Budget page) with the league fit line; dot color = residual */
+function sbcChart(rows,fit,o){o=Object.assign({x:r=>r.grade,res:r=>r.waa,xlab:"Team grade (two-deep, board scale) →",tick:5,pad:2,fx:v=>v,tip:r=>"grade "+fmt(r.grade)},o||{});
+  rows=rows.map(r=>Object.assign({},r,{grade:o.x(r),waa:o.res(r)}));const P=rows.filter(r=>r.grade!=null&&r.pct!=null);if(P.length<3)return "";
+  const W=760,H=360,L=46,R=16,T=14,B=40;const xs=P.map(r=>r.grade),x0=Math.floor((Math.min(...xs)-o.pad)/o.tick)*o.tick,x1=Math.ceil((Math.max(...xs)+o.pad)/o.tick)*o.tick;
   const X=v=>L+(v-x0)/(x1-x0)*(W-L-R),Y=v=>T+(1-v)*(H-T-B);const ab=n=>String(n).replace(/^(Georgia|Louisiana|South|Southern|Old|Coastal|James|App|Arkansas)\s*/,m=>({"Georgia ":"Ga ","Louisiana ":"La ","South ":"S ","Southern ":"So ","Old ":"O ","Coastal ":"C ","James ":"J ","App ":"App ","Arkansas ":"Ark "})[m]||m);
   let g="";for(let v=0;v<=1.0001;v+=.25)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${Math.round(v*100)}%</text>`;
-  for(let v=Math.ceil(x0/5)*5;v<=x1;v+=5)g+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${v}</text>`;
+  for(let v=Math.ceil(x0/o.tick)*o.tick;v<=x1+1e-9;v+=o.tick)g+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${o.fx(+v.toFixed(2))}</text>`;
   const ya=Math.max(0,Math.min(1,fit.a+fit.b*x0)),yb=Math.max(0,Math.min(1,fit.a+fit.b*x1));
   g+=`<line x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
   const placed=[];
-  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const o=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
+  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const us=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
     /* try right, left, above, below so labels don't sit on top of each other */
     const opts=[[cx+9,cy+4,"start"],[cx-9,cy+4,"end"],[cx,cy-10,"middle"],[cx,cy+17,"middle"],[cx+9,cy-9,"start"],[cx+9,cy+16,"start"]];
     const box=([x,y,a])=>{const x0=a==="start"?x:a==="end"?x-tw:x-tw/2;return [x0,y-10,x0+tw,y+2]};const hit=b=>placed.some(q=>b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]);
     const pick=opts.find(op=>{const b=box(op);return !hit(b)&&b[0]>=L&&b[2]<=W-2})||opts[0];placed.push(box(pick));
-    return `<circle cx="${cx}" cy="${cy}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: grade ${fmt(r.grade)}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
-  g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">Team grade (two-deep, board scale) →</text>`;
-  return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Team grade vs. win percentage">${g}</svg>`}
+    return `<circle cx="${cx}" cy="${cy}" r="${us?7:5.5}" fill="${c}" stroke="${us?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: ${esc(o.tip(r))}, ${r.w}-${r.l}</title></circle><text class="lbl${us?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${esc(o.xlab)}</text>`;
+  return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.xlab.replace(" →",""))} vs. win percentage">${g}</svg>`}
+/* Budget page: win % and team grade each fit against roster budget ($M, teams.<fid>.budget) across the league */
+const sbcMoney=v=>v==null?"–":(+v)<1?"$"+Math.round(v*1000)+"K":"$"+(+v).toFixed(1)+"M";
+function sbcBudgetCalc(rows){let R=[];const fitOn=(yk)=>{const P=R.filter(r=>r.budget!=null&&r[yk]!=null),n=P.length;let a=0,b=0,r2=0;if(n<3)return null;
+    const mx=P.reduce((s,r)=>s+r.budget,0)/n,my=P.reduce((s,r)=>s+r[yk],0)/n;let sxy=0,sxx=0,syy=0;P.forEach(r=>{sxy+=(r.budget-mx)*(r[yk]-my);sxx+=(r.budget-mx)**2;syy+=(r[yk]-my)**2});
+    b=sxx?sxy/sxx:0;a=my-b*mx;r2=sxx&&syy?sxy*sxy/(sxx*syy):0;return {a,b,r2,n}};
+  R=rows.map(r=>{const t=(SBC.meta.teams||{})[r.fid]||{};const b=t.budget!=null&&t.budget!==""&&isFinite(+t.budget)?+t.budget:null;return Object.assign({},r,{budget:b})});
+  const fw=fitOn("pct"),fg=fitOn("grade");
+  R.forEach(r=>{if(r.budget==null)return;if(fw&&r.gp){r.xpctB=Math.max(0,Math.min(1,fw.a+fw.b*r.budget));r.xwB=r.xpctB*r.gp;r.wab=r.w-r.xwB}if(fg&&r.grade!=null){r.xgB=fg.a+fg.b*r.budget;r.gab=r.grade-r.xgB}r.perWin=r.w?r.budget/r.w:null});
+  [...R].filter(r=>r.budget!=null).sort((x,y)=>y.budget-x.budget).forEach((r,i)=>r.budgetRk=i+1);
+  return {rows:R,fw,fg}}
+function sbcBudgetView(rows){const {rows:R0,fw,fg}=sbcBudgetCalc(rows);const m=SBC.meta;const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
+  const key={wab:r=>r.wab??-99,budget:r=>r.budget??-1,pct:r=>r.pct??-1,gab:r=>r.gab??-99}[SBC_BSORT]||(r=>r.wab??-99);const R=[...R0].sort((a,b)=>key(b)-key(a));
+  const miss=R0.filter(r=>r.budget==null).length;
+  const head=`<thead><tr><th>#</th><th>Team</th><th class="num">Record</th><th class="num">Win %</th><th class="num" title="2026 football roster budget">Roster budget</th><th class="num" title="Wins a team with this budget would be expected to have after this many games">Expected W</th><th class="num" title="Actual wins minus expected wins for the money">Wins vs. budget</th><th>Verdict</th><th class="num">Team grade</th><th class="num" title="Team grade minus the grade the league's money-to-talent line predicts for this budget">Talent vs. budget</th><th class="num" title="Budget ÷ wins so far">Cost per win</th></tr></thead>`;
+  const body=R.map((r,i)=>`<tr class="${sbcOurs(r)?"ours":""}"><td class="num">${i+1}</td><td class="tm">${r.tid?`<img class="slogo" src="${logoUrl(r.tid)}" alt="" loading="lazy" onerror="this.remove()">`:logoImg(null,null,r.name)}${esc(r.name)}</td><td class="num">${r.w}-${r.l}</td><td class="num">${r.pct!=null?Math.round(r.pct*100)+"%":"–"}</td>
+    <td class="num">${SBC_EDIT?`<input type="number" min="0" step="0.1" data-sbcbud="${esc(r.fid)}" value="${r.budget??""}" style="width:76px" aria-label="${esc(r.name)} budget in millions">`:`<b>${sbcMoney(r.budget)}</b> <span class="sub">#${r.budgetRk||"–"}</span>`}</td>
+    <td class="num">${r.xwB!=null?r.xwB.toFixed(1):"–"}</td><td class="num ${r.wab>=1?"sbc-up":r.wab<=-1?"sbc-dn":""}">${sg(r.wab)}</td><td>${sbcVerdict(r.wab)}</td>
+    <td class="num">${fmt(r.grade)} <span class="sub">#${r.gradeRk||"–"}</span></td><td class="num ${r.gab>=2?"sbc-up":r.gab<=-2?"sbc-dn":""}">${sg(r.gab)}</td><td class="num">${r.perWin!=null?sbcMoney(r.perWin):"–"}</td></tr>`).join("");
+  return `<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["wab","Wins vs. budget"],["budget","Budget"],["gab","Talent vs. budget"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcbsort="${k}" aria-pressed="${SBC_BSORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveBud">Save budgets</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
+    ${miss?`<p class="sub">${miss} team${miss===1?" has":"s have"} no budget yet; use Edit budgets.</p>`:""}
+    <div class="tablewrap"><table id="sbcBudTbl">${head}<tbody>${body}</tbody></table></div>
+    <p class="note"><b>Expected W</b> = wins a team with that budget usually gets (league fit${fw?`, explains ${Math.round(fw.r2*100)}% of record`:""}). <b>Wins vs. budget</b> = actual − expected; ±1 = over/under. <b>Talent vs. budget</b> = team grade vs. what that money usually buys. Budgets: ${esc(m.budgetSrc||"staff")}.</p>
+    ${sbcChart(R0,fw||{a:.5,b:0},{x:r=>r.budget,res:r=>r.wab,xlab:"Roster budget ($M) →",tick:1,pad:.4,fx:v=>"$"+v+"M",tip:r=>"budget "+sbcMoney(r.budget)})}`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
   const cell=p=>{if(!p)return "<td></td><td></td>";const r=p.r;const low=r&&r.conf==="Low";
     return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${p.snaps||0} snaps${p.prev?" · from "+esc(p.prev):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
@@ -3748,6 +3773,9 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
   $("sbcMeta").textContent=[m.dataAsOf?"PFF data through "+fmtDate(m.dataAsOf):"",m.recAsOf?"records as of "+fmtDate(m.recAsOf):""].filter(Boolean).join(" · ");
   const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT];const R=[...rows].sort((a,b)=>key(b)-key(a));
   if(!SBC_TEAM||!rows.some(r=>r.fid===SBC_TEAM))SBC_TEAM=(rows.find(sbcOurs)||rows[0]).fid;
+  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span></div>`;
+  $("sbcEdit").textContent=SBC_PAGE==="budget"?"Edit budgets":"Edit records";
+  if(SBC_PAGE==="budget"){el.innerHTML=pageSeg+sbcBudgetView(rows);return}
   const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
   const head=`<thead><tr><th>#</th><th>Team</th><th>Div</th><th class="num">Record</th><th class="num">Win %</th><th class="num" title="Weighted two-deep grade on the board scale">Team grade</th><th class="num">Offense</th><th class="num">Defense</th><th class="num" title="Wins a team with this grade would be expected to have after this many games">Expected W</th><th class="num" title="Actual wins minus expected wins">Wins vs. talent</th><th>Verdict</th></tr></thead>`;
   const body=R.map((r,i)=>`<tr class="${sbcOurs(r)?"ours":""}"><td class="num">${i+1}</td><td class="tm">${r.tid?`<img class="slogo" src="${logoUrl(r.tid)}" alt="" loading="lazy" onerror="this.remove()">`:logoImg(null,null,r.name)}<button type="button" class="linkbtn" data-sbct="${esc(r.fid)}">${esc(r.name)}</button></td><td class="sub">${esc(r.div)}</td>
@@ -3755,22 +3783,26 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <td class="num">${r.pct!=null?Math.round(r.pct*100)+"%":"–"}</td><td class="num"><b>${fmt(r.grade)}</b> <span class="sub">#${r.gradeRk||"–"}</span></td><td class="num">${fmt(r.off)}</td><td class="num">${fmt(r.def)}</td>
     <td class="num">${r.xw!=null?r.xw.toFixed(1):"–"}</td><td class="num ${r.waa>=1?"sbc-up":r.waa<=-1?"sbc-dn":""}">${sg(r.waa)}</td><td>${sbcVerdict(r.waa)}</td></tr>`).join("");
   const t=rows.find(r=>r.fid===SBC_TEAM);
-  el.innerHTML=`<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["waa","Wins vs. talent"],["grade","Team grade"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcsort="${k}" aria-pressed="${SBC_SORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveRec">Save records</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
+  el.innerHTML=`${pageSeg}<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["waa","Wins vs. talent"],["grade","Team grade"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcsort="${k}" aria-pressed="${SBC_SORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveRec">Save records</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
     <div class="tablewrap"><table id="sbcTbl">${head}<tbody>${body}</tbody></table></div>
-    <p class="note"><b>Team grade</b> = every two-deep player graded on his board position's scale (same numbers as our boards), averaged with the QB counting 3× and backups ¼. <b>Expected W</b> comes from a straight-line fit of win % on team grade across the league (fit explains ${Math.round(fit.r2*100)}% of the differences in record). <b>Wins vs. talent</b> = actual wins minus expected: +1 or more is overperforming, −1 or less underperforming. Overall record, all games.</p>
+    <p class="note"><b>Team grade</b> = two-deep graded on our board scales (QB 3×, backups ¼). <b>Expected W</b> = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). <b>Wins vs. talent</b> = actual − expected; ±1 = over/under.</p>
     ${sbcChart(rows,fit)}
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?(SBC_SZN==="next"?(()=>{const n=sbcNext(SBC_TEAM);const ch=(a,b)=>a==null||b==null?"":` <span class="${a-b>=0?"sbc-up":"sbc-dn"}">(${a-b>=0?"+":"−"}${Math.abs(a-b).toFixed(1)})</span>`;return `<span class="sub">Next season · grade <b>${fmt(n.grade)}</b>${ch(n.grade,t.grade)} · starters ${fmt(n.st)}${ch(n.st,t.st)} · offense <b>${fmt(n.off)}</b>${ch(n.off,t.off)} · defense <b>${fmt(n.def)}</b>${ch(n.def,t.def)}</span>`})():`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`):""}</div>
     <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span><span class="seg" role="group" aria-label="Season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
     ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);return `<p style="margin:4px 0"><b>Next season:</b> losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
-    <p class="note">Starters and backups are the snap leaders at each group this season (PFF); each spot is filled by position first, so a team in a 3-3-5 shows its third linebacker where a lineman would sit. "from" = his previous school if he transferred. <b>*</b> = small sample (Low confidence). "–" = not enough data to grade; he's left out of the team grade.</p>
+    <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 style="margin:0">2026 portal class</h3><select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
-    <p class="note">Every incoming transfer on 247Sports' 2026 lists for each school, plus anyone PFF has at a new school this season that 247 missed. Each is graded on his board position's scale: <b>Last season</b> = his last college season played (2025, or 2024/2023 if he sat out; year shown when it isn't 2025) at that school's level for the full season, <b>2026</b> here so far. <b>Good take</b> = 70+ with a real role (40%+ of his side's snaps) · <b>Bad take</b> = under 60 · <b>Not playing</b> = under 10% of snaps · everything else <b>OK</b>. <b>Hit rate</b> = good takes ÷ transfers, not counting specialists (K/P/LS, listed but not graded) or players no longer on the roster.</p>
+    <p class="note">Every 2026 transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not 2025). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. Hit rate skips K/P/LS and players who left.</p>
     <h3 style="margin:14px 0 0">Next season snapshot</h3>${sbcNextLeague()}
-    <p class="note">Graduating = PFF 2027 draft class (out of eligibility after this season). Returning two-deep players move up by this year's role, then snaps; a spot is <b>open</b> when no returning two-deep player is left for it (it'll come from deeper on the roster, the portal or high school). <b>Projected grade</b> uses the same weights as the team grade. Use <b>Next season</b> above to see a team's field.</p>`}
+    <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
+  const pg=e.target.closest("[data-sbcpage]");if(pg){SBC_PAGE=pg.dataset.sbcpage;SBC_EDIT=false;renderSbc();return}
+  const bs=e.target.closest("[data-sbcbsort]");if(bs){SBC_BSORT=bs.dataset.sbcbsort;renderSbc();return}
+  if(e.target.id==="sbcSaveBud"){const up={};let bad=0;$("sbcBody").querySelectorAll("[data-sbcbud]").forEach(i=>{const v=i.value.trim();if(v===""){up[`teams.${i.dataset.sbcbud}.budget`]=null;return}const n=parseFloat(v);if(isFinite(n)&&n>=0)up[`teams.${i.dataset.sbcbud}.budget`]=Math.round(n*100)/100;else bad++});
+    if(bad){flash("Budgets must be numbers in millions, like 6.7.");return}up.budgetAsOf=new Date().toISOString().slice(0,10);up.budgetSrc="staff roster-budget sheet";DB.doc("owner/sbc").update(up).then(()=>{SBC_EDIT=false;flash("Budgets saved.");renderSbc(true)}).catch(()=>flash("Couldn't save the budgets."));return}
   const sd=e.target.closest("[data-sbcside]");if(sd){SBC_SIDE=sd.dataset.sbcside;SBC_VIEW="field";renderSbc();return}
   const sv=e.target.closest("[data-sbcview]");if(sv){SBC_VIEW=sv.dataset.sbcview;renderSbc();return}
   const sc=e.target.closest("[data-sbccls]");if(sc){SBC_CLS=sc.dataset.sbccls;renderSbc();return}
@@ -3785,13 +3817,22 @@ $("sbcBody").addEventListener("change",e=>{if(e.target.id==="sbcTeamSel"){SBC_TE
   if(e.target.id==="sbcClsSel"){const v=e.target.value;if(v==="league")SBC_CLS="league";else{SBC_CLS="team";SBC_CLS_TEAM=v}renderSbc();$("sbcClsSel").scrollIntoView({block:"center"})}});
 $("sbcEdit").addEventListener("click",()=>{SBC_EDIT=!SBC_EDIT;renderSbc()});
 $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Belt page first.");return}if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh and try again.");return}
+  if(SBC_PAGE==="budget"){const {rows:B,fw}=sbcBudgetCalc(sbcCalc().rows);const key={wab:r=>r.wab??-99,budget:r=>r.budget??-1,pct:r=>r.pct??-1,gab:r=>r.gab??-99}[SBC_BSORT]||(r=>r.wab??-99);const R=[...B].sort((a,b)=>key(b)-key(a));
+    const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
+    pdfHeader(doc,"Player Tool · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
+    doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Record","Win %","Roster budget","Expected W","Wins vs. budget","Verdict","Team grade","Talent vs. budget","Cost per win"]],
+      body:R.map((r,i)=>[i+1,r.name,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.budget!=null?sbcMoney(r.budget)+"  (#"+r.budgetRk+")":"-",r.xwB!=null?r.xwB.toFixed(1):"-",sg(r.wab),r.wab==null?"-":r.wab>=1?"Overperforming":r.wab<=-1?"Underperforming":"About right",r.grade!=null?r.grade.toFixed(1):"-",sg(r.gab),r.perWin!=null?sbcMoney(r.perWin):"-"]),
+      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+    const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(91,102,93);const m=SBC.meta;
+    doc.text(doc.splitTextToSize(`Expected W = wins that budget usually gets (league fit${fw?", explains "+Math.round(fw.r2*100)+"% of record":""}). Wins vs. budget = actual - expected. Talent vs. budget = team grade vs. what that money usually buys. Budgets: ${m.budgetSrc||"staff"}.`,doc.internal.pageSize.getWidth()-80),40,y);
+    await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
   const {rows,fit}=sbcCalc();/* same order as the Sort by buttons on the page */const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT]||(r=>r.waa??-99);const R=[...rows].sort((a,b)=>key(b)-key(a));const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   pdfHeader(doc,"Player Tool · Sun Belt snapshot",$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
     body:R.map((r,i)=>[i+1,r.name,r.div,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.grade!=null?r.grade.toFixed(1)+"  (#"+r.gradeRk+")":"-",fmt(r.off),fmt(r.def),r.xw!=null?r.xw.toFixed(1):"-",sg(r.waa),r.waa>=1?"Overperforming":r.waa<=-1?"Underperforming":"About right"]),
     styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
   const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(91,102,93);
-  doc.text(doc.splitTextToSize(`Team grade: two-deep (PFF snap leaders) graded on each board position's scale; QB counts 3x, backups 1/4. Expected W: straight-line fit of win % on team grade across the league (explains ${Math.round(fit.r2*100)}% of the differences in record). Wins vs. talent = actual - expected. Overall record.`,doc.internal.pageSize.getWidth()-80),40,y);
+  doc.text(doc.splitTextToSize(`Team grade = two-deep graded on our board scales (QB 3x, backups 1/4). Expected W = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). Wins vs. talent = actual - expected.`,doc.internal.pageSize.getWidth()-80),40,y);
   await pdfSave(doc,`Sun Belt snapshot ${new Date().toISOString().slice(0,10)}.pdf`)});
 function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAULT_TAB:t;TAB=t;
   const gmSide=GM_TABS.includes(t),hsSide=t.startsWith("hs")&&!gmSide;document.body.classList.toggle("mode-hs",hsSide);document.body.classList.toggle("mode-gm",gmSide);if(hsSide)PREF.hsTab=t;else if(gmSide)PREF.gmTab=t;else PREF.ptTab=t;if(window.HS)HS.syncSwitch();
