@@ -3738,10 +3738,10 @@ function sbcChart(rows,fit,o){o=Object.assign({x:r=>r.grade,res:r=>r.waa,xlab:"T
   return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.xlab.replace(" →",""))} vs. win percentage">${g}</svg>`}
 /* Budget page: win % and team grade each fit against roster budget ($M, teams.<fid>.budget) across the league */
 const sbcMoney=v=>v==null?"–":"$"+(+v).toFixed(1)+"M";
-function sbcBudgetCalc(rows){const fitOn=(yk)=>{const P=rows.filter(r=>r.budget!=null&&r[yk]!=null),n=P.length;let a=0,b=0,r2=0;if(n<3)return null;
+function sbcBudgetCalc(rows){let R=[];const fitOn=(yk)=>{const P=R.filter(r=>r.budget!=null&&r[yk]!=null),n=P.length;let a=0,b=0,r2=0;if(n<3)return null;
     const mx=P.reduce((s,r)=>s+r.budget,0)/n,my=P.reduce((s,r)=>s+r[yk],0)/n;let sxy=0,sxx=0,syy=0;P.forEach(r=>{sxy+=(r.budget-mx)*(r[yk]-my);sxx+=(r.budget-mx)**2;syy+=(r[yk]-my)**2});
     b=sxx?sxy/sxx:0;a=my-b*mx;r2=sxx&&syy?sxy*sxy/(sxx*syy):0;return {a,b,r2,n}};
-  const R=rows.map(r=>{const t=(SBC.meta.teams||{})[r.fid]||{};const b=t.budget!=null&&t.budget!==""&&isFinite(+t.budget)?+t.budget:null;return Object.assign({},r,{budget:b})});
+  R=rows.map(r=>{const t=(SBC.meta.teams||{})[r.fid]||{};const b=t.budget!=null&&t.budget!==""&&isFinite(+t.budget)?+t.budget:null;return Object.assign({},r,{budget:b})});
   const fw=fitOn("pct"),fg=fitOn("grade");
   R.forEach(r=>{if(r.budget==null)return;if(fw&&r.gp){r.xpctB=Math.max(0,Math.min(1,fw.a+fw.b*r.budget));r.xwB=r.xpctB*r.gp;r.wab=r.w-r.xwB}if(fg&&r.grade!=null){r.xgB=fg.a+fg.b*r.budget;r.gab=r.grade-r.xgB}r.perWin=r.w?r.budget/r.w:null});
   [...R].filter(r=>r.budget!=null).sort((x,y)=>y.budget-x.budget).forEach((r,i)=>r.budgetRk=i+1);
