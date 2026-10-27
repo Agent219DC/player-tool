@@ -20,9 +20,11 @@ service cloud.firestore {
       allow read: if isStaff();
       allow write: if isOwner();
     }
-    // Team games played and current season: any staff member
+    // Team games played and current season: any staff member.
+    // Depth charts (GM side): staff read them for starters, only the owner changes them.
     match /shared/{doc} {
-      allow read, write: if isStaff();
+      allow read: if isStaff();
+      allow write: if isOwner() || (isStaff() && !(doc in ['depth', 'depth_next', 'depth_prev']));
     }
     // Display names for "updated by" lines
     match /users/{uid} {
