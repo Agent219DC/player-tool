@@ -2467,7 +2467,7 @@ function oddsFor(level,role){const O=PODDS;if(!O||!O.cells)return null;const L=o
 function oddsHtml(p){if(!PODDS||isOurs(p)||(p.status||"")==="Committed elsewhere")return "";const role=oddsRole(POSKEY,p.db,oddsGames(p.thru),PODDS.bench);const o=oddsFor(p.level,role);if(!o)return "";
   const pc=v=>Math.round(100*v/o.n)+"%";
   return `<div class="pc-odds"><h3 style="margin:0">Transfers like him</h3><div class="sub">${esc(o.label)}${o.broad?" (small group, so broader)":""} · ${o.n} Sun Belt transfers, ${esc(PODDS.season||"2026")}</div>
-    <div class="odds-row"><span class="sbc-up"><b>${pc(o.good)}</b> good take</span><span><b>${pc(o.ok)}</b> OK</span><span class="sbc-dn"><b>${pc(o.bad)}</b> bad take</span><span class="sbc-np"><b>${pc(o.np)}</b> didn't play</span></div>
+    <div class="odds-row"><span class="sbc-up" title="Turned into a good take: 70+ with a real role">Boom <b>${pc(o.good)}</b></span><span>OK <b>${pc(o.ok)}</b></span><span class="sbc-dn" title="Graded under 60">Bust <b>${pc(o.bad)}</b></span><span class="sbc-np" title="Under 10% of snaps">Didn't play <b>${pc(o.np)}</b></span></div>
     ${o.avg!=null?`<div class="sub">Typical grade after the move: <b>${fmt(o.avg)}</b>${o.lo!=null?` (middle half ${fmt(o.lo)}–${fmt(o.hi)})`:""}</div>`:""}</div>`}
 function openCard(p){if(!p)return;CARD_K=POSKEY;CARD_P=clone(p);if(!ME.id)whoAmI();const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P);
   if(PODDS===null){const id=CARD_P.id;loadOdds().then(()=>{const box=d.querySelector("[data-odds]");if(box&&CARD_P&&CARD_P.id===id)box.outerHTML=oddsHtml(CARD_P)})}}
