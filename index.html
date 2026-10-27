@@ -156,7 +156,14 @@ table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl 
 .pc-glog .tw{overflow-x:auto;max-width:100%}.pc>*{min-width:0}.pc-glog{min-width:0;max-width:100%}
 .pc-notes{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}.pc-notes h3{margin:0}
 .note-i{border-left:3px solid var(--accent);padding:2px 0 2px 10px}.note-t{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}.note-m{font-size:12px;margin-top:2px}
-.pc-odds{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:grid;gap:4px}.odds-row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
+.pc-odds{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:4px;font-size:14px}
+.pc-cols{display:grid;gap:12px}.pc-col{display:grid;gap:12px;align-content:start;min-width:0}
+@media (min-width:960px){dialog#pcard{width:min(1060px,calc(100% - 32px))}.pc-cols{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);align-items:start}}
+.pc-sec{border:1px solid var(--line);border-radius:8px;padding:0 12px;min-width:0}
+.pc-sec>summary{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:10px 0;cursor:pointer;list-style:none;font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase}
+.pc-sec>summary::-webkit-details-marker{display:none}.pc-sec>summary>span:first-child{white-space:nowrap}.pc-sec>summary>span:first-child::before{content:"▸ ";color:var(--muted)}.pc-sec[open]>summary>span:first-child::before{content:"▾ "}
+.sec-pv{font:400 13px var(--body);letter-spacing:0;text-transform:none;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}.pc-sec[open]>summary .sec-pv{display:none}
+.pc-sec>.sec-b{padding:0 0 12px;display:grid;gap:10px;min-width:0}.pc-sec .pf-grid{margin-top:0}.note-open{justify-self:start;font-size:13px}.odds-row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
 .note-add{display:flex;gap:8px;align-items:flex-end}.note-add textarea{flex:1;min-width:0;resize:vertical;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
 @media (max-width:480px){.note-add{flex-direction:column;align-items:stretch}}
 .notemark{display:inline-flex;align-items:center;gap:1px;margin-left:5px;color:var(--accent-text);font:700 11px var(--body);vertical-align:-1px}
@@ -240,6 +247,10 @@ table .chip{font-size:10.5px;padding:2px 7px}
 .math{font:400 11px/1.45 var(--mono);color:var(--muted);background:var(--sunk);border-radius:4px;padding:8px 10px;white-space:pre-wrap;overflow-x:auto}
 /* board */
 .printbar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px}
+.selbtns{display:inline-flex;gap:8px;flex-wrap:wrap}
+.moremenu{position:relative}.moremenu>summary{list-style:none;cursor:pointer}.moremenu>summary::-webkit-details-marker{display:none}.moremenu>summary::after{content:" ▾"}
+.moremenu .menu{position:absolute;right:0;top:calc(100% + 6px);z-index:30;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px;display:grid;gap:10px;min-width:260px;max-width:min(340px,90vw);box-shadow:0 8px 24px rgba(0,0,0,.25);font-size:13px}
+.moremenu .menu .note{font-size:12px}
 .btn:disabled,.btn.primary:disabled{background:transparent;color:var(--muted);border-color:var(--line);opacity:.6;cursor:not-allowed;filter:none}
 #board a[data-load]{text-decoration:none} #board a[data-load]:hover,#board a[data-load]:focus-visible{text-decoration:underline}
 .bio{font-size:12px;margin-top:2px;white-space:normal}
@@ -630,6 +641,8 @@ button.stag.st-Pass{color:#fff;border-color:transparent!important}
 .sidesw button{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:4px 12px}
 .sidesw button.has-dot::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cMed);margin-left:6px;vertical-align:2px}
 body:not(.mode-hs) #tabs [data-hs]{display:none}
+#tabs [data-sub]{display:none!important}
+.subnav{display:flex;padding:2px 0 0}.subnav .seg button{font:600 13px var(--display);letter-spacing:.04em;padding:5px 14px}
 body:not(.mode-gm) #tabs [data-gm]{display:none} body.mode-gm #tabs [data-tab]:not([data-gm]){display:none}
 body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
 .hs-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px}
@@ -690,7 +703,7 @@ table.hs-cmp .cn button{font:inherit;font-weight:700;background:none;border:0;co
 #hsNeedTbl input{width:64px}
 .tag .g.none{color:var(--muted);font-weight:600}
 .chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
-dialog#hsDlg{width:min(820px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+dialog#hsDlg{width:min(820px,calc(100% - 32px));}@media (min-width:960px){dialog#hsDlg{width:min(1100px,calc(100% - 32px))}}dialog#hsDlg{max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
 .hsd{display:grid;gap:16px;padding:20px 22px 22px}
 .hsd-box{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
@@ -812,10 +825,11 @@ window.claude={use:async n=>{
       <span class="seg sidesw" role="group" aria-label="Portal, High School or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High School</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
     </div>
     <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs">
-      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Overview</span><span class="ts">Overview</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="sbc" data-gm id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">HS Needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">HS Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-tab="hsset" data-gm id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">HS Settings</span></button></div>
+      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Roster</span><span class="ts">Roster</span></button><button type="button" class="tab" data-sub data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-sub data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="sbc" data-gm id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-sub data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-sub data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">HS Needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="hsset" data-gm id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">HS Settings</span></button></div>
       <span class="gsearch"><input id="gSearch" type="search" placeholder="Search portal + HS" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden aria-label="Sign out" title="Sign out" onclick="firebase.auth().signOut().then(()=>location.reload())"><svg class="hi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span class="lbl">Sign out</span></button></span>
   </header>
+  <div id="subnav" class="subnav" hidden><span class="seg" role="group" aria-label="View" id="subnavSeg"></span></div>
   <div id="bkNag" class="bknag" data-page="settings" role="status" hidden><span id="bkNagTxt"></span><span class="bknag-btns"><button class="btn primary" type="button" id="bkNagGo">Download backup</button><button class="btn" type="button" id="bkNagLater">Later</button></span></div>
   <script>
   (function(){var K="mf_theme",b=document.getElementById("themeBtn"),root=document.documentElement;
@@ -827,13 +841,7 @@ window.claude={use:async n=>{
   })();
   </script>
 
-  <div class="posrow" data-page="boards"><div class="pos" role="group" aria-label="Position" id="posBar"></div>
-  <div class="modebar">
-    <label style="display:flex;align-items:center;gap:6px;color:var(--fg)">Team games played
-      <input id="teamGames" type="number" min="1" max="15" style="width:64px">
-    </label>
-    <span id="modeNote" class="note"></span>
-  </div></div>
+  <div class="posrow" data-page="boards"><div class="pos" role="group" aria-label="Position" id="posBar"></div></div>
 
   <section id="bigboard" data-page="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
@@ -1001,13 +1009,15 @@ window.claude={use:async n=>{
     <div class="printbar">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px">
         <label class="check" style="font-size:13px;color:var(--muted)"><input type="checkbox" id="starOnly"> <span style="color:#e0a100">★</span> Starred only</label>
-        <label class="check" style="font-size:13px;color:var(--muted)"><input type="checkbox" id="showRef"> Show hidden players</label>
       </div>
       <div class="btns">
-        <button class="btn" type="button" id="cmpBtn" disabled>Compare selected</button>
-        <button class="btn primary" type="button" id="printBtn" disabled>Print selected</button>
-        <span class="tbsep" aria-hidden="true"></span>
-        <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on every position board who has them">Refresh all stats</button>
+        <span class="selbtns" id="selBtns" hidden><button class="btn" type="button" id="cmpBtn" disabled>Compare selected</button><button class="btn primary" type="button" id="printBtn" disabled>Print selected</button></span>
+        <details class="moremenu" id="boardMore"><summary class="btn">More</summary><div class="menu">
+          <label class="check"><input type="checkbox" id="showRef"> Show hidden players</label>
+          <label style="display:flex;align-items:center;gap:6px">Team games played <input id="teamGames" type="number" min="1" max="15" style="width:64px"></label>
+          <span id="modeNote" class="note"></span>
+          <button class="btn" type="button" id="espnAll" title="Pull the latest ESPN stats for every player on every position board who has them">Refresh all stats</button>
+        </div></details>
       </div>
       <div id="espnAllRes" class="espnres" hidden></div>
     </div>
@@ -1857,7 +1867,7 @@ function pkey(p){return [p.name||"",p.school||"",p.season||""].join("|")}
 function updatePickUI(){
   const n=LAST_ROWS.filter(x=>PICK.has(pkey(x.p))).length;
   $("printBtn").disabled=n===0;
-  $("cmpBtn").disabled=n<2;
+  $("cmpBtn").disabled=n<2;$("selBtns").hidden=!n;
   $("printBtn").textContent=n?`Print selected (${n})`:"Print selected";
 }
 const CONFRGB={High:[0,122,51],Medium:[125,99,0],Low:[198,40,40]};
@@ -2422,9 +2432,9 @@ const noteList=p=>(Array.isArray(p&&p.notes)?p.notes:[]).filter(n=>n&&n.t).slice
 function noteMark(p){const n=noteList(p).length;return n?`<span class="notemark" title="${n} coach note${n>1?"s":""}: ${esc(noteList(p)[0].t.slice(0,90))}"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 2h10v9l-3 3H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.5 6h5M5.5 8.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${n>1?n:""}</span>`:""}
 function notesHtml(p){if(!p||!p.id)return "";const L=noteList(p);
   const when=at=>{const d=new Date(at);return isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
-  return `<div class="pc-notes"><h3>Coach notes${L.length?` <span class="sub">(${L.length})</span>`:""}</h3>
+  return `<details class="pc-sec pc-notes"${L.length?" open":""}><summary><span>Coach notes${L.length?` (${L.length})`:""}</span><span class="sec-pv">${L.length?esc(L[0].t.slice(0,70)):"None yet"}</span></summary><div class="sec-b">
     ${L.map(n=>`<div class="note-i"><div class="note-t">${esc(n.t)}</div><div class="note-m sub">${esc(n.byName||"Staff")} · ${when(n.at)}${(OWNER||(ME.id&&n.by===ME.id))?` · <button type="button" class="linkbtn" data-pc="note-del" data-nid="${esc(n.id)}">Delete</button>`:""}</div></div>`).join("")}
-    <div class="note-add"><textarea id="pcNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" data-pc="note-add">Add note</button></div></div>`}
+    <button type="button" class="linkbtn note-open" data-pc="note-open">+ Add a note</button><div class="note-add" hidden><textarea id="pcNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" data-pc="note-add">Add note</button></div></div></details>`}
 async function noteSave(op,arg){const q=CARD_P;if(!DB||!q||!q.id)return;const k=CARD_K||POSKEY,ref=DB.collection(k.toLowerCase()+"_players").doc(q.id);
   const d=$("pcard"),top=d.scrollTop;
   try{if(op==="add"){const t=String(arg||"").trim();if(!t)return;const me=await whoAmI();
@@ -2443,14 +2453,18 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
       ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
       <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div>${p.espnId?'<div class="pc-line" data-espnline></div>':""}</div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
-  const mets=r?`<div><h3>Metrics</h3><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div>`:"";
+  const mets=r?`<details class="pc-sec" open><summary><span>Metrics</span></summary><div class="sec-b"><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div></details>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
     ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
+  const bioPv=[p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":"",[p.home,p.st].filter(Boolean).join(", "),p.elig!=null?p.elig+" yr"+(p.elig==1?"":"s")+" left":""].filter(Boolean).join(" · ")||"–";
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
-  const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
+  const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="pc-sec"><summary><span>Career stats · ESPN</span></summary><div class="sec-b career">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div class="pc-who">${headshotHtml(p)}<div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${PODDS===null?"<div data-odds></div>":oddsHtml(p)}${notesHtml(p)}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    <div class="pc-cols"><div class="pc-col">${grade}${PODDS===null?"<div data-odds></div>":oddsHtml(p)}${mets}</div>
+    <div class="pc-col">${notesHtml(p)}${pfHtml(p,r)}${p.espnId?'<details class="pc-sec" data-glogsec hidden><summary><span>Game log · ESPN</span><span class="sec-pv" data-glogpv></span></summary><div class="sec-b pc-glog" data-espnglog></div></details>':""}
+    <details class="pc-sec"><summary><span>Bio &amp; recruiting</span><span class="sec-pv">${esc(bioPv)}</span></summary><div class="sec-b">${bio}</div></details>
+    <details class="pc-sec"><summary><span>Contacts</span><span class="sec-pv">${esc(p.agency||(p.agent||p.pcontact?"On file":"None yet"))}</span></summary><div class="sec-b"><div class="pc-contacts"><div style="text-align:right"><button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px">Edit contacts</button></div>${contacts}</div></div></details>${car}</div></div>
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 let CARD_K=null;
 /* Portal odds: how Sun Belt transfers with the same profile (old level + role) actually did. config/portalOdds, written by the owner from the Sun Belt page.
@@ -2466,7 +2480,7 @@ function oddsFor(level,role){const O=PODDS;if(!O||!O.cells)return null;const L=o
   const a=O.cells.all;return a?Object.assign({label:"all transfers",broad:true},a):null}
 function oddsHtml(p){if(!PODDS||isOurs(p)||(p.status||"")==="Committed elsewhere")return "";const role=oddsRole(POSKEY,p.db,oddsGames(p.thru),PODDS.bench);const o=oddsFor(p.level,role);if(!o)return "";
   const pc=v=>Math.round(100*v/o.n)+"%";
-  return `<div class="pc-odds"><h3 style="margin:0">Transfers like him</h3><div class="sub">${esc(o.label)}${o.broad?" (small group, so broader)":""} · ${o.n} Sun Belt transfers, ${esc(PODDS.season||"2026")}</div>
+  return `<div class="pc-odds"><div><b>Transfers like him</b> <span class="sub">· ${esc(o.label)}${o.broad?" (small group, so broader)":""} · ${o.n} Sun Belt transfers, ${esc(PODDS.season||"2026")}</span></div>
     <div class="odds-row"><span class="sbc-up" title="Turned into a good take: 70+ with a real role">Boom <b>${pc(o.good)}</b></span><span>OK <b>${pc(o.ok)}</b></span><span class="sbc-dn" title="Graded under 60">Bust <b>${pc(o.bad)}</b></span><span class="sbc-np" title="Under 10% of snaps">Didn't play <b>${pc(o.np)}</b></span></div>
     ${o.avg!=null?`<div class="sub">Typical grade after the move: <b>${fmt(o.avg)}</b>${o.lo!=null?` (middle half ${fmt(o.lo)}–${fmt(o.hi)})`:""}</div>`:""}</div>`}
 function openCard(p){if(!p)return;CARD_K=POSKEY;CARD_P=clone(p);if(!ME.id)whoAmI();const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P);
@@ -2506,7 +2520,8 @@ async function fillEspnLive(p){let d;try{d=await espnLive(p.espnId)}catch(e){ret
   const L=d.labels,G=d.games,F=G.filter(x=>x.fbs),W=a=>a.filter(x=>x.res==="W").length,Lx=a=>a.filter(x=>x.res==="L").length;
   const sumRow=(a,lbl)=>`<tr class="gl-sum"><td colspan="2">${lbl}</td><td>${W(a)}–${Lx(a)}</td>${glogSum(L,a.map(x=>x.s)).map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`;
   const fbsLine=F.length?`<div class="gl-fbs"><b>Vs. FBS opponents</b> · ${F.length} game${F.length>1?"s":""} (${W(F)}–${Lx(F)}): ${(()=>{const seen=new Set();return glogSum(L,F.map(x=>x.s)).map((v,i)=>{const l=L[i];if(/^(LNG|RTG|QBR|ADJQBR)$/i.test(l)||v==="–"||v==="0"||seen.has(l))return null;seen.add(l);return `${esc(v)} ${esc(l)}`}).filter(Boolean).slice(0,6).join(" · ")})()}</div>`:(G.some(x=>x.fbs===false)&&p.level!=="P4"&&p.level!=="G6"?'<div class="gl-fbs sub">No games against FBS opponents this season.</div>':"");
-  gl.innerHTML=`<h3>Game log · ESPN</h3>${fbsLine}<div class="tw"><table class="gl"><thead><tr><th>Date</th><th>Opponent</th><th>Result</th>${L.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${G.map(x=>`<tr${x.fbs?' class="gl-f"':""}><td>${esc(new Date(x.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}))}</td><td>${esc(x.at)} ${esc(x.opp)}${x.fbs?' <span class="gl-tag">FBS</span>':""}</td><td class="${x.res==="W"?"up":x.res==="L"?"dn":""}">${esc(x.res)} ${esc(x.score)}</td>${x.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${sumRow(G,"Season")}${F.length&&F.length<G.length?sumRow(F,"Vs. FBS"):""}</tbody></table></div>`;
+  const sec=gl.closest("[data-glogsec]");if(sec){sec.hidden=false;const pv=sec.querySelector("[data-glogpv]");if(pv)pv.textContent=`${G.length} game${G.length>1?"s":""} · ${W(G)}–${Lx(G)}`}
+  gl.innerHTML=`${fbsLine}<div class="tw"><table class="gl"><thead><tr><th>Date</th><th>Opponent</th><th>Result</th>${L.map(l=>`<th>${esc(l)}</th>`).join("")}</tr></thead><tbody>${G.map(x=>`<tr${x.fbs?' class="gl-f"':""}><td>${esc(new Date(x.date).toLocaleDateString("en-US",{month:"short",day:"numeric"}))}</td><td>${esc(x.at)} ${esc(x.opp)}${x.fbs?' <span class="gl-tag">FBS</span>':""}</td><td class="${x.res==="W"?"up":x.res==="L"?"dn":""}">${esc(x.res)} ${esc(x.score)}</td>${x.s.map(v=>`<td>${esc(v)}</td>`).join("")}</tr>`).join("")}${sumRow(G,"Season")}${F.length&&F.length<G.length?sumRow(F,"Vs. FBS"):""}</tbody></table></div>`;
   gl.hidden=false}
 function closeCard(){const d=$("pcard");if(d.open)try{d.close()}catch(e){d.removeAttribute("open")}}
 $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){closeCard();return}const b=e.target.closest("[data-pc]");if(!b)return;const a=b.dataset.pc;
@@ -2520,6 +2535,7 @@ $("pcard").addEventListener("click",e=>{const d=$("pcard");if(e.target===d){clos
     $("pc-agency").focus()}
   if(a==="ccancel")openCard(CARD_P);
   if(a==="csave")saveContacts();
+  if(a==="note-open"){const w=d.querySelector(".pc-notes .note-add");if(w){w.hidden=false;b.hidden=true;$("pcNote").focus()}return}
   if(a==="note-add"){const v=$("pcNote").value;if(v.trim())noteSave("add",v)}
   if(a==="note-del"){if(confirmDel(b))noteSave("del",b.dataset.nid)}});
 /* two-tap delete on notes: first tap asks, second tap within 4s deletes (no browser pop-up) */
@@ -3210,7 +3226,8 @@ function parseBudgetSheet(R){const cell=(r,c)=>(R[r]||[])[c];const txt=v=>v==nul
 /* market, asking price, our budget and commit impact in one box (targets: the impact box carries the budget line) */
 function pfHtml(p,r){const mk=r?marketHtml(p,r):"",ask=askHtml(p,r),bud=isOurs(p)?budgetCardHtml(p,r):"",imp=impactHtml(p,r);
   if(!mk&&!ask&&!bud&&!imp)return "";const top=mk||ask?`<div class="pf-grid">${mk}${ask}</div>`:"";
-  return `<div class="pc-pf"><h3 class="pf-h">Price &amp; fit</h3>${top}${bud}${imp}</div>`}
+  const pv=((mk.match(/class="big">([^<]+)</)||[])[1]||"").trim();
+  return `<details class="pc-sec pc-pf"><summary><span>Price &amp; fit</span><span class="sec-pv">${pv?"Market "+pv:"Only you see this"}</span></summary><div class="sec-b">${top}${bud}${imp}</div></details>`}
 function impactHtml(p,r){if(!p||isOurs(p)||p.ref||p.deleted||!r||r.grade==null)return "";const lines=[];const nm=normName(p.name);
   const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;
   const Ln=(DCS.next||{}).limits||{},cnt=(DCS.next&&DCS.next.groups)?dcCounts("next"):null;
@@ -3650,6 +3667,12 @@ let TAB=null,TABS_READY=false;
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||{}}catch(e){return {}}})();
 function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
 const GM_TABS=["sbc","budget","settings","hsset"];
+/* Tab groups: one tab per group in the row; the group's pages switch with the bar under the header. Every page keeps its own #hash. */
+const TAB_GROUPS=[{id:"boards",btn:"boards",views:[["boards","By position"],["bigboard","Big Board"]]},{id:"roster",btn:"overview",views:[["overview","Overview"],["depth","Depth chart"],["recruit","Needs"]]},
+  {id:"hsprosp",btn:"hsboard",views:[["hsboard","List"],["hsbig","Big Board"]]},{id:"hsrecg",btn:"hsrec",views:[["hsneeds","Needs"],["hsrec","Visits & offers"]]},{id:"set",btn:"settings",views:[["settings","Portal"],["hsset","High school"]]}];
+const groupOf=t=>TAB_GROUPS.find(g=>g.views.some(v=>v[0]===t))||null;
+function subnavSync(t){const g=groupOf(t),bar=$("subnav");if(!bar)return;if(!g){bar.hidden=true;return}const V=g.views.filter(v=>okTab(v[0]));if(V.length<2){bar.hidden=true;return}
+  bar.hidden=false;$("subnavSeg").innerHTML=V.map(([k,n])=>`<button type="button" data-subgo="${k}" aria-pressed="${k===t}">${n}</button>`).join("")}
 function okTab(t){return TABS.includes(t)&&!(GM_TABS.includes(t)&&!OWNER_TAB())}
 function OWNER_TAB(){return !$("budBtn").hidden}
 function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PREF.tab||DEFAULT_TAB)}
@@ -3873,7 +3896,8 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
   await pdfSave(doc,`Sun Belt snapshot ${new Date().toISOString().slice(0,10)}.pdf`)});
 function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAULT_TAB:t;TAB=t;
   const gmSide=GM_TABS.includes(t),hsSide=t.startsWith("hs")&&!gmSide;document.body.classList.toggle("mode-hs",hsSide);document.body.classList.toggle("mode-gm",gmSide);if(hsSide)PREF.hsTab=t;else if(gmSide)PREF.gmTab=t;else PREF.ptTab=t;if(window.HS)HS.syncSwitch();
-  document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t){b.setAttribute("aria-current","page");const r=$("tabs");if(r.scrollWidth>r.clientWidth)r.scrollLeft=Math.max(0,b.offsetLeft-r.clientWidth/2+b.offsetWidth/2)}else b.removeAttribute("aria-current")});
+  const grp=groupOf(t);if(grp){PREF.sub=PREF.sub||{};PREF.sub[grp.id]=t}subnavSync(t);
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t||(grp&&b.dataset.tab===grp.btn)){b.setAttribute("aria-current","page");const r=$("tabs");if(r.scrollWidth>r.clientWidth)r.scrollLeft=Math.max(0,b.offsetLeft-r.clientWidth/2+b.offsetWidth/2)}else b.removeAttribute("aria-current")});
   document.querySelectorAll("[data-page]").forEach(el=>el.classList.toggle("pg-off",el.dataset.page!==t));
   PREF.tab=t;savePref();
   if(o.push!==false&&location.hash!=="#"+t){try{history.pushState(null,"","#"+t)}catch(e){location.hash=t}}
@@ -3896,7 +3920,9 @@ document.addEventListener("keydown",e=>{if(e.key!=="/"||e.metaKey||e.ctrlKey||e.
   if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||t.isContentEditable||document.querySelector("dialog[open]"))return;const g=$("gSearch");if(!g)return;e.preventDefault();window.scrollTo({top:0});g.focus();g.select()});
 window.addEventListener("scroll",()=>{const y=window.scrollY,b=document.body.classList;if(y>90&&!b.contains("scrolled"))b.add("scrolled");else if(y<8&&b.contains("scrolled"))b.remove("scrolled")},{passive:true});
 function startTabs(){if(TABS_READY)return;TABS_READY=true;go(firstTab(),{push:false,scroll:false});try{history.replaceState(null,"","#"+TAB)}catch(e){}}
-$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(b)go(b.dataset.tab)});
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;const g=TAB_GROUPS.find(x=>x.btn===b.dataset.tab);const last=g&&PREF.sub&&PREF.sub[g.id];go(g&&last&&okTab(last)?last:b.dataset.tab)});
+document.addEventListener("click",e=>{document.querySelectorAll("details.moremenu[open]").forEach(d=>{if(!d.contains(e.target))d.open=false})});
+$("subnav").addEventListener("click",e=>{const b=e.target.closest("[data-subgo]");if(b)go(b.dataset.subgo)});
 window.addEventListener("popstate",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
 window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
 /* remember the toggles on each page */
@@ -4137,9 +4163,9 @@ function hsNotes(p){const n=p&&p.notes;if(Array.isArray(n))return n.filter(x=>x&
 function noteMk(p){const n=hsNotes(p).length;return n?`<span class="notemark" title="${n} coach note${n>1?"s":""}"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 2h10v9l-3 3H3z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M5.5 6h5M5.5 8.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>${n>1?n:""}</span>`:""}
 const noteWhen=at=>{const d=new Date(at);return !at||isNaN(d)?"":d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})+" · "+d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
 function notesBox(p,m){const L=hsNotes(p).slice().sort((a,b)=>String(b.at).localeCompare(String(a.at)));
-  return `<div class="pc-notes"><h3>Coach notes${L.length?` <span class="sub">(${L.length})</span>`:""}</h3>
+  return `<details class="pc-sec pc-notes"${L.length?" open":""}><summary><span>Coach notes${L.length?` (${L.length})`:""}</span><span class="sec-pv">${L.length?e_(L[0].t.slice(0,70)):"None yet"}</span></summary><div class="sec-b">
     ${L.map(n=>`<div class="note-i"><div class="note-t">${e_(n.t)}</div><div class="note-m sub">${e_(n.byName||"Staff")}${n.at?" · "+noteWhen(n.at):""}${(isOwner()||(m.id&&n.by===m.id)||(n.id==="legacy"&&(isOwner()||p.addedBy===m.id)))?` · <button type="button" class="linkbtn" data-hsnd="${e_(n.id)}">Delete</button>`:""}</div></div>`).join("")}
-    <div class="note-add"><textarea id="hsNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" id="hsNoteAdd">Add note</button></div></div>`}
+    <button type="button" class="linkbtn note-open" id="hsNoteOpen">+ Add a note</button><div class="note-add" hidden><textarea id="hsNote" rows="2" maxlength="2000" placeholder="Add a note from the head coach or staff…" aria-label="New note"></textarea><button type="button" class="btn" id="hsNoteAdd">Add note</button></div></div></details>`}
 async function noteSaveHS(id,op,arg){const p=ROWS.find(r=>r.id===id);if(!p||!DBX)return;const m=await me();let L=hsNotes(p);
   if(op==="add"){const t=String(arg||"").trim();if(!t)return;L=L.concat([{id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),t,at:new Date().toISOString(),by:m.id||"",byName:m.name||"Staff"}])}
   else L=L.filter(n=>n.id!==arg);
@@ -4149,7 +4175,7 @@ async function noteSaveHS(id,op,arg){const p=ROWS.find(r=>r.id===id);if(!p||!DBX
 async function toggleStar(id){const p=ROWS.find(r=>r.id===id);if(!p||!DBX)return;try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({star:!p.star})}catch(e){REFRESH=false;toast("Couldn't change that prospect. You may not have edit access.")}}
 
 /* ---------- compare (up to 3 prospects side by side) ---------- */
-function pickUI(){const n=LAST_LIST.filter(x=>PICKH.has(x.r.id)).length;q("hsListPrint").disabled=!n;q("hsCmpSel").disabled=n<2;q("hsListPrint").textContent=n?`Print selected (${n})`:"Print selected";
+function pickUI(){const n=LAST_LIST.filter(x=>PICKH.has(x.r.id)).length;q("hsCmpSel").parentElement.hidden=!n;q("hsListPrint").disabled=!n;q("hsCmpSel").disabled=n<2;q("hsListPrint").textContent=n?`Print selected (${n})`:"Print selected";
   const h=q("hsPickAll");if(h)h.checked=LAST_LIST.length>0&&LAST_LIST.every(x=>PICKH.has(x.r.id))}
 function cmpRows(L){const tv=(r,src,k)=>num(((r.outside||{})[src]||{})[k]);const samePos=L.every(x=>x.r.pos===L[0].r.pos);
   const rows=[["grp","Profile"],["Position",x=>x.r.pos||"–"],["High school",x=>[x.r.school,x.r.state].filter(Boolean).join(", ")||"–"],["Class",x=>x.r.cls||"–"],
@@ -4216,12 +4242,13 @@ function muOffer(p){const t=(Array.isArray(p.offerTimeline)?p.offerTimeline:[]).
 function visitDate(v){const d=new Date(String(v.date||"")+"T12:00:00");return isNaN(d)?null:d}
 function recBox(p){const R=p.rec||{},V=Array.isArray(p.visits)?p.visits:[];const names=k=>[...new Set(ROWS.map(r=>(r.rec||{})[k]).filter(Boolean))].sort();
   const vrow=(v,i)=>`<tr data-vi="${i}"><td><select data-vf="type">${VTYPES.map(t=>`<option${t===v.type?" selected":""}>${t}</option>`).join("")}</select></td><td><input data-vf="date" type="date" value="${e_(v.date||"")}"></td><td><input data-vf="note" type="text" value="${e_(v.note||"")}" placeholder="Note"></td><td><button type="button" class="btn" data-vdel="${i}" aria-label="Remove visit">✕</button></td></tr>`;
-  return `<div class="hsd-box"><h3>Recruiting</h3>
+  const pv=[R.recruiter,R.offerDate?"offered "+R.offerDate:"",V.length?V.length+" visit"+(V.length>1?"s":""):""].filter(Boolean).join(" · ");
+  return `<details class="pc-sec"><summary><span>Recruiting</span><span class="sec-pv">${e_(pv||"Not set")}</span></summary><div class="sec-b">
     <datalist id="hsRecNames">${[...new Set(names("recruiter").concat(names("posCoach")))].map(n=>`<option value="${e_(n)}">`).join("")}</datalist>
     <div class="grid2">${field("hsR-recruiter","Recruiter (area)",R.recruiter,"text",' list="hsRecNames"')}${field("hsR-posCoach","Position coach",R.posCoach,"text",' list="hsRecNames"')}${field("hsR-offerDate","Marshall offer date",R.offerDate,"date")}</div>
     ${!R.offerDate&&muOffer(p)?`<p class="sub" style="margin:0">Tracking Football lists the Marshall offer on ${e_(muOffer(p))}.</p>`:""}
     <div class="tablewrap"><table class="hs-mini hs-visits" id="hsVisits"><thead><tr><th>Visit / camp</th><th>Date</th><th>Note</th><th></th></tr></thead><tbody>${V.map(vrow).join("")||`<tr class="empty"><td colspan="4" class="sub">No visits or camps yet.</td></tr>`}</tbody></table></div>
-    <div class="btns"><button class="btn" type="button" id="hsAddVisit">+ Add visit or camp</button><button class="btn primary" type="button" id="hsSaveRec">Save recruiting</button></div></div>`}
+    <div class="btns"><button class="btn" type="button" id="hsAddVisit">+ Add visit or camp</button><button class="btn primary" type="button" id="hsSaveRec">Save recruiting</button></div></div></details>`}
 function wireRec(id){const tb=()=>q("hsVisits").querySelector("tbody");
   const read=()=>[...tb().querySelectorAll("tr[data-vi]")].map(tr=>{const o={};tr.querySelectorAll("[data-vf]").forEach(el=>o[el.dataset.vf]=el.value.trim());return o}).filter(v=>v.date||v.note);
   q("hsAddVisit").onclick=()=>{const e=tb().querySelector("tr.empty");if(e)e.remove();const i=tb().querySelectorAll("tr[data-vi]").length;tb().insertAdjacentHTML("beforeend",`<tr data-vi="${i}"><td><select data-vf="type">${VTYPES.map(t=>`<option>${t}</option>`).join("")}</select></td><td><input data-vf="date" type="date"></td><td><input data-vf="note" type="text" placeholder="Note"></td><td><button type="button" class="btn" data-vdel="${i}" aria-label="Remove visit">✕</button></td></tr>`)};
@@ -4311,25 +4338,27 @@ function pct(v){return num(v)==null?"–":Math.round(num(v)*100)+"%"}
 function outsidePanel(p,s){const o=p.outside||{},T=o.tf||{},G=o.ng||{};if(!Object.keys(T).length&&!Object.keys(G).length)return "";
   const row=(n,pk,rk)=>`<tr><td>${n}</td><td class="num">${pct(T[pk])}</td><td class="num sub">${e_(T[rk]||"")}</td></tr>`;
   const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub">${n}</span><b>${e_(v)}</b></div>`;
-  return `<div class="hsd-box"><h3>Outside ratings</h3>
+  const pv=[T.pai!=null?"PAI "+T.pai:"",G.r247?"247 "+G.r247:"",num(T.muPct)!=null?"vs MU "+pct(T.muPct):""].filter(Boolean).join(" · ");
+  return `<details class="pc-sec"><summary><span>Outside ratings</span><span class="sec-pv">${e_(pv)}</span></summary><div class="sec-b">
   ${Object.keys(T).length?`<div class="hsd-break">${kv("Tracking Football PAI",T.pai)}${kv("HS Combine score",T.com)}${kv("Game speed MPH",T.mph)}${kv("Rating compared",T.rating)}</div>
     ${num(T.muPct)!=null||num(T.hsPct)!=null?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>${e_(T.rating||"Rating")} vs.</th><th class="num">Percentile</th><th class="num">Rank</th></tr></thead><tbody>
       ${row("HS class","hsPct","hsRank")}${row("Division I","diPct","diRank")}${row("<b>Marshall</b>","muPct","muRank")}${row("Sun Belt","sbPct","sbRank")}${row("NFL Draft","nflPct","nflRank")}</tbody></table></div>`:""}
     ${T.parts?`<p class="sub" style="margin:0">${e_(T.parts)}</p>`:""}
     ${s&&s.estTm?`<p class="sub" style="margin:0">No usable testing yet, so his testing score (~${f1(s.Tm,0)}) is estimated from the vs. Marshall percentile. It doesn't count as verified testing.</p>`:""}`:""}
   ${Object.keys(G).length?`<div class="hsd-break">${kv("XOS rating",G.xos)}${kv("ISR grade",G.isr)}${kv("LSR grade",G.lsr)}${kv("Catapult top speed",G.topSpeed)}${kv("NextGen offer score",G.offerScore)}${kv("247 rating",G.r247)}${kv("247 national",G.nat&&"#"+G.nat)}${kv("247 position",G.posRank&&"#"+G.posRank)}</div>`:""}
-  <p class="sub" style="margin:0">${[T.src&&T.at?T.src+" ("+T.at+")":T.src,G.src&&G.at?G.src+" ("+G.at+")":G.src].filter(Boolean).map(e_).join(" · ")}</p></div>`}
+  <p class="sub" style="margin:0">${[T.src&&T.at?T.src+" ("+T.at+")":T.src,G.src&&G.at?G.src+" ("+G.at+")":G.src].filter(Boolean).map(e_).join(" · ")}</p></div></details>`}
 
 function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub">${n}</span><b style="font-size:16px">${v}</b></div>`;
   const tr=Array.isArray(p.track)?p.track:[];const ol=Array.isArray(p.offerTimeline)?p.offerTimeline:[];
   const items=[kv("Committed to",e_(p.commitTo||"")),kv("Offers",p.offers!=null?e_(p.offers)+(p.p4?` (${e_(p.p4)} P4)`:""):""),kv("GPA",e_(p.gpa??"")),kv("ACT / SAT",e_(p.act||"")),kv("Height %ile",e_(p.htp||"")),kv("Weight %ile",e_(p.wtp||"")),kv("Other sports",e_(p.sports||""))].join("");
   if(!items&&!tr.length&&!ol.length&&!p.filmUrl&&!p.history)return "";
-  return `<div class="hsd-box"><h3>Background</h3>${items?`<div class="hsd-break">${items}</div>`:""}
+  const pv=[p.commitTo?"Committed to "+p.commitTo:"",p.offers!=null?p.offers+" offers":"",p.gpa?"GPA "+p.gpa:""].filter(Boolean).join(" · ");
+  return `<details class="pc-sec"><summary><span>Background</span><span class="sec-pv">${e_(pv)}</span></summary><div class="sec-b">${items?`<div class="hsd-break">${items}</div>`:""}
   ${p.history?`<p class="sub" style="margin:0">${e_(p.history)}</p>`:""}
   ${p.filmUrl&&p.filmUrl!==hudlOf(p)?`<p style="margin:0"><a href="${e_(p.filmUrl)}" target="_blank" rel="noopener">Watch film clip</a> <span class="sub">(Tracking Football)</span></p>`:""}
   ${tr.length?`<div class="tablewrap"><table class="hs-mini"><thead><tr><th>Track & field</th><th class="num">Mark</th><th>Meet</th><th>Date</th><th class="num">vs Marshall</th></tr></thead><tbody>${tr.map(t=>`<tr><td>${e_(t.e)}</td><td class="num">${e_(t.v)}</td><td class="sub">${e_(t.meet||"")}</td><td class="sub">${e_(t.date||"")}</td><td class="num">${t.mu!=null?Math.round(t.mu*100)+"%":"–"}</td></tr>`).join("")}</tbody></table></div>`:""}
   ${ol.length?`<details><summary class="sub">Offer list (${ol.length})</summary><p class="sub" style="margin:6px 0 0">${ol.map(o=>e_(o.s)+(o.c?" ✓":"")+(o.d?` <span style="opacity:.7">(${e_(o.d)})</span>`:"")).join(", ")}</p></details>`:p.offerList?`<details><summary class="sub">Offer list</summary><p class="sub" style="margin:6px 0 0">${e_(p.offerList)}</p></details>`:""}
-  ${p.pulledAt?`<p class="sub" style="margin:0">Last pulled from Tracking Football${p.src&&p.src.ng?" and NextGen":""} on ${e_(String(p.pulledAt).slice(0,10))}.</p>`:""}</div>`}
+  ${p.pulledAt?`<p class="sub" style="margin:0">Last pulled from Tracking Football${p.src&&p.src.ng?" and NextGen":""} on ${e_(String(p.pulledAt).slice(0,10))}.</p>`:""}</div></details>`}
 
 /* ---------- prospect card ---------- */
 /* Our measurements (taken on a visit): saved into ht/wt/wing/arm/hand, marked manual so imports never overwrite them; meas keeps when, where, who and the listed numbers they replaced */
@@ -4337,13 +4366,14 @@ const MK=[["ht","Height"],["wt","Weight"],["wing","Wingspan"],["arm","Arm"],["ha
 function measFmt(k,v){if(v==null||v==="")return "–";if(k==="ht"){const m=String(v).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)\s*(\d{1,2}(?:\.\d+)?)/);return m?`${m[1]}'${+m[2]}"`:fmtHt(v)}return k==="wt"?v+" lbs":v+'"'}
 function measWhen(M){return M?[M.date?fmtDate(M.date):"",M.where||"",M.byName||""].filter(Boolean).join(" · "):""}
 function measBox(p){const M=p.meas,W=(M&&M.was)||{},td=new Date().toISOString().slice(0,10);
-  return `<div class="hsd-box" id="hsMeasBox"><h3>Measurements ${M?`<span class="chip meas-chip">Measured by us</span>`:""}</h3>
+  const pv=[p.ht?measFmt("ht",p.ht):"",p.wt?measFmt("wt",p.wt):"",p.wing?measFmt("wing",p.wing)+" wing":""].filter(Boolean).join(" · ")+(M?" · measured by us":"");
+  return `<details class="pc-sec" id="hsMeasBox"><summary><span>Measurements</span><span class="sec-pv">${e_(pv||"None yet")}</span></summary><div class="sec-b">${M?`<span class="chip meas-chip" style="justify-self:start">Measured by us</span>`:""}
   <p class="sub" style="margin:0">${M?e_(measWhen(M)):"From recruiting sources. Update after we measure him on a visit."}</p>
   <div class="hsd-break">${MK.map(([k,n])=>`<div><span class="sub">${n}</span><b style="font-size:16px">${e_(measFmt(k,p[k]))}</b>${W[k]!=null&&String(W[k])!==String(p[k]??"")?`<span class="sub">listed ${e_(measFmt(k,W[k]))}</span>`:""}</div>`).join("")}</div>
   <div class="btns" id="hsMeasBtns"><button class="btn" type="button" id="hsMeasEdit">${M?"Update measurements":"+ Add our measurements"}</button></div>
   <div id="hsMeasForm" hidden style="display:grid;gap:10px"><div class="grid2">${field("hsM-ht","Height",p.ht,"text"," placeholder=\"6'2\"")}${field("hsM-wt","Weight (lbs)",p.wt,"number")}${field("hsM-wing","Wingspan (in)",p.wing,"number"," step=\"0.125\"")}${field("hsM-arm","Arm (in)",p.arm,"number"," step=\"0.125\"")}${field("hsM-hand","Hand (in)",p.hand,"number"," step=\"0.125\"")}</div>
     <div class="grid2">${field("hsM-date","Date measured",td,"date")}${field("hsM-where","Where",(M&&M.where)||"Marshall visit")}</div>
-    <div class="btns"><button class="btn primary" type="button" id="hsMeasSave">Save measurements</button><button class="btn" type="button" id="hsMeasCancel">Cancel</button></div></div></div>`}
+    <div class="btns"><button class="btn primary" type="button" id="hsMeasSave">Save measurements</button><button class="btn" type="button" id="hsMeasCancel">Cancel</button></div></div></div></details>`}
 async function saveMeas(id){const p=ROWS.find(r=>r.id===id);if(!p)return;const v=k=>q("hsM-"+k).value.trim();
   const vals={ht:v("ht")||null,wt:num(v("wt")),wing:num(v("wing")),arm:num(v("arm")),hand:num(v("hand"))};
   const keys=MK.map(([k])=>k).filter(k=>vals[k]!=null);if(!keys.length){toast("Enter at least one measurement.");return}
@@ -4366,10 +4396,9 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
   dlg.innerHTML=`<div class="hsd"><div class="pc-top"><div><h2>${e_(p.name||"New prospect")}</h2><div class="sub">${e_([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state].filter(Boolean).join(" · "))}</div>
     ${id?`<div class="hs-acts"><button class="btn" type="button" id="hsPriBtn" aria-pressed="${!!p.star}"><span style="color:#e0a100">${p.star?"★":"☆"}</span> ${p.star?"Starred":"Star"}</button><button class="btn" type="button" id="hsCardPrint">Print</button>${hudlOf(p)?`<a class="btn primary" href="${e_(hudlOf(p))}" target="_blank" rel="noopener">▶ Watch Hudl</a><button class="btn" type="button" id="hsHudlEdit">Change Hudl link</button>`:`<button class="btn" type="button" id="hsHudlEdit">+ Hudl link</button>`}</div>
     <div class="hs-ctl hudl-row" id="hsHudlRow" hidden><input id="hsHudl" type="url" inputmode="url" placeholder="Paste his Hudl link (hudl.com/profile/…)" value="${e_(p.hudl||"")}" style="flex:1;min-width:200px"><button class="btn primary" type="button" id="hsHudlSave">Save</button>${p.hudl?`<button class="btn" type="button" id="hsHudlClr">Remove</button>`:""}</div>`:""}</div><button class="pc-x" type="button" id="hsX" aria-label="Close">×</button></div>
-  ${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
+  ${id?`<div class="pc-cols"><div class="pc-col">`:""}${id?`<div class="pc-grade"><div class="score hs-ltr" style="font-size:56px">${s.score!=null?letter(s.score):"–"}</div><div><div style="font:700 26px var(--display)">${s.score!=null?f1(s.score,1):"Not graded yet"} ${t?`<span class="chip t-${t}">${TN[t]}</span>`:""} ${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf} confidence</span>`:""}</div>
     <div class="sub">${s.score==null?e_(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.TmRaw,1)}${s.estTm?" (estimated from Tracking Football)":""} · ${Math.round(100*(1-s.tShare))}% film / ${Math.round(100*s.tShare)}% testing${s.comp&&s.comp!==1?` · level ×${s.comp}`:""}${s.adj?` · ${s.adj>0?"+":""}${s.adj} context`:""}${s.capped?` · capped by ${s.conf} confidence (was ${f1(s.raw,1)})`:""}`}</div>
     ${s.disagree?`<div class="hs-flag">Our testing (${f1(s.Tm,0)}) and Tracking Football (~${f1(s.outEst,0)}) disagree by 25+ points. Check for an old or listed time.</div>`:""}${s.F&&s.F.split.length?`<div class="hs-flag">Coaches are 3+ apart on: ${e_(s.F.split.join(", "))}</div>`:""}</div></div>`:""}
-  ${id?measBox(p):""}
   ${id?`<div class="hsd-box"><h3>Film grades</h3><p class="sub" style="margin:0">Your grades, 1–10 (7 = Marshall starter trait). Grade what's on film now; projection lives in testing.</p>
     <div class="hs-traits">${tr.map((n,i)=>sel("hsG"+i,`${i+1}. ${e_(n)}`,[["","–"]].concat([10,9,8,7,6,5,4,3,2,1].map(v=>[v,v])),(mine.g||[])[i])).join("")}</div>
     <div class="btns"><button class="btn primary" type="button" id="hsSaveG">Save my grades</button>${mine.g?`<button class="btn" type="button" id="hsClrG">Clear mine</button>`:""}</div>
@@ -4377,15 +4406,15 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
       ${others.map(f=>`<tr><td>${e_(f.uid===m.id?"You":f.name||"Coach")}</td>${[0,1,2,3].map(i=>`<td class="num">${f.g[i]??"–"}</td>`).join("")}<td class="sub">${e_((f.at||"").slice(0,10))}</td></tr>`).join("")}
       <tr><td><b>Average</b></td>${s.F.avg.map(a=>`<td class="num"><b>${f1(a,1)}</b></td>`).join("")}<td></td></tr></tbody></table></div>`:`<p class="sub" style="margin:0">No coach has graded him yet.</p>`}
   </div>`:""}
-  ${id&&s.parts?`<div class="hsd-box"><h3>Testing used in the score</h3><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th><th class="num" title="How much this result is trusted: timing method, a 100m standing in for the 40, and age">Counts</th></tr></thead><tbody>
+  ${id&&s.parts?`<details class="pc-sec"><summary><span>Testing used in the score</span><span class="sec-pv">${s.TmRaw!=null?"Testing "+f1(s.TmRaw,1)+" · ":""}${s.parts.filter(x=>x.o).length} test${s.parts.filter(x=>x.o).length===1?"":"s"}</span></summary><div class="sec-b"><div class="tablewrap"><table class="hs-mini"><thead><tr><th>Test</th><th class="num">Official</th><th>Source</th><th class="num">70 / 100 marks</th><th class="num">Score</th><th class="num">Weight</th><th class="num" title="How much this result is trusted: timing method, a 100m standing in for the 40, and age">Counts</th></tr></thead><tbody>
     ${s.parts.map(x=>{const b=bench(p.pos,x.k);return `<tr><td>${TEST[x.k].n}</td><td class="num">${x.o?f1(+x.o.v,TEST[x.k].dp)+ftag(x.o):"–"}</td><td class="sub">${e_(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):"")}</td><td class="num">${b?f1(b[0],TEST[x.k].dp)+" / "+f1(b[1],TEST[x.k].dp):"no benchmark"}</td><td class="num">${f1(x.s,0)}</td><td class="num">${x.w}%</td><td class="num">${x.o&&x.s!=null?Math.round(x.rel*100)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
     ${s.score!=null&&!s.estTm?`<p class="sub" style="margin:0">Testing counts <b>${Math.round(100*s.tShare)}%</b> of his score (up to ${Math.round(100*s.maxT)}% at ${e_(p.pos)}). It reaches the full share once 60% of the ${e_(p.pos)} testing weight is measured reliably; he's at ${Math.round(100*s.cov)}%, so film carries the rest.</p>`:""}
     ${s.score==null&&s.fill?`<p class="sub" style="margin:0">His tests cover less than half of the ${e_(p.pos)} testing weight, so ${s.fill.share}% of his testing score comes from the ${e_(s.fill.src)} until he tests more.</p>`:""}
     ${(p.ignoreTests||[]).length?`<p class="sub" style="margin:0">Not counted (staff call): ${p.ignoreTests.map(k=>TEST[k]?TEST[k].n:k).map(e_).join(", ")}.</p>`:""}
-    <p class="sub" style="margin:0">When a test was run more than once, the official number is the best from the most reliable timing: laser, then camp event, hand, GPS, listed. <b>Counts</b>: laser and camp results count fully, hand 85%, GPS 70%, listed/self-reported 40%; a 100m standing in for the 40 counts 60% of that, and anything older than 18 months counts 60% of that.</p></div>`:""}
-  ${id?notesBox(p,m):""}
-  ${id?recBox(p):""}
-  ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}
+    <p class="sub" style="margin:0">Official = best result from the most reliable timing. <b>Counts</b>: laser/camp 100%, hand 85%, GPS 70%, listed 40%; less for a 100m in place of the 40 or results over 18 months old.</p></div></details>`:""}
+  ${id?`</div><div class="pc-col">`:""}${id?notesBox(p,m):""}
+  ${id?recBox(p):""}${id?measBox(p):""}
+  ${id?infoPanel(p):""}${id?outsidePanel(p,s):""}${id?`</div></div>`:""}
   ${id&&p.pulledAt?`<details class="hsd-box" id="hsEditBox"><summary><h3 style="display:inline">Edit profile</h3> <span class="sub">filled from sources; change only to correct something. Your corrections stick through refreshes.</span></summary>`:""}<form class="${id&&p.pulledAt?"":"hsd-box"}" id="hsForm" autocomplete="off" style="display:grid;gap:10px">${id&&p.pulledAt?"":`<h3>${id?"Profile":"Add prospect"}</h3>`}
     <div class="grid2">${field("hsF-name","Name",p.name)}${sel("hsF-pos","Position",[["","Pick"]].concat(POS.map(x=>[x,x])),p.pos)}${field("hsF-cls","Class",p.cls,"number"," step=\"1\"")}${sel("hsF-status","Status",STATUSES.map(x=>[x,x]),p.status||"Evaluating")}</div>
     <div class="grid2">${field("hsF-school","High school",p.school)}${field("hsF-city","City",p.city)}${field("hsF-state","State",p.state)}${sel("hsF-comp","Level of competition",Object.entries(COMP),p.comp||"1.00")}</div>
@@ -4411,6 +4440,7 @@ async function openCard(id){const dlg=q("hsDlg");if(id&&!ROWS.find(r=>r.id===id)
     if(q("hsHudlClr"))q("hsHudlClr").onclick=()=>saveHudl(id,"");wireRec(id);
     q("hsMeasEdit").onclick=()=>{q("hsMeasForm").hidden=false;q("hsMeasBtns").hidden=true;q("hsM-ht").focus()};
     q("hsMeasCancel").onclick=()=>{q("hsMeasForm").hidden=true;q("hsMeasBtns").hidden=false};q("hsMeasSave").onclick=()=>saveMeas(id);
+    q("hsNoteOpen").onclick=e=>{const w=q("hsNote").parentElement;w.hidden=false;e.target.hidden=true;q("hsNote").focus()};
     q("hsNoteAdd").onclick=()=>{const v=q("hsNote").value;if(v.trim())noteSaveHS(id,"add",v)};
     dlg.querySelectorAll("[data-hsnd]").forEach(b=>b.onclick=()=>{if(confirm("Delete this note?"))noteSaveHS(id,"del",b.dataset.hsnd)})}
   q("hsAddTest").onclick=()=>{readTests();tests.push({k:"t40",v:"",timing:"event"});q("hsTests").querySelector("tbody").innerHTML=testRows({tests})};
