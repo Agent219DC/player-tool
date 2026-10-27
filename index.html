@@ -3728,12 +3728,12 @@ function sbcChart(rows,fit,o){o=Object.assign({x:r=>r.grade,res:r=>r.waa,xlab:"T
   const ya=Math.max(0,Math.min(1,fit.a+fit.b*x0)),yb=Math.max(0,Math.min(1,fit.a+fit.b*x1));
   g+=`<line x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
   const placed=[];
-  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const o=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
+  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const us=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
     /* try right, left, above, below so labels don't sit on top of each other */
     const opts=[[cx+9,cy+4,"start"],[cx-9,cy+4,"end"],[cx,cy-10,"middle"],[cx,cy+17,"middle"],[cx+9,cy-9,"start"],[cx+9,cy+16,"start"]];
     const box=([x,y,a])=>{const x0=a==="start"?x:a==="end"?x-tw:x-tw/2;return [x0,y-10,x0+tw,y+2]};const hit=b=>placed.some(q=>b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]);
     const pick=opts.find(op=>{const b=box(op);return !hit(b)&&b[0]>=L&&b[2]<=W-2})||opts[0];placed.push(box(pick));
-    return `<circle cx="${cx}" cy="${cy}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: ${esc(o.tip(r))}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
+    return `<circle cx="${cx}" cy="${cy}" r="${us?7:5.5}" fill="${c}" stroke="${us?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: ${esc(o.tip(r))}, ${r.w}-${r.l}</title></circle><text class="lbl${us?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
   g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${esc(o.xlab)}</text>`;
   return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.xlab.replace(" →",""))} vs. win percentage">${g}</svg>`}
 /* Budget page: win % and team grade each fit against roster budget ($M, teams.<fid>.budget) across the league */
