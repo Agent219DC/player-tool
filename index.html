@@ -109,9 +109,13 @@ body.scrolled header .tab{padding:6px 11px}
   header .brand>svg,header .brand>div:not(#crumb),header .sidesw,header .tabrow{display:none!important}
   #crumb{display:flex;align-items:baseline;gap:10px;font:700 34px/1.05 var(--display);text-transform:uppercase;letter-spacing:.01em;min-width:0}
   #crumb .cr-s{font-size:14px;letter-spacing:.12em;color:var(--accent-text)}
+  #crumb{white-space:nowrap;overflow:hidden}#crumb .cr-s{flex:none}#crumb .cr-p{overflow:hidden;text-overflow:ellipsis}
   body.scrolled #crumb{font-size:24px}
   header{align-items:center}
-  body header>.tabs{order:2;flex:0 1 340px;max-width:340px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
+  body header>.tabs{order:2;flex:0 1 340px;max-width:340px}
+}
+@media (min-width:900px) and (max-width:1199px){
+  #crumb{font-size:26px}body header>.tabs{flex-basis:220px;max-width:220px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
 }
 svg.brandlogo .rl-liq{fill:var(--accent);transition:fill .2s}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
