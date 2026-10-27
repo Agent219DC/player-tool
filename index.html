@@ -48,10 +48,12 @@
   --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f2c94c; --tEliteFill:#8a6200; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
-body.mode-gm{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-gm{--accent-soft:#10301f; --accent-text:#4fdb9c}}
+body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
+body.mode-gm{--accent:#8b93a1; --accent-fill:#4b5563; --accent-soft:#e5e7eb; --accent-text:#374151}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}:root:not([data-theme="light"]) body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}}
 :root[data-theme="dark"] body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}
-:root[data-theme="dark"] body.mode-gm{--accent-soft:#10301f; --accent-text:#4fdb9c}
+:root[data-theme="dark"] body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}
+:root[data-theme="dark"] body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
@@ -91,6 +93,7 @@ body.scrolled header .tab{padding:6px 11px}
 
 /* navigation: phones/tablets use the side switch + one tab per page; computers get a side menu with every page */
 #sidenav{display:none}#crumb{display:none}
+#hsset{order:1}
 #sidenav a{display:block;text-decoration:none;color:var(--fg);font:500 14.5px var(--body);padding:7px 12px;border-radius:8px;position:relative}
 #sidenav a:hover{background:var(--sunk)}
 #sidenav a[aria-current=page]{background:var(--accent-soft);color:var(--accent-text);font-weight:600}
@@ -102,7 +105,7 @@ body.scrolled header .tab{padding:6px 11px}
 .sn-grp{display:flex;flex-direction:column;gap:2px}
 .sn-h{display:flex;align-items:center;gap:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
 .sn-h::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gc)}
-.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-gm{--gc:#2fcb86}
+.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-an{--gc:#2fcb86}.sn-gm{--gc:#9ca3af}
 @media (min-width:900px){
   #sidenav{display:flex;flex-direction:column;gap:20px;position:fixed;left:0;top:0;bottom:0;width:236px;padding:18px 12px 24px;background:var(--surface);border-right:1px solid var(--line);overflow-y:auto;z-index:45}
   body{padding-left:236px}
@@ -681,6 +684,7 @@ button.stag.st-Pass{color:#fff;border-color:transparent!important}
 .sidesw button{font:600 13px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:4px 12px}
 .sidesw button.has-dot::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cMed);margin-left:6px;vertical-align:2px}
 body:not(.mode-hs) #tabs [data-hs]{display:none}
+body:not(.mode-an) #tabs [data-an]{display:none} body.mode-an #tabs [data-tab]:not([data-an]){display:none}
 
 .subnav{display:flex;padding:2px 0 0}.subnav .seg button{font:600 13px var(--display);letter-spacing:.04em;padding:5px 14px}
 body:not(.mode-gm) #tabs [data-gm]{display:none} body.mode-gm #tabs [data-tab]:not([data-gm]){display:none}
@@ -858,9 +862,10 @@ window.claude={use:async n=>{
 <div class="wrap">
 <nav id="sidenav" aria-label="All pages">
   <a class="sn-brand" href="#boards" data-nav="boards"><svg class="sn-logo" width="68" height="42" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc3"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc3)"><path class="rl-liq" d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg><span>Roster <b>Lab</b></span></a>
-  <div class="sn-grp sn-pt"><div class="sn-h">Portal</div><a href="#boards" data-nav="boards">Position boards</a><a href="#bigboard" data-nav="bigboard">Big board</a><a href="#overview" data-nav="overview">Starters vs. targets</a><a href="#depth" data-nav="depth">Depth chart</a><a href="#recruit" data-nav="recruit">Roster needs</a></div>
-  <div class="sn-grp sn-hs"><div class="sn-h">High school</div><a href="#hsboard" data-nav="hsboard">Prospects</a><a href="#hsbig" data-nav="hsbig">Big board</a><a href="#hsneeds" data-nav="hsneeds">Class needs</a><a href="#hsrec" data-nav="hsrec">Visits & offers</a></div>
-  <div class="sn-grp sn-gm" id="navGm" hidden><div class="sn-h">GM</div><a href="#sbc" data-nav="sbc">Sun Belt</a><a href="#budget" data-nav="budget" id="navBud" hidden>Budget</a><a href="#settings" data-nav="settings">Settings</a><a href="#hsset" data-nav="hsset">HS settings</a></div>
+  <div class="sn-grp sn-pt"><div class="sn-h">Portal</div><a href="#boards" data-nav="boards">Position boards</a><a href="#bigboard" data-nav="bigboard">Big board</a><a href="#depth" data-nav="depth">Depth chart</a><a href="#recruit" data-nav="recruit">Roster needs</a><a href="#pvisits" data-nav="pvisits">Visits</a></div>
+  <div class="sn-grp sn-hs"><div class="sn-h">High school</div><a href="#hsboard" data-nav="hsboard">Prospects</a><a href="#hsbig" data-nav="hsbig">Big board</a><a href="#hsrec" data-nav="hsrec">Visits</a></div>
+  <div class="sn-grp sn-an"><div class="sn-h">Analytics</div><a href="#sbc" data-nav="sbc">Sun Belt snapshot</a><a href="#overview" data-nav="overview">Starters vs. targets</a></div>
+  <div class="sn-grp sn-gm" id="navGm" hidden><div class="sn-h">GM</div><a href="#budget" data-nav="budget" id="navBud">Budget</a><a href="#settings" data-nav="settings">Settings</a></div>
 </nav>
   <header>
     <div class="brand">
@@ -870,9 +875,9 @@ window.claude={use:async n=>{
         <h1>Roster <span>Lab</span></h1>
       </div>
       <div id="crumb" aria-live="polite"><span class="cr-s"></span><span class="cr-p"></span></div>
-      <span class="seg sidesw" role="group" aria-label="Portal, high school or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High school</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
+      <span class="seg sidesw" role="group" aria-label="Portal, high school or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High school</button><button type="button" data-side="an" aria-pressed="false">Analytics</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
     </div>
-    <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs"><button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Position boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Starters vs. targets</span><span class="ts">Starters</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Roster needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="sbc" data-gm id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsset" data-gm id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS settings</span><span class="ts">HS settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">Big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">Class needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Visits & offers</span><span class="ts">Visits</span></button></div>
+    <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs"><button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Position boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Roster needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="pvisits" id="pvBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Visits</span><span class="ts">Visits</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">Big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Visits</span><span class="ts">Visits</span></button><button type="button" class="tab" data-tab="sbc" data-an id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt snapshot</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="overview" data-an id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Starters vs. targets</span><span class="ts">Starters</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button></div>
       <span class="gsearch"><input id="gSearch" type="search" placeholder="Search portal + HS" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden aria-label="Sign out" title="Sign out" onclick="firebase.auth().signOut().then(()=>location.reload())"><svg class="hi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span class="lbl">Sign out</span></button></span>
   </header>
@@ -922,9 +927,13 @@ window.claude={use:async n=>{
     <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
     <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
-    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
-      <h2 style="font-size:18px">Visit calendar</h2>
-      <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
+  </section>
+
+  <section id="pvisits" data-page="pvisits" hidden>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
+      <h2>Visits</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
+    </div><button class="btn" type="button" id="visPrint" disabled>Print</button></span>
     </div>
     <div id="visitList"></div>
   </section>
@@ -1137,7 +1146,7 @@ window.claude={use:async n=>{
     <div class="tablewrap"><table id="hsVisitTbl"></table></div>
   </section>
 
-  <section id="hsset" data-page="hsset" class="hs-set" style="display:grid;gap:14px">
+  <section id="hsset" data-page="settings" class="hs-set" style="display:grid;gap:14px">
     <div class="hs-top"><h2>HS settings</h2><span class="sub" id="hsSetNote"></span></div>
     <details class="settings" open><summary><h2 style="font-size:18px">Film traits and blend</h2></summary>
       <p class="note">Four traits per position in order of importance, graded 1–10 (7 = Marshall starter trait). Film share is how much of the score comes from film; the rest is testing.</p>
@@ -2669,7 +2678,7 @@ async function renderRecruit(){
   const tot=t=>rows.reduce((a,r)=>a+(r.c[t]||0),0);
   $("recTbl").innerHTML=`<thead><tr><th>Pos</th><th class="num" title="Max at this position minus scholarship players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th><th class="num" title="Target + Contacted">Working</th><th class="num">Offered</th><th class="num">Committed</th><th class="num" title="Visits scheduled">Visits</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${cell(r.k,"working",r.c.working,r.noBoard)}${cell(r.k,"Offered",r.c.Offered,r.noBoard)}${cell(r.k,"Committed",r.c.Committed,r.noBoard)}<td class="num">${r.noBoard?'<span class="sub">–</span>':r.c.visits||'<span class="sub">0</span>'}</td></tr>`).join("")}
     <tr class="tot"><td>Total</td><td class="num">${sumG(o=>o.open)}</td><td class="num">${sumG(o=>o.left)}</td><td class="num">${tot("working")}</td><td class="num">${tot("Offered")}</td><td class="num">${tot("Committed")}</td><td class="num">${tot("visits")}</td></tr></tbody>`;
-  renderVisits();$("recPrint").disabled=false;
+  renderVisits();$("recPrint").disabled=false;$("visPrint").disabled=false;
 }
 function visitRows(){
   if(!REC)return [];
@@ -3316,8 +3325,8 @@ async function pdfSave(doc,fname){
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
 }
 /* print branding: the bar takes the current side's color; the logo (three-color football) and ROSTER LAB sit top right */
-const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},gm:{bar:[47,203,134],ink:[19,122,79]}};
-const pdfSide=()=>RL_SIDE_RGB[document.body.classList.contains("mode-gm")?"gm":document.body.classList.contains("mode-hs")?"hs":"portal"];
+const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[139,147,161],ink:[55,65,81]}};
+const pdfSide=()=>{const c=document.body.classList;return RL_SIDE_RGB[c.contains("mode-gm")?"gm":c.contains("mode-an")?"an":c.contains("mode-hs")?"hs":"portal"]};
 let RL_PNG=null;
 (function(){const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 26 112 68" width="448" height="272"><defs><clipPath id="b"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath><clipPath id="w"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath></defs><g clip-path="url(#b)"><g clip-path="url(#w)"><rect width="48" height="120" fill="#1fa3ee"/><rect x="47.9" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="#1b1e24" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="#1b1e24" stroke-width="4.5" stroke-linecap="round"/></svg>';
   const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=448;c.height=272;c.getContext("2d").drawImage(im,0,0);RL_PNG=c.toDataURL("image/png")}catch(e){}};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)})();
@@ -3339,7 +3348,7 @@ async function printRecruit(){
   if(!REC)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Roster Lab · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
+  const W=pdfHeader(doc,"Visits and roster needs",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
   if(!v.length){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(90,96,107);doc.text(VMODE==="up"?"No upcoming visits.":"No visits set.",40,90)}
   else doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos","Player","School","Status","Visit","Elig.","Grade","Tier"]],
@@ -3362,7 +3371,7 @@ async function printRecruit(){
     headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:9},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
   await pdfSave(doc,`Recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
 }
-$("recPrint").addEventListener("click",printRecruit);
+$("recPrint").addEventListener("click",printRecruit);$("visPrint").addEventListener("click",printRecruit);
 
 /* ---------- one-page player report ---------- */
 function updateReportBtn(){const p=readForm();$("reportBtn").disabled=!(p.name&&score(p))}
@@ -3723,22 +3732,24 @@ async function connect(){
   DB=db;subscribe();startTabs();if(window.HS)HS.connect(db);
 }
 /* ---------- tabs: one section at a time; each has its own address (#depth), remembered between visits ---------- */
-const TABS=["boards","overview","bigboard","recruit","depth","sbc","budget","settings","hsboard","hsbig","hsneeds","hsrec","hsset"],DEFAULT_TAB="boards";
+const TABS=["boards","overview","bigboard","recruit","pvisits","depth","sbc","budget","settings","hsboard","hsbig","hsneeds","hsrec","hsset"],DEFAULT_TAB="boards";
 let TAB=null,TABS_READY=false;
 const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||{}}catch(e){return {}}})();
 function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
-const GM_TABS=["sbc","budget","settings","hsset"];
+const GM_TABS=["budget","settings","hsset"],AN_TABS=["sbc","overview"];
+function tabSide(t){t=String(t||"");return GM_TABS.includes(t)?"gm":AN_TABS.includes(t)?"an":t.startsWith("hs")?"hs":"portal"}
+const TAB_ALIAS={hsset:"settings",hsneeds:"hsboard"};
 /* Tab groups: one tab per group in the row; the group's pages switch with the bar under the header. Every page keeps its own #hash. */
 const TAB_GROUPS_OLD=[{id:"boards",btn:"boards",views:[["boards","By position"],["bigboard","Big board"]]},{id:"roster",btn:"overview",views:[["overview","Overview"],["depth","Depth chart"],["recruit","Needs"]]},
   {id:"hsprosp",btn:"hsboard",views:[["hsboard","List"],["hsbig","Big board"]]},{id:"hsrecg",btn:"hsrec",views:[["hsneeds","Needs"],["hsrec","Visits & offers"]]},{id:"set",btn:"settings",views:[["settings","Portal"],["hsset","High school"]]}];
 const TAB_GROUPS=[];const groupOf=t=>TAB_GROUPS.find(g=>g.views.some(v=>v[0]===t))||null;
-const NAV_SIDE={portal:"Portal",hs:"High school",gm:"GM"};
+const NAV_SIDE={portal:"Portal",hs:"High school",an:"Analytics",gm:"GM"};
 function navSync(t){document.querySelectorAll("#sidenav [data-nav]:not(.sn-brand)").forEach(a=>{if(a.dataset.nav===t)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});const a=document.querySelector(`#sidenav [data-nav="${t}"]:not(.sn-brand)`),c=$("crumb");if(c&&a){const g=a.closest(".sn-grp");c.querySelector(".cr-s").textContent=g?g.querySelector(".sn-h").textContent:"";c.querySelector(".cr-p").textContent=a.textContent;document.title=a.textContent+" · Roster Lab"}}
-function paintNav(t){const gm=GM_TABS.includes(t),hs=t.startsWith("hs")&&!gm,sd=gm?"gm":hs?"hs":"portal";
-  document.body.classList.toggle("mode-hs",hs);document.body.classList.toggle("mode-gm",gm);navSync(t);
+function paintNav(t){const sd=tabSide(t);
+  document.body.classList.toggle("mode-hs",sd==="hs");document.body.classList.toggle("mode-gm",sd==="gm");document.body.classList.toggle("mode-an",sd==="an");navSync(t);
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===sd)))}
-function goSoon(t){if(!okTab(t)){go(t);return}paintNav(t);requestAnimationFrame(()=>setTimeout(()=>go(t),0))}
+function goSoon(t){t=TAB_ALIAS[t]||t;if(!okTab(t)){go(t);return}paintNav(t);requestAnimationFrame(()=>setTimeout(()=>go(t),0))}
 function subnavSync(t){navSync(t);const g=groupOf(t),bar=$("subnav");if(!bar)return;if(!g){bar.hidden=true;return}const V=g.views.filter(v=>okTab(v[0]));if(V.length<2){bar.hidden=true;return}
   bar.hidden=false;$("subnavSeg").innerHTML=V.map(([k,n])=>`<button type="button" data-subgo="${k}" aria-pressed="${k===t}">${n}</button>`).join("")}
 function okTab(t){return TABS.includes(t)&&!(GM_TABS.includes(t)&&!OWNER_TAB())}
@@ -3787,10 +3798,14 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
   const maxR=Math.max(...F.spots.map(s=>s[1]));
   return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
 /* one doc per season: owner/sbc is this season (2026), owner/sbc2025 is last season's final snapshot (two-deep, records, portal class; no budget/next season) */
-const SBC_DOC=()=>SBC_YR==="2026"?"owner/sbc":"owner/sbc"+SBC_YR;
+const SBC_DOC=()=>SBC_YR==="2026"?"analytics/sbc":"analytics/sbc"+SBC_YR;
 async function loadSbc(force){if(SBC_CACHE[SBC_YR]&&!force){SBC=SBC_CACHE[SBC_YR];return SBC}
   /* owner-only: everything lives in one doc under owner/ (Firestore rules: owner reads and writes, nobody else) */
-  const sh=await DB.doc(SBC_DOC()).get();const meta=sh.exists?sh.data():{};
+  let sh=null;try{sh=await DB.doc(SBC_DOC()).get()}catch(e){}
+  if((!sh||!sh.exists)&&OWNER){try{sh=await DB.doc(SBC_YR==="2026"?"owner/sbc":"owner/sbc"+SBC_YR).get()}catch(e){}}
+  const meta=sh&&sh.exists?sh.data():{};
+  /* team roster budgets ($M) are money: only the owner reads them, from owner/sbc */
+  if(OWNER&&SBC_YR==="2026"){try{const b=(await DB.doc("owner/sbc").get()).data()||{};const bt=b.teams||{};meta.teams=meta.teams||{};Object.keys(bt).forEach(f=>{if(bt[f]&&bt[f].budget!=null)meta.teams[f]=Object.assign({},meta.teams[f],{budget:bt[f].budget})});meta.budgetAsOf=b.budgetAsOf;meta.budgetSrc=b.budgetSrc}catch(e){}}
   const players=(meta.players||[]).map(p=>Object.assign({id:p.fid+"-"+p.pffId},p));
   const ks=[...new Set(players.map(p=>p.k))].filter(k=>POSITIONS[k]);const all=await loadAllPositions(ks);const cfg=Object.fromEntries(all.map(g=>[g.k,g.cfg]));
   players.forEach(p=>{const r=POSITIONS[p.k]?withPos(p.k,cfg[p.k],()=>{try{return score(p)}catch(e){return null}}):null;p.r=r;p.g=r&&r.grade!=null?r.grade:null});
@@ -3967,9 +3982,9 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
   $("sbcMeta").textContent=[SBC_YR!=="2026"?`${SBC_YR} final · PFF full season`:m.dataAsOf?"PFF data through "+fmtDate(m.dataAsOf):"",m.recAsOf?"records as of "+fmtDate(m.recAsOf):""].filter(Boolean).join(" · ");
   const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT];const R=[...rows].sort((a,b)=>key(b)-key(a));
   if(!SBC_TEAM||!rows.some(r=>r.fid===SBC_TEAM))SBC_TEAM=(rows.find(sbcOurs)||rows[0]).fid;
-  if(SBC_YR!=="2026"){SBC_PAGE="talent";SBC_SZN="now"}
-  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Season">${["2025","2026"].map(y=>`<button type="button" data-sbcyr="${y}" aria-pressed="${SBC_YR===y}">${y}</button>`).join("")}</span>${SBC_YR==="2026"?`<span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span>`:`<span class="sub">2025 final: full-season two-deep, records and portal class, for reference</span>`}</div>`;
-  $("sbcEdit").textContent=SBC_PAGE==="budget"?"Edit budgets":"Edit records";
+  if(SBC_YR!=="2026"){SBC_PAGE="talent";SBC_SZN="now"}if(!OWNER)SBC_PAGE="talent";
+  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Season">${["2025","2026"].map(y=>`<button type="button" data-sbcyr="${y}" aria-pressed="${SBC_YR===y}">${y}</button>`).join("")}</span>${SBC_YR==="2026"?(!OWNER?"":`<span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span>`):`<span class="sub">2025 final: full-season two-deep, records and portal class, for reference</span>`}</div>`;
+  $("sbcEdit").hidden=!OWNER;$("sbcEdit").textContent=SBC_PAGE==="budget"?"Edit budgets":"Edit records";
   if(SBC_PAGE==="budget"){el.innerHTML=pageSeg+sbcBudgetView(rows);return}
   const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
   const head=`<thead><tr><th>#</th><th>Team</th><th>Div</th><th class="num">Record</th><th class="num">Win %</th><th class="num" title="Weighted two-deep grade on the board scale">Team grade</th><th class="num">Offense</th><th class="num">Defense</th><th class="num" title="Wins a team with this grade would be expected to have after this many games">Expected W</th><th class="num" title="Actual wins minus expected wins">Wins vs. talent</th><th>Verdict</th></tr></thead>`;
@@ -3989,7 +4004,7 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
     <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
     ${SBC.portal?`
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 class="sec-h" style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 class="sec-h" style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"&&OWNER?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
     <p class="note">Every ${SBC_YR} transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not ${+SBC_YR-1}). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. <b>No data</b> = no PFF snaps last season or this one, so we can't tell why; hit rate and the odds skip them, K/P/LS and players who left. <b>Eval</b> = strengths and weaknesses (top or bottom quarter of Sun Belt transfers at his position) and why he's a good or bad take.</p>${SBC_YR!=="2026"?sbcOddsReview():""}`:""}
     ${SBC_YR==="2026"?`<h3 class="sec-h">Next season snapshot</h3>${sbcNextLeague()}
@@ -4034,8 +4049,8 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
   const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text(doc.splitTextToSize(`Team grade = two-deep graded on our board scales (QB 3x, backups 1/4). Expected W = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). Wins vs. talent = actual - expected.`,doc.internal.pageSize.getWidth()-80),40,y);
   await pdfSave(doc,`Sun Belt snapshot ${new Date().toISOString().slice(0,10)}.pdf`)});
-function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAULT_TAB:t;TAB=t;
-  const gmSide=GM_TABS.includes(t),hsSide=t.startsWith("hs")&&!gmSide;document.body.classList.toggle("mode-hs",hsSide);document.body.classList.toggle("mode-gm",gmSide);if(hsSide)PREF.hsTab=t;else if(gmSide)PREF.gmTab=t;else PREF.ptTab=t;if(window.HS)HS.syncSwitch();
+function go(t,o){o=o||{};t=TAB_ALIAS[t]||t;if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAULT_TAB:t;TAB=t;
+  const sd0=tabSide(t),gmSide=sd0==="gm",hsSide=sd0==="hs",anSide=sd0==="an";document.body.classList.toggle("mode-hs",hsSide);document.body.classList.toggle("mode-gm",gmSide);document.body.classList.toggle("mode-an",anSide);if(hsSide)PREF.hsTab=t;else if(gmSide)PREF.gmTab=t;else if(anSide)PREF.anTab=t;else PREF.ptTab=t;if(window.HS)HS.syncSwitch();
   const grp=groupOf(t);if(grp){PREF.sub=PREF.sub||{};PREF.sub[grp.id]=t}subnavSync(t);
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t||(grp&&b.dataset.tab===grp.btn)){b.setAttribute("aria-current","page");const r=$("tabs");if(r.scrollWidth>r.clientWidth)r.scrollLeft=Math.max(0,b.offsetLeft-r.clientWidth/2+b.offsetWidth/2)}else b.removeAttribute("aria-current")});
   document.querySelectorAll("[data-page]").forEach(el=>el.classList.toggle("pg-off",el.dataset.page!==t));
@@ -4045,11 +4060,11 @@ function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAU
   if(o.scroll!==false)window.scrollTo(0,0);
   if(t==="overview")renderOverview();
   else if(t==="bigboard"){if(PREF.bbv==="tags"){document.querySelectorAll("[data-bbview]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bbview==="tags"));openTagBoard()}else{$("tagboard").hidden=true;renderBigBoard()}}
-  else if(t==="recruit")renderRecruit();
+  else if(t==="recruit"||t==="pvisits")renderRecruit();
   else if(t==="depth")openDepth();
   else if(t==="sbc"){$("sbc").hidden=false;renderSbc()}
   else if(t==="budget"){$("budget").hidden=false;renderBudget()}
-  else if(t==="settings"){if(!$("ownerTools").hidden)$("ownerTools").open=true}
+  else if(t==="settings"){if(!$("ownerTools").hidden)$("ownerTools").open=true;if(window.HS)HS.render("hsset")}
   else if(t.startsWith("hs")&&window.HS)HS.render(t);
 }
 /* slim header after scrolling; the gap between 8 and 90 keeps it from flickering as the header changes height */
@@ -4204,7 +4219,7 @@ function connect(db){DBX=db;if(!db)return;
   if(UNSUB)UNSUB();UNSUB=db.collection("hs_players").onSnapshot(s=>{ROWS=s.docs.map(d=>Object.assign({id:d.id},d.data())).filter(r=>!r.deleted);rerender();
     if(OPEN){const r=ROWS.find(x=>x.id===OPEN);if(r&&q("hsDlg").open&&(REFRESH||!q("hsDlg").contains(document.activeElement))){REFRESH=false;openCard(r.id)}}},err=>{q("hsCount").textContent="Couldn't load prospects: "+(err&&err.code||"error")});
   setOwnerUi()}
-function rerender(){if(typeof TAB!=="undefined"&&TAB&&String(TAB).startsWith("hs"))render(TAB)}
+function rerender(){if(typeof TAB==="undefined"||!TAB)return;if(String(TAB).startsWith("hs"))render(TAB);else if(TAB==="settings")render("hsset")}
 async function saveRow(id,data){if(!DBX){toast("Not connected to the shared board.");return null}
   const m=await me();data.updatedAt=new Date().toISOString();data.updatedBy=m.id||"";
   if(id){await DBX.collection("hs_players").doc(id).set(data,{merge:true});return id}
@@ -4666,9 +4681,9 @@ async function exportAll(){const out=JSON.stringify({exported:new Date().toISOSt
 
 /* ---------- wiring ---------- */
 function render(t){syncSwitch();if(t==="hsrec")renderRec();else if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
-function syncSwitch(){const t=typeof TAB!=="undefined"?String(TAB||""):"";const side=["sbc","budget","settings","hsset"].includes(t)?"gm":t.startsWith("hs")?"hs":"portal";document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===side)))}
+function syncSwitch(){const t=typeof TAB!=="undefined"?String(TAB||""):"";const side=tabSide(t);document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===side)))}
 document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
-  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}const GMT=["sbc","budget","settings","hsset"],ok=(v,f)=>v&&(sd==="gm")===GMT.includes(v)&&(sd!=="hs"||String(v).startsWith("hs"))&&(sd!=="portal"||!String(v).startsWith("hs"))?v:f;goSoon(sd==="hs"?ok(pr.hsTab,"hsboard"):sd==="gm"?ok(pr.gmTab,"sbc"):ok(pr.ptTab,"boards"));return}
+  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}const ok=(v,f)=>{v=TAB_ALIAS[v]||v;return v&&okTab(v)&&tabSide(v)===sd?v:f};goSoon(sd==="hs"?ok(pr.hsTab,"hsboard"):sd==="gm"?ok(pr.gmTab,"budget"):sd==="an"?ok(pr.anTab,"sbc"):ok(pr.ptTab,"boards"));return}
   const hp=ev.target.closest("[data-hp]");if(hp){POSF=hp.dataset.hp||null;try{localStorage.setItem("hs_pos",JSON.stringify(POSF))}catch(e){}renderBoard();return}
   const hb=ev.target.closest("[data-hsside]");if(hb){BIGSIDE=hb.dataset.hsside;document.querySelectorAll("[data-hsside]").forEach(b=>b.setAttribute("aria-pressed",String(b===hb)));renderBig();return}
   const bv=ev.target.closest("[data-hsview]");if(bv){BIGVIEW=bv.dataset.hsview;try{localStorage.setItem("hs_bbv",BIGVIEW)}catch(e){}renderBig();return}
