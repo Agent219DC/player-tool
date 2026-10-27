@@ -440,7 +440,9 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-bar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
 @media (max-width:420px){.bud-g td.bp:not(.mo){display:none}.bud-g td.sl{width:34px}.bud-g .bn{font-size:12.5px}.bud-g tr:has(td.bp.mo){display:grid;grid-template-columns:34px minmax(0,1fr) 74px 36px;align-items:center;border-top:1px solid var(--line)}.bud-g tr:has(td.bp.mo)>td{border-top:0;width:auto;grid-row:1/span 2}.bud-g tr:has(td.bp.mo)>td.am{grid-row:1;grid-column:3}.bud-g tr:has(td.bp.mo)>td.bp.mo{grid-row:2;grid-column:3;width:auto;font-size:11px;padding:0 2px 2px;line-height:1.1}.bud-g tr:has(td.bp.mo)>td.rm{grid-column:4}}
 .bud-bar span:first-child{background:var(--accent-fill,#00873a)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
-.bud-side{margin-top:14px}.bud-sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--fg);font:700 17px var(--display);letter-spacing:.06em;text-transform:uppercase}.bud-sh .sub{font:400 12.5px var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
+button,input,select,textarea{font-family:inherit}
+.sec-h{font:600 18px var(--display);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 0}
+.bud-side{margin-top:14px}.bud-sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--fg);font:700 18px var(--display);letter-spacing:.06em;text-transform:uppercase}.bud-sh .sub{font:400 12.5px var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
 .bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
 @media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
@@ -526,7 +528,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .career table{border-collapse:collapse;font-size:12px;width:100%;min-width:0;font-variant-numeric:tabular-nums}
 .career caption{text-align:left;font-weight:700;font-size:12px;padding:0 0 3px}
 .career th,.career td{padding:3px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
-.career th{color:var(--muted);font-weight:600;font-size:11px;cursor:default}
+.career th{color:var(--muted);font-weight:600;font-size:11.5px;cursor:default}
 .career th:first-child,.career td:first-child,.career th:nth-child(2),.career td:nth-child(2){text-align:left}
 .career tr.tot td{font-weight:700;border-bottom:0}
 .cmpcareer{display:grid;gap:18px;margin-top:14px}
@@ -754,7 +756,7 @@ table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
 </style>
 <div id="gate">
   <div class="card">
-    <div class="eyebrow">Staff Board</div>
+    <div class="eyebrow">Staff board</div>
     <h1>Player <span>Tool</span></h1>
     <p class="msg" id="gateMsg">Sign in with your staff account.</p>
     <button class="btn primary" type="button" id="gGoogle">Sign in with Google</button>
@@ -823,13 +825,13 @@ window.claude={use:async n=>{
     <div class="brand">
       <img class="brandlogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="68" height="68" onerror="this.remove()"><img class="brandlogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="68" height="68" onerror="this.remove()">
       <div>
-        <div class="eyebrow">Staff Board</div>
+        <div class="eyebrow">Staff board</div>
         <h1>Player <span>Tool</span></h1>
       </div>
-      <span class="seg sidesw" role="group" aria-label="Portal, High School or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High School</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
+      <span class="seg sidesw" role="group" aria-label="Portal, high school or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High school</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
     </div>
     <nav class="tabs" aria-label="Sections"><div class="tabrow" id="tabs">
-      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Roster</span><span class="ts">Roster</span></button><button type="button" class="tab" data-sub data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-sub data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth Chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="sbc" data-gm id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-sub data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS Big Board</span><span class="ts">Big Board</span></button><button type="button" class="tab" data-sub data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">HS Needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="hsset" data-gm id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">HS Settings</span></button></div>
+      <button type="button" class="tab" data-tab="boards" id="bdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Boards</span><span class="ts">Boards</span></button><button type="button" class="tab" data-tab="overview" id="ovBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><circle cx="7" cy="7" r="2"/><circle cx="17" cy="7" r="2"/><circle cx="12" cy="17" r="2"/></svg><span class="tl">Roster</span><span class="ts">Roster</span></button><button type="button" class="tab" data-sub data-tab="bigboard" id="bbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg><span class="tl">Big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-sub data-tab="recruit" id="recBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5"/><path d="M17 13v7M13.5 16.5h7"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="depth" id="dcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="4" rx="1"/><rect x="4" y="10" width="16" height="4" rx="1"/><rect x="4" y="17" width="16" height="4" rx="1"/></svg><span class="tl">Depth chart</span><span class="ts">Depth</span></button><button type="button" class="tab" data-tab="sbc" data-gm id="sbcBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span class="tl">Sun Belt</span><span class="ts">Sun Belt</span></button><button type="button" class="tab" data-tab="budget" data-gm id="budBtn" hidden><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"/><path d="M16.5 7.5c-.6-1.3-2.2-2-4.5-2-2.6 0-4.3 1.2-4.3 3s1.6 2.6 4.3 3.1 4.6 1.4 4.6 3.4-1.9 3.3-4.6 3.3c-2.5 0-4.2-.9-4.8-2.4"/></svg><span class="tl">Budget</span><span class="ts">Budget</span></button><button type="button" class="tab" data-tab="settings" data-gm id="setBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span class="tl">Settings</span><span class="ts">Settings</span></button><button type="button" class="tab" data-tab="hsboard" data-hs id="hsBdBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></svg><span class="tl">Prospects</span><span class="ts">Prospects</span></button><button type="button" class="tab" data-sub data-tab="hsbig" data-hs id="hsBbBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="tl">HS big board</span><span class="ts">Big board</span></button><button type="button" class="tab" data-sub data-tab="hsneeds" data-hs id="hsNeedBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg><span class="tl">HS Needs</span><span class="ts">Needs</span></button><button type="button" class="tab" data-tab="hsrec" data-hs id="hsRecBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tl">Recruiting</span><span class="ts">Recruiting</span></button><button type="button" class="tab" data-sub data-tab="hsset" data-gm id="hsSetBtn"><svg class="ti" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span class="tl">HS Settings</span><span class="ts">HS Settings</span></button></div>
       <span class="gsearch"><input id="gSearch" type="search" placeholder="Search portal + HS" aria-keyshortcuts="/" aria-label="Search players at every position" autocomplete="off"><div id="gResults" class="gresults" hidden></div></span></nav>
     <span style="order:2;align-self:flex-start;margin-left:auto;display:flex;gap:6px"><button type="button" class="themeBtn" id="themeBtn" aria-label="Switch light or dark mode"></button><button type="button" id="signOut" hidden aria-label="Sign out" title="Sign out" onclick="firebase.auth().signOut().then(()=>location.reload())"><svg class="hi" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg><span class="lbl">Sign out</span></button></span>
   </header>
@@ -880,7 +882,7 @@ window.claude={use:async n=>{
     <div class="tablewrap"><table id="recTbl"></table></div>
     <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px;margin-top:6px">
-      <h2 style="font-size:19px">Visit calendar</h2>
+      <h2 style="font-size:18px">Visit calendar</h2>
       <span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span>
     </div>
     <div id="visitList"></div>
@@ -1042,7 +1044,7 @@ window.claude={use:async n=>{
 
   <section id="hsboard" data-page="hsboard" style="display:grid;gap:10px">
     <div class="hs-top">
-      <h2>High School Prospects</h2>
+      <h2>High school prospects</h2>
       <span class="btns"><button class="btn primary" type="button" id="hsAdd">+ Add prospect</button></span>
     </div>
     <details class="hs-queue" id="hsQueue" hidden></details>
@@ -1063,7 +1065,7 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
-    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>HS Big Board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">Prospect board</button></span></span>
+    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>HS big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">Prospect board</button></span></span>
       <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
     <div id="hsTbWrap" hidden style="display:grid;gap:10px">
       <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
@@ -1090,7 +1092,7 @@ window.claude={use:async n=>{
     <div class="hs-top"><h2>HS Recruiting</h2><span class="btns"><span class="seg" role="group" aria-label="Group by"><button type="button" data-hsrg="recruiter" aria-pressed="true">By recruiter</button><button type="button" data-hsrg="posCoach" aria-pressed="false">By position coach</button></span><button class="btn" type="button" id="hsRecPrint">Print</button></span></div>
     <div class="tablewrap"><table id="hsRecTbl"></table></div>
     <p class="note">Commits and realistic targets (no P4 offer, not committed elsewhere). Set a prospect's recruiter, position coach, offer date and visits on his card. Tap a name for his card.</p>
-    <div class="hs-top" style="margin-top:6px"><h2 style="font-size:19px">Visit calendar</h2><span class="seg" role="group" aria-label="Which visits"><button type="button" data-hsvm="up" aria-pressed="true">Upcoming</button><button type="button" data-hsvm="all" aria-pressed="false">All visits</button></span></div>
+    <div class="hs-top" style="margin-top:6px"><h2 style="font-size:18px">Visit calendar</h2><span class="seg" role="group" aria-label="Which visits"><button type="button" data-hsvm="up" aria-pressed="true">Upcoming</button><button type="button" data-hsvm="all" aria-pressed="false">All visits</button></span></div>
     <div class="tablewrap"><table id="hsVisitTbl"></table></div>
   </section>
 
@@ -1262,8 +1264,8 @@ const POSITIONS={
     metrics:[
       {name:"Negatively graded throws / DB",short:"Neg %",unit:"%",dp:1,step:0.1},
       {name:"Positively graded throws / DB",short:"Pos %",unit:"%",dp:1,step:0.1},
-      {name:"Clean Pocket Grade",short:"Clean",unit:"",dp:1,step:0.1},
-      {name:"Adjusted Completion %",short:"Adj %",unit:"%",dp:1,step:0.1}],
+      {name:"Clean pocket grade",short:"Clean",unit:"",dp:1,step:0.1},
+      {name:"Adjusted completion %",short:"Adj %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:20,agreeMinDb:75,
       anchors:{mid:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]},full:{floor:[22.9,14.6,76.7,60.7],ceil:[10.1,30.1,95.4,81.2]}},
       line:{name:"Carlos Del Rio-Wilson",level:"G6",season:"2026",thru:6,cur:{db:104,m:[16.3,23.8,87.9,68.5]},prior:{db:188,m:[17.2,22.5,78.6,70.3]}}},
@@ -1276,10 +1278,10 @@ const POSITIONS={
       {name:"Kaden Anderson",school:"Tarleton State",level:"FCS",db:146,m:[16.5,32.4,93.2,70.5],test:true}]},
   RB:{label:"RB",sample:"carries",abbr:"car.",unnamed:"Unnamed RB",conf:[150,60],
     metrics:[
-      {name:"Missed Tackles per Attempt",short:"MTF/A",unit:"",dp:2,step:0.01},
-      {name:"Yards After Contact / Attempt",short:"YCO/A",unit:"",dp:2,step:0.01},
-      {name:"Yards per Attempt",short:"YPA",unit:"",dp:2,step:0.1},
-      {name:"Breakaways per Attempt",short:"BRK/A",unit:"",dp:3,step:0.01}],
+      {name:"Missed tackles per attempt",short:"MTF/A",unit:"",dp:2,step:0.01},
+      {name:"Yards after contact / attempt",short:"YCO/A",unit:"",dp:2,step:0.01},
+      {name:"Yards per attempt",short:"YPA",unit:"",dp:2,step:0.1},
+      {name:"Breakaways per attempt",short:"BRK/A",unit:"",dp:3,step:0.01}],
     cfgFix:[{field:"dbPerGame",from:8,to:12},{field:"anchors.mid.ceil",from:[0.46,5.32,7.7,0.14],to:[0.38,4.59,6.9,0.12]}],
     defaults:{dbPerGame:12,agreeMinDb:40,weights:[35,30,15,20],
       anchors:{mid:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]},full:{floor:[0.11,2.78,4.0,0.03],ceil:[0.38,4.59,6.9,0.12]}},
@@ -1287,39 +1289,39 @@ const POSITIONS={
     samples:[]},
   TE:{label:"TE",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed TE",conf:[250,125],
     metrics:[
-      {name:"Yards per Route Run",short:"YPRR",unit:"",dp:2,step:0.01},
-      {name:"Run-Block Negatively Graded",short:"RB Neg %",unit:"%",dp:1,step:0.1},
-      {name:"Run-Block Positively Graded",short:"RB Pos %",unit:"%",dp:1,step:0.1},
-      {name:"YAC per Reception",short:"YAC/Rec",unit:"",dp:1,step:0.1}],
+      {name:"Yards per route run",short:"YPRR",unit:"",dp:2,step:0.01},
+      {name:"Run-block negatively graded",short:"RB Neg %",unit:"%",dp:1,step:0.1},
+      {name:"Run-block positively graded",short:"RB Pos %",unit:"%",dp:1,step:0.1},
+      {name:"YAC per reception",short:"YAC/Rec",unit:"",dp:1,step:0.1}],
     defaults:{dbPerGame:20,agreeMinDb:100,eliteCut:70,
       anchors:{mid:{floor:[0.43,20.3,2.3,2.7],ceil:[2.56,3.3,15.4,8.2]},full:{floor:[0.43,20.3,2.3,2.7],ceil:[2.56,3.3,15.4,8.2]}},
       line:{name:"Toby Payne",level:"G6",season:"2026",thru:6,cur:{db:187,m:[1.00,5.3,13.0,2.2]},prior:{db:297,m:[1.32,7.4,6.1,3.2]}}},
     samples:[]},
   IOL:{label:"IOL",sample:"snaps",abbr:"snaps",unnamed:"Unnamed IOL",conf:[600,300],
     metrics:[
-      {name:"Pass-Block Grade (True Pass Sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
-      {name:"Run-Block Grade",short:"Run Blk",unit:"",dp:1,step:0.1},
-      {name:"Pass Blocking Efficiency",short:"PBE",unit:"",dp:1,step:0.1},
-      {name:"Run-Block Negatively Graded",short:"RB Neg %",unit:"%",dp:1,step:0.1}],
+      {name:"Pass-block grade (true pass sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
+      {name:"Run-block grade",short:"Run Blk",unit:"",dp:1,step:0.1},
+      {name:"Pass blocking efficiency",short:"PBE",unit:"",dp:1,step:0.1},
+      {name:"Run-block negatively graded",short:"RB Neg %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:60,agreeMinDb:250,weights:[30,30,20,20],eliteCut:70,
       anchors:{mid:{floor:[29.7,52.6,94.6,18.0],ceil:[91.6,93.5,99.8,5.1]},full:{floor:[29.7,52.6,94.6,18.0],ceil:[91.6,93.5,99.8,5.1]}},
       line:{name:"Jalen Slappy",level:"G6",season:"2026",thru:6,cur:{db:436,m:[77.1,50.3,98.2,10.7]},prior:{db:799,m:[62.4,65.1,97.1,7.5]}}},
     samples:[]},
   OT:{label:"OT",sample:"snaps",abbr:"snaps",unnamed:"Unnamed OT",conf:[600,300],
     metrics:[
-      {name:"Pass-Block Grade (True Pass Sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
-      {name:"Run-Block Grade",short:"Run Blk",unit:"",dp:1,step:0.1},
-      {name:"Pass Blocking Efficiency",short:"PBE",unit:"",dp:1,step:0.1},
-      {name:"Run-Block Negatively Graded",short:"RB Neg %",unit:"%",dp:1,step:0.1}],
+      {name:"Pass-block grade (true pass sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
+      {name:"Run-block grade",short:"Run Blk",unit:"",dp:1,step:0.1},
+      {name:"Pass blocking efficiency",short:"PBE",unit:"",dp:1,step:0.1},
+      {name:"Run-block negatively graded",short:"RB Neg %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:60,agreeMinDb:250,weights:[35,25,25,15],
       anchors:{mid:{floor:[38.5,48.2,94.6,18.8],ceil:[89.6,84.2,99.6,5.9]},full:{floor:[38.5,48.2,94.6,18.8],ceil:[89.6,84.2,99.6,5.9]}},
       line:{name:"Tariq Montgomery",level:"G6",season:"2026",thru:6,cur:{db:423,m:[57.3,78.9,96.1,6.6]},prior:{db:571,m:[59.6,56.6,96.1,12.1]}}},
     samples:[]},
   WR:{label:"WR",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed WR",conf:[250,125],roles:["Slot","Outside"],
     metrics:[
-      {name:"Yards per Route Run",short:"YPRR",unit:"",dp:2,step:0.01},
-      {name:"Receiving Grade",short:"Rec Grd",unit:"",dp:1,step:0.1},
-      {name:"YAC per Reception",short:"YAC/Rec",unit:"",dp:1,step:0.1},
+      {name:"Yards per route run",short:"YPRR",unit:"",dp:2,step:0.01},
+      {name:"Receiving grade",short:"Rec Grd",unit:"",dp:1,step:0.1},
+      {name:"YAC per reception",short:"YAC/Rec",unit:"",dp:1,step:0.1},
       {name:"Separation",short:"Sep %",unit:"%",dp:1,step:0.1,fcsMin:30}],
     defaults:{dbPerGame:20,agreeMinDb:100,weights:[40,25,20,15],
       anchors:{mid:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]},full:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]}},
@@ -1327,10 +1329,10 @@ const POSITIONS={
     samples:[]},
   DT:{label:"DT",sample:"snaps",abbr:"snaps",unnamed:"Unnamed DT",conf:[300,150],
     metrics:[
-      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
-      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
-      {name:"Pass-Rush Win Rate",short:"PRW %",unit:"%",dp:1,step:0.1},
-      {name:"True Pass Set Pass-Rush Grade",short:"TPS PR",unit:"",dp:1,step:0.1}],
+      {name:"Run stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
+      {name:"Run defense grade",short:"Run Def",unit:"",dp:1,step:0.1},
+      {name:"Pass-rush win rate",short:"PRW %",unit:"%",dp:1,step:0.1},
+      {name:"True pass set pass-rush grade",short:"TPS PR",unit:"",dp:1,step:0.1}],
     defaults:{dbPerGame:35,agreeMinDb:125,weights:[35,35,15,15],eliteCut:70,
       anchors:{mid:{floor:[1.0,48.0,1.3,53.5],ceil:[13.8,91.0,15.7,91.2]},full:{floor:[1.0,48.0,1.3,53.5],ceil:[13.8,91.0,15.7,91.2]}},
       line:{name:"Kenyatta Hardge",level:"G6",season:"2026",thru:6,cur:{db:229,m:[8.8,71.8,7.9,71.3]},prior:{db:null,m:[null,null,null,null]}}},
@@ -1352,10 +1354,10 @@ const POSITIONS={
       {name:"Jason Seraphin",school:"",level:"FCS",season:"2025",thru:"full",db:400,m:[1.0,52.9,3.4,55.9],ref:true,test:true}]},
   DE:{label:"DE",sample:"snaps",abbr:"snaps",unnamed:"Unnamed DE",conf:[300,150],
     metrics:[
-      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
-      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
-      {name:"Pass-Rush Win Rate",short:"PRW %",unit:"%",dp:1,step:0.1},
-      {name:"True Pass Set Pass-Rush Grade",short:"TPS PR",unit:"",dp:1,step:0.1}],
+      {name:"Run stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
+      {name:"Run defense grade",short:"Run Def",unit:"",dp:1,step:0.1},
+      {name:"Pass-rush win rate",short:"PRW %",unit:"%",dp:1,step:0.1},
+      {name:"True pass set pass-rush grade",short:"TPS PR",unit:"",dp:1,step:0.1}],
     defaults:{dbPerGame:35,agreeMinDb:125,weights:[30,25,25,20],eliteCut:65,
       anchors:{mid:{floor:[2.4,43.7,2.8,60.9],ceil:[13.6,91.4,28.4,94.2]},full:{floor:[2.4,43.7,2.8,60.9],ceil:[13.6,91.4,28.4,94.2]}},
       line:{name:"Braydin Ward",level:"G6",season:"2026",thru:6,cur:{db:171,m:[8.7,78.6,15.7,81.7]},prior:{db:null,m:[null,null,null,null]}}},
@@ -1371,10 +1373,10 @@ const POSITIONS={
       {name:"Hunter Watson",school:"Monmouth",level:"FCS",season:"2025",thru:"full",db:650,m:[4.2,51.9,5.1,61.1],ref:true,test:true}]},
   LB:{label:"LB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed LB",conf:[450,225],
     metrics:[
-      {name:"Run Stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
-      {name:"Run Defense Grade",short:"Run Def",unit:"",dp:1,step:0.1},
-      {name:"Box Coverage Grade",short:"Box Cov",unit:"",dp:1,step:0.1},
-      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1}],
+      {name:"Run stop %",short:"Stop %",unit:"%",dp:1,step:0.1},
+      {name:"Run defense grade",short:"Run Def",unit:"",dp:1,step:0.1},
+      {name:"Box coverage grade",short:"Box Cov",unit:"",dp:1,step:0.1},
+      {name:"Missed tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:50,agreeMinDb:200,weights:[30,30,25,15],
       anchors:{mid:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]},full:{floor:[3.1,44.9,29.7,25.0],ceil:[15.3,94.8,91.2,2.2]}},
       line:{name:"Cannon Lewis",level:"G6",season:"2026",thru:6,cur:{db:338,m:[10.0,67.1,49.4,12.0]},prior:{db:null,m:[null,null,null,null]}}},
@@ -1390,10 +1392,10 @@ const POSITIONS={
       {name:"Fernando Washington",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:701,m:[7.0,38.3,56.1,27.8],ref:true,test:true}]},
   SAF:{label:"SAF",sample:"snaps",abbr:"snaps",unnamed:"Unnamed SAF",conf:[400,200],
     metrics:[
-      {name:"Coverage Grade",short:"Cov",unit:"",dp:1,step:0.1},
-      {name:"Coverage Grade on passes over 3 seconds",short:"Cov 3s+",unit:"",dp:1,step:0.1},
-      {name:"Missed Tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1},
-      {name:"Completion % Against",short:"Cmp %",unit:"%",dp:1,step:0.1}],
+      {name:"Coverage grade",short:"Cov",unit:"",dp:1,step:0.1},
+      {name:"Coverage grade on passes over 3 seconds",short:"Cov 3s+",unit:"",dp:1,step:0.1},
+      {name:"Missed tackle %",short:"MTkl %",unit:"%",dp:1,step:0.1},
+      {name:"Completion % against",short:"Cmp %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:45,agreeMinDb:180,weights:[35,20,25,20],
       anchors:{mid:{floor:[38.7,34.2,29.5,85.0],ceil:[91.0,92.7,4.9,51.4]},full:{floor:[38.7,34.2,29.5,85.0],ceil:[91.0,92.7,4.9,51.4]}},
       line:{name:"Daytione Smith",level:"G6",season:"2026",thru:6,cur:{db:301,m:[64.0,63.3,5.7,83.3]},prior:{db:641,m:[73.5,73.1,10.0,50.0]}}},
@@ -1412,10 +1414,10 @@ const POSITIONS={
       {name:"Kolbe Cage",school:"Northwestern State",level:"FCS",season:"2025",thru:"full",db:745,m:[55.5,60.1,24.3,83.9],ref:true,test:true}]},
   CB:{label:"CB",sample:"snaps",abbr:"snaps",unnamed:"Unnamed CB",conf:[360,180],
     metrics:[
-      {name:"Coverage Grade at Outside Corner",short:"Cov",unit:"",dp:1,step:0.1},
+      {name:"Coverage grade at outside corner",short:"Cov",unit:"",dp:1,step:0.1},
       {name:"Yards allowed per coverage snap",short:"Yds/CS",unit:"",dp:2,step:0.01},
-      {name:"Forced Incompletion %",short:"FI %",unit:"%",dp:1,step:0.1},
-      {name:"Completion % Against",short:"Cmp %",unit:"%",dp:1,step:0.1}],
+      {name:"Forced incompletion %",short:"FI %",unit:"%",dp:1,step:0.1},
+      {name:"Completion % against",short:"Cmp %",unit:"%",dp:1,step:0.1}],
     defaults:{dbPerGame:40,agreeMinDb:160,weights:[40,25,20,15],
       anchors:{mid:{floor:[46.4,2.23,3.6,74.6],ceil:[91.9,0.46,31.3,40.0]},full:{floor:[46.4,2.23,3.6,74.6],ceil:[91.9,0.46,31.3,40.0]}},
       line:{name:"Charles McCartherens",level:"G6",season:"2026",thru:6,cur:{db:295,m:[63.7,1.33,7.7,53.8]},prior:{db:null,m:[null,null,null,null]}}},
@@ -1776,7 +1778,7 @@ function renderBoard(){
     const A=get(a),B=get(b);return (A>B?1:A<B?-1:0)*sortDir});
   LAST_ROWS=rows;
   {const bn=$("boardNote");const show=!!(P.fcsNote&&rows.some(x=>x.p.level==="FCS"));bn.hidden=!show;if(show)bn.textContent="* "+P.fcsNote.text;}
-  const H=[["pick",""],["name","Player"],["ht","Ht"],["wt","Wt"],["level","Level"],["season","Season"],["elig","Yrs Left"],...METRICS.map((m,i)=>["m"+i,m.short]),["grade","Score"],["letter","Grade"],["tier","Tier"],["",""]];
+  const H=[["pick",""],["name","Player"],["ht","Ht"],["wt","Wt"],["level","Level"],["season","Season"],["elig","Yrs left"],...METRICS.map((m,i)=>["m"+i,m.short]),["grade","Score"],["letter","Grade"],["tier","Tier"],["",""]];
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
   $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
@@ -1812,7 +1814,7 @@ function updateBoardTitle(){const sf=$("statusFilter").value,bits=[];
   if(sf)bits.push(sf==="portal"?"Portal only":sf==="none"?"No status":sf==="working"?"Working":sf);
   if(STARONLY)bits.push("★ Starred");
   const q=($("boardSearch").value||"").trim();if(q)bits.push(`“${q}”`);
-  $("boardTitle").textContent=P.label+" Board"+(bits.length?" · "+bits.join(" · "):"");}
+  $("boardTitle").textContent=P.label+" board"+(bits.length?" · "+bits.join(" · "):"");}
 function bioLine(p){return [p.ht?fmtHt(p.ht):"",p.wt?p.wt+" lbs":"",[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ")}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 $("board").addEventListener("change",e=>{
@@ -1890,12 +1892,12 @@ async function printSelected(){
   const pdfTxt=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
-  doc.text(pdfTxt("Player Tool · "+($("boardTitle").textContent||P.label+" Board")),40,44);
+  doc.text(pdfTxt("Player Tool · "+($("boardTitle").textContent||P.label+" board")),40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
   /* columns mirror the board: Player · Ht · Wt · Level · Season · metrics · Score · Grade · Tier */
-  const head=[["Player","Ht","Wt","Level","Season","Yrs Left",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
+  const head=[["Player","Ht","Wt","Level","Season","Yrs left",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
   const schoolLine=p=>[(p.school||"")+(P.roles&&p.role?" · "+(p.role==="Slot"?"SLOT":"WR"):""),[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ");
   const hasFlag=x=>!!CONFRGB[x.r.conf], FLAGGAP="      ";
   const trendTxt=x=>{if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;return Math.abs(d)<0.1?"":(d>0?" (+":" (-")+fmt(Math.abs(d))+")"};
@@ -1940,7 +1942,7 @@ async function printOverview(){
   const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  const title=(OV_SIDE==="def"?"Defensive Overview":"Offensive Overview")+(OV_MODE==="next"?" - Next Season":"");
+  const title=(OV_SIDE==="def"?"Defensive overview":"Offensive overview")+(OV_MODE==="next"?" - Next season":"");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
   doc.text(`Player Tool · ${title}`,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
@@ -2287,9 +2289,9 @@ async function renderOverview(){
   const nm=(x,html)=>x&&x.p.id?`<button type="button" class="tlink" data-ok="${o_k(x)}" data-oid="${esc(x.p.id)}">${html}</button>`:html;
   function o_k(x){return x._k}
   out.forEach(o=>{if(o.best)o.best._k=o.k;if(o.top)o.top._k=o.k});
-  $("ovTbl").innerHTML=`<thead><tr><th>Pos.</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
+  $("ovTbl").innerHTML=`<thead><tr><th>Pos</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
     <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
-    <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None Available":"None entered"}</span>`}</td>
+    <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</td>
     <td class="num o-mg">${o.best?`<span class="gtc-${o.best.r.tier}"><b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}</span>`:"–"}</td>
     <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">0 yrs</b>`:eligText(o.best.p)):"–"}</td>
     <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</td>
@@ -2622,7 +2624,7 @@ async function renderRecruit(){
     const f=v=>v==null?'<span class="sub">–</span>':v<0?`<b class="over">${v}</b>`:v===0?'<span class="sub">0</span>':`<b class="open">${v}</b>`;return `<td class="num">${f(o.open)}${sh}</td><td class="num">${f(o.left)}</td>`};
   const sumG=f=>REC.hasChart?Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0):"–";
   const tot=t=>rows.reduce((a,r)=>a+(r.c[t]||0),0);
-  $("recTbl").innerHTML=`<thead><tr><th>Pos.</th><th class="num" title="Max at this position minus scholarship players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th><th class="num" title="Target + Contacted">Working</th><th class="num">Offered</th><th class="num">Committed</th><th class="num" title="Visits scheduled">Visits</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${cell(r.k,"working",r.c.working,r.noBoard)}${cell(r.k,"Offered",r.c.Offered,r.noBoard)}${cell(r.k,"Committed",r.c.Committed,r.noBoard)}<td class="num">${r.noBoard?'<span class="sub">–</span>':r.c.visits||'<span class="sub">0</span>'}</td></tr>`).join("")}
+  $("recTbl").innerHTML=`<thead><tr><th>Pos</th><th class="num" title="Max at this position minus scholarship players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th><th class="num" title="Target + Contacted">Working</th><th class="num">Offered</th><th class="num">Committed</th><th class="num" title="Visits scheduled">Visits</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${cell(r.k,"working",r.c.working,r.noBoard)}${cell(r.k,"Offered",r.c.Offered,r.noBoard)}${cell(r.k,"Committed",r.c.Committed,r.noBoard)}<td class="num">${r.noBoard?'<span class="sub">–</span>':r.c.visits||'<span class="sub">0</span>'}</td></tr>`).join("")}
     <tr class="tot"><td>Total</td><td class="num">${sumG(o=>o.open)}</td><td class="num">${sumG(o=>o.left)}</td><td class="num">${tot("working")}</td><td class="num">${tot("Offered")}</td><td class="num">${tot("Committed")}</td><td class="num">${tot("visits")}</td></tr></tbody>`;
   renderVisits();$("recPrint").disabled=false;
 }
@@ -2690,7 +2692,7 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
-  pdfHeader(doc,"Player Tool · Big Board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
+  pdfHeader(doc,"Player Tool · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
   const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[0,122,51]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
@@ -3286,7 +3288,7 @@ async function printRecruit(){
   const W=pdfHeader(doc,"Player Tool · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
   if(!v.length){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(91,102,93);doc.text(VMODE==="up"?"No upcoming visits.":"No visits set.",40,90)}
-  else doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos.","Player","School","Status","Visit","Elig.","Grade","Tier"]],
+  else doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos","Player","School","Status","Visit","Elig.","Grade","Tier"]],
     body:v.length?v.map(x=>[x.p.vdate?new Date(x.p.vdate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Not set",x.k+(x.k==="WR"&&x.p.role==="Slot"?" (SLOT)":""),x.p.name,x.p.school||"",x.p.status||"",vLabel(x.p),x.p.elig!=null?String(x.p.elig):"",x.r&&x.r.grade!=null?`${fmt(x.r.grade)} ${x.r.letter.replace("−","-")}`:"-",x.r&&x.r.tier?TIERNAME[x.r.tier]:""]):[["No visits","","","","","","","",""]],
     styles:{font:"helvetica",fontSize:9,cellPadding:5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
     headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},alternateRowStyles:{fillColor:[243,245,242]},
@@ -3298,7 +3300,7 @@ async function printRecruit(){
   const os=r=>r.slot&&r.slot.open!=null?String(r.slot.open)+(r.g!==r.k?" ("+r.g+")":""):"-",ls=r=>r.slot&&r.slot.left!=null?String(r.slot.left):"-";
   const gsum=f=>REC.hasChart?String(Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0)):"-";
   const wk=r=>(r.c.Target||0)+(r.c.Contacted||0),T2=t=>String(REC.rows.reduce((a,r)=>a+(t==="working"?wk(r):(r.c[t]||0)),0));
-  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos.","Open","Left","Working","Offered","Committed","Visits"]],
+  doc.autoTable({startY:y+8,theme:"grid",head:[["Pos","Open","Left","Working","Offered","Committed","Visits"]],
     body:REC.rows.map(r=>[r.k,os(r),ls(r),r.noBoard?"-":String(wk(r)),r.noBoard?"-":String(r.c.Offered||0),r.noBoard?"-":String(r.c.Committed||0),r.noBoard?"-":String(r.c.visits||0)]),
     foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),T2("working"),T2("Offered"),T2("Committed"),T2("visits")]],
     footStyles:{fillColor:[234,238,232],textColor:[24,32,26],fontStyle:"bold",halign:"center"},
@@ -3673,8 +3675,8 @@ const PREF=(()=>{try{return JSON.parse(localStorage.getItem("pt_prefs")||"{}")||
 function savePref(){try{localStorage.setItem("pt_prefs",JSON.stringify(PREF))}catch(e){}}
 const GM_TABS=["sbc","budget","settings","hsset"];
 /* Tab groups: one tab per group in the row; the group's pages switch with the bar under the header. Every page keeps its own #hash. */
-const TAB_GROUPS=[{id:"boards",btn:"boards",views:[["boards","By position"],["bigboard","Big Board"]]},{id:"roster",btn:"overview",views:[["overview","Overview"],["depth","Depth chart"],["recruit","Needs"]]},
-  {id:"hsprosp",btn:"hsboard",views:[["hsboard","List"],["hsbig","Big Board"]]},{id:"hsrecg",btn:"hsrec",views:[["hsneeds","Needs"],["hsrec","Visits & offers"]]},{id:"set",btn:"settings",views:[["settings","Portal"],["hsset","High school"]]}];
+const TAB_GROUPS=[{id:"boards",btn:"boards",views:[["boards","By position"],["bigboard","Big board"]]},{id:"roster",btn:"overview",views:[["overview","Overview"],["depth","Depth chart"],["recruit","Needs"]]},
+  {id:"hsprosp",btn:"hsboard",views:[["hsboard","List"],["hsbig","Big board"]]},{id:"hsrecg",btn:"hsrec",views:[["hsneeds","Needs"],["hsrec","Visits & offers"]]},{id:"set",btn:"settings",views:[["settings","Portal"],["hsset","High school"]]}];
 const groupOf=t=>TAB_GROUPS.find(g=>g.views.some(v=>v[0]===t))||null;
 function subnavSync(t){const g=groupOf(t),bar=$("subnav");if(!bar)return;if(!g){bar.hidden=true;return}const V=g.views.filter(v=>okTab(v[0]));if(V.length<2){bar.hidden=true;return}
   bar.hidden=false;$("subnavSeg").innerHTML=V.map(([k,n])=>`<button type="button" data-subgo="${k}" aria-pressed="${k===t}">${n}</button>`).join("")}
@@ -3796,7 +3798,7 @@ function sbcOddsReview(){if(!PODDS)return "";const L=(SBC.portal||[]).map(x=>[x,
   const row=(name,A)=>{if(A.length<5)return "";const pred=k=>A.reduce((s,[x,c])=>s+c.pc(k),0)/A.length,act=k=>A.filter(([x])=>x.v===k).length/A.length,hit=A.filter(([x,c])=>c.hit).length/A.length;
     return `<tr><td>${esc(name)}</td><td class="num">${A.length}</td>${K.map(k=>{const p=pred(k),a=act(k),d=a-p;return `<td class="num">${Math.round(p*100)}% → <b>${Math.round(a*100)}%</b> <span class="${Math.abs(d)<.08?"sub":(d>0)===(k==="good"||k==="ok")?"sbc-up":"sbc-dn"}">${d>=0?"+":"−"}${Math.round(Math.abs(d)*100)}</span></td>`}).join("")}<td class="num"><b>${Math.round(hit*100)}%</b></td></tr>`};
   const by=l=>L.filter(([x,c])=>c.lvl===l);
-  return `<h3 style="margin:14px 0 0">Did the portal odds hold up?</h3><div class="tablewrap"><table class="sbc-cls"><thead><tr><th>Came from</th><th class="num">Transfers</th>${K.map(k=>`<th class="num" title="Odds said → what happened">${N[k]}</th>`).join("")}<th class="num" title="Share whose outcome matched their odds: the most likely outcome, or one that 30%+ of players like him hit">Matched</th></tr></thead><tbody>
+  return `<h3 class="sec-h">Did the portal odds hold up?</h3><div class="tablewrap"><table class="sbc-cls"><thead><tr><th>Came from</th><th class="num">Transfers</th>${K.map(k=>`<th class="num" title="Odds said → what happened">${N[k]}</th>`).join("")}<th class="num" title="Share whose outcome matched their odds: the most likely outcome, or one that 30%+ of players like him hit">Matched</th></tr></thead><tbody>
   ${row("All",L)}${["P4","G6","FCS","D2"].map(l=>row(ODDS_LVL[l],by(l))).join("")}</tbody></table></div>
   <p class="note">Odds come from the ${esc(PODDS.season||"2026")} class (old level + old role), so this tests them on players they never saw. Each cell: odds said → what happened. A player's own odds are in his Eval.</p>`}
 /* Good = 70+ with a real role (40%+ of his side's snaps); Bad = under 60; Not playing = under 10% of snaps; everything else OK */
@@ -3919,17 +3921,17 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <div class="tablewrap"><table id="sbcTbl">${head}<tbody>${body}</tbody></table></div>
     <p class="note"><b>Team grade</b> = two-deep graded on our board scales (QB 3×, backups ¼). <b>Expected W</b> = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). <b>Wins vs. talent</b> = actual − expected; ±1 = over/under.</p>
     ${sbcChart(rows,fit)}
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 class="sec-h" style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?(SBC_SZN==="next"?(()=>{const n=sbcNext(SBC_TEAM);const ch=(a,b)=>a==null||b==null?"":` <span class="${a-b>=0?"sbc-up":"sbc-dn"}">(${a-b>=0?"+":"−"}${Math.abs(a-b).toFixed(1)})</span>`;return `<span class="sub">Next season · grade <b>${fmt(n.grade)}</b>${ch(n.grade,t.grade)} · starters ${fmt(n.st)}${ch(n.st,t.st)} · offense <b>${fmt(n.off)}</b>${ch(n.off,t.off)} · defense <b>${fmt(n.def)}</b>${ch(n.def,t.def)}</span>`})():`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`):""}</div>
     <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span>${SBC_YR==="2026"?`<span class="seg" role="group" aria-label="This or next season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>`:""}${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
     ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);const nin=(SBC.inc||[]).filter(p=>String(p.fid)===String(SBC_TEAM)).length;return `<p style="margin:4px 0"><b>Next season:</b>${nin?` adding <b>${nin}</b> portal commit${nin===1?"":"s"} (projected at their profile's typical grade) ·`:""} losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
     <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
     ${SBC.portal?`
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 class="sec-h" style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
     <p class="note">Every ${SBC_YR} transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not ${+SBC_YR-1}). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. <b>No data</b> = no PFF snaps last season or this one, so we can't tell why; hit rate and the odds skip them, K/P/LS and players who left. <b>Eval</b> = strengths and weaknesses (top or bottom quarter of Sun Belt transfers at his position) and why he's a good or bad take.</p>${SBC_YR!=="2026"?sbcOddsReview():""}`:""}
-    ${SBC_YR==="2026"?`<h3 style="margin:14px 0 0">Next season snapshot</h3>${sbcNextLeague()}
+    ${SBC_YR==="2026"?`<h3 class="sec-h">Next season snapshot</h3>${sbcNextLeague()}
     <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`:""}`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
   if(e.target.id==="sbcOddsSave"){const o=sbcOddsCalc();DB.doc("config/portalOdds").set(o).then(()=>{PODDS=o;flash(`Portal odds saved (${o.n} transfers).`)}).catch(()=>flash("Couldn't save the portal odds."));return}
@@ -4035,7 +4037,7 @@ const isCom=st=>st==="Committed"||st==="Signed";
 /* a realistic target: not ours yet, not gone, and no P4 offer (we won't win those) */
 const isTgt=r=>!isCom(r.status)&&!["Committed elsewhere","Pass"].includes(r.status)&&!(num(r.p4)>0);
 const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.05},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
-  cone:{n:"3-Cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
+  cone:{n:"3-cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
 const TKEYS=Object.keys(TEST);
 /* results outside these ranges are typos or bad imports (e.g. a 6-inch broad jump), so scoring skips them */
 const TEST_OK={t10:[1.35,2.4],t40:[4.1,6.6],shuttle:[3.6,6.5],cone:[6.2,10.5],vert:[12,48],broad:[55,145],m100:[9.8,15.5]};
