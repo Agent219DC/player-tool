@@ -15,7 +15,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#18201a">
+<meta name="theme-color" content="#111318">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Roster Lab">
@@ -27,9 +27,9 @@
 <style>
 /* Layout: scouting-sheet tool. Inputs left, live verdict right, comparison board below, settings folded at the bottom. */
 :root{
-  --bg:#f3f5f2; --surface:#ffffff; --sunk:#e8ece7; --line:#cfd6cd;
-  --fg:#18201a; --muted:#5b665d;
-  --accent:#00b140; --accent-fill:#00873a; --accent-ink:#ffffff; --accent-soft:#dcf3e3; --accent-text:#007a33;
+  --bg:#f4f5f7; --surface:#ffffff; --sunk:#e9ebef; --line:#d3d7de;
+  --fg:#1b1e24; --muted:#5a606b;
+  --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#007a33; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0a5c30; --offer:#6b3fa0;
   --tElite:#1f63c6; --tEliteFill:#1f63c6; --tImpact:#7b3fc4; --tStarter:#007a33; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
@@ -37,15 +37,21 @@
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#111613; --surface:#18201b; --sunk:#202a23; --line:#2f3b32;
-  --fg:#e9efea; --muted:#aebcb1;
-  --accent:#00b140; --accent-fill:#00873a; --accent-ink:#ffffff; --accent-soft:#143524; --accent-text:#3fd47a;
+  --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
+  --fg:#eceef2; --muted:#aab1bd;
+  --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
   --impact:#3fd47a; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#00b140; --offer:#c3a0ee; --tElite:#5ea8ff; --tEliteFill:#2a74d6; --tImpact:#b98cf0; --tStarter:#3fd47a; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#111613; --surface:#18201b; --sunk:#202a23; --line:#2f3b32;
-  --fg:#e9efea; --muted:#aebcb1;
-  --accent:#00b140; --accent-fill:#00873a; --accent-ink:#ffffff; --accent-soft:#143524; --accent-text:#3fd47a;
+  --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
+  --fg:#eceef2; --muted:#aab1bd;
+  --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
   --impact:#3fd47a; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#00b140; --offer:#c3a0ee; --tElite:#5ea8ff; --tEliteFill:#2a74d6; --tImpact:#b98cf0; --tStarter:#3fd47a; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
+/* side colors: portal blue (default), high school purple, GM green */
+body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
+body.mode-gm{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-gm{--accent-soft:#10301f; --accent-text:#4fdb9c}}
+:root[data-theme="dark"] body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}
+:root[data-theme="dark"] body.mode-gm{--accent-soft:#10301f; --accent-text:#4fdb9c}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
@@ -83,7 +89,7 @@ body.scrolled header .tab{padding:6px 11px}
   body.scrolled header h1{font-size:20px}
 }
 
-.brandlogo.dark{display:none}[data-theme=dark] .brandlogo.light{display:none}[data-theme=dark] .brandlogo.dark{display:block}
+svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pos{display:flex;flex-wrap:wrap;gap:6px}
 .pg-off{display:none!important}
@@ -92,7 +98,7 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .tabrow::-webkit-scrollbar{display:none}
 .tab{border:1px solid transparent;background:none;color:var(--muted);padding:8px 12px;border-radius:6px;font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
 .tab:hover{color:var(--fg);background:var(--sunk)}
-.tab[aria-current=page]{background:var(--accent-fill,#00873a);color:#fff}
+.tab[aria-current=page]{background:var(--accent-fill);color:#fff}
 .tab.has-dot::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--cMed);margin-left:6px;vertical-align:2px}
 .tab[aria-current=page].has-dot::after{background:#fff}
 .posrow{display:flex;padding-top:2px}
@@ -429,7 +435,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-g td.bp{width:44px;text-align:right;font:12px var(--mono);color:var(--muted)}
 .bud-g td.rm{width:22px;text-align:right}.bud-g td.rm button{border:0;background:none;color:var(--muted);font-size:15px;cursor:pointer;padding:0 3px}
 .bud-g input{width:100%;min-width:0;border:1px solid transparent;background:transparent;color:var(--fg);font:inherit;padding:2px 4px;border-radius:4px;text-overflow:ellipsis}
-.bud-g input:hover{border-color:var(--line)}.bud-g input:focus{border-color:var(--accent,#00b140);background:var(--surface);outline:none}
+.bud-g input:hover{border-color:var(--line)}.bud-g input:focus{border-color:var(--accent);background:var(--surface);outline:none}
 .bud-g .ba{width:66px;text-align:right;font-family:var(--mono)}
 .bud-g tr.nochart .bn{text-decoration:underline wavy var(--cMed);text-underline-offset:3px}
 .bud-g tr.open .bn::placeholder{color:var(--muted);font-style:italic}
@@ -439,7 +445,7 @@ tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .bud-tot input{width:150px;font:700 22px var(--display);padding:2px 6px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);margin-left:2px}
 .bud-bar{display:flex;height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;border:1px solid var(--line)}
 @media (max-width:420px){.bud-g td.bp:not(.mo){display:none}.bud-g td.sl{width:34px}.bud-g .bn{font-size:12.5px}.bud-g tr:has(td.bp.mo){display:grid;grid-template-columns:34px minmax(0,1fr) 74px 36px;align-items:center;border-top:1px solid var(--line)}.bud-g tr:has(td.bp.mo)>td{border-top:0;width:auto;grid-row:1/span 2}.bud-g tr:has(td.bp.mo)>td.am{grid-row:1;grid-column:3}.bud-g tr:has(td.bp.mo)>td.bp.mo{grid-row:2;grid-column:3;width:auto;font-size:11px;padding:0 2px 2px;line-height:1.1}.bud-g tr:has(td.bp.mo)>td.rm{grid-column:4}}
-.bud-bar span:first-child{background:var(--accent-fill,#00873a)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
+.bud-bar span:first-child{background:var(--accent-fill)}.bud-bar span:last-child{background:var(--cMed);opacity:.55}
 button,input,select,textarea{font-family:inherit}
 .sec-h{font:600 18px var(--display);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 0}
 .bud-side{margin-top:14px}.bud-sh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 0 8px;padding-bottom:4px;border-bottom:2px solid var(--fg);font:700 18px var(--display);letter-spacing:.06em;text-transform:uppercase}.bud-sh .sub{font:400 12.5px var(--body);letter-spacing:0;text-transform:none;color:var(--muted)}
@@ -756,6 +762,7 @@ table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
 </style>
 <div id="gate">
   <div class="card">
+    <svg class="gatelogo" width="96" height="58" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc2"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc2)"><path d="M0 58 Q30 52 60 58 T120 58 V65.4 H0 Z" fill="#1fa3ee"/><rect x="0" y="65.2" width="120" height="8.6" fill="#a93fd9"/><rect x="0" y="73.6" width="120" height="20" fill="#2fcb86"/><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
     <div class="eyebrow">Staff board</div>
     <h1>Roster <span>Lab</span></h1>
     <p class="msg" id="gateMsg">Sign in with your staff account.</p>
@@ -823,7 +830,7 @@ window.claude={use:async n=>{
 <div class="wrap">
   <header>
     <div class="brand">
-      <img class="brandlogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="68" height="68" onerror="this.remove()"><img class="brandlogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="68" height="68" onerror="this.remove()">
+      <svg class="brandlogo rl" width="68" height="42" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc1"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc1)"><path d="M0 58 Q30 52 60 58 T120 58 V65.4 H0 Z" fill="#1fa3ee"/><rect x="0" y="65.2" width="120" height="8.6" fill="#a93fd9"/><rect x="0" y="73.6" width="120" height="20" fill="#2fcb86"/><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
       <div>
         <div class="eyebrow">Staff board</div>
         <h1>Roster <span>Lab</span></h1>
@@ -1893,9 +1900,9 @@ async function printSelected(){
   const W=doc.internal.pageSize.getWidth();
   const pdfTxt=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
+  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);
   doc.text(pdfTxt("Roster Lab · "+($("boardTitle").textContent||P.label+" board")),40,44);
-  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
   /* columns mirror the board: Player · Ht · Wt · Level · Season · metrics · Score · Grade · Tier */
@@ -1910,10 +1917,10 @@ async function printSelected(){
   const nm=METRICS.length, cEl=5, cM=6, cScore=cM+nm, cTier=cScore+2;
   const LG=await logosFor(rows.map(x=>teamIdFor(x.p))),lgOf=x=>LG[teamIdFor(x.p)],anyLg=rows.some(lgOf);
   doc.autoTable({head,body,startY:76,theme:"grid",
-    styles:{font:"helvetica",fontSize:8.5,cellPadding:4.5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+    styles:{font:"helvetica",fontSize:8.5,cellPadding:4.5,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36],valign:"middle"},
+    headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
     columnStyles:Object.fromEntries([[0,{cellWidth:"auto",valign:"top"}],[1,{halign:"right"}],[2,{halign:"right"}],[cEl,{halign:"right"}]].concat([...Array(nm).keys()].map(i=>[cM+i,{halign:"right"}])).concat([[cScore,{halign:"right",fontStyle:"bold"}],[cScore+1,{halign:"center",fontStyle:"bold"}]])),
-    didParseCell:h=>{if(h.section==="body"&&(h.column.index===cTier||h.column.index===cScore||h.column.index===cScore+1)){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}
+    didParseCell:h=>{if(h.section==="body"&&(h.column.index===cTier||h.column.index===cScore||h.column.index===cScore+1)){const t=rows[h.row.index].r.tier;h.cell.styles.textColor=TIERRGB[t]||[27,30,36];h.cell.styles.fontStyle="bold"}
       if(anyLg&&h.column.index===0)h.cell.styles.cellPadding={top:4.5,bottom:4.5,right:4.5,left:22};
       if(h.section==="head"&&(h.column.index===1||h.column.index===2||h.column.index===cEl||(h.column.index>=cM&&h.column.index<=cScore)))h.cell.styles.halign="right";
       if(h.section==="head"&&h.column.index===cScore+1)h.cell.styles.halign="center";
@@ -1926,12 +1933,12 @@ async function printSelected(){
       if(x.r.split||x.r.partialM){doc.setFont("helvetica","bold");doc.setFontSize(8);doc.setTextColor(...rgb);doc.text("*",px+9.2,py+6.6)}}
   });
   const y=Math.min(doc.lastAutoTable.finalY+18,doc.internal.pageSize.getHeight()-38);
-  if(rows.some(hasFlag)){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);let lx=40;
+  if(rows.some(hasFlag)){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90,96,107);let lx=40;
     doc.text("Confidence:",lx,y);lx+=doc.getTextWidth("Confidence:")+6;
-    [["High","High"],["Medium","Medium"],["Low","Low"]].forEach(([k,t])=>{pdfFlag(doc,lx,y-7.5,9.5,CONFRGB[k]);lx+=11;doc.setTextColor(91,102,93);doc.text(t,lx,y);lx+=doc.getTextWidth(t)+10});
+    [["High","High"],["Medium","Medium"],["Low","Low"]].forEach(([k,t])=>{pdfFlag(doc,lx,y-7.5,9.5,CONFRGB[k]);lx+=11;doc.setTextColor(90,96,107);doc.text(t,lx,y);lx+=doc.getTextWidth(t)+10});
     doc.text("·   * next to a flag = seasons disagree or only 3 of 4 metrics",lx,y)}
   const y2=rows.some(hasFlag)?y+14:y;
-  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text("Score: 90+ A Elite · 80–89 B Impact Starter · 70–79 C Starter · 60–69 D Rotation · under 60 F NGE.   Shaded rows = on roster."+(P.fcsNote&&rows.some(x=>x.p.level==="FCS")?"   * "+P.fcsNote.text:""),40,y2);
   const fname=`${P.label} grades ${new Date().toISOString().slice(0,10)}.pdf`;
   await pdfSave(doc,fname);
@@ -1945,9 +1952,9 @@ async function printOverview(){
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
   const title=(OV_SIDE==="def"?"Defensive overview":"Offensive overview")+(OV_MODE==="next"?" - Next season":"");
-  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);
+  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);
   doc.text(`Roster Lab · ${title}`,40,44);
-  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
   const L=x=>x.r.letter.replace("−","-");
@@ -1958,7 +1965,7 @@ async function printOverview(){
   const x0=40,fw=W-80,gx=6,cw1=(fw-gx*(F.cols-1))/F.cols,ch=104,gy=12,yTop=92;
   const maxR=Math.max(...spots.map(s=>s.r)),losY=F.los==="top"?yTop-8:yTop+maxR*(ch+gy)-gy+8;
   doc.setDrawColor(150,160,152);doc.setLineWidth(1);doc.setLineDashPattern([4,3],0);doc.line(x0,losY,x0+fw,losY);doc.setLineDashPattern([],0);
-  doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(91,102,93);doc.text("LINE OF SCRIMMAGE",x0+fw,losY+(F.los==="top"?-3:8),{align:"right"});
+  doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(90,96,107);doc.text("LINE OF SCRIMMAGE",x0+fw,losY+(F.los==="top"?-3:8),{align:"right"});
   const clip=(t,w,n)=>{const ls=doc.splitTextToSize(T(t),w);if(ls.length>n){ls.length=n;ls[n-1]=ls[n-1].replace(/.{0,2}$/,"…")}return ls};
   spots.forEach(s=>{const o=s.o,x=x0+(s.c-1)*(cw1+gx),y=yTop+(s.r-1)*(ch+gy),cw=s.sp*cw1+(s.sp-1)*gx,iw=cw-10;
     doc.setLineWidth(.6);
@@ -1966,27 +1973,27 @@ async function printOverview(){
       doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(120,130,122);doc.text(s.lbl,x+cw/2,y+ch/2-2,{align:"center"});
       doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Not built yet",x+cw/2,y+ch/2+9,{align:"center"});return}
     const b=o.best,t=o.top;
-    doc.setDrawColor(207,214,205);doc.setFillColor(255,255,255);doc.roundedRect(x,y,cw,ch,4,4,"FD");
-    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(o.lbl,x+5,y+13);
-    doc.setFontSize(6.5);doc.setTextColor(...(NEEDRGB[o.need]||[24,32,26]));doc.text(NEEDLABEL[o.need].toUpperCase(),x+cw-5,y+12,{align:"right"});
+    doc.setDrawColor(211,215,222);doc.setFillColor(255,255,255);doc.roundedRect(x,y,cw,ch,4,4,"FD");
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(27,30,36);doc.text(o.lbl,x+5,y+13);
+    doc.setFontSize(6.5);doc.setTextColor(...(NEEDRGB[o.need]||[27,30,36]));doc.text(NEEDLABEL[o.need].toUpperCase(),x+cw-5,y+12,{align:"right"});
     let yy=y+24;
     const lab=t2=>{doc.setFont("helvetica","bold");doc.setFontSize(5.8);doc.setTextColor(120,130,122);doc.text(t2,x+5,yy);yy+=8};
-    const line=(t2,bold,rgb)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(7.5);doc.setTextColor(...(rgb||[24,32,26]));clip(t2,iw,2).forEach(l=>{doc.text(l,x+5,yy);yy+=8.5})};
+    const line=(t2,bold,rgb)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(7.5);doc.setTextColor(...(rgb||[27,30,36]));clip(t2,iw,2).forEach(l=>{doc.text(l,x+5,yy);yy+=8.5})};
     lab("OURS");
     if(b){line(b.p.name+(b.commit?" (Committed)":""),true);
-      const g0=`${fmt(b.r.grade)} ${T(b.r.letter)}`,g=g0+"  ·  ";doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[b.r.tier]||[24,32,26]));doc.text(g0,x+5,yy);doc.setFont("helvetica","normal");doc.setTextColor(24,32,26);doc.text("  ·  ",x+5+doc.getTextWidth(g0),yy);
+      const g0=`${fmt(b.r.grade)} ${T(b.r.letter)}`,g=g0+"  ·  ";doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[b.r.tier]||[27,30,36]));doc.text(g0,x+5,yy);doc.setFont("helvetica","normal");doc.setTextColor(27,30,36);doc.text("  ·  ",x+5+doc.getTextWidth(g0),yy);
       const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("0 yrs",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
     else line(OV_MODE==="next"?"None available":"None entered",false,[120,130,122]);
     yy+=2;lab("TARGET");
     if(t){line(t.p.name+(t.p.level?` (${t.p.level})`:""),true);
-      {const g0=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[24,32,26]));doc.text(g0,x+5,yy);if(b){const w0=doc.getTextWidth(g0);doc.setFont("helvetica","normal");doc.setTextColor(24,32,26);doc.text(`  ·  ${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}`,x+5+w0,yy)}yy+=8.5}
-      if(t.r.tier){doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[24,32,26]));doc.text(TIERNAME[t.r.tier].toUpperCase(),x+5,Math.min(yy+1,y+ch-5))}}
+      {const g0=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[27,30,36]));doc.text(g0,x+5,yy);if(b){const w0=doc.getTextWidth(g0);doc.setFont("helvetica","normal");doc.setTextColor(27,30,36);doc.text(`  ·  ${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}`,x+5+w0,yy)}yy+=8.5}
+      if(t.r.tier){doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[27,30,36]));doc.text(TIERNAME[t.r.tier].toUpperCase(),x+5,Math.min(yy+1,y+ch-5))}}
     else line(o.why?"- "+o.why:"-",false,[120,130,122]);
   });
   const y=yTop+maxR*(ch+gy)+(F.los==="top"?6:18);
   doc.setFont("helvetica","normal");
 
-  doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text(doc.splitTextToSize("Need: Upgrade = below 70 · Solid = 70–79 · Great = 80+. Our weakest starter is paired with the best target. Medium and High confidence only; targets leave out NIP, Pass and hidden players.",W-80),40,Math.min(y,doc.internal.pageSize.getHeight()-36));
   const fname=`${title} ${new Date().toISOString().slice(0,10)}.pdf`;
   await pdfSave(doc,fname);
@@ -2050,8 +2057,8 @@ async function printCompare(){
   const W=pdfHeader(doc,T(`Roster Lab · ${CMP_CTX?"Ours vs. Target":"Compare"} · ${role}`),"");
   let y=80;const v=cmpVerdict(rows);
   if(v){doc.setFont("helvetica","bold");doc.setFontSize(10.5);const ls=doc.splitTextToSize(T(v.text),W-100),bh=12+ls.length*12;
-    doc.setFillColor(243,245,242);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(0,177,64);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
-    doc.setTextColor(24,32,26);doc.text(ls,52,y+16);y+=bh+12}
+    doc.setFillColor(244,245,247);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(11,111,184);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
+    doc.setTextColor(27,30,36);doc.text(ls,52,y+16);y+=bh+12}
   const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · ")))]];
   const best=METRICS.map((_,i)=>{const n=rows.map(x=>x.r.n?x.r.n[i]:null),ok=n.filter(z=>z!=null);if(ok.length<2)return n.map(()=>0);const mx=Math.max(...ok),mn=Math.min(...ok);return n.map(z=>z==null||mx===mn?0:z===mx?1:z===mn?-1:0)});
   const body=METRICS.map((m,i)=>[`${m.name} (${S.weights[i]}%)`,...rows.map(x=>`${T(fm(x.r.m[i],i))}${m.unit}${x.r.n&&x.r.n[i]!=null?`   (${Math.round(x.r.n[i])}/100)`:""}`)]);
@@ -2068,17 +2075,17 @@ async function printCompare(){
   const nM=METRICS.length;
   const CL=await logosFor(rows.map(x=>teamIdFor(x.p)));
   doc.autoTable({head,body,startY:y,theme:"grid",
-    styles:{font:"helvetica",fontSize:9,cellPadding:6,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],valign:"middle"},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},
+    styles:{font:"helvetica",fontSize:9,cellPadding:6,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36],valign:"middle"},
+    headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:9},
     columnStyles:{0:{fontStyle:"bold",cellWidth:170}},
     didDrawCell:h=>{if(h.section==="head"&&h.column.index>0){const lg=CL[teamIdFor(rows[h.column.index-1].p)];pdfLogo(doc,lg,h.cell.x+h.cell.width-24,h.cell.y+(h.cell.height-18)/2,18)}},
     didParseCell:h=>{if(h.section==="head"&&h.column.index>0)h.cell.styles.cellPadding={top:6,bottom:6,left:6,right:28};
       if(h.section!=="body"||h.column.index===0)return;const c=h.column.index-1,r=h.row.index;
       if(r<nM){const b=best[r][c];if(b===1){h.cell.styles.fillColor=[220,239,226]}else if(b===-1){h.cell.styles.textColor=[198,40,40]}}
       if(r===nM){h.cell.styles.fontStyle="bold";if(gmx!==gmn){if(gs[c]===gmx)h.cell.styles.fillColor=[220,239,226];else if(gs[c]===gmn)h.cell.styles.textColor=[198,40,40]}}
-      if(r===nM+1){const t=rows[c].r.tier;if(t){h.cell.styles.textColor=TIERRGB[t]||[24,32,26];h.cell.styles.fontStyle="bold"}}}});
+      if(r===nM+1){const t=rows[c].r.tier;if(t){h.cell.styles.textColor=TIERRGB[t]||[27,30,36];h.cell.styles.fontStyle="bold"}}}});
   const fy=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);
-  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text("Shaded = best of this group on that metric. Red = weakest. (x/100) = the player's score on that metric's scale.",40,fy);
   await pdfSave(doc,T(`${CMP_CTX?"Ours vs target":"Compare"} ${role} ${rows.map(x=>x.p.name.replace(/[,.]?\s+(jr|sr|ii|iii|iv|v)\.?$/i,"").split(" ").pop()).join(" vs ")} ${new Date().toISOString().slice(0,10)}.pdf`));
 }
@@ -2698,10 +2705,10 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[0,122,51]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
-    styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+    styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
     columnStyles:{0:{halign:"right",cellWidth:24},2:{fontStyle:"bold"},6:{halign:"right"},8:{halign:"right",fontStyle:"bold"},11:{halign:"right"}},
-    didParseCell:h=>{if(h.section!=="body")return;const x=v[h.row.index];if(h.column.index===8||h.column.index===9){h.cell.styles.textColor=TIERRGB[x.r.tier]||[24,32,26];h.cell.styles.fontStyle="bold"}if(h.column.index===10){h.cell.styles.textColor=NEEDRGB[x.need];h.cell.styles.fontStyle="bold"}}});
-  const y=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(91,102,93);
+    didParseCell:h=>{if(h.section!=="body")return;const x=v[h.row.index];if(h.column.index===8||h.column.index===9){h.cell.styles.textColor=TIERRGB[x.r.tier]||[27,30,36];h.cell.styles.fontStyle="bold"}if(h.column.index===10){h.cell.styles.textColor=NEEDRGB[x.need];h.cell.styles.fontStyle="bold"}}});
+  const y=Math.min(doc.lastAutoTable.finalY+16,doc.internal.pageSize.getHeight()-24);doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text("This season's targets, Medium or High confidence. vs. ours = his grade minus our weakest starter at that spot.",40,y);
   await pdfSave(doc,T(`Big board ${new Date().toISOString().slice(0,10)}.pdf`))}
 $("bbPrint").addEventListener("click",printBigBoard);
@@ -2747,14 +2754,14 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
     const W=pdfHeader(doc,"Roster Lab · Portal Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
-    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
+    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
       const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
-      list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[24,32,26];
+      list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[27,30,36];
         doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.p.name)}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
-        doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
-        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
+        doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
+        doc.setTextColor(27,30,36);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
         const g=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
-        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
+        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(90,96,107);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`Portal board ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("tbPrint").addEventListener("click",printTagBoard);
 /* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
@@ -3000,31 +3007,31 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
   const box=(t,x,y,w,h,fs,label,k)=>{const g=dcGrade(t);const all=dcCols(t),cs=all.filter(c=>c!=="cut"),cut=all.includes("cut");
     if(cs.length)cs.forEach((c,ci)=>{doc.setFillColor(...DC_PRGB[c]);doc.rect(x+ci*w/cs.length,y,w/cs.length,h,"F")});else if(cut){doc.setFillColor(252,232,232);doc.rect(x,y,w,h,"F")}
     if(cut)hatch(x+w-12,y,12,h);
-    doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,w,h);
-    if(g){doc.setFillColor(...(TIERRGB[g.tier]||[24,32,26]));doc.rect(x,y,3,h,"F")}
+    doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,w,h);
+    if(g){doc.setFillColor(...(TIERRGB[g.tier]||[27,30,36]));doc.rect(x,y,3,h,"F")}
     const tw=w-(cut?20:10)-(t.inj?10:0);
-    doc.setFont("helvetica","bold");doc.setFontSize(fs);doc.setTextColor(24,32,26);const nm=doc.splitTextToSize(T(label),tw)[0]||"";doc.text(nm,x+6,y+fs+2);
+    doc.setFont("helvetica","bold");doc.setFontSize(fs);doc.setTextColor(27,30,36);const nm=doc.splitTextToSize(T(label),tw)[0]||"";doc.text(nm,x+6,y+fs+2);
     if(t.inj)cross(x+7+doc.getTextWidth(nm),y+3,fs);
     const sub=[t.yr,t.role&&t.role!==k?t.role:"",t.inj&&t.injNote?"Inj: "+t.injNote:""].filter(Boolean).join(" · ");
-    doc.setFont("helvetica","normal");doc.setFontSize(fs-1.3);doc.setTextColor(91,102,93);const sl=doc.splitTextToSize(T(sub),tw-(g?34:0))[0]||"";doc.text(sl,x+6,y+fs*2.2+2);
-    if(g){doc.setFont("helvetica","bold");doc.setFontSize(fs-.8);doc.setTextColor(...(TIERRGB[g.tier]||[24,32,26]));doc.text(T(`${fmt(g.grade)} ${g.letter}`),x+w-(cut?16:5),y+fs*2.2+2,{align:"right"})}};
+    doc.setFont("helvetica","normal");doc.setFontSize(fs-1.3);doc.setTextColor(90,96,107);const sl=doc.splitTextToSize(T(sub),tw-(g?34:0))[0]||"";doc.text(sl,x+6,y+fs*2.2+2);
+    if(g){doc.setFont("helvetica","bold");doc.setFontSize(fs-.8);doc.setTextColor(...(TIERRGB[g.tier]||[27,30,36]));doc.text(T(`${fmt(g.grade)} ${g.letter}`),x+w-(cut?16:5),y+fs*2.2+2,{align:"right"})}};
   const legend=()=>{const ly=PH-18;let lx=40;doc.setFont("helvetica","normal");doc.setFontSize(7.5);
     [["fr","Freshman"],["tr","Transfer"],["wo","Walk-on"],["cut","Potential cut"],["inj","Injured"]].forEach(([c,lab])=>{
-      if(c==="cut"){doc.setFillColor(252,232,232);doc.rect(lx,ly-7,16,9,"F");hatch(lx+6,ly-7,10,9);doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(lx,ly-7,16,9)}
+      if(c==="cut"){doc.setFillColor(252,232,232);doc.rect(lx,ly-7,16,9,"F");hatch(lx+6,ly-7,10,9);doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(lx,ly-7,16,9)}
       else if(c==="inj")cross(lx+4,ly-7,9);
-      else{doc.setFillColor(...DC_PRGB[c]);doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(lx,ly-7,16,9,"FD")}
-      doc.setTextColor(91,102,93);doc.text(lab,lx+20,ly);lx+=26+doc.getTextWidth(lab)+14});
+      else{doc.setFillColor(...DC_PRGB[c]);doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(lx,ly-7,16,9,"FD")}
+      doc.setTextColor(90,96,107);doc.text(lab,lx+20,ly);lx+=26+doc.getTextWidth(lab)+14});
     doc.text("Left edge = grade tier · grade on the right",lx,ly)};
   /* roster count strip: the 105 line and each position's players against its max, so the printout shows what we have and need */
   const rosterStrip=()=>{const L=(DCS[DC_SZN]||{}).limits||{},lim=+L.limit||105,Tg=L.targets||{},{c,total,woN}=dcCounts(DC_SZN);if(!total)return;
     const left=lim-total,sch=Object.values(c).reduce((a,b)=>a+b,0),schT=DC_GRPS.reduce((a,g)=>a+(+Tg[g]||0),0);
-    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...(left<0?[198,40,40]:[24,32,26]));doc.text(`${total} / ${lim}`,40,top+9);
-    const tw=doc.getTextWidth(`${total} / ${lim}`);doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);
+    doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...(left<0?[198,40,40]:[27,30,36]));doc.text(`${total} / ${lim}`,40,top+9);
+    const tw=doc.getTextWidth(`${total} / ${lim}`);doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90,96,107);
     doc.text(T(`${left>=0?left+" roster spot"+(left===1?"":"s")+" open":(-left)+" over the limit"} · ${sch} scholarship${schT?" of "+schT+" planned":""} · ${woN} walk-on${woN===1?"":"s"}`),40+tw+8,top+9);
     const n=DC_GRPS.length,bw=(W-80-(n-1)*4)/n;let y=top+15;
     DC_GRPS.forEach((g,i)=>{const x=40+i*(bw+4),have=c[g]||0,t=Tg[g],d=t==null?null:t-have;
-      doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,bw,24);
-      doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(24,32,26);doc.text(DC_GRPLBL[g]||g,x+4,y+9);
+      doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,bw,24);
+      doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(27,30,36);doc.text(DC_GRPLBL[g]||g,x+4,y+9);
       doc.setFontSize(8.5);doc.text(t!=null?`${have} / ${t}`:String(have),x+bw-4,y+9,{align:"right"});
       if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[0,135,58]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
     top=y+24+12};
@@ -3032,7 +3039,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{
     /* special teams shares the defense page when it fits */
     const stH=sd==="st"?40+Math.max(1,...["K","P","LS","STP"].map(k=>(G[k]||[]).length))*24:0;
-    if(sd==="st"&&top&&top+stH<PH-40){doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text("Special teams",40,top+4);top+=12}
+    if(sd==="st"&&top&&top+stH<PH-40){doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(27,30,36);doc.text("Special teams",40,top+4);top+=12}
     else{if(pi)doc.addPage();page(nm)}
     DC_ROWS[sd].forEach((row,ri)=>{const keys=row.filter(k=>!DC_POOLS.includes(k)||(G[k]||[]).length);if(!keys.length)return;const pool=keys.every(k=>DC_POOLS.includes(k));
       const n=pool?keys.length:Math.max(6,keys.length);const cw=(W-80-(n-1)*6)/n;
@@ -3041,7 +3048,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       if(lbl){doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(lbl.toUpperCase(),40,top+4);top+=9}
       let bottom=top;
       keys.forEach((k,ci)=>{const x=40+ci*(cw+6);let y=top;const list=G[k]||[];
-        doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(T(DC_LABEL[k]||k),x+5,y+11);
+        doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(T(DC_LABEL[k]||k),x+5,y+11);
         if(list.length){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text(String(list.length),x+cw-5,y+11,{align:"right"})}
         y+=20;
         if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("Open",x+5,y+6);bottom=Math.max(bottom,y+12);return}
@@ -3138,18 +3145,18 @@ async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budge
   const nH=rows.filter(x=>x.name).length;
   /* summary boxes */
   const box=[["Total budget",money(Tt),""],[`Roster players (${nH})`,money(held),pct(held)+" of budget"],[`Open spots (${rows.length-nH})`,money(open),pct(open)+" of budget"],[left>=0?"Left to allocate":"Over budget",money(Math.abs(left)),pct(held+open)+" allocated"]];
-  const bw=(W-80-3*10)/4;box.forEach(([l,v,sub],i)=>{const x=40+i*(bw+10),y=76;doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.roundedRect(x,y,bw,46,4,4);
-    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);doc.text(T(l),x+8,y+13);
-    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(...(i===3&&left<0?[198,40,40]:[24,32,26]));doc.text(T(v),x+8,y+31);
-    if(sub){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(91,102,93);doc.text(T(sub),x+8,y+41)}});
+  const bw=(W-80-3*10)/4;box.forEach(([l,v,sub],i)=>{const x=40+i*(bw+10),y=76;doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.roundedRect(x,y,bw,46,4,4);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90,96,107);doc.text(T(l),x+8,y+13);
+    doc.setFont("helvetica","bold");doc.setFontSize(15);doc.setTextColor(...(i===3&&left<0?[198,40,40]:[27,30,36]));doc.text(T(v),x+8,y+31);
+    if(sub){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(90,96,107);doc.text(T(sub),x+8,y+41)}});
   /* groups in the shortest of three columns */
   const goals=b.goals||{},cols=4,cw=(W-80-(cols-1)*10)/cols,colY=Array(cols).fill(136);
   budSides(b).forEach((sd,si)=>{let y=Math.max(...colY)+(si?6:0);const st=sd.idx.reduce((a,gi)=>a+(b.groups[gi].rows||[]).reduce((c,x)=>c+(+x.amt||0),0),0);
     const stks=budStacks(b,sd.idx,cols),hNeed=Math.max(...stks.map(k=>k.reduce((a,gi)=>a+24+(b.groups[gi].rows||[]).length*14+16+12,0)));
     if(y+18+Math.min(hNeed,PH-130)>PH-30){doc.addPage();pdfHeader(doc,"Roster Lab · Budget (cont.)","Confidential: owner only");y=80}
-    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(T(sd.label.toUpperCase()),40,y+8);
-    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(91,102,93);doc.text(T(money(st)+" · "+pct(st)+(BUD_MO()?" · "+perMo(st):"")),W-40,y+8,{align:"right"});
-    doc.setDrawColor(24,32,26);doc.setLineWidth(1.2);doc.line(40,y+12,W-40,y+12);colY.fill(y+18);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(27,30,36);doc.text(T(sd.label.toUpperCase()),40,y+8);
+    doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(90,96,107);doc.text(T(money(st)+" · "+pct(st)+(BUD_MO()?" · "+perMo(st):"")),W-40,y+8,{align:"right"});
+    doc.setDrawColor(27,30,36);doc.setLineWidth(1.2);doc.line(40,y+12,W-40,y+12);colY.fill(y+18);
   stks.forEach((k,ci)=>k.forEach(gi=>{const g=b.groups[gi];const gr=g.rows||[],t=gr.reduce((a,x)=>a+(+x.amt||0),0);const need=24+gr.length*14+16;
     let c=ci;if(colY[c]+need>PH-30){doc.addPage();pdfHeader(doc,"Roster Lab · Budget (cont.)","Confidential: owner only");colY.fill(80);c=0}
     const x=40+c*(cw+10);
@@ -3157,9 +3164,9 @@ async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budge
       head:[[{content:T(g.name),colSpan:2,styles:{halign:"left"}},{content:money(t),styles:{halign:"right"}},{content:BUD_MO()?perMo(t).replace("/mo",""):pct(t),styles:{halign:"right"}}]],
       body:gr.map(r=>[r.slot,r.name?T(r.name):"Open",money(r.amt),BUD_MO()?perMo(r.amt).replace("/mo",""):pct(+r.amt||0)]),
       foot:[[{content:`${gr.filter(r=>!r.name).length} open${goals[g.name]!=null?" · goal "+(goals[g.name]*100).toFixed(0)+"%":""}`,colSpan:4,styles:{halign:"left"}}]],
-      styles:{font:"helvetica",fontSize:8,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
-      headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8,cellPadding:{top:4,bottom:4,left:3,right:2}},footStyles:{fillColor:[243,245,242],textColor:[91,102,93],fontStyle:"normal",fontSize:7.5},
-      columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:BUD_MO()?40:31,textColor:[91,102,93]}},
+      styles:{font:"helvetica",fontSize:8,cellPadding:3,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},
+      headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8,cellPadding:{top:4,bottom:4,left:3,right:2}},footStyles:{fillColor:[244,245,247],textColor:[90,96,107],fontStyle:"normal",fontSize:7.5},
+      columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:BUD_MO()?40:31,textColor:[90,96,107]}},
       didParseCell:h=>{if(h.section==="body"&&h.column.index===1&&!gr[h.row.index].name){h.cell.styles.textColor=[120,130,122];h.cell.styles.fontStyle="italic"}}});
     colY[c]=doc.lastAutoTable.finalY+12}))});
   await pdfSave(doc,`Budget ${new Date().toISOString().slice(0,10)}.pdf`)}
@@ -3277,8 +3284,8 @@ async function pdfSave(doc,fname){
 function pdfHeader(doc,title,sub){
   const W=doc.internal.pageSize.getWidth();
   doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(24,32,26);doc.text(title,40,44);
-  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);doc.text(title,40,44);
+  doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${sub?"  ·  "+sub:""}`,40,62);
   return W;
@@ -3289,25 +3296,25 @@ async function printRecruit(){
   const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=pdfHeader(doc,"Roster Lab · Recruiting",VMODE==="up"?"Upcoming visits":"All visits");
   const v=visitRows();
-  if(!v.length){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(91,102,93);doc.text(VMODE==="up"?"No upcoming visits.":"No visits set.",40,90)}
+  if(!v.length){doc.setFont("helvetica","normal");doc.setFontSize(10);doc.setTextColor(90,96,107);doc.text(VMODE==="up"?"No upcoming visits.":"No visits set.",40,90)}
   else doc.autoTable({startY:76,theme:"grid",head:[["Date","Pos","Player","School","Status","Visit","Elig.","Grade","Tier"]],
     body:v.length?v.map(x=>[x.p.vdate?new Date(x.p.vdate+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Not set",x.k+(x.k==="WR"&&x.p.role==="Slot"?" (SLOT)":""),x.p.name,x.p.school||"",x.p.status||"",vLabel(x.p),x.p.elig!=null?String(x.p.elig):"",x.r&&x.r.grade!=null?`${fmt(x.r.grade)} ${x.r.letter.replace("−","-")}`:"-",x.r&&x.r.tier?TIERNAME[x.r.tier]:""]):[["No visits","","","","","","","",""]],
-    styles:{font:"helvetica",fontSize:9,cellPadding:5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8.5},alternateRowStyles:{fillColor:[243,245,242]},
+    styles:{font:"helvetica",fontSize:9,cellPadding:5,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},
+    headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8.5},alternateRowStyles:{fillColor:[244,245,247]},
     columnStyles:{0:{fontStyle:"bold",cellWidth:110},1:{cellWidth:60},6:{halign:"center"},7:{halign:"right",fontStyle:"bold"},8:{fontStyle:"bold"}},
     didParseCell:h=>{if(h.section==="body"&&h.column.index===8&&v[h.row.index]){const t=v[h.row.index].r&&v[h.row.index].r.tier;if(t)h.cell.styles.textColor=TIERRGB[t]}}});
   let y=v.length?doc.lastAutoTable.finalY+22:118;
   if(y>doc.internal.pageSize.getHeight()-160){doc.addPage();y=40}
-  doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(24,32,26);doc.text("Recruiting summary",40,y);if(REC.hasChart){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);doc.text(String($("recRoster").innerText).replace(/[−–]/g,"-"),170,y)}
+  doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(27,30,36);doc.text("Recruiting summary",40,y);if(REC.hasChart){doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90,96,107);doc.text(String($("recRoster").innerText).replace(/[−–]/g,"-"),170,y)}
   const os=r=>r.slot&&r.slot.open!=null?String(r.slot.open)+(r.g!==r.k?" ("+r.g+")":""):"-",ls=r=>r.slot&&r.slot.left!=null?String(r.slot.left):"-";
   const gsum=f=>REC.hasChart?String(Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0)):"-";
   const wk=r=>(r.c.Target||0)+(r.c.Contacted||0),T2=t=>String(REC.rows.reduce((a,r)=>a+(t==="working"?wk(r):(r.c[t]||0)),0));
   doc.autoTable({startY:y+8,theme:"grid",head:[["Pos","Open","Left","Working","Offered","Committed","Visits"]],
     body:REC.rows.map(r=>[r.k,os(r),ls(r),r.noBoard?"-":String(wk(r)),r.noBoard?"-":String(r.c.Offered||0),r.noBoard?"-":String(r.c.Committed||0),r.noBoard?"-":String(r.c.visits||0)]),
     foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),T2("working"),T2("Offered"),T2("Committed"),T2("visits")]],
-    footStyles:{fillColor:[234,238,232],textColor:[24,32,26],fontStyle:"bold",halign:"center"},
-    styles:{font:"helvetica",fontSize:9.5,cellPadding:5,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26],halign:"center"},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
+    footStyles:{fillColor:[234,238,232],textColor:[27,30,36],fontStyle:"bold",halign:"center"},
+    styles:{font:"helvetica",fontSize:9.5,cellPadding:5,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36],halign:"center"},
+    headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:9},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
   await pdfSave(doc,`Recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
 }
 $("recPrint").addEventListener("click",printRecruit);
@@ -3319,7 +3326,7 @@ async function printReport(){
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});
   const W=pdfHeader(doc,"Roster Lab · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
-  const ink=[24,32,26],mut=[91,102,93];
+  const ink=[27,30,36],mut=[90,96,107];
   {const id=teamIdFor(p),lg=id?(await logosFor([id]))[id]:null;if(lg)pdfLogo(doc,lg,W-40-46,74,46)}
   doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(...ink);doc.text(p.name,40,100);
   doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(...mut);
@@ -3327,7 +3334,7 @@ async function printReport(){
   doc.text([p.school||"",roleTxt,p.level,p.season?`${p.season}${p.thru==="full"?" full season":p.thru?" through game "+p.thru:""}`:"",`${p.db} ${P.sample}`].filter(Boolean).join("  ·  "),40,118);
   /* grade block */
   const tc=TIERRGB[r.tier]||ink;
-  doc.setFillColor(243,245,242);doc.roundedRect(40,134,W-80,84,6,6,"F");
+  doc.setFillColor(244,245,247);doc.roundedRect(40,134,W-80,84,6,6,"F");
   doc.setFont("helvetica","bold");doc.setFontSize(40);doc.setTextColor(...ink);doc.text(fmt(r.grade),56,190);const gw=doc.getTextWidth(fmt(r.grade));
   doc.setFontSize(18);doc.text(r.letter.replace("−","-"),56+gw+8,190);
   doc.setFontSize(14);doc.setTextColor(...tc);doc.text(TIERNAME[r.tier]||"",220,168);
@@ -3341,11 +3348,11 @@ async function printReport(){
   doc.autoTable({startY:y,theme:"grid",margin:{left:40,right:40},
     head:[["Metric","Weight","Value","Score (0-100)",""]],
     body:METRICS.map((m,i)=>[m.name,S.weights[i]+"%",r.m[i]==null?"missing":fm(r.m[i],i)+(m.unit||""),r.n[i]==null?"-":String(Math.round(r.n[i])),""]),
-    styles:{font:"helvetica",fontSize:10,cellPadding:6,lineColor:[207,214,205],lineWidth:.5,textColor:ink},
-    headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:9},
+    styles:{font:"helvetica",fontSize:10,cellPadding:6,lineColor:[211,215,222],lineWidth:.5,textColor:ink},
+    headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:9},
     columnStyles:{0:{cellWidth:190},1:{halign:"center",cellWidth:56},2:{halign:"right",cellWidth:70},3:{halign:"right",cellWidth:80},4:{cellWidth:"auto"}},
     didDrawCell:h=>{if(h.section==="body"&&h.column.index===4){const v=r.n[h.row.index];const x=h.cell.x+6,w=h.cell.width-12,yy=h.cell.y+h.cell.height/2-3;
-      doc.setFillColor(232,236,231);doc.roundedRect(x,yy,w,6,3,3,"F");if(v!=null){doc.setFillColor(0,177,64);doc.roundedRect(x,yy,Math.max(3,w*v/100),6,3,3,"F")}}}});
+      doc.setFillColor(233,235,239);doc.roundedRect(x,yy,w,6,3,3,"F");if(v!=null){doc.setFillColor(11,111,184);doc.roundedRect(x,yy,Math.max(3,w*v/100),6,3,3,"F")}}}});
   y=doc.lastAutoTable.finalY+24;
   /* bio + recruiting */
   const bio=[["Height",p.ht?fmtHt(p.ht):"–"],["Weight",p.wt?p.wt+" lbs":"–"],["Hometown",[p.home,p.st].filter(Boolean).join(", ")||"–"],["High school",p.hs||"–"]];
@@ -3364,8 +3371,8 @@ async function printReport(){
       doc.setFont("helvetica","bold");doc.setFontSize(10);doc.setTextColor(...ink);doc.text(k.name,40,y+8);
       doc.autoTable({startY:y+12,theme:"grid",margin:{left:40,right:40,bottom:60},head:[["Year","Team",...k.labels]],
         body:[...newestFirst(k.rows).map(r=>[String(r.y||""),r.team,...r.s]),...(k.tot?[["Career","",...k.tot]]:[])],
-        styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[207,214,205],lineWidth:.5,textColor:ink,halign:"right"},
-        headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},
+        styles:{font:"helvetica",fontSize:8.5,cellPadding:3,lineColor:[211,215,222],lineWidth:.5,textColor:ink,halign:"right"},
+        headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
         columnStyles:{0:{halign:"left",cellWidth:40},1:{halign:"left",cellWidth:90}},
         didParseCell:h=>{if(h.column.index<2)h.cell.styles.halign="left";if(h.section==="body"&&k.tot&&h.row.index===k.rows.length)h.cell.styles.fontStyle="bold"}});
       y=doc.lastAutoTable.finalY+12});
@@ -3963,16 +3970,16 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
     pdfHeader(doc,"Roster Lab · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
     doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Record","Win %","Roster budget","Expected W","Wins vs. budget","Verdict","Team grade","Talent vs. budget","Cost per win"]],
       body:R.map((r,i)=>[i+1,r.name,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.budget!=null?sbcMoney(r.budget)+"  (#"+r.budgetRk+")":"-",r.xwB!=null?r.xwB.toFixed(1):"-",sg(r.wab),r.wab==null?"-":r.wab>=1?"Overperforming":r.wab<=-1?"Underperforming":"About right",r.grade!=null?r.grade.toFixed(1):"-",sg(r.gab),r.perWin!=null?sbcMoney(r.perWin):"-"]),
-      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
-    const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(91,102,93);const m=SBC.meta;
+      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+    const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(90,96,107);const m=SBC.meta;
     doc.text(doc.splitTextToSize(`Expected W = wins that budget usually gets (league fit${fw?", explains "+Math.round(fw.r2*100)+"% of record":""}). Wins vs. budget = actual - expected. Talent vs. budget = team grade vs. what that money usually buys. Budgets: ${m.budgetSrc||"staff"}.`,doc.internal.pageSize.getWidth()-80),40,y);
     await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
   const {rows,fit}=sbcCalc();/* same order as the Sort by buttons on the page */const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT]||(r=>r.waa??-99);const R=[...rows].sort((a,b)=>key(b)-key(a));const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   pdfHeader(doc,`Roster Lab · ${SBC_YR} Sun Belt snapshot`,$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
     body:R.map((r,i)=>[i+1,r.name,r.div,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.grade!=null?r.grade.toFixed(1)+"  (#"+r.gradeRk+")":"-",fmt(r.off),fmt(r.def),r.xw!=null?r.xw.toFixed(1):"-",sg(r.waa),r.waa>=1?"Overperforming":r.waa<=-1?"Underperforming":"About right"]),
-    styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
-  const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(91,102,93);
+    styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+  const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text(doc.splitTextToSize(`Team grade = two-deep graded on our board scales (QB 3x, backups 1/4). Expected W = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). Wins vs. talent = actual - expected.`,doc.internal.pageSize.getWidth()-80),40,y);
   await pdfSave(doc,`Sun Belt snapshot ${new Date().toISOString().slice(0,10)}.pdf`)});
 function go(t,o){o=o||{};if(!okTab(t))t=(TABS_READY||!GM_TABS.includes(t))?DEFAULT_TAB:t;TAB=t;
@@ -4226,14 +4233,14 @@ async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF)
   const RGB=(typeof TIERRGB!=="undefined"&&TIERRGB)||{};
   [[TB_OFF,"Offense"],[TB_DEF,"Defense"]].forEach(([keys,nm],pi)=>{if(pi)doc.addPage();
     const W=pdfHeader(doc,"Roster Lab · HS Prospect Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-(keys.length-1)*8)/keys.length;
-    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(24,32,26);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
+    keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
       const L=TBS[k]||[];if(!L.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No prospects",x+5,y+6);return}
       L.forEach((t,i)=>{if(y>PH-44)return;const tier=tierOfHS(t.s.score);const rgb=RGB[tier]||[140,148,140];
         doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.r.name||"")}${t.r.status==="Signed"?" (S)":t.r.status==="Committed"?" (C)":""}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
-        doc.setDrawColor(207,214,205);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
-        doc.setTextColor(24,32,26);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
+        doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
+        doc.setTextColor(27,30,36);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
         const g=t.s.score!=null?`${f1(t.s.score,1)} ${T(letter(t.s.score))}`:"–";doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
-        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(91,102,93);doc.text(doc.splitTextToSize(T([t.r.school,t.r.state].filter(Boolean).join(", ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
+        doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(90,96,107);doc.text(doc.splitTextToSize(T([t.r.school,t.r.state].filter(Boolean).join(", ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
   await pdfSave(doc,`HS prospect board ${new Date().toISOString().slice(0,10)}.pdf`)}
 
 /* ---------- Hudl link (staff-set; a Hudl film link from the import counts until one is set) ---------- */
@@ -4370,8 +4377,8 @@ function search(t){t=String(t||"").toLowerCase().trim();if(t.length<2)return [];
 /* ---------- printouts ---------- */
 const PT=t=>String(t??"").replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
 function pdfOk(){if(!window.jspdf||!window.jspdf.jsPDF){toast("The print tool didn't load. Refresh the page and try again.");return false}return true}
-const TSTY={styles:{font:"helvetica",fontSize:8.6,cellPadding:4,lineColor:[207,214,205],lineWidth:.5,textColor:[24,32,26]},headStyles:{fillColor:[24,32,26],textColor:255,fontStyle:"bold",fontSize:8},alternateRowStyles:{fillColor:[243,245,242]}};
-const tierRGB=t=>((typeof TIERRGB!=="undefined"&&TIERRGB)||{})[t]||[24,32,26];
+const TSTY={styles:{font:"helvetica",fontSize:8.6,cellPadding:4,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},alternateRowStyles:{fillColor:[244,245,247]}};
+const tierRGB=t=>((typeof TIERRGB!=="undefined"&&TIERRGB)||{})[t]||[27,30,36];
 async function printList(){if(!pdfOk())return;const L=LAST_LIST.filter(x=>PICKH.has(x.r.id));if(!L.length)return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const f=[POSF,q("hsClass").value&&"Class of "+q("hsClass").value,q("hsStatus").value,q("hsPri").checked&&"Starred only"].filter(Boolean).join(" · ");
   pdfHeader(doc,"Roster Lab · HS Prospects",`${L.length} prospects${f?" · "+f:""}`);
@@ -4383,10 +4390,10 @@ async function printList(){if(!pdfOk())return;const L=LAST_LIST.filter(x=>PICKH.
   await pdfSave(doc,`HS prospects ${new Date().toISOString().slice(0,10)}.pdf`)}
 async function printCard(id){if(!pdfOk())return;const p=ROWS.find(r=>r.id===id);if(!p)return;const s=scoreOf(p),t=tierOfHS(s.score),tr=CFG.traits[p.pos]||["Trait 1","Trait 2","Trait 3","Trait 4"];
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});const W=pdfHeader(doc,PT(p.name+(p.star?" (Starred)":"")),PT([p.pos,p.cls&&"Class of "+p.cls,p.school,p.state,p.status+(p.commitTo&&!isCom(p.status)?" ("+p.commitTo+")":"")].filter(Boolean).join(" · ")));
-  let y=84;const H=txt=>{if(y>700){doc.addPage();y=50}doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(24,32,26);doc.text(txt,40,y);y+=6};
+  let y=84;const H=txt=>{if(y>700){doc.addPage();y=50}doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(27,30,36);doc.text(txt,40,y);y+=6};
   const T=(head,body,cs)=>{doc.autoTable(Object.assign({startY:y,margin:{left:40,right:40},head:[head],body,columnStyles:cs||{}},TSTY));y=doc.lastAutoTable.finalY+18};
-  doc.setFont("helvetica","bold");doc.setFontSize(26);doc.setTextColor(...(t?tierRGB(t):[24,32,26]));doc.text(s.score!=null?PT(letter(s.score)):"-",40,y+20);
-  doc.setFontSize(14);doc.text(s.score!=null?`${f1(s.score,1)}  ${TN[t]}`:"Not graded yet",90,y+8);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(91,102,93);
+  doc.setFont("helvetica","bold");doc.setFontSize(26);doc.setTextColor(...(t?tierRGB(t):[27,30,36]));doc.text(s.score!=null?PT(letter(s.score)):"-",40,y+20);
+  doc.setFontSize(14);doc.text(s.score!=null?`${f1(s.score,1)}  ${TN[t]}`:"Not graded yet",90,y+8);doc.setFont("helvetica","normal");doc.setFontSize(9);doc.setTextColor(90,96,107);
   doc.text(PT(s.score==null?(s.why||""):`Film ${f1(s.F&&s.F.score,1)} · Testing ${s.estTm?"~":""}${f1(s.TmRaw,1)} · ${Math.round(100*(1-s.tShare))}% film / ${Math.round(100*s.tShare)}% testing · ${s.conf} confidence`),90,y+22);y+=44;
   const G=s.F?s.F.G:[];if(G.length){H("Film grades (1-10)");T(["Coach",...tr.map(PT),"Updated"],G.map(f=>[PT(f.name||"Coach"),...[0,1,2,3].map(i=>f.g[i]??"-"),(f.at||"").slice(0,10)]).concat([["Average",...s.F.avg.map(a=>f1(a,1)),""]]))}
   if(s.parts&&s.parts.length){H("Testing used in the score");T(["Test","Official","Timing","Source","Score","Weight","Counts"],s.parts.map(x=>[TEST[x.k].n,x.o?f1(+x.o.v,TEST[x.k].dp):"-",x.o?(TIMING[x.o.timing]||TIMING.listed).tag:"",PT(x.o?[x.o.src,x.o.date].filter(Boolean).join(", "):""),f1(x.s,0),x.w+"%",x.o&&x.s!=null?Math.round(x.rel*100)+"%":"-"]))}
