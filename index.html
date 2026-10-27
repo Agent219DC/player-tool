@@ -1802,7 +1802,7 @@ function behindBy(p){const g=Number(p.thru);return S.mode==="mid"&&g&&String(p.s
 function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';const by=blendYr(p),bh=behindBy(p);return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}${by?` + ${by}${p.prior.level&&p.prior.level!==p.level?" ("+esc(p.prior.level)+")":""}`:""}</span>${bh?` <span class="behind" title="His numbers are through game ${esc(String(p.thru))}; we've played ${tg()}. Update his PFF numbers.">${bh} behind</span>`:""}`}
 function fcsMark(p,i){return P.fcsNote&&p.level==="FCS"&&i===P.fcsNote.idx?"*":""}
 function htIn(h){if(!h)return null;const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?(+m[1])*12+(+(m[2]||0)):null}
-function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?`${m[1]}'${m[2]??0}"`:String(h)}
+function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);if(m&&+m[1]<4)return"";/* 0 or junk = unknown height */return m?`${m[1]}'${m[2]??0}"`:String(h)}
 function metaLine(p){const parts=[];if(p.updatedAt){const d=new Date(p.updatedAt);if(!isNaN(d))parts.push("Updated "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"}))}const nm=p.addedBy&&NAMES[p.addedBy]&&NAMES[p.addedBy].name;if(nm)parts.push("by "+nm);return parts.join(" ")}
 function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+" confidence"];if(r.split)why.push("seasons disagree");if(r.partialM)why.push("3 of 4 metrics");const t=why.join(" · ");
   return `<span class="cflag c-${r.conf}" title="${t}" aria-label="${t}" role="img"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>${r.split||r.partialM?'<i>*</i>':""}</span>`}
@@ -4037,6 +4037,9 @@ const isTgt=r=>!isCom(r.status)&&!["Committed elsewhere","Pass"].includes(r.stat
 const TEST={t10:{n:"10-yd split",low:true,dp:2,span:.05},t40:{n:"40",low:true,dp:2,span:.15},shuttle:{n:"Shuttle",low:true,dp:2,span:.15},
   cone:{n:"3-Cone",low:true,dp:2,span:.25},vert:{n:"Vertical (in)",low:false,dp:1,span:4},broad:{n:"Broad (in)",low:false,dp:1,span:8},m100:{n:"100m",low:true,dp:2,span:.3}};
 const TKEYS=Object.keys(TEST);
+/* results outside these ranges are typos or bad imports (e.g. a 6-inch broad jump), so scoring skips them */
+const TEST_OK={t10:[1.35,2.4],t40:[4.1,6.6],shuttle:[3.6,6.5],cone:[6.2,10.5],vert:[12,48],broad:[55,145],m100:[9.8,15.5]};
+const testOk=t=>{const r=TEST_OK[t.k],v=num(t.v);return v!=null&&(!r||(v>=r[0]&&v<=r[1]))};
 const TIMING={laser:{n:"Laser / electronic",r:1,tag:"LASER",cls:"v"},event:{n:"Camp event (timing unknown)",r:2,tag:"CAMP",cls:"v"},
   hand:{n:"Hand timed",r:3,tag:"HAND",cls:""},gps:{n:"Catapult / GPS",r:4,tag:"GPS",cls:""},listed:{n:"Listed / self-reported",r:5,tag:"LISTED",cls:"l"}};
 const COMP={"1.05":"Top classification, strong state","1.00":"Solid program (default)","0.97":"Mid-level program","0.92":"Small school / weak schedule"};
@@ -4089,7 +4092,7 @@ function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
   if(c.cuts)Object.assign(o.cuts,c.cuts);if(typeof c.useOutside==="boolean")o.useOutside=c.useOutside;if(c.needs&&typeof c.needs==="object")o.needs=c.needs;return o}
 
 /* ---------- scoring ---------- */
-function official(p,k){if(Array.isArray(p.ignoreTests)&&p.ignoreTests.includes(k))return null;const L=(p.tests||[]).filter(t=>t&&t.k===k&&num(t.v)!=null);if(!L.length)return null;
+function official(p,k){if(Array.isArray(p.ignoreTests)&&p.ignoreTests.includes(k))return null;const L=(p.tests||[]).filter(t=>t&&t.k===k&&testOk(t));if(!L.length)return null;
   const T=TEST[k];L.sort((a,b)=>((TIMING[a.timing]||TIMING.listed).r-(TIMING[b.timing]||TIMING.listed).r)||(T.low?a.v-b.v:b.v-a.v));return L[0]}
 function bench(pos,k){const b=(CFG.bench[GROUP[pos]]||{})[k];if(!b||b[0]==null||b[1]==null)return null;let m70=+b[0],m100=+b[1];const T=TEST[k];
   const dir=T.low?-1:1;if((m100-m70)*dir<T.span)m100=m70+dir*T.span;return [m70,m100]}
@@ -4440,10 +4443,10 @@ function infoPanel(p){const kv=(n,v)=>v==null||v===""?"":`<div><span class="sub"
 /* ---------- prospect card ---------- */
 /* Our measurements (taken on a visit): saved into ht/wt/wing/arm/hand, marked manual so imports never overwrite them; meas keeps when, where, who and the listed numbers they replaced */
 const MK=[["ht","Height"],["wt","Weight"],["wing","Wingspan"],["arm","Arm"],["hand","Hand"]];
-function measFmt(k,v){if(v==null||v==="")return "–";if(k==="ht"){const m=String(v).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)\s*(\d{1,2}(?:\.\d+)?)/);return m?`${m[1]}'${+m[2]}"`:fmtHt(v)}return k==="wt"?v+" lbs":v+'"'}
+function measFmt(k,v){if(v==null||v==="")return "–";if(k==="ht"){if(!fmtHt(v))return "–";const m=String(v).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)\s*(\d{1,2}(?:\.\d+)?)/);return m?`${m[1]}'${+m[2]}"`:fmtHt(v)}return k==="wt"?v+" lbs":v+'"'}
 function measWhen(M){return M?[M.date?fmtDate(M.date):"",M.where||"",M.byName||""].filter(Boolean).join(" · "):""}
 function measBox(p){const M=p.meas,W=(M&&M.was)||{},td=new Date().toISOString().slice(0,10);
-  const pv=[p.ht?measFmt("ht",p.ht):"",p.wt?measFmt("wt",p.wt):"",p.wing?measFmt("wing",p.wing)+" wing":""].filter(Boolean).join(" · ")+(M?" · measured by us":"");
+  const pv=[fmtHt(p.ht)?measFmt("ht",p.ht):"",p.wt?measFmt("wt",p.wt):"",p.wing?measFmt("wing",p.wing)+" wing":""].filter(Boolean).join(" · ")+(M?" · measured by us":"");
   return `<details class="pc-sec" id="hsMeasBox"><summary><span>Measurements</span><span class="sec-pv">${e_(pv||"None yet")}</span></summary><div class="sec-b">${M?`<span class="chip meas-chip" style="justify-self:start">Measured by us</span>`:""}
   <p class="sub" style="margin:0">${M?e_(measWhen(M)):"From recruiting sources. Update after we measure him on a visit."}</p>
   <div class="hsd-break">${MK.map(([k,n])=>`<div><span class="sub">${n}</span><b style="font-size:16px">${e_(measFmt(k,p[k]))}</b>${W[k]!=null&&String(W[k])!==String(p[k]??"")?`<span class="sub">listed ${e_(measFmt(k,W[k]))}</span>`:""}</div>`).join("")}</div>
