@@ -29,6 +29,11 @@ service cloud.firestore {
       allow read: if isStaff();
       allow write: if isStaff() && request.auth.uid == uid;
     }
+    // Analytics (Sun Belt snapshot and two-deeps, no money): staff read, owner writes
+    match /analytics/{doc} {
+      allow read: if isStaff();
+      allow write: if isOwner();
+    }
     // Budget and what we pay our players: owner only, nobody else can read it
     match /owner/{doc} {
       allow read, write: if isOwner();
