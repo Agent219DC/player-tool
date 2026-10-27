@@ -31,7 +31,7 @@
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
-  --tElite:#8a6200; --tEliteFill:#8a6200; --tImpact:#0b7a7a; --tStarter:#4b5d6b; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
+  --tElite:#a3154f; --tEliteFill:#b0195a; --tImpact:#0b7a7a; --tStarter:#4b5d6b; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,20 +40,20 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f2c94c; --tEliteFill:#8a6200; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f2c94c; --tEliteFill:#8a6200; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
-body.mode-gm{--accent:#8b93a1; --accent-fill:#4b5563; --accent-soft:#e5e7eb; --accent-text:#374151}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}:root:not([data-theme="light"]) body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}}
+body.mode-gm{--accent:#f2b705; --accent-fill:#9a6b00; --accent-soft:#fdf3d0; --accent-text:#7a5500}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}:root:not([data-theme="light"]) body.mode-gm{--accent-soft:#3a2e0a; --accent-text:#f5c842}}
 :root[data-theme="dark"] body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}
 :root[data-theme="dark"] body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}
-:root[data-theme="dark"] body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}
+:root[data-theme="dark"] body.mode-gm{--accent-soft:#3a2e0a; --accent-text:#f5c842}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
@@ -105,7 +105,7 @@ body.scrolled header .tab{padding:6px 11px}
 .sn-grp{display:flex;flex-direction:column;gap:2px}
 .sn-h{display:flex;align-items:center;gap:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
 .sn-h::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gc)}
-.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-an{--gc:#2fcb86}.sn-gm{--gc:#9ca3af}
+.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-an{--gc:#2fcb86}.sn-gm{--gc:#f2b705}
 @media (min-width:900px){
   #sidenav{display:flex;flex-direction:column;gap:20px;position:fixed;left:0;top:0;bottom:0;width:236px;padding:18px 12px 24px;background:var(--surface);border-right:1px solid var(--line);overflow-y:auto;z-index:45}
   body{padding-left:236px}
@@ -1933,7 +1933,7 @@ const CONFRGB={High:[15,115,73],Medium:[125,99,0],Low:[198,40,40]};
 /* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
 function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
   doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
-const TIERRGB={Elite:[138,98,0],Impact:[11,122,122],Starter:[75,93,107],Rotation:[168,77,8],Pass:[198,40,40]};
+const TIERRGB={Elite:[176,25,90],Impact:[11,122,122],Starter:[75,93,107],Rotation:[168,77,8],Pass:[198,40,40]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(!rows.length)return;
@@ -3325,7 +3325,7 @@ async function pdfSave(doc,fname){
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
 }
 /* print branding: the bar takes the current side's color; the logo (three-color football) and ROSTER LAB sit top right */
-const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[139,147,161],ink:[55,65,81]}};
+const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[242,183,5],ink:[122,85,0]}};
 const pdfSide=()=>{const c=document.body.classList;return RL_SIDE_RGB[c.contains("mode-gm")?"gm":c.contains("mode-an")?"an":c.contains("mode-hs")?"hs":"portal"]};
 let RL_PNG=null;
 (function(){const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 26 112 68" width="448" height="272"><defs><clipPath id="b"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath><clipPath id="w"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath></defs><g clip-path="url(#b)"><g clip-path="url(#w)"><rect width="48" height="120" fill="#1fa3ee"/><rect x="47.9" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="#1b1e24" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="#1b1e24" stroke-width="4.5" stroke-linecap="round"/></svg>';
