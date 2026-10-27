@@ -41,8 +41,10 @@ service cloud.firestore {
       allow read, write: if isOwner();
     }
     // Every position's board (qb_players, rb_players, ...)
+    // Staff add and edit; only the owner can delete a player for good (the site's Delete is a soft delete to the trash)
     match /{coll}/{doc} {
-      allow read, write: if isStaff() && coll.matches('[a-z]+_players');
+      allow read, create, update: if isStaff() && coll.matches('[a-z]+_players');
+      allow delete: if isOwner() && coll.matches('[a-z]+_players');
     }
   }
 }
