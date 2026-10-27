@@ -111,7 +111,7 @@ body.scrolled header .tab{padding:6px 11px}
   #crumb .cr-s{font-size:14px;letter-spacing:.12em;color:var(--accent-text)}
   body.scrolled #crumb{font-size:24px}
   header{align-items:center}
-  header>.tabs{order:2;flex-basis:auto;flex:0 1 320px}
+  body header>.tabs{order:2;flex:0 1 340px;max-width:340px}body header>.tabs .gsearch{flex:1 1 auto}
 }
 svg.brandlogo .rl-liq{fill:var(--accent);transition:fill .2s}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -912,7 +912,7 @@ window.claude={use:async n=>{
 
   <section id="recruit" data-page="recruit" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2>Recruiting</h2>
+      <h2>Roster needs</h2>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button></span>
     </div>
     <p class="recroster" id="recRoster"></p>
@@ -954,7 +954,7 @@ window.claude={use:async n=>{
 
   <section id="overview" data-page="overview" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2 id="ovTitle">Overview</h2>
+      <h2 id="ovTitle">Starters vs. targets</h2>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Overview side"><button type="button" data-ovside="off" aria-pressed="true">Offense</button><button type="button" data-ovside="def" aria-pressed="false">Defense</button></span><span class="seg" role="group" aria-label="Overview season"><button type="button" data-ovm="now" aria-pressed="true">This season</button><button type="button" data-ovm="next" aria-pressed="false">Next season</button></span><button class="btn" type="button" id="ovPrint" disabled>Print</button></span>
     </div>
     <div class="ovfieldwrap"><div id="ovField" class="ovfield"></div></div>
@@ -1081,7 +1081,7 @@ window.claude={use:async n=>{
 
   <section id="hsboard" data-page="hsboard" style="display:grid;gap:10px">
     <div class="hs-top">
-      <h2>High school prospects</h2>
+      <h2>Prospects</h2>
       <span class="btns"><button class="btn primary" type="button" id="hsAdd">+ Add prospect</button></span>
     </div>
     <details class="hs-queue" id="hsQueue" hidden></details>
@@ -1102,7 +1102,7 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
-    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>HS big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">By position</button></span></span>
+    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">By position</button></span></span>
       <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
     <div id="hsTbWrap" hidden style="display:grid;gap:10px">
       <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
@@ -1120,13 +1120,13 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsneeds" data-page="hsneeds" style="display:grid;gap:10px">
-    <div class="hs-top"><h2>HS Needs</h2><span class="btns"><select id="hsNeedClass" aria-label="Class" style="width:auto"></select><button class="btn primary" type="button" id="hsNeedSave" hidden>Save needs</button><button class="btn" type="button" id="hsNeedPrint">Print</button></span></div>
+    <div class="hs-top"><h2>Class needs</h2><span class="btns"><select id="hsNeedClass" aria-label="Class" style="width:auto"></select><button class="btn primary" type="button" id="hsNeedSave" hidden>Save needs</button><button class="btn" type="button" id="hsNeedPrint">Print</button></span></div>
     <div class="tablewrap"><table id="hsNeedTbl"></table></div>
     <p class="note">Wanted vs. committed at each position. Targets follow the Prospect board order. Owner sets the numbers.</p>
   </section>
 
   <section id="hsrec" data-page="hsrec" style="display:grid;gap:10px">
-    <div class="hs-top"><h2>HS Recruiting</h2><span class="btns"><span class="seg" role="group" aria-label="Group by"><button type="button" data-hsrg="recruiter" aria-pressed="true">By recruiter</button><button type="button" data-hsrg="posCoach" aria-pressed="false">By position coach</button></span><button class="btn" type="button" id="hsRecPrint">Print</button></span></div>
+    <div class="hs-top"><h2>Visits &amp; offers</h2><span class="btns"><span class="seg" role="group" aria-label="Group by"><button type="button" data-hsrg="recruiter" aria-pressed="true">By recruiter</button><button type="button" data-hsrg="posCoach" aria-pressed="false">By position coach</button></span><button class="btn" type="button" id="hsRecPrint">Print</button></span></div>
     <div class="tablewrap"><table id="hsRecTbl"></table></div>
     <p class="note">Commits and realistic targets (no P4 offer, not committed elsewhere). Set a prospect's recruiter, position coach, offer date and visits on his card. Tap a name for his card.</p>
     <div class="hs-top" style="margin-top:6px"><h2 style="font-size:18px">Visit calendar</h2><span class="seg" role="group" aria-label="Which visits"><button type="button" data-hsvm="up" aria-pressed="true">Upcoming</button><button type="button" data-hsvm="all" aria-pressed="false">All visits</button></span></div>
@@ -1134,7 +1134,7 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsset" data-page="hsset" class="hs-set" style="display:grid;gap:14px">
-    <div class="hs-top"><h2>HS Settings</h2><span class="sub" id="hsSetNote"></span></div>
+    <div class="hs-top"><h2>HS settings</h2><span class="sub" id="hsSetNote"></span></div>
     <details class="settings" open><summary><h2 style="font-size:18px">Film traits and blend</h2></summary>
       <p class="note">Four traits per position in order of importance, graded 1–10 (7 = Marshall starter trait). Film share is how much of the score comes from film; the rest is testing.</p>
       <div class="tablewrap"><table id="hsTraitTbl"></table></div>
@@ -2252,7 +2252,7 @@ async function renderOverview(){
   if(!DB){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The overview needs the shared board.</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">The overview needs the shared board.</p>';return}
   const side=PREF.ovSide||sideOf(POSKEY);OV_SIDE=side;document.querySelectorAll("[data-ovside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.ovside===side));OV_ROWS=[];$("ovPrint").disabled=true;
   const NEXT=OV_MODE==="next";
-  $("ovTitle").textContent=(side==="off"?"Offensive overview":"Defensive overview")+(NEXT?" · Next season":"");
+  $("ovTitle").textContent=(side==="off"?"Offense":"Defense")+": starters vs. targets"+(NEXT?" · Next season":"");
   $("ovModeNote").hidden=!NEXT;
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
