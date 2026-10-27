@@ -3642,7 +3642,7 @@ function firstTab(){const h=location.hash.slice(1);return TABS.includes(h)?h:(PR
    Owner only (GM side): players, records and as-of dates live in the single doc owner/sbc. */
 const SBC_W={QB:3},SBC_BACKUP=0.25,SBC_OFF=new Set(["QB","RB","WR","TE","OT","IOL"]);
 const SBC_GRP=[["QB","Quarterback"],["RB","Running back"],["SK","Receivers / tight ends"],["OL","Offensive line"],["FR","Front seven"],["DB","Secondary"]];
-let SBC=null,SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
+let SBC=null,SBC_PAGE="talent",SBC_BSORT="wab",SBC_TEAM=null,SBC_SORT="waa",SBC_EDIT=false,SBC_SIDE="off",SBC_VIEW="field",SBC_CLS="team",SBC_CLS_TEAM=null,SBC_SZN="now";
 /* team overview on the field, laid out like our Overview: each spot shows the starter and his backup.
    Players fill spots by their PFF position first (T at OT, G/C at IOL, DI at DT, ED at DE, slot CB at NIC); anyone left over takes an open spot in his group and the card shows his own position */
 const SBC_FIELD={off:{cols:9,los:"top",spots:[["WO",1,1,"WR"],["OT",1,3,"OT"],["IOL",1,4,"IOL"],["IOL",1,5,"IOL"],["IOL",1,6,"IOL"],["OT",1,7,"OT"],["TE",1,8,"TE"],["WO",1,9,"WR"],["SL",2,2,"SLOT"],["QB",2,5,"QB"],["RB",3,5,"RB"]]},
@@ -3718,11 +3718,13 @@ function sbcCalc(){const {players,meta}=SBC;const T=meta.teams||{};
   return {rows,fit:{a,b,r2,n}}}
 const sbcOurs=r=>/marshall/i.test(r.name||r.team||"");
 function sbcVerdict(w){return w==null?"":w>=1?`<span class="sbc-up">Overperforming</span>`:w<=-1?`<span class="sbc-dn">Underperforming</span>`:`<span class="sub">About right</span>`}
-function sbcChart(rows,fit){const P=rows.filter(r=>r.grade!=null&&r.pct!=null);if(P.length<3)return "";
-  const W=760,H=360,L=46,R=16,T=14,B=40;const xs=P.map(r=>r.grade),x0=Math.floor(Math.min(...xs)-2),x1=Math.ceil(Math.max(...xs)+2);
+/* scatter of win % against x (team grade by default; roster budget on the Budget page) with the league fit line; dot color = residual */
+function sbcChart(rows,fit,o){o=Object.assign({x:r=>r.grade,res:r=>r.waa,xlab:"Team grade (two-deep, board scale) →",tick:5,pad:2,fx:v=>v,tip:r=>"grade "+fmt(r.grade)},o||{});
+  rows=rows.map(r=>Object.assign({},r,{grade:o.x(r),waa:o.res(r)}));const P=rows.filter(r=>r.grade!=null&&r.pct!=null);if(P.length<3)return "";
+  const W=760,H=360,L=46,R=16,T=14,B=40;const xs=P.map(r=>r.grade),x0=Math.floor((Math.min(...xs)-o.pad)/o.tick)*o.tick,x1=Math.ceil((Math.max(...xs)+o.pad)/o.tick)*o.tick;
   const X=v=>L+(v-x0)/(x1-x0)*(W-L-R),Y=v=>T+(1-v)*(H-T-B);const ab=n=>String(n).replace(/^(Georgia|Louisiana|South|Southern|Old|Coastal|James|App|Arkansas)\s*/,m=>({"Georgia ":"Ga ","Louisiana ":"La ","South ":"S ","Southern ":"So ","Old ":"O ","Coastal ":"C ","James ":"J ","App ":"App ","Arkansas ":"Ark "})[m]||m);
   let g="";for(let v=0;v<=1.0001;v+=.25)g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${Math.round(v*100)}%</text>`;
-  for(let v=Math.ceil(x0/5)*5;v<=x1;v+=5)g+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${v}</text>`;
+  for(let v=Math.ceil(x0/o.tick)*o.tick;v<=x1+1e-9;v+=o.tick)g+=`<text x="${X(v)}" y="${H-B+16}" text-anchor="middle">${o.fx(+v.toFixed(2))}</text>`;
   const ya=Math.max(0,Math.min(1,fit.a+fit.b*x0)),yb=Math.max(0,Math.min(1,fit.a+fit.b*x1));
   g+=`<line x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
   const placed=[];
@@ -3731,9 +3733,32 @@ function sbcChart(rows,fit){const P=rows.filter(r=>r.grade!=null&&r.pct!=null);i
     const opts=[[cx+9,cy+4,"start"],[cx-9,cy+4,"end"],[cx,cy-10,"middle"],[cx,cy+17,"middle"],[cx+9,cy-9,"start"],[cx+9,cy+16,"start"]];
     const box=([x,y,a])=>{const x0=a==="start"?x:a==="end"?x-tw:x-tw/2;return [x0,y-10,x0+tw,y+2]};const hit=b=>placed.some(q=>b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]);
     const pick=opts.find(op=>{const b=box(op);return !hit(b)&&b[0]>=L&&b[2]<=W-2})||opts[0];placed.push(box(pick));
-    return `<circle cx="${cx}" cy="${cy}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: grade ${fmt(r.grade)}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
-  g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">Team grade (two-deep, board scale) →</text>`;
-  return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Team grade vs. win percentage">${g}</svg>`}
+    return `<circle cx="${cx}" cy="${cy}" r="${o?7:5.5}" fill="${c}" stroke="${o?"var(--fg)":"none"}" stroke-width="2"><title>${esc(r.name)}: ${esc(o.tip(r))}, ${r.w}-${r.l}</title></circle><text class="lbl${o?" ours":""}" x="${pick[0]}" y="${pick[1]}" text-anchor="${pick[2]}">${esc(ab(r.name))}</text>`}).join("");
+  g+=`<text x="${(L+W-R)/2}" y="${H-6}" text-anchor="middle">${esc(o.xlab)}</text>`;
+  return `<svg class="sbc-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.xlab.replace(" →",""))} vs. win percentage">${g}</svg>`}
+/* Budget page: win % and team grade each fit against roster budget ($M, teams.<fid>.budget) across the league */
+const sbcMoney=v=>v==null?"–":"$"+(+v).toFixed(1)+"M";
+function sbcBudgetCalc(rows){const fitOn=(yk)=>{const P=rows.filter(r=>r.budget!=null&&r[yk]!=null),n=P.length;let a=0,b=0,r2=0;if(n<3)return null;
+    const mx=P.reduce((s,r)=>s+r.budget,0)/n,my=P.reduce((s,r)=>s+r[yk],0)/n;let sxy=0,sxx=0,syy=0;P.forEach(r=>{sxy+=(r.budget-mx)*(r[yk]-my);sxx+=(r.budget-mx)**2;syy+=(r[yk]-my)**2});
+    b=sxx?sxy/sxx:0;a=my-b*mx;r2=sxx&&syy?sxy*sxy/(sxx*syy):0;return {a,b,r2,n}};
+  const R=rows.map(r=>{const t=(SBC.meta.teams||{})[r.fid]||{};const b=t.budget!=null&&t.budget!==""&&isFinite(+t.budget)?+t.budget:null;return Object.assign({},r,{budget:b})});
+  const fw=fitOn("pct"),fg=fitOn("grade");
+  R.forEach(r=>{if(r.budget==null)return;if(fw&&r.gp){r.xpctB=Math.max(0,Math.min(1,fw.a+fw.b*r.budget));r.xwB=r.xpctB*r.gp;r.wab=r.w-r.xwB}if(fg&&r.grade!=null){r.xgB=fg.a+fg.b*r.budget;r.gab=r.grade-r.xgB}r.perWin=r.w?r.budget/r.w:null});
+  [...R].filter(r=>r.budget!=null).sort((x,y)=>y.budget-x.budget).forEach((r,i)=>r.budgetRk=i+1);
+  return {rows:R,fw,fg}}
+function sbcBudgetView(rows){const {rows:R0,fw,fg}=sbcBudgetCalc(rows);const m=SBC.meta;const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
+  const key={wab:r=>r.wab??-99,budget:r=>r.budget??-1,pct:r=>r.pct??-1,gab:r=>r.gab??-99}[SBC_BSORT]||(r=>r.wab??-99);const R=[...R0].sort((a,b)=>key(b)-key(a));
+  const miss=R0.filter(r=>r.budget==null).length;
+  const head=`<thead><tr><th>#</th><th>Team</th><th class="num">Record</th><th class="num">Win %</th><th class="num" title="Estimated 2026 football roster spending (revenue share + NIL)">Roster budget</th><th class="num" title="Wins a team with this budget would be expected to have after this many games">Expected W</th><th class="num" title="Actual wins minus expected wins for the money">Wins vs. budget</th><th>Verdict</th><th class="num">Team grade</th><th class="num" title="Team grade minus the grade the league's money-to-talent line predicts for this budget">Talent vs. budget</th><th class="num" title="Budget ÷ wins so far">Cost per win</th></tr></thead>`;
+  const body=R.map((r,i)=>`<tr class="${sbcOurs(r)?"ours":""}"><td class="num">${i+1}</td><td class="tm">${r.tid?`<img class="slogo" src="${logoUrl(r.tid)}" alt="" loading="lazy" onerror="this.remove()">`:logoImg(null,null,r.name)}${esc(r.name)}</td><td class="num">${r.w}-${r.l}</td><td class="num">${r.pct!=null?Math.round(r.pct*100)+"%":"–"}</td>
+    <td class="num">${SBC_EDIT?`<input type="number" min="0" step="0.1" data-sbcbud="${esc(r.fid)}" value="${r.budget??""}" style="width:76px" aria-label="${esc(r.name)} budget in millions">`:`<b>${sbcMoney(r.budget)}</b> <span class="sub">#${r.budgetRk||"–"}</span>`}</td>
+    <td class="num">${r.xwB!=null?r.xwB.toFixed(1):"–"}</td><td class="num ${r.wab>=1?"sbc-up":r.wab<=-1?"sbc-dn":""}">${sg(r.wab)}</td><td>${sbcVerdict(r.wab)}</td>
+    <td class="num">${fmt(r.grade)} <span class="sub">#${r.gradeRk||"–"}</span></td><td class="num ${r.gab>=2?"sbc-up":r.gab<=-2?"sbc-dn":""}">${sg(r.gab)}</td><td class="num">${r.perWin!=null?sbcMoney(r.perWin):"–"}</td></tr>`).join("");
+  return `<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["wab","Wins vs. budget"],["budget","Budget"],["gab","Talent vs. budget"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcbsort="${k}" aria-pressed="${SBC_BSORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveBud">Save budgets</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
+    ${miss?`<p class="sub">${miss} team${miss===1?" has":"s have"} no budget yet; use Edit budgets.</p>`:""}
+    <div class="tablewrap"><table id="sbcBudTbl">${head}<tbody>${body}</tbody></table></div>
+    <p class="note"><b>Roster budget</b> = estimated 2026 football roster spending (revenue share + NIL)${m.budgetSrc?` from ${esc(m.budgetSrc)}`:""}${m.budgetAsOf?`, as of ${esc(fmtDate(m.budgetAsOf))}`:""}. These are outside estimates, not school payroll; edit any number with <b>Edit budgets</b>. <b>Expected W</b> comes from a straight-line fit of win % on budget across the league${fw?` (budget explains ${Math.round(fw.r2*100)}% of the differences in record)`:""}. <b>Wins vs. budget</b> = actual wins minus expected: +1 or more is overperforming for the money, −1 or less underperforming. <b>Talent vs. budget</b> = team grade minus the grade the league's money line predicts${fg?` (budget explains ${Math.round(fg.r2*100)}% of the differences in team grade)`:""}: + means the money bought more two-deep talent than usual. Overall record, all games.</p>
+    ${sbcChart(R0,fw||{a:.5,b:0},{x:r=>r.budget,res:r=>r.wab,xlab:"Roster budget ($M) →",tick:1,pad:.4,fx:v=>"$"+v+"M",tip:r=>"budget "+sbcMoney(r.budget)})}`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
   const cell=p=>{if(!p)return "<td></td><td></td>";const r=p.r;const low=r&&r.conf==="Low";
     return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${p.snaps||0} snaps${p.prev?" · from "+esc(p.prev):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
@@ -3748,6 +3773,9 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
   $("sbcMeta").textContent=[m.dataAsOf?"PFF data through "+fmtDate(m.dataAsOf):"",m.recAsOf?"records as of "+fmtDate(m.recAsOf):""].filter(Boolean).join(" · ");
   const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT];const R=[...rows].sort((a,b)=>key(b)-key(a));
   if(!SBC_TEAM||!rows.some(r=>r.fid===SBC_TEAM))SBC_TEAM=(rows.find(sbcOurs)||rows[0]).fid;
+  const pageSeg=`<div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Snapshot view">${[["talent","Talent"],["budget","Roster budget"]].map(([k,n])=>`<button type="button" data-sbcpage="${k}" aria-pressed="${SBC_PAGE===k}">${n}</button>`).join("")}</span></div>`;
+  $("sbcEdit").textContent=SBC_PAGE==="budget"?"Edit budgets":"Edit records";
+  if(SBC_PAGE==="budget"){el.innerHTML=pageSeg+sbcBudgetView(rows);return}
   const sg=(v,d=1)=>v==null?"–":(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(d);
   const head=`<thead><tr><th>#</th><th>Team</th><th>Div</th><th class="num">Record</th><th class="num">Win %</th><th class="num" title="Weighted two-deep grade on the board scale">Team grade</th><th class="num">Offense</th><th class="num">Defense</th><th class="num" title="Wins a team with this grade would be expected to have after this many games">Expected W</th><th class="num" title="Actual wins minus expected wins">Wins vs. talent</th><th>Verdict</th></tr></thead>`;
   const body=R.map((r,i)=>`<tr class="${sbcOurs(r)?"ours":""}"><td class="num">${i+1}</td><td class="tm">${r.tid?`<img class="slogo" src="${logoUrl(r.tid)}" alt="" loading="lazy" onerror="this.remove()">`:logoImg(null,null,r.name)}<button type="button" class="linkbtn" data-sbct="${esc(r.fid)}">${esc(r.name)}</button></td><td class="sub">${esc(r.div)}</td>
@@ -3755,7 +3783,7 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <td class="num">${r.pct!=null?Math.round(r.pct*100)+"%":"–"}</td><td class="num"><b>${fmt(r.grade)}</b> <span class="sub">#${r.gradeRk||"–"}</span></td><td class="num">${fmt(r.off)}</td><td class="num">${fmt(r.def)}</td>
     <td class="num">${r.xw!=null?r.xw.toFixed(1):"–"}</td><td class="num ${r.waa>=1?"sbc-up":r.waa<=-1?"sbc-dn":""}">${sg(r.waa)}</td><td>${sbcVerdict(r.waa)}</td></tr>`).join("");
   const t=rows.find(r=>r.fid===SBC_TEAM);
-  el.innerHTML=`<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["waa","Wins vs. talent"],["grade","Team grade"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcsort="${k}" aria-pressed="${SBC_SORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveRec">Save records</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
+  el.innerHTML=`${pageSeg}<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["waa","Wins vs. talent"],["grade","Team grade"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcsort="${k}" aria-pressed="${SBC_SORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveRec">Save records</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
     <div class="tablewrap"><table id="sbcTbl">${head}<tbody>${body}</tbody></table></div>
     <p class="note"><b>Team grade</b> = every two-deep player graded on his board position's scale (same numbers as our boards), averaged with the QB counting 3× and backups ¼. <b>Expected W</b> comes from a straight-line fit of win % on team grade across the league (fit explains ${Math.round(fit.r2*100)}% of the differences in record). <b>Wins vs. talent</b> = actual wins minus expected: +1 or more is overperforming, −1 or less underperforming. Overall record, all games.</p>
     ${sbcChart(rows,fit)}
@@ -3771,6 +3799,10 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <h3 style="margin:14px 0 0">Next season snapshot</h3>${sbcNextLeague()}
     <p class="note">Graduating = PFF 2027 draft class (out of eligibility after this season). Returning two-deep players move up by this year's role, then snaps; a spot is <b>open</b> when no returning two-deep player is left for it (it'll come from deeper on the roster, the portal or high school). <b>Projected grade</b> uses the same weights as the team grade. Use <b>Next season</b> above to see a team's field.</p>`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
+  const pg=e.target.closest("[data-sbcpage]");if(pg){SBC_PAGE=pg.dataset.sbcpage;SBC_EDIT=false;renderSbc();return}
+  const bs=e.target.closest("[data-sbcbsort]");if(bs){SBC_BSORT=bs.dataset.sbcbsort;renderSbc();return}
+  if(e.target.id==="sbcSaveBud"){const up={};let bad=0;$("sbcBody").querySelectorAll("[data-sbcbud]").forEach(i=>{const v=i.value.trim();if(v===""){up[`teams.${i.dataset.sbcbud}.budget`]=null;return}const n=parseFloat(v);if(isFinite(n)&&n>=0)up[`teams.${i.dataset.sbcbud}.budget`]=Math.round(n*100)/100;else bad++});
+    if(bad){flash("Budgets must be numbers in millions, like 6.7.");return}up.budgetAsOf=new Date().toISOString().slice(0,10);up.budgetSrc="staff edits and outside estimates";DB.doc("owner/sbc").update(up).then(()=>{SBC_EDIT=false;flash("Budgets saved.");renderSbc(true)}).catch(()=>flash("Couldn't save the budgets."));return}
   const sd=e.target.closest("[data-sbcside]");if(sd){SBC_SIDE=sd.dataset.sbcside;SBC_VIEW="field";renderSbc();return}
   const sv=e.target.closest("[data-sbcview]");if(sv){SBC_VIEW=sv.dataset.sbcview;renderSbc();return}
   const sc=e.target.closest("[data-sbccls]");if(sc){SBC_CLS=sc.dataset.sbccls;renderSbc();return}
@@ -3785,6 +3817,15 @@ $("sbcBody").addEventListener("change",e=>{if(e.target.id==="sbcTeamSel"){SBC_TE
   if(e.target.id==="sbcClsSel"){const v=e.target.value;if(v==="league")SBC_CLS="league";else{SBC_CLS="team";SBC_CLS_TEAM=v}renderSbc();$("sbcClsSel").scrollIntoView({block:"center"})}});
 $("sbcEdit").addEventListener("click",()=>{SBC_EDIT=!SBC_EDIT;renderSbc()});
 $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Belt page first.");return}if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh and try again.");return}
+  if(SBC_PAGE==="budget"){const {rows:B,fw}=sbcBudgetCalc(sbcCalc().rows);const key={wab:r=>r.wab??-99,budget:r=>r.budget??-1,pct:r=>r.pct??-1,gab:r=>r.gab??-99}[SBC_BSORT]||(r=>r.wab??-99);const R=[...B].sort((a,b)=>key(b)-key(a));
+    const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
+    pdfHeader(doc,"Player Tool · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
+    doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Record","Win %","Roster budget","Expected W","Wins vs. budget","Verdict","Team grade","Talent vs. budget","Cost per win"]],
+      body:R.map((r,i)=>[i+1,r.name,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.budget!=null?sbcMoney(r.budget)+"  (#"+r.budgetRk+")":"-",r.xwB!=null?r.xwB.toFixed(1):"-",sg(r.wab),r.wab==null?"-":r.wab>=1?"Overperforming":r.wab<=-1?"Underperforming":"About right",r.grade!=null?r.grade.toFixed(1):"-",sg(r.gab),r.perWin!=null?sbcMoney(r.perWin):"-"]),
+      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[24,32,26]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+    const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(91,102,93);const m=SBC.meta;
+    doc.text(doc.splitTextToSize(`Roster budget: estimated 2026 football roster spending (revenue share + NIL)${m.budgetSrc?" from "+m.budgetSrc:""}; outside estimates, not school payroll. Expected W: straight-line fit of win % on budget across the league${fw?" (explains "+Math.round(fw.r2*100)+"% of the differences in record)":""}. Wins vs. budget = actual - expected. Talent vs. budget = team grade minus the grade predicted for that budget. Overall record.`,doc.internal.pageSize.getWidth()-80),40,y);
+    await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
   const {rows,fit}=sbcCalc();/* same order as the Sort by buttons on the page */const key={waa:r=>r.waa??-99,grade:r=>r.grade??-99,pct:r=>r.pct??-1}[SBC_SORT]||(r=>r.waa??-99);const R=[...rows].sort((a,b)=>key(b)-key(a));const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   pdfHeader(doc,"Player Tool · Sun Belt snapshot",$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
