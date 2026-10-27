@@ -103,15 +103,19 @@ body.scrolled header .tab{padding:6px 11px}
 .sn-h{display:flex;align-items:center;gap:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
 .sn-h::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gc)}
 .sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-gm{--gc:#2fcb86}
-@media (min-width:1000px){
+@media (min-width:900px){
   #sidenav{display:flex;flex-direction:column;gap:20px;position:fixed;left:0;top:0;bottom:0;width:236px;padding:18px 12px 24px;background:var(--surface);border-right:1px solid var(--line);overflow-y:auto;z-index:45}
   body{padding-left:236px}
   header .brand>svg,header .brand>div:not(#crumb),header .sidesw,header .tabrow{display:none!important}
   #crumb{display:flex;align-items:baseline;gap:10px;font:700 34px/1.05 var(--display);text-transform:uppercase;letter-spacing:.01em;min-width:0}
   #crumb .cr-s{font-size:14px;letter-spacing:.12em;color:var(--accent-text)}
+  #crumb{white-space:nowrap;overflow:hidden}#crumb .cr-s{flex:none}#crumb .cr-p{overflow:hidden;text-overflow:ellipsis}
   body.scrolled #crumb{font-size:24px}
   header{align-items:center}
-  body header>.tabs{order:2;flex:0 1 340px;max-width:340px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
+  body header>.tabs{order:2;flex:0 1 340px;max-width:340px}
+}
+@media (min-width:900px) and (max-width:1199px){
+  #crumb{font-size:26px}body header>.tabs{flex-basis:220px;max-width:220px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
 }
 svg.brandlogo .rl-liq{fill:var(--accent);transition:fill .2s}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
@@ -730,7 +734,7 @@ body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
 dialog#hsCmpDlg{width:min(1100px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#hsCmpDlg::backdrop{background:rgba(10,12,16,.5)}
 table.hs-cmp td,table.hs-cmp th{vertical-align:top}table.hs-cmp th.rowh{font-weight:600;color:var(--muted);text-align:left;white-space:nowrap}
-table.hs-cmp td.best{background:rgba(0,177,64,.12);font-weight:700}table.hs-cmp td.worst{color:var(--pass)}
+table.hs-cmp td.best{background:color-mix(in srgb,var(--accent) 14%,transparent);font-weight:700}table.hs-cmp td.worst{color:var(--pass)}
 table.hs-cmp tr.grp th{background:var(--sunk);font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;text-align:left}
 table.hs-cmp .cn button{font:inherit;font-weight:700;background:none;border:0;color:var(--accent-text);cursor:pointer;padding:0;text-align:left}
 .need-full{color:var(--accent-text);font-weight:700}.need-open{color:var(--pass);font-weight:700}.need-over{color:var(--cMed);font-weight:700}
@@ -1929,9 +1933,9 @@ async function printSelected(){
   const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth();
   const pdfTxt=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/★/g,"Starred");
-  doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
+  pdfBrand(doc);
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);
-  doc.text(pdfTxt("Roster Lab · "+($("boardTitle").textContent||P.label+" board")),40,44);
+  doc.text(pdfTxt($("boardTitle").textContent||P.label+" board"),40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
@@ -1980,10 +1984,10 @@ async function printOverview(){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:"landscape",unit:"pt",format:"letter"});
   const W=doc.internal.pageSize.getWidth();
-  doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
-  const title=(OV_SIDE==="def"?"Defensive overview":"Offensive overview")+(OV_MODE==="next"?" - Next season":"");
+  pdfBrand(doc);
+  const title=(OV_SIDE==="def"?"Defense":"Offense")+": starters vs. targets"+(OV_MODE==="next"?" - Next season":"");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);
-  doc.text(`Roster Lab · ${title}`,40,44);
+  doc.text(title,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
@@ -1994,31 +1998,31 @@ async function printOverview(){
   const T=t=>String(t).replace(/[−–]/g,"-");
   const x0=40,fw=W-80,gx=6,cw1=(fw-gx*(F.cols-1))/F.cols,ch=104,gy=12,yTop=92;
   const maxR=Math.max(...spots.map(s=>s.r)),losY=F.los==="top"?yTop-8:yTop+maxR*(ch+gy)-gy+8;
-  doc.setDrawColor(150,160,152);doc.setLineWidth(1);doc.setLineDashPattern([4,3],0);doc.line(x0,losY,x0+fw,losY);doc.setLineDashPattern([],0);
+  doc.setDrawColor(150,156,166);doc.setLineWidth(1);doc.setLineDashPattern([4,3],0);doc.line(x0,losY,x0+fw,losY);doc.setLineDashPattern([],0);
   doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(90,96,107);doc.text("LINE OF SCRIMMAGE",x0+fw,losY+(F.los==="top"?-3:8),{align:"right"});
   const clip=(t,w,n)=>{const ls=doc.splitTextToSize(T(t),w);if(ls.length>n){ls.length=n;ls[n-1]=ls[n-1].replace(/.{0,2}$/,"…")}return ls};
   spots.forEach(s=>{const o=s.o,x=x0+(s.c-1)*(cw1+gx),y=yTop+(s.r-1)*(ch+gy),cw=s.sp*cw1+(s.sp-1)*gx,iw=cw-10;
     doc.setLineWidth(.6);
-    if(!o){doc.setDrawColor(190,198,190);doc.setLineDashPattern([2,2],0);doc.roundedRect(x,y,cw,ch,4,4);doc.setLineDashPattern([],0);
-      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(120,130,122);doc.text(s.lbl,x+cw/2,y+ch/2-2,{align:"center"});
+    if(!o){doc.setDrawColor(190,195,204);doc.setLineDashPattern([2,2],0);doc.roundedRect(x,y,cw,ch,4,4);doc.setLineDashPattern([],0);
+      doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(120,126,136);doc.text(s.lbl,x+cw/2,y+ch/2-2,{align:"center"});
       doc.setFont("helvetica","normal");doc.setFontSize(7);doc.text("Not built yet",x+cw/2,y+ch/2+9,{align:"center"});return}
     const b=o.best,t=o.top;
     doc.setDrawColor(211,215,222);doc.setFillColor(255,255,255);doc.roundedRect(x,y,cw,ch,4,4,"FD");
     doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(27,30,36);doc.text(o.lbl,x+5,y+13);
     doc.setFontSize(6.5);doc.setTextColor(...(NEEDRGB[o.need]||[27,30,36]));doc.text(NEEDLABEL[o.need].toUpperCase(),x+cw-5,y+12,{align:"right"});
     let yy=y+24;
-    const lab=t2=>{doc.setFont("helvetica","bold");doc.setFontSize(5.8);doc.setTextColor(120,130,122);doc.text(t2,x+5,yy);yy+=8};
+    const lab=t2=>{doc.setFont("helvetica","bold");doc.setFontSize(5.8);doc.setTextColor(120,126,136);doc.text(t2,x+5,yy);yy+=8};
     const line=(t2,bold,rgb)=>{doc.setFont("helvetica",bold?"bold":"normal");doc.setFontSize(7.5);doc.setTextColor(...(rgb||[27,30,36]));clip(t2,iw,2).forEach(l=>{doc.text(l,x+5,yy);yy+=8.5})};
     lab("OURS");
     if(b){line(b.p.name+(b.commit?" (Committed)":""),true);
       const g0=`${fmt(b.r.grade)} ${T(b.r.letter)}`,g=g0+"  ·  ";doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[b.r.tier]||[27,30,36]));doc.text(g0,x+5,yy);doc.setFont("helvetica","normal");doc.setTextColor(27,30,36);doc.text("  ·  ",x+5+doc.getTextWidth(g0),yy);
       const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("0 yrs",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
-    else line(OV_MODE==="next"?"None available":"None entered",false,[120,130,122]);
+    else line(OV_MODE==="next"?"None available":"None entered",false,[120,126,136]);
     yy+=2;lab("TARGET");
     if(t){line(t.p.name+(t.p.level?` (${t.p.level})`:""),true);
       {const g0=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[27,30,36]));doc.text(g0,x+5,yy);if(b){const w0=doc.getTextWidth(g0);doc.setFont("helvetica","normal");doc.setTextColor(27,30,36);doc.text(`  ·  ${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}`,x+5+w0,yy)}yy+=8.5}
       if(t.r.tier){doc.setFont("helvetica","bold");doc.setFontSize(6.5);doc.setTextColor(...(TIERRGB[t.r.tier]||[27,30,36]));doc.text(TIERNAME[t.r.tier].toUpperCase(),x+5,Math.min(yy+1,y+ch-5))}}
-    else line(o.why?"- "+o.why:"-",false,[120,130,122]);
+    else line(o.why?"- "+o.why:"-",false,[120,126,136]);
   });
   const y=yTop+maxR*(ch+gy)+(F.los==="top"?6:18);
   doc.setFont("helvetica","normal");
@@ -2785,7 +2789,7 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
   [["off",OFF_KEYS,"Offense"],["def",DEF_KEYS,"Defense"]].forEach(([sd,keys,nm],pi)=>{if(pi)doc.addPage();
     const W=pdfHeader(doc,"Roster Lab · Portal Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-5*8)/6;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
-      const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
+      const list=TB[k]||[];if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,126,136);doc.text(POSITIONS[k]?"No targets":"Not built yet",x+5,y+6);return}
       list.forEach((t,i)=>{if(y>PH-44)return;const rgb=TIERRGB[t.r.tier]||[27,30,36];
         doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.p.name)}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
         doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
@@ -3063,7 +3067,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,bw,24);
       doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(27,30,36);doc.text(DC_GRPLBL[g]||g,x+4,y+9);
       doc.setFontSize(8.5);doc.text(t!=null?`${have} / ${t}`:String(have),x+bw-4,y+9,{align:"right"});
-      if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[19,122,79]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
+      if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[19,122,79]:[120,126,136]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
     top=y+24+12};
   let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Roster Lab · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend();if(!cont)rosterStrip()};
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{
@@ -3075,13 +3079,13 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       const n=pool?keys.length:Math.max(6,keys.length);const cw=(W-80-(n-1)*6)/n;
       const lbl=pool?"To place":sd==="st"?"":(DC_ROWLBL[sd]||[])[ri]||"";
       if(top>PH-90){doc.addPage();page(nm,true)}
-      if(lbl){doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text(lbl.toUpperCase(),40,top+4);top+=9}
+      if(lbl){doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(120,126,136);doc.text(lbl.toUpperCase(),40,top+4);top+=9}
       let bottom=top;
       keys.forEach((k,ci)=>{const x=40+ci*(cw+6);let y=top;const list=G[k]||[];
         doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(T(DC_LABEL[k]||k),x+5,y+11);
         if(list.length){doc.setFont("helvetica","normal");doc.setFontSize(8);doc.text(String(list.length),x+cw-5,y+11,{align:"right"})}
         y+=20;
-        if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("Open",x+5,y+6);bottom=Math.max(bottom,y+12);return}
+        if(!list.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,126,136);doc.text("Open",x+5,y+6);bottom=Math.max(bottom,y+12);return}
         if(pool){/* unplaced players: compact grid, no depth numbers */
           const sc=Math.max(1,Math.floor((cw+4)/118)),sw=(cw-(sc-1)*4)/sc,h=20;
           list.forEach((t,i)=>{const r=Math.floor(i/sc),c=i%sc,yy=y+r*(h+3);if(yy>PH-44)return;const g=dcGrade(t);box(t,x+c*(sw+4),yy,sw,h,7,g&&g.name?g.name:t.n,k)});
@@ -3197,7 +3201,7 @@ async function printBudget(){const b=BUDGET;if(!OWNER||!b){flash("Load the budge
       styles:{font:"helvetica",fontSize:8,cellPadding:3,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},
       headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8,cellPadding:{top:4,bottom:4,left:3,right:2}},footStyles:{fillColor:[244,245,247],textColor:[90,96,107],fontStyle:"normal",fontSize:7.5},
       columnStyles:{0:{cellWidth:28,fontStyle:"bold"},2:{halign:"right",cellWidth:36},3:{halign:"right",cellWidth:BUD_MO()?40:31,textColor:[90,96,107]}},
-      didParseCell:h=>{if(h.section==="body"&&h.column.index===1&&!gr[h.row.index].name){h.cell.styles.textColor=[120,130,122];h.cell.styles.fontStyle="italic"}}});
+      didParseCell:h=>{if(h.section==="body"&&h.column.index===1&&!gr[h.row.index].name){h.cell.styles.textColor=[120,126,136];h.cell.styles.fontStyle="italic"}}});
     colY[c]=doc.lastAutoTable.finalY+12}))});
   await pdfSave(doc,`Budget ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("budPrint").addEventListener("click",printBudget);
@@ -3311,9 +3315,20 @@ async function pdfSave(doc,fname){
   try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
 }
+/* print branding: the bar takes the current side's color; the logo (three-color football) and ROSTER LAB sit top right */
+const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},gm:{bar:[47,203,134],ink:[19,122,79]}};
+const pdfSide=()=>RL_SIDE_RGB[document.body.classList.contains("mode-gm")?"gm":document.body.classList.contains("mode-hs")?"hs":"portal"];
+let RL_PNG=null;
+(function(){const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 26 112 68" width="448" height="272"><defs><clipPath id="b"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath><clipPath id="w"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath></defs><g clip-path="url(#b)"><g clip-path="url(#w)"><rect width="48" height="120" fill="#1fa3ee"/><rect x="47.9" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="#1b1e24" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="#1b1e24" stroke-width="4.5" stroke-linecap="round"/></svg>';
+  const im=new Image();im.onload=()=>{try{const c=document.createElement("canvas");c.width=448;c.height=272;c.getContext("2d").drawImage(im,0,0);RL_PNG=c.toDataURL("image/png")}catch(e){}};im.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)})();
+function pdfBrand(doc){const W=doc.internal.pageSize.getWidth(),c=pdfSide();
+  doc.setFillColor(...c.bar);doc.rect(0,0,W,6,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(13);const w1=doc.getTextWidth("ROSTER "),w2=doc.getTextWidth("LAB"),x=W-40-w1-w2;
+  doc.setTextColor(27,30,36);doc.text("ROSTER",x,41);doc.setTextColor(...c.ink);doc.text("LAB",x+w1,41);
+  if(RL_PNG){try{doc.addImage(RL_PNG,"PNG",x-44,25,38,23)}catch(e){}}
+  return W}
 function pdfHeader(doc,title,sub){
-  const W=doc.internal.pageSize.getWidth();
-  doc.setFillColor(0,177,64);doc.rect(0,0,W,6,"F");
+  const W=pdfBrand(doc);title=String(title).replace(/^Roster Lab · /,"");
   doc.setFont("helvetica","bold");doc.setFontSize(18);doc.setTextColor(27,30,36);doc.text(title,40,44);
   doc.setFont("helvetica","normal");doc.setFontSize(9.5);doc.setTextColor(90,96,107);
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
@@ -3342,7 +3357,7 @@ async function printRecruit(){
   doc.autoTable({startY:y+8,theme:"grid",head:[["Pos","Open","Left","Working","Offered","Committed","Visits"]],
     body:REC.rows.map(r=>[r.k,os(r),ls(r),r.noBoard?"-":String(wk(r)),r.noBoard?"-":String(r.c.Offered||0),r.noBoard?"-":String(r.c.Committed||0),r.noBoard?"-":String(r.c.visits||0)]),
     foot:[[{content:"Total",styles:{halign:"left"}},gsum(o=>o.open),gsum(o=>o.left),T2("working"),T2("Offered"),T2("Committed"),T2("visits")]],
-    footStyles:{fillColor:[234,238,232],textColor:[27,30,36],fontStyle:"bold",halign:"center"},
+    footStyles:{fillColor:[234,236,241],textColor:[27,30,36],fontStyle:"bold",halign:"center"},
     styles:{font:"helvetica",fontSize:9.5,cellPadding:5,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36],halign:"center"},
     headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:9},columnStyles:{0:{fontStyle:"bold",halign:"left"}}});
   await pdfSave(doc,`Recruiting ${new Date().toISOString().slice(0,10)}.pdf`);
@@ -4267,8 +4282,8 @@ async function printTags(){if(!TBS)return;if(!window.jspdf||!window.jspdf.jsPDF)
   [[TB_OFF,"Offense"],[TB_DEF,"Defense"]].forEach(([keys,nm],pi)=>{if(pi)doc.addPage();
     const W=pdfHeader(doc,"Roster Lab · HS Prospect Board · "+nm,"");const PH=doc.internal.pageSize.getHeight();const cw=(W-80-(keys.length-1)*8)/keys.length;
     keys.forEach((k,ci)=>{const x=40+ci*(cw+8);let y=84;doc.setFillColor(27,30,36);doc.rect(x,y,cw,16,"F");doc.setFont("helvetica","bold");doc.setFontSize(9);doc.setTextColor(255);doc.text(k,x+5,y+11);y+=22;
-      const L=TBS[k]||[];if(!L.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,130,122);doc.text("No prospects",x+5,y+6);return}
-      L.forEach((t,i)=>{if(y>PH-44)return;const tier=tierOfHS(t.s.score);const rgb=RGB[tier]||[140,148,140];
+      const L=TBS[k]||[];if(!L.length){doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(120,126,136);doc.text("No prospects",x+5,y+6);return}
+      L.forEach((t,i)=>{if(y>PH-44)return;const tier=tierOfHS(t.s.score);const rgb=RGB[tier]||[140,145,153];
         doc.setFont("helvetica","bold");doc.setFontSize(7.8);const nl=doc.splitTextToSize(`${i+1}. ${T(t.r.name||"")}${t.r.status==="Signed"?" (S)":t.r.status==="Committed"?" (C)":""}`,cw-10).slice(0,2);const h=12+nl.length*8.5+6;
         doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,cw,h);doc.setFillColor(...rgb);doc.rect(x,y,3,h,"F");
         doc.setTextColor(27,30,36);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
@@ -4445,7 +4460,7 @@ async function printNeeds(){if(!pdfOk())return;const cl=needCls(),D=needData(cl)
     didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[15,115,73]}}},TSTY));
   await pdfSave(doc,`HS needs ${cl} ${new Date().toISOString().slice(0,10)}.pdf`)}
 async function printCompare(L){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Roster Lab · Compare prospects",L.map(x=>PT(x.r.name)).join(" vs. "));
-  const body=[];cmpRows(L).forEach(row=>{if(row[0]==="grp"){body.push([{content:row[1],colSpan:L.length+1,styles:{fillColor:[230,234,229],fontStyle:"bold"}}]);return}
+  const body=[];cmpRows(L).forEach(row=>{if(row[0]==="grp"){body.push([{content:row[1],colSpan:L.length+1,styles:{fillColor:[230,233,238],fontStyle:"bold"}}]);return}
     const [lab,fn,,dp,sub,suf]=row;const v=L.map(fn);if(v.every(x=>x==null||x===""||x==="–"))return;body.push([lab,...v.map((x,i)=>(x==null?"-":typeof x==="number"?f1(x,dp??1)+(suf||""):PT(x))+(sub&&sub(L[i])?" "+PT(sub(L[i])):""))])});
   doc.autoTable(Object.assign({startY:76,head:[["",...L.map(x=>PT(x.r.name))]],body,columnStyles:{0:{fontStyle:"bold",cellWidth:150}}},TSTY));
   await pdfSave(doc,`Compare ${L.map(x=>PT(x.r.name)).join(" vs ")}.pdf`)}
