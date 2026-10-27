@@ -97,7 +97,7 @@ body.scrolled header .tab{padding:6px 11px}
 #sidenav a[aria-current=page]::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:3px;background:var(--accent)}
 #sidenav .sn-brand{display:flex;align-items:center;gap:10px;padding:4px 6px 14px;margin-bottom:4px;border-bottom:1px solid var(--line);border-radius:0;background:none!important}
 #sidenav .sn-brand::before{display:none}
-#sidenav .sn-logo{width:52px;height:auto;flex:none;color:var(--fg)}#sidenav .sn-logo .rl-liq{fill:var(--accent);transition:fill .2s}
+#sidenav .sn-logo{width:52px;height:auto;flex:none;color:var(--fg)}#sidenav .sn-logo .rl-liq{fill:var(--accent)}
 #sidenav .sn-brand span{font:700 26px/1 var(--display);text-transform:uppercase;letter-spacing:.01em}#sidenav .sn-brand b{color:var(--accent-text)}
 .sn-grp{display:flex;flex-direction:column;gap:2px}
 .sn-h{display:flex;align-items:center;gap:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
@@ -117,7 +117,7 @@ body.scrolled header .tab{padding:6px 11px}
 @media (min-width:900px) and (max-width:1199px){
   #crumb{font-size:26px}body header>.tabs{flex-basis:220px;max-width:220px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
 }
-svg.brandlogo .rl-liq{fill:var(--accent);transition:fill .2s}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
+svg.brandlogo .rl-liq{fill:var(--accent)}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pos{display:flex;flex-wrap:wrap;gap:6px}
 .pg-off{display:none!important}
@@ -3734,6 +3734,11 @@ const TAB_GROUPS_OLD=[{id:"boards",btn:"boards",views:[["boards","By position"],
 const TAB_GROUPS=[];const groupOf=t=>TAB_GROUPS.find(g=>g.views.some(v=>v[0]===t))||null;
 const NAV_SIDE={portal:"Portal",hs:"High school",gm:"GM"};
 function navSync(t){document.querySelectorAll("#sidenav [data-nav]:not(.sn-brand)").forEach(a=>{if(a.dataset.nav===t)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});const a=document.querySelector(`#sidenav [data-nav="${t}"]:not(.sn-brand)`),c=$("crumb");if(c&&a){const g=a.closest(".sn-grp");c.querySelector(".cr-s").textContent=g?g.querySelector(".sn-h").textContent:"";c.querySelector(".cr-p").textContent=a.textContent;document.title=a.textContent+" · Roster Lab"}}
+function paintNav(t){const gm=GM_TABS.includes(t),hs=t.startsWith("hs")&&!gm,sd=gm?"gm":hs?"hs":"portal";
+  document.body.classList.toggle("mode-hs",hs);document.body.classList.toggle("mode-gm",gm);navSync(t);
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>{if(b.dataset.tab===t)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===sd)))}
+function goSoon(t){if(!okTab(t)){go(t);return}paintNav(t);requestAnimationFrame(()=>setTimeout(()=>go(t),0))}
 function subnavSync(t){navSync(t);const g=groupOf(t),bar=$("subnav");if(!bar)return;if(!g){bar.hidden=true;return}const V=g.views.filter(v=>okTab(v[0]));if(V.length<2){bar.hidden=true;return}
   bar.hidden=false;$("subnavSeg").innerHTML=V.map(([k,n])=>`<button type="button" data-subgo="${k}" aria-pressed="${k===t}">${n}</button>`).join("")}
 function okTab(t){return TABS.includes(t)&&!(GM_TABS.includes(t)&&!OWNER_TAB())}
@@ -4055,9 +4060,9 @@ document.addEventListener("keydown",e=>{if(e.key!=="/"||e.metaKey||e.ctrlKey||e.
   if(/^(INPUT|TEXTAREA|SELECT)$/.test(tag)||t.isContentEditable||document.querySelector("dialog[open]"))return;const g=$("gSearch");if(!g)return;e.preventDefault();window.scrollTo({top:0});g.focus();g.select()});
 window.addEventListener("scroll",()=>{const y=window.scrollY,b=document.body.classList;if(y>90&&!b.contains("scrolled"))b.add("scrolled");else if(y<8&&b.contains("scrolled"))b.remove("scrolled")},{passive:true});
 function startTabs(){if(TABS_READY)return;TABS_READY=true;go(firstTab(),{push:false,scroll:false});try{history.replaceState(null,"","#"+TAB)}catch(e){}}
-$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;const g=TAB_GROUPS.find(x=>x.btn===b.dataset.tab);const last=g&&PREF.sub&&PREF.sub[g.id];go(g&&last&&okTab(last)?last:b.dataset.tab)});
+$("tabs").addEventListener("click",e=>{const b=e.target.closest("[data-tab]");if(!b)return;const g=TAB_GROUPS.find(x=>x.btn===b.dataset.tab);const last=g&&PREF.sub&&PREF.sub[g.id];goSoon(g&&last&&okTab(last)?last:b.dataset.tab)});
 document.addEventListener("click",e=>{document.querySelectorAll("details.moremenu[open]").forEach(d=>{if(!d.contains(e.target))d.open=false})});
-$("sidenav").addEventListener("click",e=>{const a=e.target.closest("[data-nav]");if(!a)return;e.preventDefault();go(a.dataset.nav);window.scrollTo(0,0)});
+$("sidenav").addEventListener("click",e=>{const a=e.target.closest("[data-nav]");if(!a)return;e.preventDefault();goSoon(a.dataset.nav)});
 $("subnav").addEventListener("click",e=>{const b=e.target.closest("[data-subgo]");if(b)go(b.dataset.subgo)});
 window.addEventListener("popstate",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
 window.addEventListener("hashchange",()=>{const h=location.hash.slice(1);if(h&&h!==TAB)go(h,{push:false})});
@@ -4663,7 +4668,7 @@ async function exportAll(){const out=JSON.stringify({exported:new Date().toISOSt
 function render(t){syncSwitch();if(t==="hsrec")renderRec();else if(t==="hsboard")renderBoard();else if(t==="hsbig")renderBig();else if(t==="hsneeds")renderNeeds();else if(t==="hsset")renderSet()}
 function syncSwitch(){const t=typeof TAB!=="undefined"?String(TAB||""):"";const side=["sbc","budget","settings","hsset"].includes(t)?"gm":t.startsWith("hs")?"hs":"portal";document.querySelectorAll("[data-side]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.side===side)))}
 document.addEventListener("click",ev=>{const sw=ev.target.closest("[data-side]");
-  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}const GMT=["sbc","budget","settings","hsset"],ok=(v,f)=>v&&(sd==="gm")===GMT.includes(v)&&(sd!=="hs"||String(v).startsWith("hs"))&&(sd!=="portal"||!String(v).startsWith("hs"))?v:f;go(sd==="hs"?ok(pr.hsTab,"hsboard"):sd==="gm"?ok(pr.gmTab,"sbc"):ok(pr.ptTab,"boards"));return}
+  if(sw){const sd=sw.dataset.side;let pr={};try{pr=JSON.parse(localStorage.getItem("pt_prefs")||"{}")}catch(e){}const GMT=["sbc","budget","settings","hsset"],ok=(v,f)=>v&&(sd==="gm")===GMT.includes(v)&&(sd!=="hs"||String(v).startsWith("hs"))&&(sd!=="portal"||!String(v).startsWith("hs"))?v:f;goSoon(sd==="hs"?ok(pr.hsTab,"hsboard"):sd==="gm"?ok(pr.gmTab,"sbc"):ok(pr.ptTab,"boards"));return}
   const hp=ev.target.closest("[data-hp]");if(hp){POSF=hp.dataset.hp||null;try{localStorage.setItem("hs_pos",JSON.stringify(POSF))}catch(e){}renderBoard();return}
   const hb=ev.target.closest("[data-hsside]");if(hb){BIGSIDE=hb.dataset.hsside;document.querySelectorAll("[data-hsside]").forEach(b=>b.setAttribute("aria-pressed",String(b===hb)));renderBig();return}
   const bv=ev.target.closest("[data-hsview]");if(bv){BIGVIEW=bv.dataset.hsview;try{localStorage.setItem("hs_bbv",BIGVIEW)}catch(e){}renderBig();return}
