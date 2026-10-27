@@ -156,6 +156,7 @@ table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl 
 .pc-glog .tw{overflow-x:auto;max-width:100%}.pc>*{min-width:0}.pc-glog{min-width:0;max-width:100%}
 .pc-notes{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}.pc-notes h3{margin:0}
 .note-i{border-left:3px solid var(--accent);padding:2px 0 2px 10px}.note-t{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}.note-m{font-size:12px;margin-top:2px}
+.pc-odds{border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:grid;gap:4px}.odds-row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
 .note-add{display:flex;gap:8px;align-items:flex-end}.note-add textarea{flex:1;min-width:0;resize:vertical;font:inherit;font-size:14px;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg)}
 @media (max-width:480px){.note-add{flex-direction:column;align-items:stretch}}
 .notemark{display:inline-flex;align-items:center;gap:1px;margin-left:5px;color:var(--accent-text);font:700 11px var(--body);vertical-align:-1px}
@@ -2449,10 +2450,26 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const contacts=kv([["Agency",esc(p.agency||"")||"–"],["Agent",contactHtml(p.agent)],["Player",contactHtml(p.pcontact)]]);
   const car=p.career&&p.career.cats&&p.career.cats.length?`<details class="career"><summary>Career stats · ESPN</summary><div class="career" style="margin-top:8px">${careerHtml(p.career,"")}</div></details>`:"";
   return `<div class="pc"><div class="pc-top"><div class="pc-who">${headshotHtml(p)}<div><h2>${logoImg(p,"vlogo")}${esc(p.name||P.unnamed)}</h2><div class="sub">${esc(top)}</div><div class="chips">${st}${confFlag(r)}</div></div></div><button type="button" class="pc-x" data-pc="close" aria-label="Close">×</button></div>
-    ${grade}${notesHtml(p)}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
+    ${grade}${PODDS===null?"<div data-odds></div>":oddsHtml(p)}${notesHtml(p)}${pfHtml(p,r)}${mets}${p.espnId?'<div class="pc-glog" data-espnglog hidden></div>':""}<div><h3>Bio & recruiting</h3>${bio}</div><div class="pc-contacts"><h3 style="display:flex;justify-content:space-between;align-items:center">Contacts<button type="button" class="linkbtn" data-pc="cedit" style="font-size:13px;letter-spacing:0;text-transform:none">Edit contacts</button></h3>${contacts}</div>${car}
     <div class="pc-btns"><button type="button" class="btn primary" data-pc="edit">Edit player</button><button type="button" class="btn" data-pc="report"${r?"":" disabled"}>Player report (PDF)</button>${p.espnId?`<a class="btn" href="https://www.espn.com/college-football/player/_/id/${encodeURIComponent(p.espnId)}" target="_blank" rel="noopener">ESPN page</a>`:""}<button type="button" class="btn" data-pc="close">Close</button></div></div>`}
 let CARD_K=null;
-function openCard(p){if(!p)return;CARD_K=POSKEY;CARD_P=clone(p);if(!ME.id)whoAmI();const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P)}
+/* Portal odds: how Sun Belt transfers with the same profile (old level + role) actually did. config/portalOdds, written by the owner from the Sun Belt page.
+   A transfer's own board grade barely predicts his grade after a move (2026 backtest), so cards show the profile's base rates beside it. */
+let PODDS=null;
+async function loadOdds(force){if(PODDS!==null&&!force)return PODDS;try{const s=await DB.doc("config/portalOdds").get();PODDS=s.exists?s.data():false}catch(e){PODDS=false}return PODDS}
+const ODDS_LVL={P4:"Power Four",G6:"Group of Five",FCS:"FCS",D2:"D2 and lower"};
+function oddsLvl(l){l=String(l||"");return /P4|SEC|B1G|ACC|Big 12/i.test(l)?"P4":/G6|FBS/i.test(l)?"G6":/FCS/i.test(l)?"FCS":l?"D2":null}
+function oddsRole(k,db,games,bench){const b=bench&&bench[k];if(!b||db==null||!games)return null;const r=db/(games*b);return r>=.6?"Starter":r>=.25?"Part-time":"Backup"}
+function oddsFor(level,role){const O=PODDS;if(!O||!O.cells)return null;const L=oddsLvl(level);const c=L&&role&&O.cells[L+"|"+role];
+  if(c&&c.n>=8)return Object.assign({label:`${ODDS_LVL[L]} ${role.toLowerCase()}s`},c);const l=L&&O.cells[L+"|all"];if(l&&l.n>=8)return Object.assign({label:`all ${ODDS_LVL[L]} transfers`,broad:!!role},l);
+  const a=O.cells.all;return a?Object.assign({label:"all transfers",broad:true},a):null}
+function oddsHtml(p){if(!PODDS||isOurs(p)||(p.status||"")==="Committed elsewhere")return "";const role=oddsRole(POSKEY,p.db,+p.thru||null,PODDS.bench);const o=oddsFor(p.level,role);if(!o)return "";
+  const pc=v=>Math.round(100*v/o.n)+"%";
+  return `<div class="pc-odds"><h3 style="margin:0">Transfers like him</h3><div class="sub">${esc(o.label)}${o.broad?" (small group, so broader)":""} · ${o.n} Sun Belt transfers, ${esc(PODDS.season||"2026")}</div>
+    <div class="odds-row"><span class="sbc-up"><b>${pc(o.good)}</b> good take</span><span><b>${pc(o.ok)}</b> OK</span><span class="sbc-dn"><b>${pc(o.bad)}</b> bad take</span><span class="sbc-np"><b>${pc(o.np)}</b> didn't play</span></div>
+    ${o.avg!=null?`<div class="sub">Typical grade after the move: <b>${fmt(o.avg)}</b>${o.lo!=null?` (middle half ${fmt(o.lo)}–${fmt(o.hi)})`:""}</div>`:""}</div>`}
+function openCard(p){if(!p)return;CARD_K=POSKEY;CARD_P=clone(p);if(!ME.id)whoAmI();const d=$("pcard");d.innerHTML=cardHtml(CARD_P);if(!d.open){try{d.showModal()}catch(e){d.setAttribute("open","")}}d.scrollTop=0;if(CARD_P.espnId)fillEspnLive(CARD_P);
+  if(PODDS===null){const id=CARD_P.id;loadOdds().then(()=>{const box=d.querySelector("[data-odds]");if(box&&CARD_P&&CARD_P.id===id)box.outerHTML=oddsHtml(CARD_P)})}}
 /* ---------- live from ESPN on the card: season line, game log, vs. FBS ---------- */
 const ESPN_LIVE=new Map();
 async function fbsIds(){const yr=CUR_SEASON,K="pt_fbs_ids_"+yr;try{const c=JSON.parse(localStorage.getItem(K)||"null");if(c&&c.ids&&Date.now()-c.at<7*864e5)return new Set(c.ids)}catch(e){}
@@ -3656,7 +3673,9 @@ function sbcAssignP(pool,side){const F=SBC_FIELD[side].spots;const used=new Set(
   F.forEach((s,i)=>{if(out[i])return;const p=pool.find(x=>!used.has(x)&&SBC_GROUPOF[s[0]]===x.grp);if(p){used.add(p);out[i]=p}});
   return out}
 /* next season: drop the 2027 draft class (PFF), move the returning two-deep up (this year's starters first, then backups by snaps) */
-function sbcNextAssign(L,side){const R=L.filter(p=>!p.grad).sort((a,b)=>a.dep-b.dep||(b.snaps||0)-(a.snaps||0));const S1=sbcAssignP(R,side);const used=new Set(S1.filter(Boolean));const S2=sbcAssignP(R.filter(p=>!used.has(p)),side);return {S1,S2}}
+function sbcNextAssign(L,side){const fid=L[0]&&L[0].fid;const I=(SBC.inc||[]).filter(p=>String(p.fid)===String(fid));
+  /* returning starters keep their spots; returning backups and incoming commits then compete on grade */
+  const R=[...L.filter(p=>!p.grad&&p.dep===1).sort((a,b)=>(b.snaps||0)-(a.snaps||0)),...L.filter(p=>!p.grad&&p.dep!==1).concat(I).sort((a,b)=>(b.g??0)-(a.g??0)||(b.snaps||0)-(a.snaps||0))];const S1=sbcAssignP(R,side);const used=new Set(S1.filter(Boolean));const S2=sbcAssignP(R.filter(p=>!used.has(p)),side);return {S1,S2}}
 function sbcNext(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));const o={stLost:L.filter(p=>p.dep===1&&p.grad).length,bkLost:L.filter(p=>p.dep===2&&p.grad).length,open:0,lost:L.filter(p=>p.grad)};
   /* same weights as sbcCalc: whole team, each side, starters only */
   const A={all:[0,0],off:[0,0],def:[0,0],st:[0,0]};const add=(keys,g,wt)=>keys.forEach(k=>{A[k][0]+=g*wt;A[k][1]+=wt});
@@ -3666,12 +3685,13 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
   let S1,S2;if(NX){({S1,S2}=sbcNextAssign(L,side))}else{S1=now1;S2=sbcAssign(L,side,2)}
   const PL=p=>p.nic?"NIC":({HB:"RB",FB:"RB",DI:"DT",ED:"DE",S:"SAF",T:"OT",G:"IOL",C:"IOL"})[p.pos]||p.pos;
   const ln=(lab,p,k)=>{if(!p)return `<div><span class="ovc-l">${lab}</span><span class="sub">–</span></div>`;const r=p.r;
+    if(p.inc)return `<div><span class="ovc-l">${lab} · incoming</span><span class="ovc-n">${esc(p.name)}</span>${p.prev?`<span class="sub sbc-prev">from ${esc(p.prev)}</span>`:"<br>"}<span class="sub" title="Typical grade for ${esc(p.odds.label)} after a move">~${fmt(p.g)} projected</span></div>`;
     return `<div><span class="ovc-l">${lab}</span><span class="ovc-n">${esc(p.name)}</span>${k&&!sbcFits(k,p)?` <span class="sub">(${esc(PL(p))})</span>`:""}${p.prev?`<span class="sub sbc-prev" title="Transfer">from ${esc(p.prev)}</span>`:"<br>"}${p.g!=null?`<span class="ovc-g gtc-${r.tier}">${fmt(p.g)} ${esc(r.letter||"")}</span>${r.conf==="Low"?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'} · <span class="sub">${p.snaps||0} snaps</span></div>`};
   const cards=F.spots.map(([k,r,c,lbl],i)=>{const a=S1[i],b=S2[i];const pos=`grid-row:${r+(F.los==="top"?1:0)};grid-column:${Math.round((c-1)*4)+1} / span 4`;
     const show=a&&!sbcFits(k,a)?PL(a):lbl;
     const was=NX&&now1[i]&&now1[i].grad?now1[i]:null;const lostTxt=was?`<div class="sbc-lost">Losing ${esc(was.name)}${was.g!=null?` · ${fmt(was.g)} ${esc((was.r&&was.r.letter)||"")}`:""}</div>`:"";
     if(!a&&!b)return `<div class="ovcard ovc-empty" style="${pos}"><b>${esc(lbl)}</b><span class="sub">${NX?"Open":"No one"}</span>${lostTxt}</div>`;
-    return `<div class="ovcard sbc-card${NX&&!a?" sbc-open":""}" style="${pos}"><div class="ovc-h"><b>${esc(show)}</b>${NX&&!a?`<span class="chip sbc-openchip">Open</span>`:a&&a.r&&a.r.tier?`<span class="chip t-${a.r.tier}">${TIERNAME[a.r.tier]}</span>`:""}</div>${lostTxt}${ln(NX&&a&&a.dep===2?"Starter · moves up":"Starter",a)}${ln("Backup",b,k)}</div>`}).join("");
+    return `<div class="ovcard sbc-card${NX&&!a?" sbc-open":""}" style="${pos}"><div class="ovc-h"><b>${esc(show)}</b>${NX&&!a?`<span class="chip sbc-openchip">Open</span>`:a&&a.r&&a.r.tier?`<span class="chip t-${a.r.tier}">${TIERNAME[a.r.tier]}</span>`:""}</div>${lostTxt}${ln(NX&&a&&a.dep===2&&!a.inc?"Starter · moves up":"Starter",a)}${ln("Backup",b,k)}</div>`}).join("");
   const maxR=Math.max(...F.spots.map(s=>s[1]));
   return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
 async function loadSbc(force){if(SBC&&!force)return SBC;
@@ -3686,7 +3706,22 @@ async function loadSbc(force){if(SBC&&!force)return SBC;
   const gr=(k,p)=>{if(!p||!POSITIONS[k])return null;const r=withPos(k,cfg[k],()=>{try{return score(p)}catch(e){return null}});return r&&r.grade!=null?r:null};
   portal.forEach(x=>{x.yr=x.y25&&x.y25.season||"2025";x.r25=gr(x.k,x.y25&&{name:x.name,level:x.y25.level,season:x.yr,thru:"full",db:x.y25.db,m:x.y25.m});x.r26=gr(x.k,x.y26&&{name:x.name,level:"G6",season:"2026",thru:x.y26.thru,db:x.y26.db,m:x.y26.m});
     x.g25=x.r25?x.r25.grade:null;x.g26=x.r26?x.r26.grade:null;x.v=sbcVerdictOf(x)});
-  SBC={players,meta,portal};return SBC}
+  /* our committed portal players join next season at their profile's typical grade (portal odds), not their board grade */
+  const inc=[];const us=Object.entries(meta.teams||{}).find(([f,t])=>sbcOurs(t));await loadOdds();
+  if(us&&PODDS){const PP={QB:"QB",RB:"HB",WR:"WR",TE:"TE",OT:"T",IOL:"G",DT:"DI",DE:"ED",LB:"LB",SAF:"S",CB:"CB"},GR={QB:"QB",RB:"RB",WR:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",CB:"DB"};
+    for(const k of Object.keys(POSITIONS)){try{const s=await DB.collection(k.toLowerCase()+"_players").where("status","==","Committed").get();
+      s.forEach(d=>{const q=d.data();if(q.deleted||!PP[k])return;const o=oddsFor(q.level,oddsRole(k,q.db,+q.thru||null,PODDS.bench));if(!o||o.avg==null)return;
+        inc.push({id:"in-"+d.id,fid:+us[0],name:q.name,k,pos:PP[k],grp:GR[k],g:o.avg,r:{tier:"",letter:"proj."},inc:true,prev:q.school||"",odds:o,dep:2,snaps:0})})}catch(e){}}}
+  SBC={players,meta,portal,inc};return SBC}
+/* Portal odds from this season's Sun Belt transfers: bucket by old level and old role (his last-season volume vs. a Sun Belt starter's per game),
+   then count how each bucket turned out here. Saved to config/portalOdds (owner writes, staff read) for the portal cards. */
+function sbcOddsCalc(){const bench={};const by={};SBC.players.filter(p=>p.dep===1&&p.db!=null&&+p.thru>0&&POSITIONS[p.k]).forEach(p=>(by[p.k]=by[p.k]||[]).push(p.db/p.thru));
+  Object.entries(by).forEach(([k,v])=>{v.sort((a,b)=>a-b);bench[k]=+v[Math.floor(v.length/2)].toFixed(1)});
+  const L=SBC.portal.filter(x=>x.y25&&x.y25.db!=null&&!x.spec&&!x.gone&&POSITIONS[x.k]);const cells={};
+  const put=(key,x)=>{const c=cells[key]=cells[key]||{n:0,good:0,ok:0,bad:0,np:0,gs:[]};c.n++;c[x.v]++;if(x.v!=="np"&&x.g26!=null)c.gs.push(x.g26)};
+  L.forEach(x=>{const lv=oddsLvl(x.fromLvl||x.y25.level);const role=oddsRole(x.k,x.y25.db,12,bench);if(!lv)return;put("all",x);put(lv+"|all",x);if(role)put(lv+"|"+role,x)});
+  Object.values(cells).forEach(c=>{const g=c.gs.sort((a,b)=>a-b);c.avg=g.length?+(g.reduce((a,b)=>a+b,0)/g.length).toFixed(1):null;c.lo=g.length>=4?+g[Math.floor(g.length*.25)].toFixed(1):null;c.hi=g.length>=4?+g[Math.floor(g.length*.75)].toFixed(1):null;delete c.gs});
+  return {bench,cells,season:String((SBC.meta.dataAsOf||"").slice(0,4)||new Date().getFullYear()),asOf:new Date().toISOString().slice(0,10),n:L.length}}
 /* Good = 70+ with a real role (40%+ of his side's snaps); Bad = under 60; Not playing = under 10% of snaps; everything else OK */
 function sbcVerdictOf(x){if(x.gone)return "gone";if(x.spec)return "sp";const sh=x.share26||0;if(sh<0.10||x.g26==null)return "np";if(x.g26<60)return "bad";if(x.g26>=70&&sh>=0.40)return "good";return "ok"}
 const SBC_V={good:["Good take","sbc-up"],ok:["OK","sub"],bad:["Bad take","sbc-dn"],np:["Not playing","sbc-np"],sp:["Specialist","sub"],gone:["Not on roster","sbc-np"]};
@@ -3790,15 +3825,16 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?(SBC_SZN==="next"?(()=>{const n=sbcNext(SBC_TEAM);const ch=(a,b)=>a==null||b==null?"":` <span class="${a-b>=0?"sbc-up":"sbc-dn"}">(${a-b>=0?"+":"−"}${Math.abs(a-b).toFixed(1)})</span>`;return `<span class="sub">Next season · grade <b>${fmt(n.grade)}</b>${ch(n.grade,t.grade)} · starters ${fmt(n.st)}${ch(n.st,t.st)} · offense <b>${fmt(n.off)}</b>${ch(n.off,t.off)} · defense <b>${fmt(n.def)}</b>${ch(n.def,t.def)}</span>`})():`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`):""}</div>
     <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span><span class="seg" role="group" aria-label="Season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
-    ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);return `<p style="margin:4px 0"><b>Next season:</b> losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
+    ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);const nin=(SBC.inc||[]).filter(p=>String(p.fid)===String(SBC_TEAM)).length;return `<p style="margin:4px 0"><b>Next season:</b>${nin?` adding <b>${nin}</b> portal commit${nin===1?"":"s"} (projected at their profile's typical grade) ·`:""} losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
     <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 style="margin:0">2026 portal class</h3><select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 style="margin:0">2026 portal class</h3><button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button><select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
     <p class="note">Every 2026 transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not 2025). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. Hit rate skips K/P/LS and players who left.</p>
     <h3 style="margin:14px 0 0">Next season snapshot</h3>${sbcNextLeague()}
     <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
+  if(e.target.id==="sbcOddsSave"){const o=sbcOddsCalc();DB.doc("config/portalOdds").set(o).then(()=>{PODDS=o;flash(`Portal odds saved (${o.n} transfers).`)}).catch(()=>flash("Couldn't save the portal odds."));return}
   const pg=e.target.closest("[data-sbcpage]");if(pg){SBC_PAGE=pg.dataset.sbcpage;SBC_EDIT=false;renderSbc();return}
   const bs=e.target.closest("[data-sbcbsort]");if(bs){SBC_BSORT=bs.dataset.sbcbsort;renderSbc();return}
   if(e.target.id==="sbcSaveBud"){const up={};let bad=0;$("sbcBody").querySelectorAll("[data-sbcbud]").forEach(i=>{const v=i.value.trim();if(v===""){up[`teams.${i.dataset.sbcbud}.budget`]=null;return}const n=parseFloat(v);if(isFinite(n)&&n>=0)up[`teams.${i.dataset.sbcbud}.budget`]=Math.round(n*100)/100;else bad++});
