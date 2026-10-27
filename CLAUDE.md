@@ -1,6 +1,7 @@
 # Roster Lab repo notes (repo Agent219DC/roster-lab, live at agent219dc.github.io/roster-lab)
 
 - `index.html` is the entire app: the shared Roster Lab page (formerly Player Tool) plus a Firebase shim (sign-in gate, `window.claude.use()` stand-in for db/user/downloads). Edit it directly.
+- Sign-in is Google only: the email-link controls on the gate are hidden, and Firebase has email-link and password sign-in off.
 - Owner email is set in two places: `OWNER_EMAIL` in index.html and `isOwner()` in firestore.rules. Keep them in sync.
 - Staff emails live in Firestore at `config/staff` (`emails` array), managed from Owner tools → Staff access.
 - Never commit player data or backup JSON files; this repo is public.
