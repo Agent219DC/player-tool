@@ -15,16 +15,22 @@ service cloud.firestore {
         && email() in get(/databases/$(database)/documents/config/staff).data.emails);
     }
 
-    // Model settings, staff list, season rollover record: staff read, owner writes
+    // The position boards staff work in
+    function isBoard(c) {
+      return c in ['qb_players', 'rb_players', 'wr_players', 'te_players', 'iol_players', 'ot_players',
+                   'dt_players', 'de_players', 'lb_players', 'saf_players', 'cb_players', 'hs_players'];
+    }
+
+    // Model settings: staff read, owner writes. Staff list, market prices and backup log: owner only.
     match /config/{doc} {
-      allow read: if isStaff();
+      allow read: if isOwner() || (isStaff() && !(doc in ['staff', 'market', 'backup', 'rollover']));
       allow write: if isOwner();
     }
-    // Team games played and current season: any staff member.
-    // Depth charts (GM side): staff read them for starters, only the owner changes them.
+    // Staff read everything here (depth charts feed the starters); staff only write games played (season).
+    // Depth charts are GM side: only the owner changes them.
     match /shared/{doc} {
       allow read: if isStaff();
-      allow write: if isOwner() || (isStaff() && !(doc in ['depth', 'depth_next', 'depth_prev']));
+      allow write: if isOwner() || (isStaff() && doc == 'season');
     }
     // Display names for "updated by" lines
     match /users/{uid} {
@@ -40,11 +46,12 @@ service cloud.firestore {
     match /owner/{doc} {
       allow read, write: if isOwner();
     }
-    // Every position's board (qb_players, rb_players, ...)
-    // Staff add and edit; only the owner can delete a player for good (the site's Delete is a soft delete to the trash)
+    // Position boards: staff add and edit; only the owner deletes a player for good (the site's Delete is a soft delete).
+    // Any other collection (old copies such as sbc_players): owner only.
     match /{coll}/{doc} {
-      allow read, create, update: if isStaff() && coll.matches('[a-z]+_players');
-      allow delete: if isOwner() && coll.matches('[a-z]+_players');
+      allow read, create, update: if isStaff() && isBoard(coll);
+      allow delete: if isOwner() && isBoard(coll);
+      allow read: if isOwner();
     }
   }
 }
