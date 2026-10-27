@@ -30,8 +30,8 @@
   --bg:#f4f5f7; --surface:#ffffff; --sunk:#e9ebef; --line:#d3d7de;
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
-  --impact:#007a33; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0a5c30; --offer:#6b3fa0;
-  --tElite:#1f63c6; --tEliteFill:#1f63c6; --tImpact:#7b3fc4; --tStarter:#007a33; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
+  --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
+  --tElite:#8a6200; --tEliteFill:#8a6200; --tImpact:#0b7a7a; --tStarter:#4b5d6b; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,12 +40,12 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#3fd47a; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#00b140; --offer:#c3a0ee; --tElite:#5ea8ff; --tEliteFill:#2a74d6; --tImpact:#b98cf0; --tStarter:#3fd47a; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f2c94c; --tEliteFill:#8a6200; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#3fd47a; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#00b140; --offer:#c3a0ee; --tElite:#5ea8ff; --tEliteFill:#2a74d6; --tImpact:#b98cf0; --tStarter:#3fd47a; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f2c94c; --tEliteFill:#8a6200; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-gm{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
@@ -131,7 +131,7 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 .tbsep{width:1px;align-self:stretch;background:var(--line);margin:0 4px}
 .boardfoot{margin:0}
 .pc-mkt{display:grid;gap:4px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
-.pc-hist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px}.pc-hist .up,.pc-imp .up{color:var(--cHigh,#00873a)}.pc-hist .dn,.pc-imp .dn{color:var(--cLow,#c62828)}.pc-hist>span{color:var(--muted)}.pc-hist>span.up{color:var(--cHigh,#00873a)}.pc-hist>span.dn{color:var(--cLow,#c62828)}
+.pc-hist{display:flex;gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:10px;font-size:13px}.pc-hist .up,.pc-imp .up{color:var(--cHigh,#137a4f)}.pc-hist .dn,.pc-imp .dn{color:var(--cLow,#c62828)}.pc-hist>span{color:var(--muted)}.pc-hist>span.up{color:var(--cHigh,#137a4f)}.pc-hist>span.dn{color:var(--cLow,#c62828)}
 @media (max-width:480px){.pc-hist{flex-direction:column;align-items:flex-start;gap:6px}}
 .pc-pf{display:grid;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
 .pc .pc-pf h3.pf-h{margin:0;font:700 13px var(--display);letter-spacing:.08em;color:var(--fg)}
@@ -150,7 +150,7 @@ header>.tabs{order:3;flex-basis:100%;min-width:0;max-width:100%;display:flex;fle
 #bbTbl .rk{font:600 13px var(--mono);color:var(--muted)} #bbTbl .gtc{font:600 14px var(--mono)}
 .bbctl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
 dialog#pcard{width:min(760px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-dialog#pcard::backdrop,dialog#sbcDlg::backdrop{background:rgba(10,16,12,.5)}
+dialog#pcard::backdrop,dialog#sbcDlg::backdrop{background:rgba(10,12,16,.5)}
 dialog#sbcDlg{width:min(720px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 @media (max-width:640px){dialog#sbcDlg{width:100%;max-width:100%;max-height:100dvh;height:100dvh;margin:0;border-radius:0}}
 .sbp-grades{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}.sbp-grades>div{border:1px solid var(--line);border-radius:8px;padding:10px 12px}.sbp-grades .big{font:700 30px var(--display)}
@@ -369,7 +369,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .dc-keywrap{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:flex-start}
 
 dialog#dcDlg{width:min(420px,calc(100% - 32px));padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
+dialog#dcDlg::backdrop{background:rgba(10,12,16,.5)}
 .dcd{display:grid;gap:10px;padding:18px}.dcd h3{margin:0;font:700 18px var(--display)}
 .dcd label{display:grid;gap:4px;font-size:13px;color:var(--muted)}.dcd label.check{display:flex;gap:8px;align-items:center;color:var(--fg)}
 .dcd input:not([type=checkbox]),.dcd select{font-family:var(--body);font-size:15px}
@@ -395,8 +395,8 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 @media (max-width:1000px){.rc-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr))}}
 .rc{border:1px solid var(--line);border-radius:6px;padding:5px 8px;display:grid;gap:1px;font-size:12px}
 .rc b{font:700 12px var(--display);letter-spacing:.06em}.rc-n{font:600 14px var(--mono);white-space:nowrap}
-.rc-d{font-size:11px;font-weight:600}.rc-d.open{color:#00873a}.rc-d.over{color:#c62828}.rc-d.even{color:var(--muted)}
-[data-theme=dark] .rc-d.open{color:#5fd38a}[data-theme=dark] .rc-d.over,[data-theme=dark] .rc-big.over{color:#ff8a80}
+.rc-d{font-size:11px;font-weight:600}.rc-d.open{color:#137a4f}.rc-d.over{color:#c62828}.rc-d.even{color:var(--muted)}
+[data-theme=dark] .rc-d.open{color:#4fdb9c}[data-theme=dark] .rc-d.over,[data-theme=dark] .rc-big.over{color:#ff8a80}
 .rc-in{width:34px;font:600 13px var(--mono);padding:1px 4px}.rc-in.big{width:64px;font-size:16px}
 .skel{display:block;border-radius:6px;background:linear-gradient(90deg,var(--sunk) 25%,var(--line) 50%,var(--sunk) 75%);background-size:200% 100%;animation:skel 1.2s linear infinite}
 @keyframes skel{from{background-position:200% 0}to{background-position:-200% 0}}
@@ -405,9 +405,9 @@ dialog#dcDlg::backdrop{background:rgba(10,16,12,.5)}
 .dcinj{display:inline-flex;vertical-align:-2px;margin-left:5px;cursor:help}.dcinj svg{display:block}
 .ask-row{display:flex;align-items:center;gap:6px;margin:4px 0 2px}.ask-row input{width:150px;font:600 15px var(--mono);padding:5px 8px}
 .valtag{display:inline-block;font:700 10.5px var(--body);letter-spacing:.04em;text-transform:uppercase;padding:1px 7px;border-radius:8px;border:1px solid currentColor;margin-right:4px}
-td.vgood{color:#00873a;font-weight:600}td.vbad{color:#c62828;font-weight:600}[data-theme=dark] td.vgood{color:#5fd38a}[data-theme=dark] td.vbad{color:#ff8a80}
-.valtag.good{color:#00873a}.valtag.fair{color:var(--cMed)}.valtag.pricey{color:#c62828}
-[data-theme=dark] .valtag.good{color:#5fd38a}[data-theme=dark] .valtag.pricey{color:#ff8a80}
+td.vgood{color:#137a4f;font-weight:600}td.vbad{color:#c62828;font-weight:600}[data-theme=dark] td.vgood{color:#4fdb9c}[data-theme=dark] td.vbad{color:#ff8a80}
+.valtag.good{color:#137a4f}.valtag.fair{color:var(--cMed)}.valtag.pricey{color:#c62828}
+[data-theme=dark] .valtag.good{color:#4fdb9c}[data-theme=dark] .valtag.pricey{color:#ff8a80}
 .cmpverdict .valline{display:block;margin-top:6px}
 tr.ownrow td{background:color-mix(in srgb,var(--accent) 5%,transparent)}
 .dc-infobtn{display:none}
@@ -456,7 +456,7 @@ button,input,select,textarea{font-family:inherit}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
 #recTbl{min-width:0}#recruit .tablewrap{max-width:760px}#recTbl th,#recTbl td{text-align:center}#recTbl th:first-child,#recTbl td:first-child{text-align:left}#recTbl .og{display:block;font:500 10px var(--body);color:var(--muted)}
-#recTbl .open{color:#00873a}#recTbl .over,.recroster .over{color:#c62828}[data-theme=dark] #recTbl .open{color:#5fd38a}[data-theme=dark] #recTbl .over,[data-theme=dark] .recroster .over{color:#ff8a80}
+#recTbl .open{color:#137a4f}#recTbl .over,.recroster .over{color:#c62828}[data-theme=dark] #recTbl .open{color:#4fdb9c}[data-theme=dark] #recTbl .over,[data-theme=dark] .recroster .over{color:#ff8a80}
 .recroster{margin:0;font-size:14px}
 /* phones: keep the columns that matter on screen instead of side-scrolling */
 @media (max-width:640px){
@@ -704,7 +704,7 @@ body.mode-hs #tabs [data-tab]:not([data-hs]){display:none}
 .hs-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.hs-acts .btn{font-size:13px;padding:5px 10px}
 .hs-acts .btn[aria-pressed=true]{border-color:#e0a100}
 dialog#hsCmpDlg{width:min(1100px,calc(100% - 32px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-dialog#hsCmpDlg::backdrop{background:rgba(10,16,12,.5)}
+dialog#hsCmpDlg::backdrop{background:rgba(10,12,16,.5)}
 table.hs-cmp td,table.hs-cmp th{vertical-align:top}table.hs-cmp th.rowh{font-weight:600;color:var(--muted);text-align:left;white-space:nowrap}
 table.hs-cmp td.best{background:rgba(0,177,64,.12);font-weight:700}table.hs-cmp td.worst{color:var(--pass)}
 table.hs-cmp tr.grp th{background:var(--sunk);font:700 12px var(--display);letter-spacing:.08em;text-transform:uppercase;text-align:left}
@@ -716,14 +716,14 @@ table.hs-cmp .cn button{font:inherit;font-weight:700;background:none;border:0;co
 .tag .g.none{color:var(--muted);font-weight:600}
 .chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
 dialog#hsDlg{width:min(820px,calc(100% - 32px));}@media (min-width:960px){dialog#hsDlg{width:min(1100px,calc(100% - 32px))}}dialog#hsDlg{max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
-dialog#hsDlg::backdrop{background:rgba(10,16,12,.5)}
+dialog#hsDlg::backdrop{background:rgba(10,12,16,.5)}
 .hsd{display:grid;gap:16px;padding:20px 22px 22px}
 .hsd-box{display:grid;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}
 .hsd-box h3{margin:0;font:700 13px var(--display);letter-spacing:.08em;text-transform:uppercase}
 .hsd-break{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
 .hsd-break div{display:grid;gap:2px}
 .hsd-break b{font:700 22px var(--display)}
-.sbc-up{color:#00873a;font-weight:700}.sbc-dn{color:#c62828;font-weight:700}[data-theme=dark] .sbc-up{color:#5fd38a}[data-theme=dark] .sbc-dn{color:#ff8a80}
+.sbc-up{color:#137a4f;font-weight:700}.sbc-dn{color:#c62828;font-weight:700}[data-theme=dark] .sbc-up{color:#4fdb9c}[data-theme=dark] .sbc-dn{color:#ff8a80}
 #sbc{grid-template-columns:minmax(0,1fr)} #sbc>*,#sbcBody>*{min-width:0} #sbcBody{display:grid;gap:10px;min-width:0}
 #sbcTbl tr.ours td{background:var(--accent-soft)} #sbcTbl td.tm{font-weight:600;white-space:nowrap} .sbc-chart{width:100%;max-width:760px;height:auto;display:block}
 .sbc-chart text{font:600 11px var(--body);fill:var(--muted)} .sbc-chart .lbl{fill:var(--fg)} .sbc-chart .ours{fill:var(--accent-text)}
@@ -1886,11 +1886,11 @@ function updatePickUI(){
   $("cmpBtn").disabled=n<2;$("selBtns").hidden=!n;
   $("printBtn").textContent=n?`Print selected (${n})`:"Print selected";
 }
-const CONFRGB={High:[0,122,51],Medium:[125,99,0],Low:[198,40,40]};
+const CONFRGB={High:[15,115,73],Medium:[125,99,0],Low:[198,40,40]};
 /* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
 function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
   doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
-const TIERRGB={Elite:[31,99,198],Impact:[123,63,196],Starter:[0,122,51],Rotation:[168,77,8],Pass:[198,40,40]};
+const TIERRGB={Elite:[138,98,0],Impact:[11,122,122],Starter:[75,93,107],Rotation:[168,77,8],Pass:[198,40,40]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(!rows.length)return;
@@ -1958,7 +1958,7 @@ async function printOverview(){
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
   const L=x=>x.r.letter.replace("−","-");
-  const NEEDRGB={High:[176,58,46],Upgrade:[176,122,18],Set:[0,135,58]};
+  const NEEDRGB={High:[176,58,46],Upgrade:[176,122,18],Set:[19,122,79]};
   /* field layout: one card per starting spot, placed where it lines up */
   const F=OV_FIELD[OV_SIDE],spots=ovSpots(OV_SIDE,rows),H=doc.internal.pageSize.getHeight();
   const T=t=>String(t).replace(/[−–]/g,"-");
@@ -2702,7 +2702,7 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
   pdfHeader(doc,"Roster Lab · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
-  const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[0,122,51]};
+  const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[15,115,73]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
     styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
@@ -3033,7 +3033,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
       doc.setDrawColor(211,215,222);doc.setLineWidth(.5);doc.rect(x,y,bw,24);
       doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(27,30,36);doc.text(DC_GRPLBL[g]||g,x+4,y+9);
       doc.setFontSize(8.5);doc.text(t!=null?`${have} / ${t}`:String(have),x+bw-4,y+9,{align:"right"});
-      if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[0,135,58]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
+      if(d!=null){doc.setFont("helvetica","normal");doc.setFontSize(7);doc.setTextColor(...(d<0?[198,40,40]:d>0?[19,122,79]:[120,130,122]));doc.text(d<0?`${-d} over`:d>0?`${d} open`:"full",x+4,y+19)}});
     top=y+24+12};
   let top=0;const page=(nm,cont)=>{W=pdfHeader(doc,"Roster Lab · Depth Chart · "+nm+(cont?" (cont.)":""),zn);top=80;legend();if(!cont)rosterStrip()};
   [["off","Offense"],["def","Defense"],["st","Special teams"]].forEach(([sd,nm],pi)=>{
@@ -3870,7 +3870,7 @@ function sbcChart(rows,fit,o){o=Object.assign({x:r=>r.grade,res:r=>r.waa,xlab:"T
   const ya=Math.max(0,Math.min(1,fit.a+fit.b*x0)),yb=Math.max(0,Math.min(1,fit.a+fit.b*x1));
   g+=`<line x1="${X(x0)}" y1="${Y(ya)}" x2="${X(x1)}" y2="${Y(yb)}" stroke="var(--muted)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
   const placed=[];
-  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const us=sbcOurs(r),c=r.waa>=1?"#00a651":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
+  g+=[...P].sort((a,b)=>(sbcOurs(b)?1:0)-(sbcOurs(a)?1:0)).map(r=>{const us=sbcOurs(r),c=r.waa>=1?"#2fcb86":r.waa<=-1?"#e53935":"var(--muted)";const cx=X(r.grade),cy=Y(r.pct),tw=String(ab(r.name)).length*6.4;
     /* try right, left, above, below so labels don't sit on top of each other */
     const opts=[[cx+9,cy+4,"start"],[cx-9,cy+4,"end"],[cx,cy-10,"middle"],[cx,cy+17,"middle"],[cx+9,cy-9,"start"],[cx+9,cy+16,"start"]];
     const box=([x,y,a])=>{const x0=a==="start"?x:a==="end"?x-tw:x-tw/2;return [x0,y-10,x0+tw,y+2]};const hit=b=>placed.some(q=>b[0]<q[2]&&b[2]>q[0]&&b[1]<q[3]&&b[3]>q[1]);
@@ -3970,7 +3970,7 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
     pdfHeader(doc,"Roster Lab · Sun Belt roster budget vs. results",$("sbcMeta").textContent+" · Sorted by "+({wab:"wins vs. budget",budget:"budget",gab:"talent vs. budget",pct:"record"}[SBC_BSORT]||"wins vs. budget"));
     doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Record","Win %","Roster budget","Expected W","Wins vs. budget","Verdict","Team grade","Talent vs. budget","Cost per win"]],
       body:R.map((r,i)=>[i+1,r.name,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.budget!=null?sbcMoney(r.budget)+"  (#"+r.budgetRk+")":"-",r.xwB!=null?r.xwB.toFixed(1):"-",sg(r.wab),r.wab==null?"-":r.wab>=1?"Overperforming":r.wab<=-1?"Underperforming":"About right",r.grade!=null?r.grade.toFixed(1):"-",sg(r.gab),r.perWin!=null?sbcMoney(r.perWin):"-"]),
-      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+      styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===6){const v=R[h.row.index].wab;if(v>=1)h.cell.styles.textColor=[19,122,79];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
     const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(90,96,107);const m=SBC.meta;
     doc.text(doc.splitTextToSize(`Expected W = wins that budget usually gets (league fit${fw?", explains "+Math.round(fw.r2*100)+"% of record":""}). Wins vs. budget = actual - expected. Talent vs. budget = team grade vs. what that money usually buys. Budgets: ${m.budgetSrc||"staff"}.`,doc.internal.pageSize.getWidth()-80),40,y);
     await pdfSave(doc,`Sun Belt budget vs results ${new Date().toISOString().slice(0,10)}.pdf`);return}
@@ -3978,7 +3978,7 @@ $("sbcPrint").addEventListener("click",async()=>{if(!SBC){flash("Open the Sun Be
   pdfHeader(doc,`Roster Lab · ${SBC_YR} Sun Belt snapshot`,$("sbcMeta").textContent+" · Sorted by "+({waa:"wins vs. talent",grade:"team grade",pct:"record"}[SBC_SORT]||"wins vs. talent"));const sg=v=>v==null?"-":(v>0?"+":"")+v.toFixed(1);
   doc.autoTable({startY:70,margin:{left:40,right:40},head:[["#","Team","Div","Record","Win %","Team grade","Offense","Defense","Expected W","Wins vs. talent","Verdict"]],
     body:R.map((r,i)=>[i+1,r.name,r.div,`${r.w}-${r.l}`,r.pct!=null?Math.round(r.pct*100)+"%":"-",r.grade!=null?r.grade.toFixed(1)+"  (#"+r.gradeRk+")":"-",fmt(r.off),fmt(r.def),r.xw!=null?r.xw.toFixed(1):"-",sg(r.waa),r.waa>=1?"Overperforming":r.waa<=-1?"Underperforming":"About right"]),
-    styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[0,135,58];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
+    styles:{fontSize:9,cellPadding:4},headStyles:{fillColor:[27,30,36]},didParseCell:h=>{if(h.section==="body"&&/marshall/i.test(R[h.row.index].name))h.cell.styles.fillColor=[220,239,226];if(h.section==="body"&&h.column.index===9){const v=R[h.row.index].waa;if(v>=1)h.cell.styles.textColor=[19,122,79];else if(v<=-1)h.cell.styles.textColor=[198,40,40]}}});
   const y=doc.lastAutoTable.finalY+16;doc.setFontSize(8);doc.setTextColor(90,96,107);
   doc.text(doc.splitTextToSize(`Team grade = two-deep graded on our board scales (QB 3x, backups 1/4). Expected W = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). Wins vs. talent = actual - expected.`,doc.internal.pageSize.getWidth()-80),40,y);
   await pdfSave(doc,`Sun Belt snapshot ${new Date().toISOString().slice(0,10)}.pdf`)});
@@ -4409,7 +4409,7 @@ async function printNeeds(){if(!pdfOk())return;const cl=needCls(),D=needData(cl)
   const nm=x=>PT(x.r.name+(x.r.star?" (Starred)":""))+(x.s.score!=null?` (${f1(x.s.score,1)})`:"");
   doc.autoTable(Object.assign({startY:76,head:[["Pos","Need","Committed","Offered","Status","Commits","Top targets"]],body:D.map(d=>[d.p,d.need,d.com.length,d.off,st(d),d.com.map(nm).join("\n")||"-",d.tgt.slice(0,3).map(nm).join("\n")||"-"]),
     columnStyles:{0:{fontStyle:"bold",cellWidth:40},1:{halign:"right",cellWidth:40},2:{halign:"right",cellWidth:62},3:{halign:"right",cellWidth:52},4:{fontStyle:"bold",cellWidth:64}},
-    didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[0,122,51]}}},TSTY));
+    didParseCell:h=>{if(h.section==="body"&&h.column.index===4){const d=D[h.row.index];h.cell.styles.textColor=d.left>0?[198,40,40]:d.left<0?[168,77,8]:[15,115,73]}}},TSTY));
   await pdfSave(doc,`HS needs ${cl} ${new Date().toISOString().slice(0,10)}.pdf`)}
 async function printCompare(L){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({orientation:"landscape",unit:"pt",format:"letter"});pdfHeader(doc,"Roster Lab · Compare prospects",L.map(x=>PT(x.r.name)).join(" vs. "));
   const body=[];cmpRows(L).forEach(row=>{if(row[0]==="grp"){body.push([{content:row[1],colSpan:L.length+1,styles:{fillColor:[230,234,229],fontStyle:"bold"}}]);return}
