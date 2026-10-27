@@ -1643,6 +1643,8 @@ function espnLevel(team){const g=team&&team.groups||{},par=(g.parent&&(g.parent.
   if(P4_CONF.test(n)||/notre dame/i.test(team&&team.location||""))return "P4";
   if(G6_CONF.test(n)||/FBS/i.test(par))return "G6";
   return n.trim()?"FCS":"G6"}
+/* ESPN mixes "SOLO" with "Forced Fumbles"; keep abbreviations, sentence-case the rest to match the site */
+const espnLbl=t=>{t=String(t||"");return /[a-z]/.test(t)?t.split(" ").map((w,i)=>i&&/^[A-Z][a-z]/.test(w)?w.toLowerCase():w).join(" "):t};
 function espnCareer(j){const teams=j.teams||{};const tname=sl=>{const t=teams[sl]||Object.values(teams).find(x=>x&&x.slug===sl)||{};return {n:t.location||t.displayName||sl||"",lv:t.groups?espnLevel(t):""}};
   const zero=a=>a.every(v=>!parseFloat(String(v).replace(/,/g,"")));
   const cats=[];const seen={};
@@ -2502,7 +2504,7 @@ function espnLive(id){if(ESPN_LIVE.has(id))return ESPN_LIVE.get(id);
   const pr=(async()=>{const base=`${ESPN_API}/sports/football/college-football/athletes/${encodeURIComponent(id)}`;
     const [a,g,fbs]=await Promise.all([espnJSON(base).catch(()=>null),espnJSON(base+"/gamelog").catch(()=>null),fbsIds()]);
     const ath=a&&(a.athlete||a),ss=ath&&ath.statsSummary;
-    const line=ss&&ss.statistics&&ss.statistics.length?{title:ss.displayName||"",stats:ss.statistics.map(x=>({l:x.shortDisplayName||x.abbreviation||x.displayName,v:x.displayValue}))}:null;
+    const line=ss&&ss.statistics&&ss.statistics.length?{title:ss.displayName||"",stats:ss.statistics.map(x=>({l:espnLbl(x.shortDisplayName||x.abbreviation||x.displayName),v:x.displayValue}))}:null;
     let games=[],labels=[];
     if(g&&g.events){labels=(g.labels||[]).map(String);const names=(g.names||[]).map(String);const rows={};
       (g.seasonTypes||[]).forEach(st=>(st.categories||[]).forEach(c=>(c.events||[]).forEach(e=>{rows[e.eventId]=(e.stats||[]).map(String)})));
