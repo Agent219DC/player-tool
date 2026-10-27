@@ -2459,11 +2459,12 @@ let PODDS=null;
 async function loadOdds(force){if(PODDS!==null&&!force)return PODDS;try{const s=await DB.doc("config/portalOdds").get();PODDS=s.exists?s.data():false}catch(e){PODDS=false}return PODDS}
 const ODDS_LVL={P4:"Power Four",G6:"Group of Five",FCS:"FCS",D2:"D2 and lower"};
 function oddsLvl(l){l=String(l||"");return /P4|SEC|B1G|ACC|Big 12/i.test(l)?"P4":/G6|FBS/i.test(l)?"G6":/FCS/i.test(l)?"FCS":l?"D2":null}
+const oddsGames=t=>t==="full"?12:(+t||null);
 function oddsRole(k,db,games,bench){const b=bench&&bench[k];if(!b||db==null||!games)return null;const r=db/(games*b);return r>=.6?"Starter":r>=.25?"Part-time":"Backup"}
 function oddsFor(level,role){const O=PODDS;if(!O||!O.cells)return null;const L=oddsLvl(level);const c=L&&role&&O.cells[L+"|"+role];
   if(c&&c.n>=8)return Object.assign({label:`${ODDS_LVL[L]} ${role.toLowerCase()}s`},c);const l=L&&O.cells[L+"|all"];if(l&&l.n>=8)return Object.assign({label:`all ${ODDS_LVL[L]} transfers`,broad:!!role},l);
   const a=O.cells.all;return a?Object.assign({label:"all transfers",broad:true},a):null}
-function oddsHtml(p){if(!PODDS||isOurs(p)||(p.status||"")==="Committed elsewhere")return "";const role=oddsRole(POSKEY,p.db,+p.thru||null,PODDS.bench);const o=oddsFor(p.level,role);if(!o)return "";
+function oddsHtml(p){if(!PODDS||isOurs(p)||(p.status||"")==="Committed elsewhere")return "";const role=oddsRole(POSKEY,p.db,oddsGames(p.thru),PODDS.bench);const o=oddsFor(p.level,role);if(!o)return "";
   const pc=v=>Math.round(100*v/o.n)+"%";
   return `<div class="pc-odds"><h3 style="margin:0">Transfers like him</h3><div class="sub">${esc(o.label)}${o.broad?" (small group, so broader)":""} · ${o.n} Sun Belt transfers, ${esc(PODDS.season||"2026")}</div>
     <div class="odds-row"><span class="sbc-up"><b>${pc(o.good)}</b> good take</span><span><b>${pc(o.ok)}</b> OK</span><span class="sbc-dn"><b>${pc(o.bad)}</b> bad take</span><span class="sbc-np"><b>${pc(o.np)}</b> didn't play</span></div>
@@ -3710,7 +3711,7 @@ async function loadSbc(force){if(SBC&&!force)return SBC;
   const inc=[];const us=Object.entries(meta.teams||{}).find(([f,t])=>sbcOurs(t));await loadOdds();
   if(us&&PODDS){const PP={QB:"QB",RB:"HB",WR:"WR",TE:"TE",OT:"T",IOL:"G",DT:"DI",DE:"ED",LB:"LB",SAF:"S",CB:"CB"},GR={QB:"QB",RB:"RB",WR:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",CB:"DB"};
     for(const k of Object.keys(POSITIONS)){try{const s=await DB.collection(k.toLowerCase()+"_players").where("status","==","Committed").get();
-      s.forEach(d=>{const q=d.data();if(q.deleted||!PP[k])return;const o=oddsFor(q.level,oddsRole(k,q.db,+q.thru||null,PODDS.bench));if(!o||o.avg==null)return;
+      s.forEach(d=>{const q=d.data();if(q.deleted||!PP[k])return;const o=oddsFor(q.level,oddsRole(k,q.db,oddsGames(q.thru),PODDS.bench));if(!o||o.avg==null)return;
         inc.push({id:"in-"+d.id,fid:+us[0],name:q.name,k,pos:PP[k],grp:GR[k],g:o.avg,r:{tier:"",letter:"proj."},inc:true,prev:q.school||"",odds:o,dep:2,snaps:0})})}catch(e){}}}
   SBC={players,meta,portal,inc};return SBC}
 /* Portal odds from this season's Sun Belt transfers: bucket by old level and old role (his last-season volume vs. a Sun Belt starter's per game),
