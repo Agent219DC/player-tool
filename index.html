@@ -2816,7 +2816,7 @@ async function printTagBoard(){if(!TB)return;if(!window.jspdf||!window.jspdf.jsP
         doc.setTextColor(27,30,36);doc.text(nl,x+7,y+9.5);const yy=y+9.5+nl.length*8.5;
         const g=`${fmt(t.r.grade)} ${T(t.r.letter)}`;doc.setTextColor(...rgb);doc.text(g,x+7,yy);const gw=doc.getTextWidth(g);
         doc.setFont("helvetica","normal");doc.setFontSize(6.6);doc.setTextColor(90,96,107);doc.text(doc.splitTextToSize(T([t.p.school,t.p.level,t.p.status].filter(Boolean).join(" · ")),cw-gw-16)[0]||"",x+11+gw,yy);y+=h+3})})});
-  await pdfSave(doc,`Portal board ${new Date().toISOString().slice(0,10)}.pdf`)}
+  await pdfSave(doc,`Big board by position ${new Date().toISOString().slice(0,10)}.pdf`)}
 $("tbPrint").addEventListener("click",printTagBoard);
 /* ---------- depth chart: staff rank our own players by position group. Two charts: this season (shared/depth) and next season (shared/depth_next). Names and roster tags only, never money ---------- */
 /* each side is rows of spots; WRP / OLP hold receivers and linemen not placed at a spot yet (shown only when someone is in them) */
@@ -4269,7 +4269,7 @@ function renderBoard(){posBar();renderQueue();fillSelect(q("hsClass"),classes(),
   const term=(q("hsSearch").value||"").toLowerCase().trim(),cl=q("hsClass").value,st=q("hsStatus").value,pri=q("hsPri").checked;
   let L=ROWS.filter(r=>(!POSF||r.pos===POSF)&&(!pri||r.star)&&(!cl||String(r.cls)===cl)&&(!st||r.status===st)&&(!term||[r.name,r.school,r.state].join(" ").toLowerCase().includes(term)));
   L=sortRows(rowsFor(L));LAST_LIST=L;q("hsCount").textContent=`${L.length} prospect${L.length===1?"":"s"}`;
-  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="15" class="sub">No prospects yet. Use + Add prospect, or import a file in HS Settings.</td></tr>`}</tbody>`;
+  q("hsTbl").innerHTML=HEAD(false)+`<tbody>${L.map(x=>boardRow(x)).join("")||`<tr><td colspan="15" class="sub">No prospects yet. Use + Add prospect, or the owner can import a file in Settings.</td></tr>`}</tbody>`;
   q("hsTbl").querySelectorAll("th[data-k]").forEach(th=>{if(th.dataset.k===SORT.k)th.textContent+=SORT.d<0?" ▼":" ▲"});pickUI()
   q("hsSortReset").hidden=SORT.k==="commit"}
 function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("hsTbBtns").hidden=!tags;q("hsListCtl").hidden=tags;q("hsListWrap").hidden=tags;
@@ -4280,7 +4280,7 @@ function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("h
   let L=rowsFor(ROWS.filter(r=>(isCom(r.status)||isTgt(r))&&(!cl||String(r.cls)===cl)&&(BIGSIDE==="all"||(BIGSIDE==="off")===OFF.has(r.pos))))
     .filter(x=>x.s.score!=null&&(!cf||(cf==="High"?x.s.conf==="High":x.s.conf!=="Low")));
   L.sort((a,b)=>b.s.score-a.s.score);
-  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody graded yet. A prospect joins this list once a coach grades his film. Until then, rank by hand on the Prospect board.</td></tr>`}</tbody>`}
+  q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody graded yet. A prospect joins this list once a coach grades his film. Until then, rank by hand in Big board → By position.</td></tr>`}</tbody>`}
 
 /* ---------- prospect board: drag tags to rank each position (mirrors the portal board). Order is saved as hsRank on each prospect ---------- */
 const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","CB"];
