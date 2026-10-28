@@ -31,7 +31,7 @@
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
-  --tElite:#a3154f; --tEliteFill:#b0195a; --tImpact:#0b7a7a; --tStarter:#4b5d6b; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
+  --tElite:#a3154f; --tEliteFill:#b0195a; --cHigh:#0f7349; --tImpact:#0b7a7a; --tStarter:#4b5d6b; --tRotation:#a84d08; --tPass:#c62828; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,12 +40,12 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --cHigh:#4fdb9c; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#b0195a; --cHigh:#4fdb9c; --tImpact:#3fd0c9; --tStarter:#a9b9c6; --tRotation:#ff8f45; --tPass:#ff5d55; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
@@ -120,6 +120,16 @@ body.scrolled header .tab{padding:6px 11px}
 @media (min-width:900px) and (max-width:1199px){
   #crumb{font-size:26px}body header>.tabs{flex-basis:220px;max-width:220px}body header>.tabs .gsearch{flex:1 1 auto}body header>.tabs .gsearch input{width:100%;max-width:none}
 }
+/* Marshall logo beside the Roster Lab mark (header, side menu, sign-in, printouts; never the favicon/app icons) */
+.mulogo{width:44px;height:44px;object-fit:contain;flex:none}.mulogo.dark{display:none}
+:root[data-theme=dark] .mulogo.light{display:none}:root[data-theme=dark] .mulogo.dark{display:block}
+@media (prefers-color-scheme: dark){:root:not([data-theme=light]) .mulogo.light{display:none}:root:not([data-theme=light]) .mulogo.dark{display:block}}
+.mudiv{width:1px;align-self:stretch;min-height:28px;background:var(--line);flex:none}
+#sidenav .sn-brand .mulogo{width:34px;height:34px;margin-left:auto}#sidenav .sn-brand .mudiv{display:none}
+.gatebrand{display:flex;align-items:center;justify-content:center;gap:16px}.gatebrand .mulogo{width:56px;height:56px}
+body.scrolled header .mulogo{width:32px;height:32px}
+@media (max-width:640px){header .mulogo{width:34px;height:34px}}
+@media (min-width:900px){header .brand>.mulogo,header .brand>.mudiv{display:none!important}}
 svg.brandlogo .rl-liq{fill:var(--accent)}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pos{display:flex;flex-wrap:wrap;gap:6px}
@@ -193,7 +203,7 @@ table.gl{border-collapse:collapse;font-size:12px;width:100%;font-variant-numeric
 table.gl th,table.gl td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:right}table.gl th:nth-child(-n+3),table.gl td:nth-child(-n+3){text-align:left}
 table.gl th{font-size:11.5px;background:var(--sunk);cursor:default}table.gl tr.gl-f td{background:color-mix(in srgb,var(--accent) 7%,transparent)}
 table.gl .gl-tag{font:700 9.5px var(--body);color:var(--accent-text);border:1px solid currentColor;border-radius:3px;padding:0 3px;vertical-align:1px}
-table.gl td.up{color:var(--tStarter)}table.gl td.dn{color:var(--tPass)}table.gl tr.gl-sum td{font-weight:700;background:var(--sunk)}
+table.gl td.up{color:var(--cHigh)}table.gl td.dn{color:var(--tPass)}table.gl tr.gl-sum td{font-weight:700;background:var(--sunk)}
 .pc-glog .tw{overflow-x:auto;max-width:100%}.pc>*{min-width:0}.pc-glog{min-width:0;max-width:100%}
 .pc-notes{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px}.pc-notes h3{margin:0}
 .note-i{border-left:3px solid var(--accent);padding:2px 0 2px 10px}.note-t{white-space:pre-wrap;font-size:14px;line-height:1.45;overflow-wrap:anywhere}.note-m{font-size:12px;margin-top:2px}
@@ -265,7 +275,7 @@ table .chip{font-size:10.5px;padding:2px 7px}
 .chip{font:600 12px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid currentColor}
 .t-Elite{color:#fff;background:var(--tEliteFill);border-color:var(--tEliteFill)} .t-Impact{color:var(--tImpact)} .t-Starter{color:var(--tStarter)} .t-Rotation{color:var(--tRotation)} .t-Pass{color:var(--tPass)}
 .cflag{display:inline-flex;align-items:center;margin-left:5px;vertical-align:-1px;cursor:help}.cflag i{font:700 11px var(--body);font-style:normal;margin-left:1px}
-.c-High{color:var(--tStarter);font-weight:600} .c-Medium{color:var(--cMed);font-weight:600} .c-Low{color:var(--tPass);font-weight:600}
+.c-High{color:var(--cHigh);font-weight:600} .c-Medium{color:var(--cMed);font-weight:600} .c-Low{color:var(--tPass);font-weight:600}
 .who{font-family:var(--display);font-size:26px;font-weight:600;line-height:1.1}
 .sub{color:var(--muted);font-size:13px}
 /* scale */
@@ -746,7 +756,7 @@ table.hs-cmp .cn button{font:inherit;font-weight:700;background:none;border:0;co
 #hsNeedTbl tr.tot td{border-top:2px solid var(--line);font-weight:700}
 #hsNeedTbl input{width:64px}
 .tag .g.none{color:var(--muted);font-weight:600}
-.chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--accent-text)}
+.chip.c-Low{color:var(--pass)}.chip.c-Medium{color:var(--cMed)}.chip.c-High{color:var(--cHigh)}
 dialog#hsDlg{width:min(820px,calc(100% - 32px));}@media (min-width:960px){dialog#hsDlg{width:min(1100px,calc(100% - 32px))}}dialog#hsDlg{max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#hsDlg::backdrop{background:rgba(10,12,16,.5)}
 .hsd{display:grid;gap:16px;padding:20px 22px 22px}
@@ -794,7 +804,7 @@ table.hs-mini input,table.hs-mini select{padding:4px 6px;font-size:13px}
 </style>
 <div id="gate">
   <div class="card">
-    <svg class="gatelogo" width="96" height="58" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc2"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc2)"><clipPath id="rlw2"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath><g clip-path="url(#rlw2)"><rect x="0" y="0" width="48" height="120" fill="#1fa3ee"/><rect x="47.9" y="0" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" y="0" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg>
+    <div class="gatebrand"><svg class="gatelogo" width="96" height="58" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc2"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc2)"><clipPath id="rlw2"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath><g clip-path="url(#rlw2)"><rect x="0" y="0" width="48" height="120" fill="#1fa3ee"/><rect x="47.9" y="0" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" y="0" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg><span class="mudiv" aria-hidden="true"></span><img class="mulogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="56" height="56" onerror="this.remove()"><img class="mulogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="56" height="56" onerror="this.remove()"></div>
     <div class="eyebrow">Staff board</div>
     <h1>Roster <span>Lab</span></h1>
     <p class="msg" id="gateMsg">Sign in with your staff Google account.</p>
@@ -862,7 +872,7 @@ window.claude={use:async n=>{
 
 <div class="wrap">
 <nav id="sidenav" aria-label="All pages">
-  <a class="sn-brand" href="#boards" data-nav="boards"><svg class="sn-logo" width="68" height="42" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc3"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc3)"><path class="rl-liq" d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg><span>Roster <b>Lab</b></span></a>
+  <a class="sn-brand" href="#boards" data-nav="boards"><svg class="sn-logo" width="68" height="42" viewBox="4 26 112 68" role="img" aria-label="Roster Lab"><defs><clipPath id="rlc3"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath></defs><g clip-path="url(#rlc3)"><path class="rl-liq" d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="currentColor" stroke-width="4.5" stroke-linecap="round"/></svg><span>Roster <b>Lab</b></span><span class="mudiv sn" aria-hidden="true"></span><img class="mulogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="34" height="34" onerror="this.remove()"><img class="mulogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="34" height="34" onerror="this.remove()"></a>
   <div class="sn-grp sn-pt"><div class="sn-h">Portal</div><a href="#boards" data-nav="boards">Position boards</a><a href="#bigboard" data-nav="bigboard">Big board</a><a href="#recruit" data-nav="recruit">Roster needs</a><a href="#pvisits" data-nav="pvisits">Visits</a></div>
   <div class="sn-grp sn-hs"><div class="sn-h">High school</div><a href="#hsboard" data-nav="hsboard">Prospects</a><a href="#hsbig" data-nav="hsbig">Big board</a><a href="#hsrec" data-nav="hsrec">Visits</a></div>
   <div class="sn-grp sn-an"><div class="sn-h">Analytics</div><a href="#sbc" data-nav="sbc">Sun Belt snapshot</a><a href="#overview" data-nav="overview">Starters vs. targets</a></div>
@@ -875,6 +885,7 @@ window.claude={use:async n=>{
         <div class="eyebrow">Staff board</div>
         <h1>Roster <span>Lab</span></h1>
       </div>
+      <span class="mudiv" aria-hidden="true"></span><img class="mulogo light" src="https://a.espncdn.com/i/teamlogos/ncaa/500/276.png" alt="Marshall" width="44" height="44" onerror="this.remove()"><img class="mulogo dark" src="https://a.espncdn.com/i/teamlogos/ncaa/500-dark/276.png" alt="" width="44" height="44" onerror="this.remove()">
       <div id="crumb" aria-live="polite"><span class="cr-s"></span><span class="cr-p"></span></div>
       <span class="seg sidesw" role="group" aria-label="Portal, high school or GM"><button type="button" data-side="portal" aria-pressed="true">Portal</button><button type="button" data-side="hs" aria-pressed="false">High school</button><button type="button" data-side="an" aria-pressed="false">Analytics</button><button type="button" data-side="gm" id="gmSide" aria-pressed="false" hidden>GM</button></span>
     </div>
@@ -3324,6 +3335,7 @@ async function pdfSave(doc,fname){
   try{await dl.save({filename:fname,data:doc.output("blob")});flash("PDF ready. Open it and print from your PDF viewer.")}
   catch(err){const c=err&&err.code;if(c==="declined")return;flash(c==="rate_limited"?"A save prompt is already open. Finish that one first.":"Couldn't create the PDF. Try again.")}
 }
+let MU_PNG=null;logoData("276").then(d=>{MU_PNG=d}).catch(()=>{});
 /* print branding: the bar takes the current side's color; the logo (three-color football) and ROSTER LAB sit top right */
 const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[242,183,5],ink:[122,85,0]}};
 const pdfSide=()=>{const c=document.body.classList;return RL_SIDE_RGB[c.contains("mode-gm")?"gm":c.contains("mode-an")?"an":c.contains("mode-hs")?"hs":"portal"]};
@@ -3335,6 +3347,7 @@ function pdfBrand(doc){const W=doc.internal.pageSize.getWidth(),c=pdfSide();
   doc.setFont("helvetica","bold");doc.setFontSize(13);const w1=doc.getTextWidth("ROSTER "),w2=doc.getTextWidth("LAB"),x=W-40-w1-w2;
   doc.setTextColor(27,30,36);doc.text("ROSTER",x,41);doc.setTextColor(...c.ink);doc.text("LAB",x+w1,41);
   if(RL_PNG){try{doc.addImage(RL_PNG,"PNG",x-44,25,38,23)}catch(e){}}
+  if(MU_PNG){try{doc.setDrawColor(211,215,222);doc.setLineWidth(.75);doc.line(x-51,24,x-51,50);doc.addImage(MU_PNG,"PNG",x-85,22,28,28)}catch(e){}}
   return W}
 function pdfHeader(doc,title,sub){
   const W=pdfBrand(doc);title=String(title).replace(/^Roster Lab · /,"");
