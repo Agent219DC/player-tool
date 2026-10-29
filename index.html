@@ -1323,7 +1323,7 @@ window.claude={use:async n=>{
   <h3>Depth chart player</h3>
   <label>Name<input id="dcdName" maxlength="60" required></label>
   <div class="dcd2"><label>Position<select id="dcdPos"></select></label><label>Depth<select id="dcdDepth"></select></label></div>
-  <label>Class<input id="dcdYr" maxlength="12" placeholder="RS-SO"></label>
+  <label>Years left<input id="dcdYr" type="number" min="0" max="5" step="1" placeholder="e.g. 2"></label>
   <div class="dcd2"><label>Type<select id="dcdType"><option value="ret">Returning</option><option value="tr">Transfer</option><option value="fr">Freshman</option></select></label><label>Role<input id="dcdRole" maxlength="6" placeholder="K, P, LS"></label></div>
   <label id="dcdLinkWrap">Board player (for his grade and card)<select id="dcdLink"></select></label>
   <label class="check"><input type="checkbox" id="dcdWo"> Walk-on</label>
@@ -2967,6 +2967,9 @@ $("dcRosterWrap").addEventListener("click",e=>{if(e.target.id!=="rcEdit")return;
     dcSave(z)}
   DC_LIMEDIT=!DC_LIMEDIT;drawRoster()});
 $("dcRosterWrap").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.classList.contains("rc-in"))$("rcEdit").click()});
+/* depth chart shows years of eligibility left, not class (owner call): a staff-set number wins, otherwise it comes from the roster grid's class */
+function dcLeft(x){if(x&&x.left!=null&&x.left!=="")return +x.left;const c=String((x&&x.yr)||"").toUpperCase().replace(/[^A-Z]/g,"").replace(/^RS/,"");return {FR:4,SO:3,JR:2,SR:1,GR:1}[c]??(x&&x.t==="fr"&&!c?4:null)}
+function dcLeftTxt(x){const n=dcLeft(x);return n==null?"":n+(n===1?" yr":" yrs")+" left"}
 function dcMarks(x,k){return x.role&&x.role!==k?`<span class="dcm">${esc(x.role)}</span>`:""}
 /* tag color: yellow freshman, blue transfer, purple walk-on, red potential cut; more than one splits the tag */
 /* next season nobody is a transfer any more: a year on the roster makes him one of ours */
@@ -2983,7 +2986,7 @@ function dcHtWt(g){if(!g)return "";const h=String(g.ht||"").replace(/^(\d)\s*[-'
 function dcTag(k,x,i){const g=dcGrade(x);const shown=g&&g.name?g.name:x.n;const pool=DC_POOLS.includes(k);
   const cls=`tag dc${pool?" dcchip":""}${g?" tb-"+g.tier:""}`;const bg=dcBg(x);const st=bg?` style="background:${bg}"`:"";
   const bp=g&&DC_FAM(g.k)!==DC_FAM(k)&&!["K","P","LS","STP"].includes(k)?g.k:"";
-  const info=[x.yr,dcHtWt(g)].filter(Boolean).map(esc).join(' <span class="dot">·</span> ');
+  const info=[dcLeftTxt(x),dcHtWt(g)].filter(Boolean).map(esc).join(' <span class="dot">·</span> ');
   const gr=g?`<b class="gr gtc-${g.tier}"${bp?` title="His grade on the ${bp} board"`:""}>${fmt(g.grade)} ${g.letter}${bp?`<small class="bp">${bp}</small>`:""}</b>`:"";
   const marks=dcMarks(x,k);const inj=x.inj?dcInjIcon(x):"";
   if(pool)return `<div class="${cls}"${st} data-dk="${k}" data-did="${esc(x.id)}" tabindex="0"><span class="nm">${esc(shown)}${inj}</span><span class="meta">${gr?gr+' <span class="dot">·</span> ':""}${info}${marks?" "+marks:""}</span></div>`;
@@ -3024,14 +3027,14 @@ function dcFromDom(){const G=DCG();const by=new Map(dcAll().map(x=>[x.id,x]));
   drawDepth();dcSave()}
 function dcFind(id){const G=DCG();for(const k in G){const i=G[k].findIndex(x=>x.id===id);if(i>=0)return {k,i,x:G[k][i]}}return null}
 function dcOpenEdit(id){const f=dcFind(id);if(!f)return;DC_EDIT=f;const x=f.x,g=dcGrade(x);
-  $("dcdName").value=x.n;$("dcdYr").value=x.yr||"";$("dcdType").querySelector('[value="tr"]').hidden=DC_SZN==="next";$("dcdType").value=dcIsTr(x)?"tr":x.t==="tr"?"ret":(x.t||"ret");$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdInj").checked=!!x.inj;$("dcdInjNote").value=x.injNote||"";$("dcdInjWrap").hidden=!x.inj;$("dcdRole").value=x.role||"";
+  $("dcdName").value=x.n;$("dcdYr").value=dcLeft(x)??"";$("dcdType").querySelector('[value="tr"]').hidden=DC_SZN==="next";$("dcdType").value=dcIsTr(x)?"tr":x.t==="tr"?"ret":(x.t||"ret");$("dcdWo").checked=!!x.wo;$("dcdCut").checked=!!x.cut;$("dcdInj").checked=!!x.inj;$("dcdInjNote").value=x.injNote||"";$("dcdInjWrap").hidden=!x.inj;$("dcdRole").value=x.role||"";
   $("dcdPos").innerHTML=[].concat(...Object.values(DC_SIDES)).map(k=>`<option value="${k}"${k===f.k?" selected":""}>${DC_OPT(k)}</option>`).join("");dcDepthOpts();
   $("dcdLink").innerHTML=`<option value="">Auto: ${g?esc(g.name)+" ("+g.k+")":"no match"}</option>`+DC_OURS.map(c=>`<option value="${esc(c.id)}"${x.link===c.id?" selected":""}>${esc(c.name)} · ${c.k} · ${fmt(c.grade)} ${c.letter}</option>`).join("")+`<option value="none"${x.link==="none"?" selected":""}>Not on a board</option>`;
   $("dcdLinkWrap").hidden=!DC_GRADES;
   $("dcdCard").hidden=!(g&&g.id);$("dcdCard").dataset.k=g?g.k:"";$("dcdCard").dataset.id=g?g.id:"";
   const d=$("dcDlg");try{d.showModal()}catch(e){d.setAttribute("open","")}}
 $("dcDlg").addEventListener("submit",e=>{e.preventDefault();const f=DC_EDIT;if(!f)return;const x=f.x,G=DCG();
-  x.n=$("dcdName").value.trim().replace(/\s+/g," ")||x.n;x.yr=$("dcdYr").value.trim();x.t=$("dcdType").value;x.wo=$("dcdWo").checked;x.cut=$("dcdCut").checked;x.inj=$("dcdInj").checked;x.injNote=x.inj?$("dcdInjNote").value.trim():"";x.role=$("dcdRole").value.trim().toUpperCase();if(DC_GRADES){const l=$("dcdLink").value;if(l)x.link=l;else delete x.link}
+  x.n=$("dcdName").value.trim().replace(/\s+/g," ")||x.n;{const v=$("dcdYr").value.trim();if(v==="")delete x.left;else if(+v!==dcLeft(x)||x.left!=null)x.left=+v}x.t=$("dcdType").value;x.wo=$("dcdWo").checked;x.cut=$("dcdCut").checked;x.inj=$("dcdInj").checked;x.injNote=x.inj?$("dcdInjNote").value.trim():"";x.role=$("dcdRole").value.trim().toUpperCase();if(DC_GRADES){const l=$("dcdLink").value;if(l)x.link=l;else delete x.link}
   ["yr","role"].forEach(k=>{if(!x[k])delete x[k]});if(!x.wo)delete x.wo;if(!x.cut)delete x.cut;if(!x.inj)delete x.inj;if(!x.injNote)delete x.injNote;
   const to=$("dcdPos").value,at=Math.max(0,(+$("dcdDepth").value||1)-1);G[f.k].splice(f.i,1);(G[to]=G[to]||[]).splice(Math.min(at,G[to].length),0,x);
   $("dcDlg").close();drawDepth();dcSave()});
@@ -3123,7 +3126,7 @@ async function printDepth(){if(!window.jspdf||!window.jspdf.jsPDF){flash("The pr
     const tw=w-(cut?20:10)-(t.inj?10:0);
     doc.setFont("helvetica","bold");doc.setFontSize(fs);doc.setTextColor(27,30,36);const nm=doc.splitTextToSize(T(label),tw)[0]||"";doc.text(nm,x+6,y+fs+2);
     if(t.inj)cross(x+7+doc.getTextWidth(nm),y+3,fs);
-    const sub=[t.yr,t.role&&t.role!==k?t.role:"",t.inj&&t.injNote?"Inj: "+t.injNote:""].filter(Boolean).join(" · ");
+    const sub=[dcLeftTxt(t),t.role&&t.role!==k?t.role:"",t.inj&&t.injNote?"Inj: "+t.injNote:""].filter(Boolean).join(" · ");
     doc.setFont("helvetica","normal");doc.setFontSize(fs-1.3);doc.setTextColor(90,96,107);const sl=doc.splitTextToSize(T(sub),tw-(g?34:0))[0]||"";doc.text(sl,x+6,y+fs*2.2+2);
     if(g){doc.setFont("helvetica","bold");doc.setFontSize(fs-.8);doc.setTextColor(...(TIERRGB[g.tier]||[27,30,36]));doc.text(T(`${fmt(g.grade)} ${g.letter}`),x+w-(cut?16:5),y+fs*2.2+2,{align:"right"})}};
   const legend=()=>{const ly=PH-18;let lx=40;doc.setFont("helvetica","normal");doc.setFontSize(7.5);
