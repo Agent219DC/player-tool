@@ -325,7 +325,7 @@ select.qsel{width:auto;display:inline-block;font:500 12px var(--body);padding:2p
 #overview tr.go{cursor:pointer}
 #overview tr.go:hover td{background:var(--sunk)}
 .need{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
-#ovTbl .chip{font-size:10.5px;padding:2px 7px} #ovTbl td:nth-child(3),#ovTbl td:nth-child(6){white-space:normal;min-width:150px} #ovTbl tr.ovfirst td{border-top:2px solid var(--line)} #ovTbl tbody tr.ovfirst:first-child td{border-top:0} .need-High{color:var(--pass)} .need-Upgrade{color:var(--rotation)} .need-Set{color:var(--impact)}
+#ovTbl .chip{font-size:10.5px;padding:2px 7px} #ovTbl td:nth-child(3),#ovTbl td:nth-child(6){white-space:normal;min-width:150px} #ovTbl tr.ovfirst td{border-top:2px solid var(--line)} #ovTbl tbody tr.ovfirst:first-child td{border-top:0} .need-High{color:#fff;background:var(--pPass);border-color:var(--pPass)} .need-Upgrade{color:var(--rotation)} .need-Set{color:var(--impact)}
 .meta{font-size:11px;margin-top:2px;opacity:.8}
 
 
@@ -2015,7 +2015,7 @@ async function printOverview(){
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
   const L=x=>x.r.letter.replace("−","-");
-  const NEEDRGB={High:[176,58,46],Upgrade:[176,122,18],Set:[19,122,79]};
+  const NEEDRGB={High:[204,0,24],Upgrade:[176,122,18],Set:[19,122,79]};
   /* field layout: one card per starting spot, placed where it lines up */
   const F=OV_FIELD[OV_SIDE],spots=ovSpots(OV_SIDE,rows),H=doc.internal.pageSize.getHeight();
   const T=t=>String(t).replace(/[−–]/g,"-");
@@ -2759,7 +2759,7 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
   pdfHeader(doc,"Roster Lab · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
-  const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[15,115,73]};
+  const NEEDRGB={High:[204,0,24],Upgrade:[143,93,8],Set:[15,115,73]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
     styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
