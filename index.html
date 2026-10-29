@@ -4219,9 +4219,10 @@ if(window.claude&&claude.use) connect(); else {subscribe();startTabs()}
    Prospects live in Firestore "hs_players" (staff read/write under the existing *_players rule).
    Settings live in "config/hs" (staff read, owner write). No player data is ever stored in this file. */
 window.HS=(()=>{
-const POS=["QB","RB","WR","TE","OL","DT","DE","ILB","OLB","SAF","NIC","CB"];
-const OFF=new Set(["QB","RB","WR","TE","OL"]);
-const GROUP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"DB",NIC:"DB",CB:"DB"};
+/* OL is split into IOL and OT; "OL" stays only for prospects nobody has tagged yet (hidden once none are left) */
+const POS=["QB","RB","WR","TE","IOL","OT","OL","DT","DE","ILB","OLB","SAF","NIC","CB"];
+const OFF=new Set(["QB","RB","WR","TE","IOL","OT","OL"]);
+const GROUP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",IOL:"OL",OT:"OL",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"DB",NIC:"DB",CB:"DB"};
 const STATUSES=["Signed","Committed","Offered","Committed elsewhere","Target","Evaluating","Pass"];
 const isCom=st=>st==="Committed"||st==="Signed";
 /* a realistic target: not ours yet, not gone, and no P4 offer (we won't win those) */
@@ -4266,7 +4267,8 @@ const DEF={
     DB:{t10:[1.79,1.64],t40:[4.93,4.50],shuttle:[4.53,4.10],cone:[7.28,6.97],vert:[25.9,34.9],broad:[108,110],m100:[11.59,11.04]}},
   cuts:{elite:90,impact:80,starter:70,rotation:60},useOutside:true,needs:{}
 };
-const NEED_DEF={QB:1,RB:2,WR:4,TE:2,OL:5,DT:2,DE:2,ILB:2,OLB:1,SAF:2,NIC:1,CB:3};
+const NEED_DEF={QB:1,RB:2,WR:4,TE:2,IOL:3,OT:2,OL:0,DT:2,DE:2,ILB:2,OLB:1,SAF:2,NIC:1,CB:3};
+["traits","filmW","testWt"].forEach(k=>{["IOL","OT"].forEach(p=>{if(DEF[k][p]==null)DEF[k][p]=JSON.parse(JSON.stringify(DEF[k].OL))})});
 let REFRESH=false,CFG=JSON.parse(JSON.stringify(DEF)),ROWS=[],DBX=null,UNSUB=null,POSF=null,SORT={k:"commit",d:1},BIGSIDE="all",BIGVIEW="list",TBSIDE="off",TBS=null,TB_SRT=[],TB_DRAG=0,TB_BUSY=false,LAST_LIST=[],PICKH=new Set(),OPEN=null,ME_=null;
 try{POSF=JSON.parse(localStorage.getItem("hs_pos")||"null");BIGVIEW=localStorage.getItem("hs_bbv")||"list";TBSIDE=localStorage.getItem("hs_tbside")||"off"}catch(e){}
 const q=id=>document.getElementById(id);
@@ -4277,6 +4279,7 @@ const toast=m=>{try{flash(m)}catch(e){}};
 const isOwner=()=>{try{return !!OWNER}catch(e){return false}};
 async function me(){if(ME_)return ME_;try{ME_=await whoAmI()}catch(e){ME_={id:"",name:""}}return ME_}
 function mergeCfg(c){const o=JSON.parse(JSON.stringify(DEF));if(!c)return o;
+  c=JSON.parse(JSON.stringify(c));["traits","filmW","testWt"].forEach(k=>{const m=c[k];if(m&&m.OL!=null)["IOL","OT"].forEach(p=>{if(m[p]==null)m[p]=JSON.parse(JSON.stringify(m.OL))})});
   if(Array.isArray(c.traitW)&&c.traitW.length===4)o.traitW=c.traitW.map(Number);
   if(c.testWt)POS.forEach(p=>{if(c.testWt[p])o.testWt[p]=Object.assign({},o.testWt[p],c.testWt[p])});
   ["traits","filmW"].forEach(k=>{if(c[k])POS.forEach(p=>{if(c[k][p]!=null)o[k][p]=c[k][p]})});
@@ -4342,7 +4345,7 @@ async function saveRow(id,data){if(!DBX){toast("Not connected to the shared boar
 function classes(){const s=new Set(ROWS.map(r=>String(r.cls||"")).filter(Boolean));return [...s].sort()}
 function fillSelect(el,opts,cur,all){el.innerHTML=`<option value="">${all}</option>`+opts.map(o=>`<option${o===cur?" selected":""}>${e_(o)}</option>`).join("");el.value=cur||""}
 function posBar(){const el=q("hsPosBar");const cnt=p=>ROWS.filter(r=>r.pos===p).length;
-  el.innerHTML=`<button type="button" data-hp="" aria-pressed="${!POSF}">All <span class="sub">${ROWS.length}</span></button>`+POS.map(p=>`<button type="button" data-hp="${p}" aria-pressed="${POSF===p}">${p}${cnt(p)?` <span class="sub">${cnt(p)}</span>`:""}</button>`).join("")}
+  el.innerHTML=`<button type="button" data-hp="" aria-pressed="${!POSF}">All <span class="sub">${ROWS.length}</span></button>`+POS.filter(p=>p!=="OL"||cnt(p)||POSF==="OL").map(p=>`<button type="button" data-hp="${p}" aria-pressed="${POSF===p}">${p}${cnt(p)?` <span class="sub">${cnt(p)}</span>`:""}</button>`).join("")}
 function rowsFor(list){return list.map(r=>({r,s:scoreOf(r)}))}
 function ftag(o){if(!o)return"";const T=TIMING[o.timing]||TIMING.listed;return `<span class="hs-tag ${T.cls}" title="${e_(T.n+(o.src?" · "+o.src:"")+(o.date?" · "+o.date:""))}">${T.tag}</span>`}
 function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"t40"),id=e_(r.id),L=s.score!=null?letter(s.score):"–";
@@ -4383,7 +4386,7 @@ function renderBig(){const tags=BIGVIEW==="tags";q("hsTbWrap").hidden=!tags;q("h
   q("hsBigTbl").innerHTML=HEAD(true).replace(/ data-k="[a-z0-9]+"/g,"")+`<tbody>${L.map((x,i)=>boardRow(x,i+1)).join("")||`<tr><td colspan="15" class="sub">Nobody graded yet. A prospect joins this list once a coach grades his film. Until then, rank by hand in Big board → By position.</td></tr>`}</tbody>`}
 
 /* ---------- prospect board: drag tags to rank each position (mirrors the portal board). Order is saved as hsRank on each prospect ---------- */
-const TB_OFF=["QB","RB","WR","TE","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","CB"];
+const TB_OFF=["QB","RB","WR","TE","IOL","OT","OL"],TB_DEF=["DT","DE","ILB","OLB","SAF","CB"];
 function tbOrder(a,b){const ra=a.r.hsRank,rb=b.r.hsRank;if(ra!=null&&rb!=null)return ra-rb;if(ra!=null)return -1;if(rb!=null)return 1;return commitOrder(a,b)}
 function buildTags(){const cl=q("hsTbClass").value,sh=q("hsTbShow").value;const cols={};POS.forEach(k=>cols[k]=[]);
   rowsFor(ROWS.filter(r=>r.id&&POS.includes(r.pos)&&(isCom(r.status)||isTgt(r))&&(!cl||String(r.cls)===cl)&&(!sh||(sh==="star"?r.star:sh==="Committed"?isCom(r.status):r.status===sh)))).forEach(x=>cols[x.r.pos].push(x));
@@ -4397,7 +4400,7 @@ function tagHS(k,x,i){const r=x.r,s=x.s,t=tierOfHS(s.score);
 function renderTags(){if(TB_BUSY)return;fillSelect(q("hsTbClass"),classes(),q("hsTbClass").value,"All classes");TBS=buildTags();
   const n=Object.values(TBS).reduce((a,l)=>a+l.length,0),cm=Object.values(TBS).reduce((a,l)=>a+l.filter(x=>isCom(x.r.status)).length,0);
   q("hsTbCount").textContent=`${n} prospect${n===1?"":"s"} · ${cm} commit${cm===1?"":"s"}`;drawTags()}
-function drawTags(){TB_SRT.forEach(x=>{try{x.destroy()}catch(e){}});TB_SRT=[];const keys=TBSIDE==="def"?TB_DEF:TB_OFF;const el=q("hsTbCols");
+function drawTags(){TB_SRT.forEach(x=>{try{x.destroy()}catch(e){}});TB_SRT=[];const keys=(TBSIDE==="def"?TB_DEF:TB_OFF).filter(k=>k!=="OL"||(TBS.OL||[]).length);const el=q("hsTbCols");
   el.style.gridTemplateColumns=`repeat(${keys.length},minmax(175px,1fr))`;
   el.innerHTML=keys.map(k=>{const L=TBS[k]||[],c=L.filter(x=>isCom(x.r.status)).length;
     return `<div class="tb-col"><h3>${k}<span class="sub">${L.length}${c?` · ${c} commit${c===1?"":"s"}`:""}</span></h3><div class="tb-list" data-tbk="${k}">${L.length?L.map((x,i)=>tagHS(k,x,i)).join(""):`<div class="tb-empty">No prospects</div>`}</div></div>`}).join("");
@@ -4478,8 +4481,10 @@ function openCompare(){const L=LAST_LIST.filter(x=>PICKH.has(x.r.id));if(L.lengt
 /* ---------- needs by position ---------- */
 function needCls(){const cs=classes();const sel=q("hsNeedClass").value;if(sel)return sel;const c=ROWS.filter(r=>isCom(r.status)).map(r=>String(r.cls));
   const by={};c.forEach(x=>by[x]=(by[x]||0)+1);return Object.keys(by).sort((a,b)=>by[b]-by[a])[0]||cs[0]||String(new Date().getFullYear()+1)}
-function needsFor(cl){const n=(CFG.needs||{})[cl]||{};const o={};POS.forEach(p=>o[p]=n[p]!=null?+n[p]:NEED_DEF[p]);return o}
-function needData(cl){const N=needsFor(cl);return POS.map(p=>{const L=rowsFor(ROWS.filter(r=>r.pos===p&&String(r.cls)===cl));
+function needsFor(cl){const n=Object.assign({},(CFG.needs||{})[cl]||{});
+  /* a class saved before the split: its OL number is shared 60/40 between IOL and OT */
+  if(n.OL!=null&&n.IOL==null&&n.OT==null){const t=+n.OL||0;n.IOL=Math.ceil(t*0.6);n.OT=t-n.IOL;n.OL=0}const o={};POS.forEach(p=>o[p]=n[p]!=null?+n[p]:NEED_DEF[p]);return o}
+function needData(cl){const N=needsFor(cl);return POS.filter(p=>p!=="OL"||ROWS.some(r=>r.pos==="OL"&&String(r.cls)===cl)).map(p=>{const L=rowsFor(ROWS.filter(r=>r.pos===p&&String(r.cls)===cl));
   const com=L.filter(x=>isCom(x.r.status)).sort(commitOrder),tgt=L.filter(x=>isTgt(x.r)).sort(tbOrder);
   const off=L.filter(x=>x.r.status==="Offered").length,left=N[p]-com.length;return {p,need:N[p],com,tgt,off,left}})}
 function needStatus(d){return d.left>0?`<span class="need-open">Need ${d.left}</span>`:d.left<0?`<span class="need-over">Over by ${-d.left}</span>`:`<span class="need-full">Full</span>`}
@@ -4548,8 +4553,8 @@ async function printRec(){if(!pdfOk())return;const doc=new window.jspdf.jsPDF({o
   await pdfSave(doc,`HS recruiting ${new Date().toISOString().slice(0,10)}.pdf`)}
 
 /* ---------- next-season depth chart hookup: HS commits and signees for next season's class ---------- */
-const DC_SPOT={QB:"QB",RB:"RB",TE:"TE",WR:"WRP",OL:"OLP",DT:"DLP",DE:"DLP",ILB:"LBP",OLB:"LBP",SAF:"DBP",NIC:"DBP",CB:"DBP"};
-const DC_GRP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"SAF",NIC:"NIC",CB:"CB"};
+const DC_SPOT={QB:"QB",RB:"RB",TE:"TE",WR:"WRP",IOL:"OLP",OT:"OLP",OL:"OLP",DT:"DLP",DE:"DLP",ILB:"LBP",OLB:"LBP",SAF:"DBP",NIC:"DBP",CB:"DBP"};
+const DC_GRP={QB:"QB",RB:"RB",WR:"WR",TE:"TE",IOL:"OL",OT:"OL",OL:"OL",DT:"DT",DE:"DE",ILB:"LB",OLB:"LB",SAF:"SAF",NIC:"NIC",CB:"CB"};
 function chartCommits(){const cls=String((typeof CUR_SEASON!=="undefined"?CUR_SEASON:new Date().getFullYear())+1);
   return ROWS.filter(r=>isCom(r.status)&&String(r.cls)===cls&&POS.includes(r.pos)).map(r=>({id:r.id,name:r.name,pos:r.pos,spot:DC_SPOT[r.pos],grp:DC_GRP[r.pos],status:r.status}))}
 
@@ -4740,11 +4745,11 @@ function setOwnerUi(){const own=isOwner();q("hsOwnerBtns").hidden=!own;q("hsImpo
   q("hsSetNote").textContent=own?"Changes apply for the whole staff.":"Only the owner can change these.";
   q("hsset").querySelectorAll("input:not([type=file]),select").forEach(el=>el.disabled=!own)}
 function renderSet(){
-  q("hsTraitTbl").innerHTML=`<thead><tr><th>Pos</th><th>Trait 1</th><th>Trait 2</th><th>Trait 3</th><th>Trait 4</th><th class="num">Film share %</th></tr></thead><tbody>${POS.map(p=>`<tr><td><b>${p}</b></td>${[0,1,2,3].map(i=>`<td><input data-tr="${p}" data-i="${i}" value="${e_(CFG.traits[p][i]||"")}"></td>`).join("")}<td><input type="number" data-fw="${p}" value="${CFG.filmW[p]}" min="0" max="100" style="width:80px"></td></tr>`).join("")}</tbody>`;
+  q("hsTraitTbl").innerHTML=`<thead><tr><th>Pos</th><th>Trait 1</th><th>Trait 2</th><th>Trait 3</th><th>Trait 4</th><th class="num">Film share %</th></tr></thead><tbody>${POS.map(p=>`<tr><td><b>${p}</b>${p==="OL"?' <span class="sub">untagged</span>':""}</td>${[0,1,2,3].map(i=>`<td><input data-tr="${p}" data-i="${i}" value="${e_(CFG.traits[p][i]||"")}"></td>`).join("")}<td><input type="number" data-fw="${p}" value="${CFG.filmW[p]}" min="0" max="100" style="width:80px"></td></tr>`).join("")}</tbody>`;
   q("hsTraitW").value=CFG.traitW.join(", ");
   const WK=["t10","t40","shuttle","cone","vert","broad"];
   q("hsTestWTbl").innerHTML=`<thead><tr><th>Pos</th>${WK.map(k=>`<th class="num">${TEST[k].n}</th>`).join("")}<th class="num">Total</th></tr></thead><tbody>${POS.map(p=>{const W=CFG.testWt[p]||{};const t=WK.reduce((a,k)=>a+(+W[k]||0),0);
-    return `<tr><td><b>${p}</b></td>${WK.map(k=>`<td><input type="number" min="0" max="100" step="5" data-tw="${p}" data-tk="${k}" value="${W[k]??0}" style="width:70px"></td>`).join("")}<td class="num${t===100?"":" sub"}" data-twt="${p}">${t}</td></tr>`}).join("")}</tbody>`;
+    return `<tr><td><b>${p}</b>${p==="OL"?' <span class="sub">untagged</span>':""}</td>${WK.map(k=>`<td><input type="number" min="0" max="100" step="5" data-tw="${p}" data-tk="${k}" value="${W[k]??0}" style="width:70px"></td>`).join("")}<td class="num${t===100?"":" sub"}" data-twt="${p}">${t}</td></tr>`}).join("")}</tbody>`;
   const groups=["QB","RB","WR","TE","OL","DT","DE","LB","DB"];
   q("hsBenchTbl").innerHTML=`<thead><tr><th>Group</th>${TKEYS.map(k=>`<th class="num">${TEST[k].n}<div class="sub">70 / 100</div></th>`).join("")}</tr></thead><tbody>${groups.map(g=>`<tr><td><b>${g}</b></td>${TKEYS.map(k=>{const b=(CFG.bench[g]||{})[k]||[];return `<td><input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="0" value="${b[0]??""}" style="width:72px"> <input type="number" step="0.01" data-bg="${g}" data-bk="${k}" data-bi="1" value="${b[1]??""}" style="width:72px"></td>`}).join("")}</tr>`).join("")}</tbody>`;
   q("hsCutE").value=CFG.cuts.elite;q("hsCutI").value=CFG.cuts.impact;q("hsCutS").value=CFG.cuts.starter;q("hsCutR").value=CFG.cuts.rotation;q("hsUseOut").checked=CFG.useOutside!==false;setOwnerUi()}
