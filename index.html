@@ -31,7 +31,7 @@
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
-  --tElite:#be185d; --tEliteFill:#db2777; --cHigh:#0f7349; --cFlag:#0e7490; --tImpact:#0f766e; --tStarter:#15803d; --tRotation:#c2410c; --tPass:#cc0018; --cMed:#7d6300;
+  --tElite:#be185d; --tEliteFill:#db2777; --cHigh:#0f7349; --cFlag:#0e7490; --tImpact:#0f766e; --tStarter:#3f7d14; --tRotation:#c2410c; --tPass:#cc0018; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,12 +40,12 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --cHigh:#4fdb9c; --cFlag:#22d3ee; --tImpact:#2dd4bf; --tStarter:#4ade80; --tRotation:#fdba74; --tPass:#ff4757; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --cHigh:#4fdb9c; --cFlag:#22d3ee; --tImpact:#2dd4bf; --tStarter:#8fdc5a; --tRotation:#fdba74; --tPass:#ff4757; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --cHigh:#4fdb9c; --cFlag:#22d3ee; --tImpact:#2dd4bf; --tStarter:#4ade80; --tRotation:#fdba74; --tPass:#ff4757; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --cHigh:#4fdb9c; --cFlag:#22d3ee; --tImpact:#2dd4bf; --tStarter:#8fdc5a; --tRotation:#fdba74; --tPass:#ff4757; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
@@ -133,6 +133,9 @@ body.scrolled header .mulogo{width:32px;height:32px}
 @media (max-width:640px){header .mulogo{width:34px;height:34px}}
 @media (min-width:900px){header .brand>.mulogo,header .brand>.mudiv{display:none!important}}
 .rl-tri{display:none}body.mode-gm .rl-tri{display:inline}body.mode-gm .rl-liq{display:none}
+#recTbl td.num,#recTbl td.num :is(b,button,span){font-size:14px}
+@media (min-width:900px){h2.dup{display:none}}
+.sgrp .grid2>label{justify-content:space-between}
 svg.brandlogo .rl-liq{fill:var(--accent)}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
 .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pos{display:flex;flex-wrap:wrap;gap:6px}
@@ -412,6 +415,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 @media (max-width:640px){.dc-key{grid-template-columns:1fr 1fr}}
 .dc-keywrap{display:flex;flex-wrap:wrap;gap:6px 28px;align-items:flex-start}
 
+dialog#visDlg{width:min(440px,calc(100% - 32px));padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}dialog#visDlg::backdrop{background:rgba(10,12,16,.5)}.dcd .vd-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 dialog#dcDlg{width:min(420px,calc(100% - 32px));padding:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
 dialog#dcDlg::backdrop{background:rgba(10,12,16,.5)}
 .dcd{display:grid;gap:10px;padding:18px}.dcd h3{margin:0;font:700 18px var(--display)}
@@ -496,6 +500,15 @@ button,input,select,textarea{font-family:inherit}
 .bud-g .ft{margin-top:6px;font-size:12px;color:var(--muted)}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
 @media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
+/* computers: Big board position columns wrap onto a second row instead of squeezing */
+@media (min-width:901px){#tbCols,#hsTbCols{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))!important;overflow-x:visible;align-items:start}}
+#pvisits{display:grid;gap:10px}
+#ownerTools{order:2}
+/* phones: less chrome above the first player */
+@media (max-width:640px){.wrap{gap:14px}#posBar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}#posBar::-webkit-scrollbar{display:none}#posBar>*{flex:none}}
+@media (min-width:900px){#hsTbl td,#hsTbl th{padding-left:5px;padding-right:5px}#hsTbl .stag{font-size:10.5px}#hsTbl td.cst,#hsTbl td.cof{white-space:normal}}
+/* touch screens: bigger targets for stars and move arrows */
+@media (pointer:coarse){.tag .mv{gap:6px}.tag .mv button{font-size:13px;padding:8px 11px;border-radius:6px}}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
 #recTbl td.num button:hover{background:var(--sunk)}
 #recTbl tr.tot td{font-weight:700;border-top:2px solid var(--line)}
@@ -913,7 +926,7 @@ window.claude={use:async n=>{
 
   <section id="bigboard" data-page="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">By position</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2 class="dup">Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="true">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="false">By position</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="bbPrint" disabled>Print</button></span>
     </div>
     <div class="bbctl">
@@ -928,7 +941,7 @@ window.claude={use:async n=>{
 
   <section id="tagboard" data-page="bigboard" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">By position</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2 class="dup">Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-bbview="list" aria-pressed="false">Ranked list</button><button type="button" data-bbview="tags" aria-pressed="true">By position</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Side"><button type="button" data-tbside="off" aria-pressed="true">Offense</button><button type="button" data-tbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="tbPrint" disabled>Print</button></span>
     </div>
     <div class="tb-cols" id="tbCols"></div>
@@ -937,25 +950,25 @@ window.claude={use:async n=>{
 
   <section id="recruit" data-page="recruit" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2>Roster needs</h2>
+      <h2 class="dup">Roster needs</h2>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn" type="button" id="recPrint" disabled>Print</button></span>
     </div>
     <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
+    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Total</b> adds up only the positions with room; positions over their max (red) aren't subtracted, so it can differ from the roster count above. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
   </section>
 
   <section id="pvisits" data-page="pvisits" class="pg-off">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <h2>Visits</h2>
-      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span><button class="btn" type="button" id="visPrint" disabled>Print</button></span>
+      <h2 class="dup">Visits</h2>
+      <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn primary" type="button" id="visAdd">+ Add visit</button><span class="seg" role="group" aria-label="Which visits"><button type="button" data-vm="up" aria-pressed="true">Upcoming</button><button type="button" data-vm="all" aria-pressed="false">All visits</button></span><button class="btn" type="button" id="visPrint" disabled>Print</button></span>
     </div>
-    <div id="visitList"></div>
+    <div class="tablewrap"><table id="visitList"></table></div>
   </section>
 
   <section id="depth" data-page="depth" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2 class="dup">Depth chart</h2><span class="seg" role="group" aria-label="Season"><button type="button" data-dcszn="now" aria-pressed="false">This season</button><button type="button" data-dcszn="next" aria-pressed="true">Next season</button></span><span class="seg" role="group" aria-label="Side"><button type="button" data-dcside="off" aria-pressed="true">Offense</button><button type="button" data-dcside="def" aria-pressed="false">Defense</button><button type="button" data-dcside="st" aria-pressed="false">Special teams</button></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="sub" id="dcMeta" style="font-size:12.5px"></span><button class="btn" type="button" id="dcAddHs" hidden>Add HS commits</button><button class="btn" type="button" id="dcPrint">Print</button></span>
     </div>
     <div class="dc-roster" id="dcRosterWrap"><div id="dcRoster"></div></div>
@@ -967,14 +980,14 @@ window.claude={use:async n=>{
   </section>
 
   <section id="sbc" data-page="sbc" hidden style="display:grid;gap:12px">
-    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px"><span><h2>Sun Belt snapshot</h2><span class="sub" id="sbcMeta" style="font-size:12.5px"></span></span>
+    <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px"><span><h2 class="dup">Sun Belt snapshot</h2><span class="sub" id="sbcMeta" style="font-size:12.5px"></span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="sbcEdit">Edit records</button><button class="btn" type="button" id="sbcPrint">Print</button></span></div>
     <div id="sbcBody"><p class="sub">Loading…</p></div>
   </section>
 
   <section id="budget" data-page="budget" hidden>
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px">
-      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
+      <span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2 class="dup">Budget</h2><span class="stag" style="margin-left:0">Only you can see this</span></span>
       <span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="seg" role="group" aria-label="Show amounts as"><button type="button" data-budmo="0" aria-pressed="true">Per year</button><button type="button" data-budmo="1" aria-pressed="false">Per month</button></span><button class="btn" type="button" id="budPrint">Print</button></span>
     </div>
     <div id="budBody"></div>
@@ -1109,7 +1122,7 @@ window.claude={use:async n=>{
 
   <section id="hsboard" data-page="hsboard" style="display:grid;gap:10px">
     <div class="hs-top">
-      <h2>Prospects</h2>
+      <h2 class="dup">Prospects</h2>
       <span class="btns"><button class="btn primary" type="button" id="hsAdd">+ Add prospect</button></span>
     </div>
     <details class="hs-queue" id="hsQueue" hidden></details>
@@ -1130,7 +1143,7 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
-    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2>Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">By position</button></span></span>
+    <div class="hs-top"><span style="display:flex;flex-wrap:wrap;gap:12px;align-items:center"><h2 class="dup">Big board</h2><span class="seg" role="group" aria-label="Big board view"><button type="button" data-hsview="list" aria-pressed="true">Ranked list</button><button type="button" data-hsview="tags" aria-pressed="false">By position</button></span></span>
       <span class="btns" id="hsTbBtns" hidden><span class="seg" role="group" aria-label="Side"><button type="button" data-hstbside="off" aria-pressed="true">Offense</button><button type="button" data-hstbside="def" aria-pressed="false">Defense</button></span><button class="btn" type="button" id="hsTbPrint">Print</button></span></div>
     <div id="hsTbWrap" hidden style="display:grid;gap:10px">
       <div class="hs-ctl"><select id="hsTbClass" aria-label="Class"></select>
@@ -1154,31 +1167,31 @@ window.claude={use:async n=>{
   </section>
 
   <section id="hsrec" data-page="hsrec" style="display:grid;gap:10px">
-    <div class="hs-top"><h2>Visits &amp; offers</h2><span class="btns"><span class="seg" role="group" aria-label="Group by"><button type="button" data-hsrg="recruiter" aria-pressed="true">By recruiter</button><button type="button" data-hsrg="posCoach" aria-pressed="false">By position coach</button></span><button class="btn" type="button" id="hsRecPrint">Print</button></span></div>
+    <div class="hs-top"><h2 class="dup">Visits</h2><span class="btns"><button class="btn primary" type="button" id="hsVisAdd">+ Add visit</button><span class="seg" role="group" aria-label="Which visits"><button type="button" data-hsvm="up" aria-pressed="true">Upcoming</button><button type="button" data-hsvm="all" aria-pressed="false">All visits</button></span><button class="btn" type="button" id="hsRecPrint">Print</button></span></div>
+    <div class="tablewrap"><table id="hsVisitTbl"></table></div>
+    <div class="hs-top" style="margin-top:6px"><h2 style="font-size:18px">Recruiters</h2><span class="btns"><span class="seg" role="group" aria-label="Group by"><button type="button" data-hsrg="recruiter" aria-pressed="true">By recruiter</button><button type="button" data-hsrg="posCoach" aria-pressed="false">By position coach</button></span></span></div>
     <div class="tablewrap"><table id="hsRecTbl"></table></div>
     <p class="note">Commits and realistic targets (no P4 offer, not committed elsewhere). Set a prospect's recruiter, position coach, offer date and visits on his card. Tap a name for his card.</p>
-    <div class="hs-top" style="margin-top:6px"><h2 style="font-size:18px">Visit calendar</h2><span class="seg" role="group" aria-label="Which visits"><button type="button" data-hsvm="up" aria-pressed="true">Upcoming</button><button type="button" data-hsvm="all" aria-pressed="false">All visits</button></span></div>
-    <div class="tablewrap"><table id="hsVisitTbl"></table></div>
   </section>
 
   <section id="hsset" data-page="settings" class="hs-set" style="display:grid;gap:14px">
-    <div class="hs-top"><h2>HS settings</h2><span class="sub" id="hsSetNote"></span></div>
-    <details class="settings" open><summary><h2 style="font-size:18px">Film traits and blend</h2></summary>
+    <details class="settings" open><summary>High school model</summary><div class="setbody"><span class="sub" id="hsSetNote"></span>
+    <details class="sgrp"><summary>Film traits and blend</summary>
       <p class="note">Four traits per position in order of importance, graded 1–10 (7 = Marshall starter trait). Film share is how much of the score comes from film; the rest is testing.</p>
       <div class="tablewrap"><table id="hsTraitTbl"></table></div>
       <div class="grid2" style="margin-top:10px;max-width:520px">
         <label>Trait weights (most to least important)<input id="hsTraitW" type="text"></label>
       </div>
     </details>
-    <details class="settings" open><summary><h2 style="font-size:18px">Testing weights by position</h2></summary>
+    <details class="sgrp"><summary>Testing weights by position</summary>
       <p class="note">How much each test counts by position (rows add to 100). Results count by reliability: laser 100%, hand 85%, GPS 70%, listed 40%; a 100m for the 40 or results over 18 months old count less. Thin testing shifts weight to film.</p>
       <div class="tablewrap"><table id="hsTestWTbl"></table></div>
     </details>
-    <details class="settings" open><summary><h2 style="font-size:18px">Testing benchmarks</h2></summary>
+    <details class="sgrp"><summary>Testing benchmarks</summary>
       <p class="note"><b>70</b> = Marshall roster median, <b>100 mark</b> = roster best (Tracking Football HS data). Scores ease off above 90, so matching the best lands near 95.</p>
       <div class="tablewrap"><table id="hsBenchTbl"></table></div>
     </details>
-    <details class="settings" open><summary><h2 style="font-size:18px">Grade cutoffs</h2></summary>
+    <details class="sgrp"><summary>Grade cutoffs</summary>
       <div class="grid2" style="max-width:640px">
         <label>Elite at<input id="hsCutE" type="number" step="1"></label>
         <label>Impact at<input id="hsCutI" type="number" step="1"></label>
@@ -1189,15 +1202,16 @@ window.claude={use:async n=>{
       <label class="check"><input type="checkbox" id="hsUseOut"> When a prospect has no usable testing, estimate it from Tracking Football's vs. Marshall percentile (50th = 70, 100th = 100)</label>
     </details>
     <div class="btns" id="hsOwnerBtns"><button class="btn primary" type="button" id="hsSaveCfg">Save settings</button><button class="btn" type="button" id="hsResetCfg">Reset to defaults</button></div>
-    <details class="settings" id="hsImportBox"><summary><h2 style="font-size:18px">Import prospects</h2></summary>
+    <details class="sgrp" id="hsImportBox"><summary>Import prospects</summary>
       <p class="note">Load a Tracking Football / NextGen file (.json). New players are added and existing ones refreshed; staff edits (film, notes, positions, statuses, corrections) are never overwritten.</p>
       <div class="btns"><input type="file" id="hsImportFile" accept=".json,application/json" style="width:auto"><button class="btn" type="button" id="hsExport">Download all prospects (.json)</button></div>
       <p class="sub" id="hsImportMsg"></p>
     </details>
+    </div></details>
   </section>
 
   <details class="settings" id="modelSettings" data-page="settings" open>
-    <summary>Model settings</summary>
+    <summary>Portal model</summary>
     <div class="setbody">
       <label class="setpos">Position <select id="setPos" aria-label="Which position's model"></select></label>
       <p class="note" id="lockNote" hidden style="color:var(--rotation);font-weight:600">Only the owner can change these settings.</p>
@@ -1207,7 +1221,7 @@ window.claude={use:async n=>{
       </details>
       <details class="sgrp" data-sg="tiers"><summary>Sample, tiers &amp; levels</summary>
       <div class="grid2">
-        <label>Full-credit <span class="sw">dropbacks</span> per game<input id="s-dbpg" type="number" step="1"></label>
+        <label><span class="lt">Full-credit <span class="sw">dropbacks</span> per game</span><input id="s-dbpg" type="number" step="1"></label>
         <label>Games in full season<input id="s-season" type="number" step="1"></label>
         <label>Last-season weight<input id="s-pw" type="number" step="0.05" min="0" max="1"></label>
         <label>Impact Starter raw score (min)<input id="s-impact" type="number" step="1"></label>
@@ -1215,7 +1229,7 @@ window.claude={use:async n=>{
         <label>Rotation raw score (min)<input id="s-rot" type="number" step="1"></label>
         <label>Elite raw score (min)<input id="s-elite" type="number" step="1"></label>
         <label>Season gap that lowers confidence<input id="s-gap" type="number" step="1"></label>
-        <label>Min <span class="sw">dropbacks</span> per season for gap check<input id="s-mindb" type="number" step="5"></label>
+        <label><span class="lt">Min <span class="sw">dropbacks</span> per season for gap check</span><input id="s-mindb" type="number" step="5"></label>
         <label>P4 factor<input id="s-P4" type="number" step="0.01"></label>
         <label>G6 factor<input id="s-G6" type="number" step="0.01"></label>
         <label>FCS factor<input id="s-FCS" type="number" step="0.01"></label>
@@ -1615,6 +1629,8 @@ function buildPositionUI(){
   $("roleWrap").hidden=!P.roles; $("roleFilter").hidden=!P.roles;
   ROLEF="All"; document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"));
   $("posBar").innerHTML=ALL_POS.map(k=>`<button type="button" data-pos="${k}" aria-pressed="${k===POSKEY}"${POSITIONS[k]?"":" disabled title=\"Coming soon\""}>${k}</button>`).join("");
+  /* phones scroll the position row: keep the current position in view */
+  requestAnimationFrame(()=>{const bar=$("posBar"),b=bar.querySelector('[aria-pressed="true"]');if(b&&bar.scrollWidth>bar.clientWidth)bar.scrollLeft=b.offsetLeft-bar.offsetLeft-(bar.clientWidth-b.offsetWidth)/2});
 }
 $("posBar").addEventListener("click",e=>{const b=e.target.closest("[data-pos]");if(!b||b.disabled)return;switchPos(b.dataset.pos)});
 
@@ -1810,7 +1826,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
   $("v-score").hidden=false;$("scale").hidden=false;$("v-score").innerHTML=`${fmt(r.grade)}<small> ${r.letter}</small>`;
   $("v-name").textContent=p.name||P.unnamed;
   const lg=gradeScore(L.final), d=r.grade-lg;
-  $("v-sub").textContent=S.line.name?`${p.school||"School"} · ${p.level} · ${d>=0?"+":""}${fmt(d)} vs. ${S.line.name}, ${L.blended?(Number(S.line.season)-1)+"–"+String(S.line.season).slice(-2)+" blended":S.line.season} (${fmt(lg)} ${letterOf(lg)})`:`${p.school||"School"} · ${p.level} · no starter set in Model settings yet`;
+  {const t=vsOursTxt(p,r.grade);$("v-sub").textContent=`${p.school||"School"} · ${p.level}`+(t?` · ${t}`:"")}
   $("v-chips").innerHTML=`<span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>`
     +(r.split?`<span class="chip t-Pass">Seasons disagree</span>`:"")
     +(P.fcsNote&&p.level==="FCS"?`<span class="chip t-Rotation" title="${P.fcsNote.text}">Sep % vs. G6/P4 only</span>`:"")
@@ -1871,7 +1887,7 @@ function behindBy(p){const g=Number(p.thru);return S.mode==="mid"&&g&&String(p.s
 function seasonLabel(p){if(!p.season)return'<span class="sub">—</span>';const by=blendYr(p),bh=behindBy(p);return `${esc(p.season)}<span class="sub">${p.thru==="full"?" · Full":p.thru?" · Gm "+esc(String(p.thru)):""}${by?` + ${by}${p.prior.level&&p.prior.level!==p.level?" ("+esc(p.prior.level)+")":""}`:""}</span>${bh?` <span class="behind" title="His numbers are through game ${esc(String(p.thru))}; we've played ${tg()}. Update his PFF numbers.">${bh} behind</span>`:""}`}
 function fcsMark(p,i){return P.fcsNote&&p.level==="FCS"&&i===P.fcsNote.idx?"*":""}
 function htIn(h){if(!h)return null;const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);return m?(+m[1])*12+(+(m[2]||0)):null}
-function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);if(m&&+m[1]<4)return"";/* 0 or junk = unknown height */return m?`${m[1]}'${m[2]??0}"`:String(h)}
+function fmtHt(h){if(!h)return"";const m=String(h).match(/^\s*(\d)\s*(?:'|’|-|\s|ft)?\s*(\d{1,2})?/);if(m&&+m[1]<4)return"";/* 0 or junk = unknown height */return m?`${m[1]}'${m[2]!=null?+m[2]:0}"`:String(h)}
 function metaLine(p){const parts=[];if(p.updatedAt){const d=new Date(p.updatedAt);if(!isNaN(d))parts.push("Updated "+d.toLocaleDateString("en-US",{month:"short",day:"numeric"}))}const nm=p.addedBy&&NAMES[p.addedBy]&&NAMES[p.addedBy].name;if(nm)parts.push("by "+nm);return parts.join(" ")}
 function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+" confidence"];if(r.split)why.push("seasons disagree");if(r.partialM)why.push("3 of 4 metrics");const t=why.join(" · ");
   return `<span class="cflag c-${r.conf}" title="${t}" aria-label="${t}" role="img"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>${r.split||r.partialM?'<i>*</i>':""}</span>`}
@@ -1948,7 +1964,7 @@ const CONFRGB={High:[14,116,144],Medium:[125,99,0],Low:[198,40,40]};
 /* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
 function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
   doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
-const TIERRGB={Elite:[190,24,93],Impact:[15,118,110],Starter:[21,128,61],Rotation:[194,65,12],Pass:[204,0,24]};
+const TIERRGB={Elite:[190,24,93],Impact:[15,118,110],Starter:[63,125,20],Rotation:[194,65,12],Pass:[204,0,24]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(!rows.length)return;
@@ -2280,7 +2296,7 @@ async function renderOverview(){
   if(!DB){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The overview needs the shared board.</td></tr></tbody>';$("ovField").innerHTML='<p class="sub" style="grid-column:1/-1">The overview needs the shared board.</p>';return}
   const side=PREF.ovSide||sideOf(POSKEY);OV_SIDE=side;document.querySelectorAll("[data-ovside]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.ovside===side));OV_ROWS=[];$("ovPrint").disabled=true;
   const NEXT=OV_MODE==="next";
-  $("ovTitle").textContent=(side==="off"?"Offense":"Defense")+": starters vs. targets"+(NEXT?" · Next season":"");
+  $("ovTitle").textContent=(side==="off"?"Offense":"Defense")+" · "+(NEXT?"Next season":"This season");
   $("ovModeNote").hidden=!NEXT;
   const keys=ALL_POS.filter(k=>POSITIONS[k]&&sideOf(k)===side);
   if(!keys.length){$("ovTbl").innerHTML='<tbody><tr><td class="sub">The defensive overview will fill in once the defensive positions are built.</td></tr></tbody>';renderOvField(side,[]);return}
@@ -2525,7 +2541,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
   const st=p.status?`<span class="stag st-${esc(p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(p.status)}</span>`:"";
   const grade=r&&r.grade!=null?`<div class="pc-grade"><div class="score gtc-${r.tier}">${fmt(r.grade)}<small> ${r.letter}</small></div><div>
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
-      ${S.line.name&&!(isOurs(p)&&String(p.name).toLowerCase()===String(S.line.name).toLowerCase())?`<div class="sub" style="margin-top:8px">${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${esc(S.line.name)} (${fmt(lg)} ${letterOf(lg)})</div>`:""}
+      ${(t=>t?`<div class="sub" style="margin-top:8px">${esc(t)}</div>`:"")(vsOursTxt(p,r.grade))}
       <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div>${p.espnId?'<div class="pc-line" data-espnline></div>':""}</div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
   const mets=r?`<details class="pc-sec" open><summary><span>Metrics</span></summary><div class="sec-b"><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div></details>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
@@ -2692,9 +2708,31 @@ async function renderRecruit(){
   const sumG=f=>REC.hasChart?Object.values(REC.grp).filter(o=>o.open!=null).reduce((a,o)=>a+Math.max(0,f(o)),0):"–";
   const tot=t=>rows.reduce((a,r)=>a+(r.c[t]||0),0);
   $("recTbl").innerHTML=`<thead><tr><th>Pos</th><th class="num" title="Max at this position minus scholarship players on the Next season depth chart">Open</th><th class="num" title="Open spots minus Committed targets">Left</th><th class="num" title="Target + Contacted">Working</th><th class="num">Offered</th><th class="num">Committed</th><th class="num" title="Visits scheduled">Visits</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${r.k}</b></td>${sp(r.slot,r.g,r.k)}${cell(r.k,"working",r.c.working,r.noBoard)}${cell(r.k,"Offered",r.c.Offered,r.noBoard)}${cell(r.k,"Committed",r.c.Committed,r.noBoard)}<td class="num">${r.noBoard?'<span class="sub">–</span>':r.c.visits||'<span class="sub">0</span>'}</td></tr>`).join("")}
-    <tr class="tot"><td>Total</td><td class="num">${sumG(o=>o.open)}</td><td class="num">${sumG(o=>o.left)}</td><td class="num">${tot("working")}</td><td class="num">${tot("Offered")}</td><td class="num">${tot("Committed")}</td><td class="num">${tot("visits")}</td></tr></tbody>`;
+    <tr class="tot"><td title="Adds up the positions with room. Positions over their max (red) aren't subtracted; the line above has the whole roster count.">Total<div class="sub" style="font-weight:400;font-size:11px">spots with room</div></td><td class="num">${sumG(o=>o.open)}</td><td class="num">${sumG(o=>o.left)}</td><td class="num">${tot("working")}</td><td class="num">${tot("Offered")}</td><td class="num">${tot("Committed")}</td><td class="num">${tot("visits")}</td></tr></tbody>`;
   renderVisits();$("recPrint").disabled=false;$("visPrint").disabled=false;
 }
+/* + Add visit (portal and HS): pick a player, type and date */
+function visitDialog(o){let d=$("visDlg");if(d)d.remove();d=document.createElement("dialog");d.id="visDlg";d.setAttribute("aria-label",o.title);
+  d.innerHTML=`<form class="dcd" method="dialog"><h3>${esc(o.title)}</h3>
+    <label>${esc(o.who||"Player")}<input id="vdWho" list="vdList" placeholder="Start typing a name" autocomplete="off"></label><datalist id="vdList">${o.items.map(i=>`<option value="${esc(i.label)}">`).join("")}</datalist>
+    <div class="vd-row"><label>Type<select id="vdType">${o.types.map(t=>`<option>${esc(t)}</option>`).join("")}</select></label><label>Date<input id="vdDate" type="date"></label></div>
+    ${o.note?'<label>Note<input id="vdNote" type="text" placeholder="Optional"></label>':""}
+    <p class="sub" id="vdMsg" style="margin:0;min-height:1em"></p>
+    <div class="btns" style="justify-content:flex-end"><button class="btn" type="button" id="vdCancel">Cancel</button><button class="btn primary" type="submit" id="vdSave">Save visit</button></div></form>`;
+  document.body.appendChild(d);d.showModal();const msg=t=>{$("vdMsg").textContent=t};
+  $("vdCancel").onclick=()=>d.close();d.addEventListener("close",()=>d.remove());
+  d.querySelector("form").addEventListener("submit",async e=>{e.preventDefault();const w=$("vdWho").value.trim().toLowerCase();
+    const it=o.items.find(i=>i.label.toLowerCase()===w)||o.items.filter(i=>i.label.toLowerCase().startsWith(w)).length===1&&o.items.find(i=>i.label.toLowerCase().startsWith(w));
+    if(!w||!it){msg("Pick a name from the list.");return}const date=$("vdDate").value;if(!date){msg("Pick a date.");return}
+    $("vdSave").disabled=true;msg("Saving…");
+    try{await o.save(it,{type:$("vdType").value,date,note:o.note?$("vdNote").value.trim():""});d.close()}catch(err){$("vdSave").disabled=false;msg("Couldn't save the visit. Try again.")}})}
+async function addPortalVisit(){if(!DB){flash("Visits need the shared board.");return}
+  const all=await loadAllPositions(),items=[];
+  all.forEach(({k,cfg,docs})=>withPos(k,cfg,()=>{latestByPlayer(docs.filter(p=>!p.ref&&!p.deleted&&!isMarshallP(p))).forEach(p=>items.push({id:p.id,k,label:`${p.name} · ${k} · ${p.school||""}`}))}));
+  items.sort((a,b)=>a.label.localeCompare(b.label));
+  visitDialog({title:"Add a portal visit",items,types:["Scheduled","Completed","Canceled"],save:async(it,v)=>{
+    await DB.collection(it.k.toLowerCase()+"_players").doc(it.id).update({visit:v.type,vdate:v.date});flash("Visit saved.");renderRecruit()}})}
+$("visAdd").addEventListener("click",addPortalVisit);
 function visitRows(){
   if(!REC)return [];
   const today=new Date().toISOString().slice(0,10);
@@ -2705,7 +2743,8 @@ function visitRows(){
 function vLabel(p){return p.visit==="Completed"?"Visited":p.visit==="Canceled"?"Canceled":"Scheduled"}
 function renderVisits(){
   const v=visitRows();
-  if(!v.length){$("visitList").innerHTML=`<p class="sub">${VMODE==="up"?"No upcoming visits. Set a visit and date on a player to see him here.":"No visits entered yet."}</p>`;return}
+  const fd=d=>d?new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric"}):"Date not set";
+  $("visitList").innerHTML=`<thead><tr><th>Date</th><th>Type</th><th>Player</th><th>Status</th><th class="num">Grade</th></tr></thead><tbody>${v.map(x=>`<tr class="go" data-vk="${x.k}" data-vid="${esc(x.p.id||"")}" tabindex="0"><td><b>${fd(x.p.vdate)}</b></td><td>${vLabel(x.p)}</td><td><b>${esc(x.p.name)}</b> <span class="sub">${esc([x.k+(x.k==="WR"&&x.p.role==="Slot"?" · SLOT":""),x.p.school].filter(Boolean).join(" · "))}</span></td><td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:""}</td><td class="num">${x.r&&x.r.grade!=null?`<span class="gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</span>`:'<span class="sub">–</span>'}</td></tr>`).join("")||`<tr><td colspan="5" class="sub">${VMODE==="up"?"No upcoming visits.":"No visits entered yet."}</td></tr>`}</tbody>`;return;
   const days=new Map();v.forEach(x=>{const d=x.p.vdate||"";if(!days.has(d))days.set(d,[]);days.get(d).push(x)});
   $("visitList").innerHTML=[...days.entries()].map(([d,list])=>`<div class="vday"><h3>${d?new Date(d+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"}):"Date not set"}</h3>${list.map(x=>`
     <div class="vrow" data-vk="${x.k}" data-vid="${esc(x.p.id||"")}" role="button" tabindex="0"><span class="vp">${x.k}${x.k==="WR"&&x.p.role?(x.p.role==="Slot"?" · SLOT":""):""}</span>
@@ -2740,15 +2779,17 @@ function bbRows(){if(!BB)return [];let v=BB.filter(x=>BBS.side==="all"||x.side==
   v.sort(BBS.sort==="grade"?(a,b)=>b.r.grade-a.r.grade:BBS.sort==="gain"?(a,b)=>b.gain-a.gain||b.r.grade-a.r.grade:(a,b)=>NEEDRANK[a.need]-NEEDRANK[b.need]||b.r.grade-a.r.grade);
   const n=+$("bbTop").value;return n?v.slice(0,n):v}
 function drawBigBoard(){const v=bbRows();
+  /* money columns only once someone has an asking price */
+  const MONEY=OWNER&&!!BB&&BB.some(x=>x.val);{const vb=document.querySelector('[data-bbs="value"]');if(vb){vb.hidden=!MONEY;if(!MONEY&&BBS.sort==="value"){BBS.sort="priority";document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.bbs==="priority"));return drawBigBoard()}}}
   if(!v.length){$("bbTbl").innerHTML=`<tbody><tr><td class="sub">${BB&&BB.length?"No targets match these filters.":"No graded targets yet. Add targets on the position boards and they'll show up here."}</td></tr></tbody>`;return}
-  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num">vs. ours</th>${OWNER?'<th class="num" title="Only you see this">Ask</th><th class="num" title="His ask against the market price for his grade at that spot">vs. mkt</th><th class="num" title="Points over our weakest starter per $10k">Upg/$10k</th>':""}</tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
+  $("bbTbl").innerHTML=`<thead><tr><th class="num">#</th><th>Spot</th><th>Player</th><th>Level</th><th class="num">Yrs</th><th>Status</th><th class="num">Grade</th><th>Tier</th><th>Need</th><th class="num" title="His grade minus our weakest starter at that spot this season (depth chart #1s)">vs. ours</th>${MONEY?'<th class="num" title="Only you see this">Ask</th><th class="num" title="His ask against the market price for his grade at that spot">vs. mkt</th><th class="num" title="Points over our weakest starter per $10k">Upg/$10k</th>':""}</tr></thead><tbody>${v.map((x,i)=>`<tr data-bbk="${x.k}" data-bbid="${esc(x.p.id||"")}">
     <td class="num rk">${i+1}</td><td><b>${esc(x.spot)}</b></td>
     <td class="bbp">${logoImg(x.p)}<b>${esc(x.p.name)}</b>${confFlag(x.r)}<div class="sub">${esc([x.p.school,seasonPlain(x.p)].filter(Boolean).join(" · "))}</div></td>
     <td>${esc(x.p.level||"")}</td><td class="num">${x.p.elig!=null?esc(String(x.p.elig)):"–"}</td>
     <td>${x.p.status?`<span class="stag st-${esc(x.p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(x.p.status)}</span>`:'<span class="sub">–</span>'}</td>
     <td class="num gtc gtc-${x.r.tier}">${fmt(x.r.grade)} ${x.r.letter}</td><td><span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span></td>
     <td><span class="need need-${x.need}">${NEEDLABEL[x.need]}</span></td>
-    <td class="num" data-l="vs. ours">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${OWNER?(()=>{const q=x.val;return `<td class="num${q?"":" nov"}" data-l="Ask">${q?money(q.ask):'<span class="sub">–</span>'}</td><td data-l="vs. mkt" class="num${q?"":" nov"} ${q&&q.pct!=null?(q.pct<=-0.1?"vgood":q.pct>0.1?"vbad":""):""}">${q&&q.pct!=null?pctTxt(q.pct):'<span class="sub">–</span>'}</td><td class="num${q?"":" nov"}" data-l="Upg/$10k">${q?`<b>${fmt(q.upg,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
+    <td class="num" data-l="vs. ours">${x.weak==null?'<span class="sub">open spot</span>':(x.gain>=0?"+":"")+fmt(x.gain)}</td>${MONEY?(()=>{const q=x.val;return `<td class="num${q?"":" nov"}" data-l="Ask">${q?money(q.ask):'<span class="sub">–</span>'}</td><td data-l="vs. mkt" class="num${q?"":" nov"} ${q&&q.pct!=null?(q.pct<=-0.1?"vgood":q.pct>0.1?"vbad":""):""}">${q&&q.pct!=null?pctTxt(q.pct):'<span class="sub">–</span>'}</td><td class="num${q?"":" nov"}" data-l="Upg/$10k">${q?`<b>${fmt(q.upg,1)}</b>`:'<span class="sub">–</span>'}</td>`})():""}</tr>`).join("")}</tbody>`}
 function seasonPlain(p){return p.season?`${p.season}${p.thru==="full"?" full":p.thru?" · Gm "+p.thru:""}`:""}
 document.querySelectorAll("[data-bbs]").forEach(b=>b.addEventListener("click",()=>{BBS.sort=b.dataset.bbs;document.querySelectorAll("[data-bbs]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
 document.querySelectorAll("[data-bbside]").forEach(b=>b.addEventListener("click",()=>{BBS.side=b.dataset.bbside;document.querySelectorAll("[data-bbside]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawBigBoard()}));
@@ -3249,11 +3290,18 @@ const moeOf=r=>GRADE_MOE[r&&r.conf]||8;
 /* our starters at a spot: the depth chart's #1 at each matching spot first, then the best grades. entries = [{p,r}] for that position this season */
 function starterGrades(k,role,entries,zone){const g=(OV_SPOTS[k]||[{n:1}]).find(s=>!s.role||s.role===role)||{n:1};
   const dcG=(DCS[zone||"now"]||{}).groups||{},sps=OV_DC[k+"|"+(g.role||"")]||[],used=new Set(),picks=[];
-  sps.forEach(sp=>{const x0=(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,entries);if(e&&e.r&&e.r.grade!=null&&!used.has(e.p.id)){used.add(e.p.id);picks.push(e.r.grade)}});
-  const rest=entries.filter(e=>!used.has(e.p.id)&&isOurs(e.p)&&(!g.role||e.p.role===g.role)&&e.r&&e.r.grade!=null&&(e.r.conf==="High"||e.r.conf==="Medium")).map(e=>e.r.grade).sort((a,b)=>b-a);
-  return {n:g.n,grades:picks.concat(rest).slice(0,g.n)}}
+  sps.forEach(sp=>{const x0=(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,entries);if(e&&e.r&&e.r.grade!=null&&!used.has(e.p.id)){used.add(e.p.id);picks.push(e)}});
+  const rest=entries.filter(e=>!used.has(e.p.id)&&isOurs(e.p)&&(!g.role||e.p.role===g.role)&&e.r&&e.r.grade!=null&&(e.r.conf==="High"||e.r.conf==="Medium")).sort((a,b)=>b.r.grade-a.r.grade);
+  const all=picks.concat(rest).slice(0,g.n);return {n:g.n,grades:all.map(e=>e.r.grade),names:all.map(e=>e.p.name)}}
 /* our weakest starter at his spot (on the board in view): what he'd have to beat */
-function weakStarterGrade(p){const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
+/* "vs. ours" everywhere = our weakest depth-chart #1 at his spot this season (same rule as the Big board and Starters vs. targets) */
+function weakStarter(p){const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
+  const entries=latestByPlayer(BOARD.filter(b=>!b.ref&&!b.deleted&&(+b.season||0)===yr).map(b=>({p:b,r:score(b)})).filter(x=>x.r&&x.r.grade!=null));
+  const s=starterGrades(POSKEY,p.role||"",entries);if(s.grades.length<s.n)return null;const i=s.grades.indexOf(Math.min(...s.grades));return {grade:s.grades[i],name:s.names[i]}}
+function vsOursTxt(p,g){const w=weakStarter(p);if(!w||g==null)return "";if(isOurs(p)&&String(p.name).toLowerCase()===String(w.name).toLowerCase())return "Our weakest starter at this spot";
+  const d=g-w.grade;return `${d>=0?"+":""}${fmt(d)} vs. ${w.name}, our weakest starter here (${fmt(w.grade)} ${letterOf(w.grade)})`}
+function weakStarterGrade(p){const w=weakStarter(p);return w?w.grade:null}
+function weakStarterGradeOld(p){const yr=Math.max(0,...BOARD.filter(b=>!b.ref&&!b.deleted).map(b=>+b.season||0));
   const entries=BOARD.filter(b=>!b.ref&&!b.deleted&&(+b.season||0)===yr).map(b=>({p:b,r:score(b)}));
   const s=starterGrades(POSKEY,p.role||"",entries);return s.grades.length<s.n?null:Math.min(...s.grades)}
 /* value: his ask against what the market pays for his grade at that spot, and how many points he adds over our weakest starter per $10k */
@@ -3413,7 +3461,7 @@ async function printReport(){
   doc.setFontSize(11);doc.setTextColor(...cc);doc.text(`${r.conf} confidence${r.split?" · seasons disagree":""}${r.partialM?" · 3 of 4 metrics":""}`,220,188);
   doc.setFont("helvetica","normal");doc.setTextColor(...mut);doc.setFontSize(10);
   const L=lineScore(),lg=gradeScore(L.final);
-  if(S.line.name)doc.text(`${r.grade-lg>=0?"+":""}${fmt(r.grade-lg)} vs. ${S.line.name} (${fmt(lg)} ${letterOf(lg).replace("−","-")})`,220,205);
+  {const t=vsOursTxt(p,r.grade);if(t)doc.text(t.replace(/[−–]/g,"-"),220,205)}
   /* metrics */
   let y=246;doc.setFont("helvetica","bold");doc.setFontSize(12);doc.setTextColor(...ink);doc.text("Metrics",40,y);y+=8;
   doc.autoTable({startY:y,theme:"grid",margin:{left:40,right:40},
@@ -3636,7 +3684,9 @@ function withHist(p,ex){const cur=ghSnap(Object.assign({},p,{updatedAt:new Date(
   const same=a=>a&&JSON.stringify([a.thru,a.db,a.m])===JSON.stringify([cur.thru,cur.db,cur.m]);
   if(!same(gh[gh.length-1]))gh.push(cur);p.gh=gh.slice(-12);return p}
 function gradeHist(p){if(!Array.isArray(p.gh)||p.gh.length<2)return [];
-  return p.gh.map(h=>{const r=score(Object.assign({},p,{thru:h.thru,db:h.db,m:h.m}));return r&&r.grade!=null?{d:h.d,thru:h.thru,g:r.grade,l:r.letter}:null}).filter(Boolean)}
+  const H=p.gh.map(h=>{const r=score(Object.assign({},p,{thru:h.thru,db:h.db,m:h.m}));return r&&r.grade!=null?{d:h.d,thru:h.thru,g:r.grade,l:r.letter}:null}).filter(Boolean);
+  /* the same game loaded twice (PFF re-grades) keeps only the latest load */
+  return H.filter((h,i)=>!(h.thru!=null&&H[i+1]&&String(H[i+1].thru)===String(h.thru)))}
 function histHtml(p){const H=gradeHist(p);if(H.length<2)return "";const a=H[0],z=H[H.length-1],d=z.g-a.g;
   const lbl=h=>h.thru==="full"?"Full":h.thru?"Gm "+h.thru:fmtDate(h.d);
   const W=120,Ht=26,xs=H.map((h,i)=>4+i*(W-8)/(H.length-1)),lo=Math.min(...H.map(h=>h.g)),hi=Math.max(...H.map(h=>h.g)),sp=Math.max(4,hi-lo);
@@ -4253,13 +4303,13 @@ function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"
   const st=r.status?`<span class="stag st-${e_(r.status.replace(/\s+/g,""))}">${e_(r.status)}</span>`:"";
   const tm=s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"–";
   return `<tr data-id="${id}">${rank?`<td class="num crk">${rank}</td>`:`<td class="pick"><input type="checkbox" data-hpick="${id}" aria-label="Select ${e_(r.name)}"${PICKH.has(r.id)?" checked":""}></td>`}
-  <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${noteMk(r)}${hudlOf(r)?`<a class="hudlmk" href="${e_(hudlOf(r))}" target="_blank" rel="noopener" title="Watch his Hudl" aria-label="Watch ${e_(r.name)} on Hudl">▶ Hudl</a>`:""}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&!isCom(r.status)?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
-  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}${r.meas?`<span class="meas-ok" title="Measured by us: ${e_(measWhen(r.meas))}"> ✓</span>`:""}</td><td class="cst">${st}</td>
+  <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${s.conf&&s.conf!=="–"&&s.score!=null?confFlag({conf:s.conf}):""}${noteMk(r)}${hudlOf(r)?`<a class="hudlmk" href="${e_(hudlOf(r))}" target="_blank" rel="noopener" title="Watch his Hudl" aria-label="Watch ${e_(r.name)} on Hudl">▶ Hudl</a>`:""}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&!isCom(r.status)?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
+  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?"/"+e_(r.wt):""}${r.meas?`<span class="meas-ok" title="Measured by us: ${e_(measWhen(r.meas))}"> ✓</span>`:""}</td><td class="cst">${st}</td>
   <td class="num cf">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num ctm"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${tm}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num cg${t?" tc-"+t:""}" data-l="${s.score!=null?e_(L):""}">${s.score!=null?`<b>${f1(s.score,1)}</b>`:`<span class="mtest sub">${s.Tm!=null?"Test "+tm:"No grade"}</span><span class="dtest">–</span>`}</td><td class="ctr cle"><span class="letter${t?" tc-"+t:""}">${L}</span></td>
-  <td class="ct">${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}<span class="mstat">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</span></td><td class="ccf">${s.conf&&s.conf!=="–"?`<span class="chip c-${s.conf}">${s.conf}</span>`:""}</td>
+  <td class="ct">${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td>
   <td class="num c40">${o40?f1(+o40.v,2)+ftag(o40):"–"}</td><td class="num cmu">${(r.outside&&r.outside.tf&&num(r.outside.tf.muPct)!=null)?Math.round(num(r.outside.tf.muPct)*100)+"%":"–"}</td><td class="num cof">${r.offers!=null&&r.offers!==""?e_(r.offers)+(r.p4?` <span class="sub">(${e_(r.p4)} P4)</span>`:""):"–"}</td></tr>`}
-const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":`<th class="pick"><input type="checkbox" id="hsPickAll" aria-label="Select all prospects"></th>`}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th>Confidence</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
+const HEAD=rk=>`<thead><tr>${rk?"<th>#</th>":`<th class="pick"><input type="checkbox" id="hsPickAll" aria-label="Select all prospects"></th>`}<th data-k="name">Name</th><th data-k="pos">Pos</th><th data-k="cls">Class</th><th class="num">Ht / Wt</th><th data-k="status">Status</th><th class="num" data-k="film">Film</th><th class="num" data-k="test">Testing</th><th class="num" data-k="score">Score</th><th class="ctr">Grade</th><th>Tier</th><th class="num" data-k="t40">40</th><th class="num" data-k="mu" title="Tracking Football athletic rating percentile vs. Marshall players at his position">vs MU</th><th class="num" data-k="offers">Offers</th></tr></thead>`;
 const ST_ORD=s=>{const i=STATUSES.indexOf(s);return i<0?STATUSES.length:i};
 /* default order: our commits, then offers, then everyone else; best score first inside each (testing, then name, breaks ties) */
 function commitOrder(a,b){const sa=ST_ORD(a.r.status),sb=ST_ORD(b.r.status);if(sa!==sb)return sa-sb;
@@ -4296,7 +4346,7 @@ function tagHS(k,x,i){const r=x.r,s=x.s,t=tierOfHS(s.score);
   const g=s.score!=null?`<span class="g gtc-${t}">${f1(s.score,1)} ${letter(s.score)}</span>`:s.Tm!=null?`<span class="g none">Test ${s.estTm?"~":""}${f1(s.Tm,0)}</span>`:`<span class="g none">No grade</span>`;
   const st=r.status==="Signed"?'<span class="hs-tag cm">SIGNED</span>':r.status==="Committed"?'<span class="hs-tag cm">COMMIT</span>':r.status==="Offered"?'<span class="hs-tag v">OFFER</span>':r.status?`<span class="hs-tag">${e_(r.status.toUpperCase())}</span>`:"";
   return `<div class="tag tb-${t||"none"}" data-tk="${k}" data-tid="${e_(r.id)}" title="${e_(r.name)} · ${e_(r.school||"")}"><span class="rk">${i+1}</span><span class="nm">${r.star?'<span class="hs-star" title="Starred priority">★</span>':""}${e_(r.name||"Unnamed")}${st}</span>${g}
-    <span class="ln2">${e_([r.school,r.state,r.cls,(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?fmtHt(r.ht):"")+(r.wt?(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?"/":"")+r.wt:""),r.offers?r.offers+" offers":""].filter(Boolean).join(" · "))}</span>
+    <span class="ln2">${e_([r.school,r.state].filter(Boolean).join(", "))}<br>${e_([r.cls,(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?fmtHt(r.ht):"")+(r.wt?(r.ht&&!/^0\D+0\D*$/.test(fmtHt(r.ht)||"")?"/":"")+r.wt:""),r.offers?r.offers+" offers":""].filter(Boolean).join(" · "))}</span>
     <span class="mv"><button type="button" data-mv="-1" aria-label="Move ${e_(r.name)} up">▲</button><button type="button" data-mv="1" aria-label="Move ${e_(r.name)} down">▼</button></span></div>`}
 function renderTags(){if(TB_BUSY)return;fillSelect(q("hsTbClass"),classes(),q("hsTbClass").value,"All classes");TBS=buildTags();
   const n=Object.values(TBS).reduce((a,l)=>a+l.length,0),cm=Object.values(TBS).reduce((a,l)=>a+l.filter(x=>isCom(x.r.status)).length,0);
@@ -4431,6 +4481,9 @@ function wireRec(id){const tb=()=>q("hsVisits").querySelector("tbody");
   tb().addEventListener("click",ev=>{const b=ev.target.closest("[data-vdel]");if(b)b.closest("tr").remove()});
   q("hsSaveRec").onclick=async()=>{const rec={recruiter:q("hsR-recruiter").value.trim(),posCoach:q("hsR-posCoach").value.trim(),offerDate:q("hsR-offerDate").value};
     try{REFRESH=true;await DBX.collection("hs_players").doc(id).update({rec,visits:read(),updatedAt:new Date().toISOString()});toast("Recruiting saved.")}catch(e){REFRESH=false;toast("Couldn't save recruiting.")}}}
+q("hsVisAdd").onclick=()=>{const items=ROWS.filter(r=>r.id&&!r.deleted).map(r=>({id:r.id,label:[r.name,r.pos,r.school].filter(Boolean).join(" · ")})).sort((a,b)=>a.label.localeCompare(b.label));
+  visitDialog({title:"Add a high school visit",who:"Prospect",items,types:VTYPES,note:true,save:async(it,v)=>{const r=ROWS.find(x=>x.id===it.id);const V=(Array.isArray(r&&r.visits)?r.visits:[]).concat([{type:v.type,date:v.date,note:v.note}]);
+    REFRESH=true;await DBX.collection("hs_players").doc(it.id).update({visits:V,updatedAt:new Date().toISOString()});if(r)r.visits=V;toast("Visit saved.");renderRec()}})};
 function recPool(){return rowsFor(ROWS.filter(r=>POS.includes(r.pos)&&(isCom(r.status)||isTgt(r))))}
 function visitList(){const today=new Date();today.setHours(0,0,0,0);const out=[];
   ROWS.forEach(r=>(Array.isArray(r.visits)?r.visits:[]).forEach(v=>{const d=visitDate(v);if(VM==="up"&&(!d||d<today))return;out.push({r,v,d})}));
