@@ -49,11 +49,11 @@
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
-body.mode-gm{--accent:#f2b705; --accent-fill:#9a6b00; --accent-soft:#fdf3d0; --accent-text:#7a5500}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}:root:not([data-theme="light"]) body.mode-gm{--accent-soft:#3a2e0a; --accent-text:#f5c842}}
+body.mode-gm{--accent:#8b93a1; --accent-fill:#4b5563; --accent-soft:#e5e7eb; --accent-text:#374151}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}:root:not([data-theme="light"]) body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}:root:not([data-theme="light"]) body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}}
 :root[data-theme="dark"] body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}
 :root[data-theme="dark"] body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}
-:root[data-theme="dark"] body.mode-gm{--accent-soft:#3a2e0a; --accent-text:#f5c842}
+:root[data-theme="dark"] body.mode-gm{--accent:#9ca3af; --accent-soft:#2a2e36; --accent-text:#d1d5db}
 /* grade badge fills: Elite pink, Impact Starter teal, Starter indigo, Rotation orange, NGE red */
 :root{--pElite:#db2777;--pImpact:#0d9488;--pStarter:#4f46e5;--pStarterInk:#fff;--pRotation:#fb923c;--pPass:#e11d2e}
 *{box-sizing:border-box}
@@ -107,7 +107,7 @@ body.scrolled header .tab{padding:6px 11px}
 .sn-grp{display:flex;flex-direction:column;gap:2px}
 .sn-h{display:flex;align-items:center;gap:8px;font:700 12px var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 12px 4px}
 .sn-h::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gc)}
-.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-an{--gc:#2fcb86}.sn-gm{--gc:#f2b705}
+.sn-pt{--gc:#1fa3ee}.sn-hs{--gc:#a93fd9}.sn-an{--gc:#2fcb86}.sn-gm{--gc:#9ca3af}
 @media (min-width:900px){
   #sidenav{display:flex;flex-direction:column;gap:20px;position:fixed;left:0;top:0;bottom:0;width:236px;padding:18px 12px 24px;background:var(--surface);border-right:1px solid var(--line);overflow-y:auto;z-index:45}
   body{padding-left:236px}
@@ -325,7 +325,7 @@ select.qsel{width:auto;display:inline-block;font:500 12px var(--body);padding:2p
 #overview tr.go{cursor:pointer}
 #overview tr.go:hover td{background:var(--sunk)}
 .need{font:600 11px var(--body);letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid currentColor}
-#ovTbl .chip{font-size:10.5px;padding:2px 7px} #ovTbl td:nth-child(3),#ovTbl td:nth-child(6){white-space:normal;min-width:150px} #ovTbl tr.ovfirst td{border-top:2px solid var(--line)} #ovTbl tbody tr.ovfirst:first-child td{border-top:0} .need-High{color:var(--pass)} .need-Upgrade{color:var(--rotation)} .need-Set{color:var(--impact)}
+#ovTbl .chip{font-size:10.5px;padding:2px 7px} #ovTbl td:nth-child(3),#ovTbl td:nth-child(6){white-space:normal;min-width:150px} #ovTbl tr.ovfirst td{border-top:2px solid var(--line)} #ovTbl tbody tr.ovfirst:first-child td{border-top:0} .need-High{color:#fff;background:var(--pPass);border-color:var(--pPass)} .need-Upgrade{color:var(--rotation)} .need-Set{color:var(--impact)}
 .meta{font-size:11px;margin-top:2px;opacity:.8}
 
 
@@ -2015,7 +2015,7 @@ async function printOverview(){
   const d=new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
   doc.text(`Printed ${d}${TG?`  ·  ${TG} team games played`:""}`,40,62);
   const L=x=>x.r.letter.replace("−","-");
-  const NEEDRGB={High:[176,58,46],Upgrade:[176,122,18],Set:[19,122,79]};
+  const NEEDRGB={High:[204,0,24],Upgrade:[176,122,18],Set:[19,122,79]};
   /* field layout: one card per starting spot, placed where it lines up */
   const F=OV_FIELD[OV_SIDE],spots=ovSpots(OV_SIDE,rows),H=doc.internal.pageSize.getHeight();
   const T=t=>String(t).replace(/[−–]/g,"-");
@@ -2759,7 +2759,7 @@ async function printBigBoard(){const v=bbRows();if(!v.length)return;
   const T=t=>String(t).replace(/[−–]/g,"-").replace(/[“”]/g,'"').replace(/[‘’]/g,"'");
   const sortName={priority:"Priority",grade:"Grade",gain:"Biggest upgrade"}[BBS.sort],sideName={all:"All positions",off:"Offense",def:"Defense"}[BBS.side];
   pdfHeader(doc,"Roster Lab · Big board",T(`${sideName} · sorted by ${sortName}${$("bbNeed").checked?" · Upgrade spots only":""} · ${v.length} players`));
-  const NEEDRGB={High:[176,58,46],Upgrade:[143,93,8],Set:[15,115,73]};
+  const NEEDRGB={High:[204,0,24],Upgrade:[143,93,8],Set:[15,115,73]};
   doc.autoTable({startY:76,theme:"grid",head:[["#","Spot","Player","School","Level","Season","Yrs","Status","Grade","Tier","Need","vs. ours"]],
     body:v.map((x,i)=>[String(i+1),x.spot,T(x.p.name),T(x.p.school||""),x.p.level||"",T(seasonPlain(x.p)),x.p.elig!=null?String(x.p.elig):"-",x.p.status||"-",T(`${fmt(x.r.grade)} ${x.r.letter}`),TIERNAME[x.r.tier]||"",NEEDLABEL[x.need],x.weak==null?"open spot":(x.gain>=0?"+":"")+fmt(x.gain)]),
     styles:{font:"helvetica",fontSize:8.5,cellPadding:4,lineColor:[211,215,222],lineWidth:.5,textColor:[27,30,36]},headStyles:{fillColor:[27,30,36],textColor:255,fontStyle:"bold",fontSize:8},
@@ -3340,7 +3340,7 @@ async function pdfSave(doc,fname){
 }
 let MU_PNG=null;logoData("276").then(d=>{MU_PNG=d}).catch(()=>{});
 /* print branding: the bar takes the current side's color; the logo (three-color football) and ROSTER LAB sit top right */
-const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[242,183,5],ink:[122,85,0]}};
+const RL_SIDE_RGB={portal:{bar:[31,163,238],ink:[11,111,184]},hs:{bar:[169,63,217],ink:[126,42,168]},an:{bar:[47,203,134],ink:[19,122,79]},gm:{bar:[139,147,161],ink:[55,65,81]}};
 const pdfSide=()=>{const c=document.body.classList;return RL_SIDE_RGB[c.contains("mode-gm")?"gm":c.contains("mode-an")?"an":c.contains("mode-hs")?"hs":"portal"]};
 let RL_PNG=null;
 (function(){const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="4 26 112 68" width="448" height="272"><defs><clipPath id="b"><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z"/></clipPath><clipPath id="w"><path d="M0 58 Q30 52 60 58 T120 58 V120 H0 Z"/></clipPath></defs><g clip-path="url(#b)"><g clip-path="url(#w)"><rect width="48" height="120" fill="#1fa3ee"/><rect x="47.9" width="24.4" height="120" fill="#a93fd9"/><rect x="72.2" width="48" height="120" fill="#2fcb86"/></g><circle cx="44" cy="80" r="3" fill="#fff" opacity=".85"/><circle cx="72" cy="69" r="2.2" fill="#fff" opacity=".85"/></g><path d="M8 60 Q60 4 112 60 Q60 116 8 60 Z" fill="none" stroke="#1b1e24" stroke-width="6" stroke-linejoin="round"/><path d="M44 47 H76 M48 41 V53 M56 41 V53 M64 41 V53 M72 41 V53" fill="none" stroke="#1b1e24" stroke-width="4.5" stroke-linecap="round"/></svg>';
