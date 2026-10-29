@@ -1404,7 +1404,7 @@ const POSITIONS={
       {name:"Yards per route run",short:"YPRR",unit:"",dp:2,step:0.01},
       {name:"Receiving grade",short:"Rec Grd",unit:"",dp:1,step:0.1},
       {name:"YAC per reception",short:"YAC/Rec",unit:"",dp:1,step:0.1},
-      {name:"Separation",short:"Sep %",unit:"%",dp:1,step:0.1,fcsMin:30}],
+      {name:"Separation",short:"Sep %",unit:"%",dp:1,step:0.1,fcsSkip:true}],
     defaults:{dbPerGame:20,agreeMinDb:100,weights:[40,25,20,15],
       anchors:{mid:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]},full:{floor:[0.57,51.2,1.9,48.6],ceil:[3.69,91.4,11.0,95.7]}},
       line:{name:"Adrian Norton",level:"G6",season:"2026",thru:6,cur:{db:126,m:[1.45,63.4,3.7,72.0]},prior:{db:283,m:[1.28,65.7,5.6,68.3]}}},
@@ -1575,8 +1575,8 @@ function lineScore(role){
   return {...r,m:b.m,final:r.raw*(S.levels[L.level]??1)};
 }
 function scaleReady(){const A=anchors();return !A.floor.some(v=>v==null)&&!A.ceil.some(v=>v==null)}
-/* metrics PFF doesn't track reliably at FCS (e.g. WR separation): an FCS value under the metric's fcsMin counts as missing */
-function cleanM(m,level){if(!m||level!=="FCS"||!METRICS.some(x=>x.fcsMin!=null))return m;return m.map((v,i)=>v!=null&&METRICS[i]&&METRICS[i].fcsMin!=null&&v<METRICS[i].fcsMin?null:v)}
+/* metrics PFF doesn't track reliably at FCS (WR separation): an FCS value never counts, whatever it is (owner call) */
+function cleanM(m,level){if(!m||level!=="FCS"||!METRICS.some(x=>x.fcsSkip))return m;return m.map((v,i)=>v!=null&&METRICS[i]&&METRICS[i].fcsSkip?null:v)}
 function score(p){
   if(p&&p.m&&p.level==="FCS"||p&&p.prior&&p.prior.m){const m2=cleanM(p.m,p.level),pr2=p.prior&&p.prior.m?Object.assign({},p.prior,{m:cleanM(p.prior.m,p.prior.level||p.level)}):p.prior;
     if(m2!==p.m||(pr2&&p.prior&&pr2.m!==p.prior.m)){const q=Object.assign({},p,{m:m2,prior:pr2});if(JSON.stringify(q.m)!==JSON.stringify(p.m)||JSON.stringify(q.prior)!==JSON.stringify(p.prior)){const r=score(q);if(r)r.fcsDropped=true;return r}}}
@@ -2555,7 +2555,7 @@ function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
       <div class="chips" style="margin-top:0"><span class="chip t-${r.tier}">${TIERNAME[r.tier]}</span><span class="chip c-${r.conf}">${r.conf} confidence</span>${r.split?'<span class="chip t-Pass">Seasons disagree</span>':""}${r.part<1?`<span class="chip t-Rotation">Partial sample ${Math.round(r.part*100)}%</span>`:""}${r.partialM?'<span class="chip t-Rotation">3 of 4 metrics</span>':""}</div>
       ${(t=>t?`<div class="sub" style="margin-top:8px">${esc(t)}</div>`:"")(vsOursTxt(p,r.grade))}
       <div class="sub" style="margin-top:4px">${esc(String(p.db??"–"))} ${P.sample} · ${seasonLabel(p)}</div>${p.espnId?'<div class="pc-line" data-espnline></div>':""}</div></div>${histHtml(p)}`:`<div class="pc-grade"><div class="sub">Not enough numbers to grade yet.</div></div>`;
-  const mets=r?`<details class="pc-sec" open><summary><span>Metrics</span></summary><div class="sec-b"><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsMin!=null?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: FCS value under ${m.fcsMin})</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div></details>`:"";
+  const mets=r?`<details class="pc-sec" open><summary><span>Metrics</span></summary><div class="sec-b"><div class="metrics">${METRICS.map((m,i)=>`<div class="mrow"><div class="nm"><b>${m.name}</b> · ${r.m[i]==null&&p.m&&p.m[i]!=null&&m.fcsSkip&&p.level==="FCS"?`${fm(p.m[i],i)}${m.unit} <span class="sub">(not used: not tracked reliably at FCS)</span>`:`${fm(r.m[i],i)}${m.unit} <span class="sub">(${S.weights[i]}%)</span>`}</div><div class="val">${fmt(r.n[i],0)}</div><div class="bar"><i style="width:${r.n[i]??0}%"></i><u style="left:${L.n[i]}%" title="Our starter"></u></div></div>`).join("")}</div></div></details>`:"";
   const kv=rows=>`<dl class="pc-kv">${rows.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
   const bio=kv([["Height",p.ht?esc(fmtHt(p.ht)):"–"],["Weight",p.wt?esc(p.wt+" lbs"):"–"],["Hometown",esc([p.home,p.st].filter(Boolean).join(", "))||"–"],["High school",esc(p.hs||"")||"–"],
     ["Years left",p.elig!=null?esc(String(p.elig)):"–"],["Status",esc(p.status||"")||"–"],["In portal",p.pdate?"Since "+esc(fmtDate(p.pdate)):p.portal==="Yes"?"Yes":"–"],["Visit",p.visit?esc(vLabel(p)+(p.vdate?" · "+fmtDate(p.vdate):"")):"–"]]);
@@ -3722,7 +3722,7 @@ let DUP_ARMED=null,ODD_ARMED=null,XDUP_ARMED=null;
 $("form").addEventListener("input",()=>{DUP_ARMED=null;ODD_ARMED=null;XDUP_ARMED=null});
 /* stats more than a quarter of the scale beyond the usual floor-to-ceiling range */
 function oddStats(p){const A=anchors(modeFor(p.thru)),out=[];
-  const chk=(m,tag)=>(m||[]).forEach((v,i)=>{if(v==null)return;const lo=Math.min(A.floor[i],A.ceil[i]),hi=Math.max(A.floor[i],A.ceil[i]),pad=(hi-lo)*0.25;
+  const chk=(m,tag)=>(m||[]).forEach((v,i)=>{if(v==null||(p.level==="FCS"&&METRICS[i].fcsSkip))return;const lo=Math.min(A.floor[i],A.ceil[i]),hi=Math.max(A.floor[i],A.ceil[i]),pad=(hi-lo)*0.25;
     if(v<lo-pad||v>hi+pad)out.push(`${METRICS[i].short}${tag} ${fm(v,i)}${METRICS[i].unit} (usual ${fm(lo,i)}–${fm(hi,i)})`)});
   chk(p.m,"");if(p.prior&&p.prior.db)chk(p.prior.m," last season");return out}
 function statsKey(p){return JSON.stringify([p.db,p.m,p.prior||null])}
