@@ -31,7 +31,7 @@
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
-  --tElite:#007896; --tEliteFill:#0087a5; --cHigh:#0f7349; --tImpact:#00813d; --tStarter:#4f7f00; --tRotation:#8a6d00; --tPass:#c61b2a; --cMed:#7d6300;
+  --tElite:#be185d; --tEliteFill:#db2777; --cHigh:#0f7349; --tImpact:#0f766e; --tStarter:#1b1e24; --tRotation:#c2410c; --tPass:#b91c1c; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,12 +40,12 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#22b5d6; --tEliteFill:#0087a5; --cHigh:#4fdb9c; --tImpact:#1fc46b; --tStarter:#8fd400; --tRotation:#ffd000; --tPass:#f2545f; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --pStarter:#4b5563; --pStarterInk:#f3f4f6; --cHigh:#4fdb9c; --tImpact:#2dd4bf; --tStarter:#f3f4f6; --tRotation:#fdba74; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#22b5d6; --tEliteFill:#0087a5; --cHigh:#4fdb9c; --tImpact:#1fc46b; --tStarter:#8fd400; --tRotation:#ffd000; --tPass:#f2545f; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#f472b6; --tEliteFill:#db2777; --pStarter:#4b5563; --pStarterInk:#f3f4f6; --cHigh:#4fdb9c; --tImpact:#2dd4bf; --tStarter:#f3f4f6; --tRotation:#fdba74; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
@@ -54,8 +54,8 @@ body.mode-gm{--accent:#f2b705; --accent-fill:#9a6b00; --accent-soft:#fdf3d0; --a
 :root[data-theme="dark"] body.mode-hs{--accent-soft:#2c1838; --accent-text:#d08bf2}
 :root[data-theme="dark"] body.mode-an{--accent-soft:#10301f; --accent-text:#4fdb9c}
 :root[data-theme="dark"] body.mode-gm{--accent-soft:#3a2e0a; --accent-text:#f5c842}
-/* PFF Ultimate grade colors (their scale: 90 teal, 80 green, 70 lime, 60 yellow, under 60 orange to red) */
-:root{--pElite:#0087a5;--pImpact:#009b49;--pStarter:#76c100;--pRotation:#ffd000;--pPass:#c61b2a}
+/* grade badge fills: Elite pink, Impact Starter teal, Starter bold neutral, Rotation orange, NGE red (dark mode swaps the Starter neutral) */
+:root{--pElite:#db2777;--pImpact:#0d9488;--pStarter:#e5e7eb;--pStarterInk:#1b1e24;--pRotation:#fb923c;--pPass:#b91c1c}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
@@ -385,7 +385,7 @@ details.settings>summary{cursor:pointer;padding:14px 18px;font:600 18px var(--di
 .tag .ln2{grid-column:2/4;grid-row:3;color:var(--muted);font-size:11.5px;overflow-wrap:break-word}
 .tag .mv{grid-column:3/4;grid-row:2;display:flex;gap:3px;justify-content:flex-end;align-self:center}
 .tag .mv button{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:4px;font-size:9px;line-height:1;padding:3px 5px;cursor:pointer}
-.tag.tb-Elite{border-left-color:var(--pElite)} .tag.tb-Impact{border-left-color:var(--pImpact)} .tag.tb-Starter{border-left-color:var(--pStarter)} .tag.tb-Rotation{border-left-color:var(--pRotation)} .tag.tb-Pass{border-left-color:var(--pPass)}
+.tag.tb-Elite{border-left-color:var(--pElite)} .tag.tb-Impact{border-left-color:var(--pImpact)} .tag.tb-Starter{border-left-color:var(--tStarter)} .tag.tb-Rotation{border-left-color:var(--pRotation)} .tag.tb-Pass{border-left-color:var(--pPass)}
 .tag.sortable-ghost{opacity:.35} .tag.sortable-chosen{box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .tb-empty{color:var(--muted);font-size:12px;padding:6px 2px}
 #depth,#budget{display:grid;gap:10px;grid-template-columns:minmax(0,1fr)}
@@ -679,8 +679,8 @@ th{font-size:12.5px}
 button.stag.st-Pass{color:#fff;border-color:transparent!important}
 .chip{border-color:transparent}
 .chip.t-Impact{background:var(--pImpact);color:#fff}
-.chip.t-Starter{background:var(--pStarter);color:#16200a}
-.chip.t-Rotation{background:var(--pRotation);color:#2a2100}
+.chip.t-Starter{background:var(--pStarter);color:var(--pStarterInk)}
+.chip.t-Rotation{background:var(--pRotation);color:#3b1d05}
 .chip.t-Pass{background:var(--pPass);color:#fff}
 .chip.c-High,.chip.c-Medium,.chip.c-Low{border-color:currentColor;background:transparent}
 /* board table: keep the checkbox and name in view while the numbers scroll */
@@ -1947,7 +1947,7 @@ const CONFRGB={High:[15,115,73],Medium:[125,99,0],Low:[198,40,40]};
 /* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
 function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
   doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
-const TIERRGB={Elite:[0,120,150],Impact:[0,129,61],Starter:[79,127,0],Rotation:[138,109,0],Pass:[198,27,42]};
+const TIERRGB={Elite:[190,24,93],Impact:[15,118,110],Starter:[27,30,36],Rotation:[194,65,12],Pass:[185,28,28]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(!rows.length)return;
