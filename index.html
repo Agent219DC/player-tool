@@ -1237,9 +1237,9 @@ window.claude={use:async n=>{
       </details>
       <details class="sgrp" data-sg="starter"><summary>Our starter (reference row)</summary>
       <fieldset><legend>Our starter (reference row)</legend>
-        <p class="note" style="margin:0 0 6px">The name picks our reference starter. When he's on the board, his board entry is used; these numbers are only a fallback.</p>
+        <p class="note" style="margin:0 0 6px">Pick our starter from the roster. If he's on the board, his board numbers are used; then Save settings.</p>
         <div class="grid2">
-          <label>Name<input id="l-name" type="text"></label>
+          <label>Name<select id="l-name"></select></label>
           <label>Level<select id="l-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
           <label>Season<input id="l-season" type="number" step="1"></label>
           <label>Numbers through (games, blank = full)<input id="l-thru" type="number" step="1"></label>
@@ -3642,11 +3642,20 @@ function renderAnchors(){
    <tr><td><b>Weight %</b></td>${METRICS.map((_,i)=>`<td><input id="w-${i}" type="number" step="1" value="${S.weights[i]}"></td>`).join("")}</tr>
    ${row("Floor (0)","mid","floor")}${row("Mid-season ceiling","mid","ceil")}${row("Full-season floor","full","floor")}${row("Full-season ceiling","full","ceil")}</tbody>`;
 }
+/* reference starter: our players at this position (board entries with numbers first, then the rest of the depth chart group) */
+function lineBoardEntry(nm){const n=String(nm||"").toLowerCase().trim();const c=BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&String(p.name||"").toLowerCase().trim()===n&&p.m&&p.db);return c.sort((a,b)=>(+b.season||0)-(+a.season||0))[0]||null}
+function fillLineNames(keep){const sel=$("l-name");if(!sel)return;const cur=(keep&&sel.dataset.dirty&&sel.value)||(S.line&&S.line.name)||"";if(!keep)delete sel.dataset.dirty;const seen=new Set(),opts=[];
+  latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
+  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;try{["now"].forEach(z=>dcAllZ(z).filter(y=>y&&y.n&&y.g===grp).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:y.n,l:y.n+" · not on the board"})}))}catch(e){}
+  if(cur&&!seen.has(cur.toLowerCase()))opts.unshift({v:cur,l:cur});
+  sel.innerHTML=opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join("")||'<option value="">No roster players at this position yet</option>';sel.value=cur}
+$("l-name").addEventListener("change",()=>{$("l-name").dataset.dirty="1";const e=lineBoardEntry($("l-name").value);if(!e)return;
+  $("l-level").value=e.level||"G6";$("l-season").value=e.season||"";$("l-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$("l-db").value=e.db??"";METRICS.forEach((_,i)=>{$("lc-"+i).value=(e.m||[])[i]??""})});
 function fillSettings(){
   renderAnchors();
   $("s-dbpg").value=S.dbPerGame;$("s-season").value=S.seasonGames;$("s-pw").value=S.priorWeight;{const C=cuts();$("s-impact").value=C.impact;$("s-starter").value=C.starter;$("s-rot").value=C.rotation;}$("s-elite").value=S.eliteCut??80;$("s-gap").value=S.agreeGap??20;$("s-mindb").value=S.agreeMinDb??75;
   ["P4","G6","FCS"].forEach(k=>$("s-"+k).value=S.levels[k]);
-  $("l-name").value=S.line.name;$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
+  fillLineNames();$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
   METRICS.forEach((_,i)=>{$("lc-"+i).value=S.line.cur.m[i]??"";$("lp-"+i).value=S.line.prior.m[i]??""});
   $("teamGames").value=tg();
   if(typeof applyLock==="function")applyLock();
@@ -3756,7 +3765,7 @@ function subscribe(){
     if(key!==POSKEY)return;
     boardState="ready";
     const allDocs=q.docs.map(d=>{const p=Object.assign({id:d.id},clone(d.data()));if(p.level==="G5")p.level="G6";return fixLegacy(p)});
-    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();tryCompare();
+    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();fillLineNames(true);renderTrash();resolveNames();openPending();tryCompare();
     seedBoard(key,allDocs);linkStarterPrior(key);
   },()=>{boardState="local";renderBoard()}));
 }
