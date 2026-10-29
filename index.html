@@ -1902,7 +1902,7 @@ function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+"
   return `<span class="cflag c-${r.conf}" title="${t}" aria-label="${t}" role="img"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>${r.split||r.partialM?'<i>*</i>':""}</span>`}
 function filtersOn(){return STARONLY||!!$("statusFilter").value||!!($("boardSearch").value||"").trim()||(P.roles&&ROLEF!=="All")}
 function updateBoardTitle(){const sf=$("statusFilter").value,bits=[];
-  if(P.roles&&ROLEF!=="All")bits.pushRL(ROLEF);
+  if(P.roles&&ROLEF!=="All")bits.push(RL(ROLEF));
   if(sf)bits.push(sf==="portal"?"Portal only":sf==="none"?"No status":sf==="working"?"Working":sf);
   if(STARONLY)bits.push("★ Starred");
   const q=($("boardSearch").value||"").trim();if(q)bits.push(`“${q}”`);
@@ -3688,24 +3688,27 @@ function fillSettings(){
   $("teamGames").value=tg();
   if(typeof applyLock==="function")applyLock();
 }
-function readSettings(){
+function readSettings(withStarters){
   S.dbPerGame=num($("s-dbpg").value)??DEFAULTS.dbPerGame;S.seasonGames=num($("s-season").value)??12;S.priorWeight=num($("s-pw").value)??0.5;S.cuts={impact:num($("s-impact").value)??60,starter:num($("s-starter").value)??45,rotation:num($("s-rot").value)??30};S.eliteCut=num($("s-elite").value)??80;S.agreeGap=num($("s-gap").value)??20;S.agreeMinDb=num($("s-mindb").value)??DEFAULTS.agreeMinDb;
   ["P4","G6","FCS"].forEach(k=>S.levels[k]=num($("s-"+k).value)??1);
   S.weights=METRICS.map((_,i)=>num($("w-"+i).value)??0);
   ["mid","full"].forEach(md=>["floor","ceil"].forEach(k=>S.anchors[md][k]=METRICS.map((_,i)=>num($(`a-${md}-${k}-${i}`).value))));
   ["floor","ceil"].forEach(k=>S.anchors.mid[k]=S.anchors.mid[k].map((v,i)=>v??DEFAULTS.anchors.mid[k][i]));
+  /* reference starters only change through Save starters, so an unsaved pick never rides along with another setting */
+  if(withStarters===true){
   S.line={name:$("l-name").value||"Starter",level:$("l-level").value,season:$("l-season").value||"2026",thru:num($("l-thru").value)??"full",cur:{db:num($("l-db").value)||0,m:METRICS.map((_,i)=>num($("lc-"+i).value))},
           prior:{db:num($("l-pdb").value)||0,m:METRICS.map((_,i)=>num($("lp-"+i).value))}};
   if(S.line.cur.m.some(v=>v==null)) S.line.cur.m=DEFAULTS.line.cur.m.slice();
   {const RL0={};(P.refRoles||[]).forEach(r=>{const el=$("rl-"+r+"-name");const nm=el&&el.value;if(!nm)return;
     RL0[r]={name:nm,level:$("rl-"+r+"-level").value,season:$("rl-"+r+"-season").value||S.line.season||"2026",thru:num($("rl-"+r+"-thru").value)??"full",cur:{db:num($("rl-"+r+"-db").value)||0,m:METRICS.map((_,i)=>num($("rlc-"+r+"-"+i).value))}}});
     S.roleLines=RL0;delete S.lineSlot}
+  }
   saveConfig();update();
 }
 /* the position picker only switches positions; reference starters wait for their Save button */
 document.querySelector("#modelSettings .setbody").addEventListener("change",e=>{if(e.target.id==="setPos")return;
   if(e.target.closest('[data-sg="starter"]')){$("lineSave").disabled=false;$("lineSaveMsg").textContent="Not saved yet";return}readSettings()});
-$("lineSave").addEventListener("click",()=>{readSettings();$("lineSave").disabled=true;$("lineSaveMsg").textContent=OWNER&&DB?"Saved":"Only the owner can save"});
+$("lineSave").addEventListener("click",()=>{readSettings(true);$("lineSave").disabled=true;$("lineSaveMsg").textContent=OWNER&&DB?"Saved":"Only the owner can save"});
 $("teamGames").addEventListener("change",()=>{TG=num($("teamGames").value)||1;if(DB)DB.doc("shared/season").set({teamGames:TG}).catch(()=>flash("Couldn't save team games. You may have view-only access."));update()});
 $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;update()});
 
