@@ -503,9 +503,10 @@ button,input,select,textarea{font-family:inherit}
 /* computers: Big board position columns wrap onto a second row instead of squeezing */
 @media (min-width:901px){#tbCols,#hsTbCols{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))!important;overflow-x:visible;align-items:start}}
 #pvisits{display:grid;gap:10px}
+#ownerTools{order:2}
 /* phones: less chrome above the first player */
 @media (max-width:640px){.wrap{gap:14px}#posBar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}#posBar::-webkit-scrollbar{display:none}#posBar>*{flex:none}}
-@media (min-width:900px){#hsTbl td,#hsTbl th{padding-left:5px;padding-right:5px}#hsTbl .stag{font-size:10.5px}}
+@media (min-width:900px){#hsTbl td,#hsTbl th{padding-left:5px;padding-right:5px}#hsTbl .stag{font-size:10.5px}#hsTbl td.cst,#hsTbl td.cof{white-space:normal}}
 /* touch screens: bigger targets for stars and move arrows */
 @media (pointer:coarse){.tag .mv{gap:6px}.tag .mv button{font-size:13px;padding:8px 11px;border-radius:6px}}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
