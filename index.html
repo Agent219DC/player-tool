@@ -501,7 +501,11 @@ button,input,select,textarea{font-family:inherit}
 .pc-bud{margin-top:4px;padding-top:6px;border-top:1px dashed var(--line)}
 @media (max-width:900px){.tb-cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:240px}}
 /* computers: Big board position columns wrap onto a second row instead of squeezing */
-@media (min-width:901px){#tbCols,#hsTbCols{grid-template-columns:repeat(auto-fill,minmax(230px,1fr));overflow-x:visible;align-items:start}}
+@media (min-width:901px){#tbCols,#hsTbCols{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))!important;overflow-x:visible;align-items:start}}
+#pvisits{display:grid;gap:10px}
+/* phones: less chrome above the first player */
+@media (max-width:640px){.wrap{gap:14px}#posBar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}#posBar::-webkit-scrollbar{display:none}#posBar>*{flex:none}}
+@media (min-width:900px){#hsTbl td,#hsTbl th{padding-left:5px;padding-right:5px}#hsTbl .stag{font-size:10.5px}}
 /* touch screens: bigger targets for stars and move arrows */
 @media (pointer:coarse){.tag .mv{gap:6px}.tag .mv button{font-size:13px;padding:8px 11px;border-radius:6px}}
 #recTbl td.num button{border:0;background:transparent;color:var(--fg);font:600 14px var(--mono);cursor:pointer;padding:2px 6px;border-radius:4px}
@@ -4297,7 +4301,7 @@ function boardRow(x,rank){const r=x.r,s=x.s,t=tierOfHS(s.score),o40=official(r,"
   const tm=s.Tm!=null?(s.estTm?"~":"")+f1(s.Tm,0):"–";
   return `<tr data-id="${id}">${rank?`<td class="num crk">${rank}</td>`:`<td class="pick"><input type="checkbox" data-hpick="${id}" aria-label="Select ${e_(r.name)}"${PICKH.has(r.id)?" checked":""}></td>`}
   <td class="cn"><button type="button" class="star${r.star?" on":""}" data-hstar="${id}" aria-pressed="${!!r.star}" aria-label="${r.star?"Unstar":"Star"} ${e_(r.name)}" title="${r.star?"Starred priority":"Star as a priority"}">${r.star?"★":"☆"}</button><b>${e_(r.name||"Unnamed")}</b>${s.conf&&s.conf!=="–"&&s.score!=null?confFlag({conf:s.conf}):""}${noteMk(r)}${hudlOf(r)?`<a class="hudlmk" href="${e_(hudlOf(r))}" target="_blank" rel="noopener" title="Watch his Hudl" aria-label="Watch ${e_(r.name)} on Hudl">▶ Hudl</a>`:""}<span class="mstat"> ${st}</span><div class="sub">${e_([r.school,r.state].filter(Boolean).join(", "))}${r.commitTo&&!isCom(r.status)?` · <b>${e_(r.commitTo)}</b>`:""}<span class="mstat"> · ${e_([r.pos,fmtHt(r.ht),r.wt].filter(Boolean).join(" · "))}</span></div></td>
-  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?" / "+e_(r.wt):""}${r.meas?`<span class="meas-ok" title="Measured by us: ${e_(measWhen(r.meas))}"> ✓</span>`:""}</td><td class="cst">${st}</td>
+  <td class="cpo">${e_(r.pos||"–")}</td><td class="ccl">${e_(r.cls||"")}</td><td class="num chw">${e_(fmtHt(r.ht)||"–")}${r.wt?"/"+e_(r.wt):""}${r.meas?`<span class="meas-ok" title="Measured by us: ${e_(measWhen(r.meas))}"> ✓</span>`:""}</td><td class="cst">${st}</td>
   <td class="num cf">${s.F&&s.F.coaches?f1(s.F.score/10,1)+` <span class="sub">(${s.F.coaches})</span>`:"–"}</td><td class="num ctm"${s.estTm?' title="Estimated from Tracking Football (no usable testing yet)"':""}>${tm}${s.disagree?' <span class="hs-tag l" title="Our testing and Tracking Football disagree by 25+ points">CHECK</span>':""}</td>
   <td class="num cg${t?" tc-"+t:""}" data-l="${s.score!=null?e_(L):""}">${s.score!=null?`<b>${f1(s.score,1)}</b>`:`<span class="mtest sub">${s.Tm!=null?"Test "+tm:"No grade"}</span><span class="dtest">–</span>`}</td><td class="ctr cle"><span class="letter${t?" tc-"+t:""}">${L}</span></td>
   <td class="ct">${t?`<span class="chip t-${t}">${TN[t]}</span>`:""}</td>
