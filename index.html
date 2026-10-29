@@ -134,6 +134,7 @@ body.scrolled header .mulogo{width:32px;height:32px}
 @media (min-width:900px){header .brand>.mulogo,header .brand>.mudiv{display:none!important}}
 .rl-tri{display:none}body.mode-gm .rl-tri{display:inline}body.mode-gm .rl-liq{display:none}
 #recTbl td.num,#recTbl td.num :is(b,button,span){font-size:14px}
+select.stale{border-color:var(--pPass);color:var(--tPass)}
 @media (min-width:900px){h2.dup{display:none}}
 .sgrp .grid2>label{justify-content:space-between}
 svg.brandlogo .rl-liq{fill:var(--accent)}svg.brandlogo{height:auto!important;aspect-ratio:112/68;filter:none;color:var(--fg)}#gate .gatelogo{justify-self:center;color:var(--fg)}
@@ -3662,7 +3663,9 @@ function fillLineSel(keep,id,L,role){const sel=$(id);if(!sel)return;const cur=(k
   latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&roleOk(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
   const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;const spots=role?REF_SPOTS[role]:POSKEY==="WR"?["X","Z"]:POSKEY==="IOL"?["LG","RG"]:null;
   try{["now"].forEach(z=>(spots?spots.flatMap(sp=>((DCS[z]||{}).groups||{})[sp]||[]):dcAllZ(z).filter(y=>y&&y.g===grp)).filter(y=>y&&y.n).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);{const be=lineBoardEntry(y.n),br=be&&score(be);opts.push({v:y.n,l:y.n+(br&&br.grade!=null?` · ${fmt(br.grade)} ${br.letter}`:" · not on the board")})}}))}catch(e){}
-  if(cur&&!seen.has(cur.toLowerCase()))opts.unshift({v:cur,l:cur});
+  /* a saved starter who's no longer one of our players here gets flagged so it's obvious he needs replacing */
+  const stale=!!cur&&!seen.has(cur.toLowerCase());if(stale)opts.unshift({v:cur,l:"⚠ "+cur+" · no longer at "+(role?RL(role):P.label)+", pick a new starter"});
+  sel.classList.toggle("stale",stale);
   if(role)opts.unshift({v:"",l:"— None (uses the main starter) —"});
   sel.innerHTML=opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join("")||'<option value="">No roster players at this position yet</option>';sel.value=cur}
 function lineFill(id,pf,mp){$(id).dataset.dirty="1";const e=lineBoardEntry($(id).value);if(!e)return;
