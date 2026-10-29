@@ -3701,7 +3701,7 @@ function readSettings(){
     S.roleLines=RL0;delete S.lineSlot}
   saveConfig();update();
 }
-document.querySelector(".setbody").addEventListener("change",readSettings);
+document.querySelector("#modelSettings .setbody").addEventListener("change",readSettings);
 $("teamGames").addEventListener("change",()=>{TG=num($("teamGames").value)||1;if(DB)DB.doc("shared/season").set({teamGames:TG}).catch(()=>flash("Couldn't save team games. You may have view-only access."));update()});
 $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;update()});
 
@@ -3768,7 +3768,7 @@ function tg(){return TG??S.teamGames??6}
 function applyLock(){
   const lock=!OWNER;
   $("lockNote").hidden=!lock;
-  document.querySelectorAll(".setbody input,.setbody select,.setbody button").forEach(el=>el.disabled=lock);
+  document.querySelectorAll("#modelSettings .setbody input,#modelSettings .setbody select,#modelSettings .setbody button").forEach(el=>el.disabled=lock);
   $("teamGames").disabled=S.mode==="full";
 }
 function update(){render();renderBoard()}
