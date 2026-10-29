@@ -1,5 +1,7 @@
 # Roster Lab repo notes (repo Agent219DC/roster-lab, live at agent219dc.github.io/roster-lab)
 
+- Owner rule: only change what the owner asked for or approved from a list of proposed changes. Never change anything else (colors especially) on your own; propose it and wait.
+
 - `index.html` is the entire app: the shared Roster Lab page (formerly Player Tool) plus a Firebase shim (sign-in gate, `window.claude.use()` stand-in for db/user/downloads). Edit it directly.
 - Sign-in is Google only on the site: the email-link controls on the gate are hidden (Firebase has email-link sign-in off). The owner chose to leave the Firebase Email/Password provider on and `localhost` in authorized domains for now. The browser API key is restricted to agent219dc.github.io and the firebaseapp.com domain.
 - Owner email is set in two places: `OWNER_EMAIL` in index.html and `isOwner()` in firestore.rules. Keep them in sync.
