@@ -955,7 +955,7 @@ window.claude={use:async n=>{
     </div>
     <p class="recroster" id="recRoster"></p>
     <div class="tablewrap"><table id="recTbl"></table></div>
-    <p class="note"><b>Open</b> = position max minus scholarship players on the Next season depth chart. <b>Left</b> = Open minus Committed targets not on it yet. <b>Total</b> adds up only the positions with room; positions over their max (red) aren't subtracted, so it can differ from the roster count above. <b>Working</b> = Target + Contacted. Tap a number to see those players.</p>
+    <p class="note"><b>Open</b> = position max minus players on the Next season depth chart. <b>Left</b> = Open minus Committed targets. <b>Total</b> counts only positions with room. <b>Working</b> = Target + Contacted. Tap a number to see the players.</p>
   </section>
 
   <section id="pvisits" data-page="pvisits" class="pg-off">
@@ -1139,7 +1139,7 @@ window.claude={use:async n=>{
       <div class="btns"><button class="btn" type="button" id="hsCmpSel" disabled>Compare selected</button><button class="btn primary" type="button" id="hsListPrint" disabled>Print selected</button></div>
     </div>
     <div class="tablewrap"><table id="hsTbl"></table></div>
-    <p class="note">Score = film + testing by position (70 = a Marshall starter); testing only until a coach grades film. <b>~</b> = testing estimated from Tracking Football · <b>CHECK</b> = ours and theirs differ by 25+ · <b>vs MU</b> = athletic percentile vs. our players at his spot. <b>Confidence</b>: High = 2+ coaches' film and verified testing; Medium caps at B, Low at C.</p>
+    <p class="note">Score = film + testing (70 = a Marshall starter). <b>~</b> = estimated testing · <b>CHECK</b> = our testing and Tracking Football differ by 25+ · <b>vs MU</b> = athletic percentile vs. our players. <b>Confidence</b>: High = 2+ coaches' film and verified testing; Medium tops out at B, Low at C.</p>
   </section>
 
   <section id="hsbig" data-page="hsbig" style="display:grid;gap:10px">
@@ -1184,7 +1184,7 @@ window.claude={use:async n=>{
       </div>
     </details>
     <details class="sgrp"><summary>Testing weights by position</summary>
-      <p class="note">How much each test counts by position (rows add to 100). Results count by reliability: laser 100%, hand 85%, GPS 70%, listed 40%; a 100m for the 40 or results over 18 months old count less. Thin testing shifts weight to film.</p>
+      <p class="note">Each test's share of the score (rows add to 100). Laser times count fully, hand 85%, GPS 70%, listed 40%; old results count less. Thin testing shifts weight to film.</p>
       <div class="tablewrap"><table id="hsTestWTbl"></table></div>
     </details>
     <details class="sgrp"><summary>Testing benchmarks</summary>
@@ -3187,7 +3187,7 @@ function renderBudget(){const b=BUDGET;if(!b){$("budBody").innerHTML='<p class="
           <td class="rm"><button type="button" data-brm aria-label="Remove ${esc(x.slot)}">×</button></td></tr>`).join("")}</tbody></table>
         <div class="ft"><span data-gf="${gi}"></span>${goal!=null?` · goal ${(goal*100).toFixed(0)}%`:""}</div>
         <div class="bud-add">${kinds.map(k=>`<button type="button" class="linkbtn" data-badd="${gi}" data-pos="${esc(k)}">+ ${esc(k)} spot</button>`).join("")}</div></div>`}).join("")}</div>`).join("")}</div></section>`).join("")}
-    <p class="note">Type to change a name, amount or total; it saves on its own. Clear a name to open the spot. <b>Per month</b> = 12-month deal. A wavy underline means the name isn't on the Next season depth chart.</p>`;
+    <p class="note">Edits save on their own. Clear a name to open the spot. <b>Per month</b> = 12-month deal. Wavy underline = not on the Next season depth chart.</p>`;
   budRecalc()}
 /* budget names are typed by hand: flag any that don't match someone on the Next season depth chart */
 function budOffChart(name){const all=(DCS.next&&DCS.next.groups)?dcAllZ("next"):[];if(!all.length)return false;const n=normName(name);return !all.some(x=>normName(x.n)===n)}
@@ -3943,7 +3943,7 @@ function sbcOddsReview(){if(!PODDS)return "";const L=(SBC.portal||[]).map(x=>[x,
   const by=l=>L.filter(([x,c])=>c.lvl===l);
   return `<h3 class="sec-h">Did the portal odds hold up?</h3><div class="tablewrap"><table class="sbc-cls"><thead><tr><th>Came from</th><th class="num">Transfers</th>${K.map(k=>`<th class="num" title="Odds said → what happened">${N[k]}</th>`).join("")}<th class="num" title="Share whose outcome matched their odds: the most likely outcome, or one that 30%+ of players like him hit">Matched</th></tr></thead><tbody>
   ${row("All",L)}${["P4","G6","FCS","D2"].map(l=>row(ODDS_LVL[l],by(l))).join("")}</tbody></table></div>
-  <p class="note">Odds come from the ${esc(PODDS.season||"2026")} class (old level + old role), so this tests them on players they never saw. Each cell: odds said → what happened. A player's own odds are in his Eval.</p>`}
+  <p class="note">Odds come from the ${esc(PODDS.season||"2026")} class, so this checks them on players they never saw. Each cell: odds said → what happened.</p>`}
 /* Good = 70+ with a real role (40%+ of his side's snaps); Bad = under 60; Not playing = under 10% of snaps; everything else OK */
 /* No data = zero PFF snaps in his last season before the move and none here (never enrolled, hurt, left or redshirted: we can't tell), so it doesn't count either way */
 function sbcVerdictOf(x){if(x.gone)return "gone";if(x.spec)return "sp";if(!(x.snaps26>0)&&(!x.y25||String(x.yr)!==String(+SBC_YR-1)))return "nd";const sh=x.share26||0;if(sh<0.10||x.g26==null)return "np";if(x.g26<60)return "bad";if(x.g26>=70&&sh>=0.40)return "good";return "ok"}
@@ -4033,7 +4033,7 @@ function sbcBudgetView(rows){const {rows:R0,fw,fg}=sbcBudgetCalc(rows);const m=S
   return `<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["wab","Wins vs. budget"],["budget","Budget"],["gab","Talent vs. budget"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcbsort="${k}" aria-pressed="${SBC_BSORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveBud">Save budgets</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
     ${miss?`<p class="sub">${miss} team${miss===1?" has":"s have"} no budget yet; use Edit budgets.</p>`:""}
     <div class="tablewrap"><table id="sbcBudTbl">${head}<tbody>${body}</tbody></table></div>
-    <p class="note"><b>Expected W</b> = wins a team with that budget usually gets (league fit${fw?`, explains ${Math.round(fw.r2*100)}% of record`:""}). <b>Wins vs. budget</b> = actual − expected; ±1 = over/under. <b>Talent vs. budget</b> = team grade vs. what that money usually buys. Budgets: ${esc(m.budgetSrc||"staff")}.</p>
+    <p class="note"><b>Expected W</b> = wins that budget usually buys${fw?` (explains ${Math.round(fw.r2*100)}% of record)`:""}. <b>Wins vs. budget</b> = actual − expected; ±1 = over/under. <b>Talent vs. budget</b> = team grade vs. what that money usually buys. Budgets: ${esc(m.budgetSrc||"staff")}.</p>
     ${sbcChart(R0,fw||{a:.5,b:0},{x:r=>r.budget,res:r=>r.wab,xlab:"Roster budget ($M) →",tick:1,pad:.4,fx:v=>"$"+v+"M",tip:r=>"budget "+sbcMoney(r.budget)})}`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
   const cell=p=>{if(!p)return "<td></td><td></td>";const r=p.r;const low=r&&r.conf==="Low";
@@ -4062,7 +4062,7 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
   const t=rows.find(r=>r.fid===SBC_TEAM);
   el.innerHTML=`${pageSeg}<div class="btns" style="align-items:center"><span class="sub">Sort by</span><span class="seg" role="group" aria-label="Sort">${[["waa","Wins vs. talent"],["grade","Team grade"],["pct","Record"]].map(([k,n])=>`<button type="button" data-sbcsort="${k}" aria-pressed="${SBC_SORT===k}">${n}</button>`).join("")}</span>${SBC_EDIT?`<button class="btn primary" type="button" id="sbcSaveRec">Save records</button><button class="btn" type="button" id="sbcCancelRec">Cancel</button>`:""}</div>
     <div class="tablewrap"><table id="sbcTbl">${head}<tbody>${body}</tbody></table></div>
-    <p class="note"><b>Team grade</b> = two-deep graded on our board scales (QB 3×, backups ¼). <b>Expected W</b> = wins that grade usually gets (league fit, explains ${Math.round(fit.r2*100)}% of record). <b>Wins vs. talent</b> = actual − expected; ±1 = over/under.</p>
+    <p class="note"><b>Team grade</b> = two-deep on our board scales (QB 3×, backups ¼). <b>Expected W</b> = wins that grade usually gets (explains ${Math.round(fit.r2*100)}% of record). <b>Wins vs. talent</b> = actual − expected; ±1 = over/under.</p>
     ${sbcChart(rows,fit)}
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px"><h3 class="sec-h" style="margin:0">Team overview</h3><select id="sbcTeamSel" aria-label="Team">${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${r.fid===SBC_TEAM?" selected":""}>${esc(r.name)}</option>`).join("")}</select>
       ${t?(SBC_SZN==="next"?(()=>{const n=sbcNext(SBC_TEAM);const ch=(a,b)=>a==null||b==null?"":` <span class="${a-b>=0?"sbc-up":"sbc-dn"}">(${a-b>=0?"+":"−"}${Math.abs(a-b).toFixed(1)})</span>`;return `<span class="sub">Next season · grade <b>${fmt(n.grade)}</b>${ch(n.grade,t.grade)} · starters ${fmt(n.st)}${ch(n.st,t.st)} · offense <b>${fmt(n.off)}</b>${ch(n.off,t.off)} · defense <b>${fmt(n.def)}</b>${ch(n.def,t.def)}</span>`})():`<span class="sub">${t.w}-${t.l} · grade ${fmt(t.grade)} (#${t.gradeRk}) · starters ${fmt(t.st)} · offense ${fmt(t.off)} · defense ${fmt(t.def)}${t.miss?` · ${t.miss} not graded`:""}</span>`):""}</div>
@@ -4073,7 +4073,7 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     ${SBC.portal?`
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 class="sec-h" style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"&&OWNER?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
-    <p class="note">Every ${SBC_YR} transfer on 247's lists plus any PFF transfers 247 missed. <b>Last season</b> = his last year played (shown if not ${+SBC_YR-1}). <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. <b>No data</b> = no PFF snaps last season or this one, so we can't tell why; hit rate and the odds skip them, K/P/LS and players who left. <b>Eval</b> = strengths and weaknesses (top or bottom quarter of Sun Belt transfers at his position) and why he's a good or bad take.</p>${SBC_YR!=="2026"?sbcOddsReview():""}`:""}
+    <p class="note">Every ${SBC_YR} transfer on 247's lists plus PFF transfers 247 missed. <b>Good</b> = 70+ on 40%+ of snaps · <b>Bad</b> = under 60 · <b>Not playing</b> = under 10% of snaps. Hit rate skips no-data players, K/P/LS and players who left. <b>Eval</b> = his strengths, weaknesses and why he's a good or bad take.</p>${SBC_YR!=="2026"?sbcOddsReview():""}`:""}
     ${SBC_YR==="2026"?`<h3 class="sec-h">Next season snapshot</h3>${sbcNextLeague()}
     <p class="note">Graduating = PFF 2027 draft class. Returning two-deep players move up; <b>open</b> = no returner left for the spot. Click <b>Next season</b> above to see a team's field.</p>`:""}`}
 $("sbcBody").addEventListener("click",e=>{const s=e.target.closest("[data-sbcsort]");if(s){SBC_SORT=s.dataset.sbcsort;renderSbc();return}
