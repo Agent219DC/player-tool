@@ -1237,7 +1237,7 @@ window.claude={use:async n=>{
       </details>
       <details class="sgrp" data-sg="starter"><summary>Our starter (reference row)</summary>
       <fieldset><legend>Our starter (reference row)</legend>
-        <p class="note" style="margin:0 0 6px">Pick our starter from the roster. If he's on the board, his board numbers are used; then Save settings.</p>
+        <p class="note" style="margin:0 0 6px">Pick our starter from the roster; it saves on its own. If he's on the board, his board numbers are used.</p>
         <div class="grid2">
           <label>Name<select id="l-name"></select></label>
           <label>Level<select id="l-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
@@ -1248,6 +1248,16 @@ window.claude={use:async n=>{
         </div>
         <div class="grid2" id="lineCur"></div>
         <div class="grid2" id="linePrior" hidden></div>
+      </fieldset>
+      <fieldset id="lineSlotBox" hidden><legend>Slot starter (reference row)</legend>
+        <div class="grid2">
+          <label>Name<select id="ls-name"></select></label>
+          <label>Level<select id="ls-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
+          <label>Season<input id="ls-season" type="number" step="1"></label>
+          <label>Numbers through (games, blank = full)<input id="ls-thru" type="number" step="1"></label>
+          <label>This season <span class="sw">dropbacks</span><input id="ls-db" type="number"></label>
+        </div>
+        <div class="grid2" id="lineSlotCur"></div>
       </fieldset>
       </details>
       <div class="btns"><button class="btn" type="button" id="reset">Reset to defaults</button></div>
@@ -1556,14 +1566,15 @@ function rawScore(m,A){const W=S.weights;let tw=0,sum=0;const n=m.map((v,i)=>v==
 function missCount(m){return m?m.filter(v=>v==null).length:99}
 /* our reference starter = his own board entry when he's on the board (one player, one grade);
    the Model settings copy is only a fallback */
-function lineEntry(){const L=S.line;if(!L||!L.name||!Array.isArray(BOARD))return null;const nm=String(L.name).toLowerCase().trim();
+const lineOf=role=>role==="Slot"&&S.lineSlot&&S.lineSlot.name?S.lineSlot:S.line;
+function lineEntry(role){const L=lineOf(role);if(!L||!L.name||!Array.isArray(BOARD))return null;const nm=String(L.name).toLowerCase().trim();
   const c=BOARD.filter(p=>!p.deleted&&String(p.name||"").toLowerCase().trim()===nm&&isOurs(p)&&p.m&&p.db);
   if(!c.length)return null;return c.find(p=>String(p.season)===String(L.season))||c.slice().sort((a,b)=>(+b.season||0)-(+a.season||0))[0]}
-function lineScore(){
-  {const e=lineEntry(),L0=S.line;
+function lineScore(role){
+  {const e=lineEntry(role),L0=lineOf(role);
     const lp=e||(L0&&L0.cur&&L0.cur.db?{level:L0.level,season:L0.season,thru:L0.thru==null||L0.thru===""?"full":L0.thru,db:L0.cur.db,m:L0.cur.m,prior:null}:null);
     const r=lp&&score(lp);if(r&&r.final!=null)return {n:r.n,raw:r.raw,m:r.m,final:r.final,entry:e||null,blended:!!(lp.prior&&lp.prior.db)}}
-  const L=S.line,A=anchors(modeFor(L.thru==null||L.thru===""?"full":L.thru)); const b=blend(L.cur,null); const r=rawScore(b.m,A);
+  const L=lineOf(role),A=anchors(modeFor(L.thru==null||L.thru===""?"full":L.thru)); const b=blend(L.cur,null); const r=rawScore(b.m,A);
   return {...r,m:b.m,final:r.raw*(S.levels[L.level]??1)};
 }
 function scaleReady(){const A=anchors();return !A.floor.some(v=>v==null)&&!A.ceil.some(v=>v==null)}
@@ -1622,7 +1633,7 @@ const TIERNAME={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation
 function metricInputs(el,prefix,pre){el.innerHTML=METRICS.map((m,i)=>`<label>${pre||""}${m.name}${m.unit?" (%)":""}<input id="${prefix}-${i}" type="number" step="${m.step}"></label>`).join("")}
 function buildPositionUI(){
   {const w=$("dbWrap"),w2=$("prDbWrap"),lv=$("prLvWrap");metricInputs($("cur"),"c");metricInputs($("prior"),"r");w.hidden=false;w2.hidden=false;$("cur").prepend(w);$("prior").prepend(w2);lv.hidden=false;$("prior").prepend(lv)}
-  metricInputs($("lineCur"),"lc","This season · "); metricInputs($("linePrior"),"lp","Last season · ");
+  metricInputs($("lineCur"),"lc","This season · ");metricInputs($("lineSlotCur"),"lsc","This season · "); metricInputs($("linePrior"),"lp","Last season · ");
   document.querySelectorAll(".sw").forEach(e=>e.textContent=P.sample);
   document.querySelectorAll(".sw-cap").forEach(e=>e.textContent=P.sample[0].toUpperCase()+P.sample.slice(1));
   updateBoardTitle();
@@ -1817,7 +1828,7 @@ function render(){setTimeout(()=>{try{updateReportBtn()}catch(e){}},0);showCaree
     ?`Full credit at ${S.dbPerGame*tg()} ${P.sample} (${S.dbPerGame} × ${tg()} games); last season's count at ${S.priorWeight} weight.`
     :`Full credit at ${S.dbPerGame*S.seasonGames} ${P.sample}; last season's count at ${S.priorWeight} weight.`)+(A.fallback?" Full-season ceilings not set; using mid-season ceilings.":"");
   $("teamGames").disabled=S.mode==="full";
-  const p=readForm(), r=score(p), L=lineScore();
+  const p=readForm(), r=score(p), L=lineScore(p.role);
   if(!r){
     $("v-score").innerHTML="";$("v-score").hidden=true;$("scale").hidden=true;$("v-name").textContent=p.name||"No grade yet";
     $("v-sub").textContent=scaleReady()?`Enter his ${P.sample} and at least three of the four numbers to see a grade.`:`The ${P.label} scale isn't set yet. Add the 2025 top and bottom values in Model settings.`;$("v-chips").innerHTML="";
@@ -1839,7 +1850,7 @@ ${r.fPrior!=null?`× level factor ${r.factor.toFixed(2)}  ${fmt(r.leveled)}  (${
 Sample               ${p.prior&&p.prior.db?`${fmt(r.eff,0)} (${p.db} + ${S.priorWeight} × ${p.prior.db} last season)`:p.db} ${P.abbr} of ${r.expected} for full credit${r.part<1?` → pulled ${Math.round((1-r.part)*100)}% toward ${fmt(r.target)}`:" → full credit"}
 ${p.prior&&p.prior.db?`Blended with last season at ${S.priorWeight} weight (${fmt(r.eff,0)} effective ${P.abbr})\n`:""}${r.disagree!=null?`Season-to-season gap  ${fmt(r.disagree)} pts (${r.split?"over":"under"} ${S.agreeGap??20} → ${r.split?"confidence −1 level":"no change"})\n`:""}Raw score            ${fmt(r.final)}  (our starter ${fmt(L.final)})
 Grade score          ${fmt(r.grade)}  ${r.letter}   ·   Grey ticks on bars = our starter`;
-  drawScale(r.grade,S.line.name?lg:null);
+  drawScale(r.grade,lineOf(p.role).name?lg:null);
 }
 function drawScale(g,lg){
   const cuts=[0,60,70,80,90,100],cols=["--tPass","--tRotation","--tStarter","--tImpact","--tElite"];
@@ -2312,7 +2323,7 @@ async function renderOverview(){
       const live=all.filter(x=>x.r.conf==="High"||x.r.conf==="Medium");
       const rows=[];
       /* listed Marshall starter fills a spot left blank by a low-confidence roster player: his own board entry when he has one, otherwise the model-settings numbers */
-      const Ln=S.line;let lineX=null;
+      const LXS={};const buildLX=Ln=>{let lineX=null;
       if(Ln&&Ln.name&&Ln.cur&&Ln.cur.db){const lr=score({name:Ln.name,level:Ln.level,season:Ln.season,thru:Ln.thru,db:Ln.cur.db,m:Ln.cur.m,prior:null});
         if(lr&&lr.grade!=null)lineX={p:{name:Ln.name,school:"Marshall",season:Ln.season||"",listed:true},r:lr}}
       if(lineX){
@@ -2324,15 +2335,17 @@ async function renderOverview(){
           if(live.includes(match))lineX=null;
           else lineX=match; /* use his board entry (the numbers staff keep updated), not the model-settings copy */
         }
-      }
+      }return lineX};
+      LXS.main=buildLX(S.line);LXS.slot=S.lineSlot&&S.lineSlot.name?buildLX(S.lineSlot):undefined;
       (OV_SPOTS[k]||[{lbl:k,n:1}]).forEach((g,gi)=>{
         const inRole=x=>!g.role||x.p.role===g.role;
         const stays=x=>!NEXT||x.p.elig!==0; /* next season: graduating players drop off */
         const ourAll=all.filter(x=>inRole(x)&&isOurs(x.p)&&(+x.p.season||0)===yr);
         /* next season: every returning player counts (any confidence); no listed-starter fill-in */
         let mine=(NEXT?all:live).filter(x=>inRole(x)&&isOurs(x.p)&&(+x.p.season||0)===yr&&stays(x));
+        const lk=g.role==="Slot"&&LXS.slot!==undefined?"slot":"main",lineX=LXS[lk];
         if(!NEXT&&lineX&&(!g.role||!lineX.p.role||lineX.p.role===g.role)&&mine.length<g.n&&ourAll.filter(stays).length>mine.length&&!mine.some(x=>x.p.name.toLowerCase()===lineX.p.name.toLowerCase())){
-          if(stays(lineX)){mine.push(lineX);lineX=null}}
+          if(stays(lineX)){mine.push(lineX);LXS[lk]=null}}
         const isTarget=x=>inRole(x)&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="Pass"&&x.p.status!=="NIP";
         const commits=all.filter(x=>isTarget(x)&&x.p.status==="Committed");
         if(NEXT)mine=mine.concat(commits.map(x=>({p:x.p,r:x.r,commit:true})));
@@ -3644,19 +3657,24 @@ function renderAnchors(){
 }
 /* reference starter: our players at this position (board entries with numbers first, then the rest of the depth chart group) */
 function lineBoardEntry(nm){const n=String(nm||"").toLowerCase().trim();const c=BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&String(p.name||"").toLowerCase().trim()===n&&p.m&&p.db);return c.sort((a,b)=>(+b.season||0)-(+a.season||0))[0]||null}
-function fillLineNames(keep){const sel=$("l-name");if(!sel)return;const cur=(keep&&sel.dataset.dirty&&sel.value)||(S.line&&S.line.name)||"";if(!keep)delete sel.dataset.dirty;const seen=new Set(),opts=[];
-  latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
-  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;try{["now"].forEach(z=>dcAllZ(z).filter(y=>y&&y.n&&y.g===grp).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:y.n,l:y.n+" · not on the board"})}))}catch(e){}
+function fillLineNames(keep){fillLineSel(keep,"l-name",S.line,null);if(P.roles)fillLineSel(keep,"ls-name",S.lineSlot,"Slot")}
+function fillLineSel(keep,id,L,role){const sel=$(id);if(!sel)return;const cur=(keep&&sel.dataset.dirty&&sel.value)||(L&&L.name)||"";if(!keep)delete sel.dataset.dirty;const seen=new Set(),opts=[];
+  const roleOk=p=>!P.roles||(role==="Slot"?p.role==="Slot":p.role!=="Slot");
+  latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&roleOk(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
+  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;const spots=P.roles?(role==="Slot"?["SLOT"]:["X","Z"]):null;
+  try{["now"].forEach(z=>(spots?spots.flatMap(sp=>((DCS[z]||{}).groups||{})[sp]||[]):dcAllZ(z).filter(y=>y&&y.g===grp)).filter(y=>y&&y.n).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:y.n,l:y.n+" · not on the board"})}))}catch(e){}
   if(cur&&!seen.has(cur.toLowerCase()))opts.unshift({v:cur,l:cur});
+  if(role==="Slot")opts.unshift({v:"",l:"— None (slots use the main starter) —"});
   sel.innerHTML=opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join("")||'<option value="">No roster players at this position yet</option>';sel.value=cur}
-$("l-name").addEventListener("change",()=>{$("l-name").dataset.dirty="1";const e=lineBoardEntry($("l-name").value);if(!e)return;
-  $("l-level").value=e.level||"G6";$("l-season").value=e.season||"";$("l-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$("l-db").value=e.db??"";METRICS.forEach((_,i)=>{$("lc-"+i).value=(e.m||[])[i]??""})});
+[["l-name","l","lc"],["ls-name","ls","lsc"]].forEach(([id,pf,mp])=>$(id).addEventListener("change",()=>{$(id).dataset.dirty="1";const e=lineBoardEntry($(id).value);if(!e)return;
+  $(pf+"-level").value=e.level||"G6";$(pf+"-season").value=e.season||"";$(pf+"-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$(pf+"-db").value=e.db??"";METRICS.forEach((_,i)=>{$(mp+"-"+i).value=(e.m||[])[i]??""})}));
 function fillSettings(){
   renderAnchors();
   $("s-dbpg").value=S.dbPerGame;$("s-season").value=S.seasonGames;$("s-pw").value=S.priorWeight;{const C=cuts();$("s-impact").value=C.impact;$("s-starter").value=C.starter;$("s-rot").value=C.rotation;}$("s-elite").value=S.eliteCut??80;$("s-gap").value=S.agreeGap??20;$("s-mindb").value=S.agreeMinDb??75;
   ["P4","G6","FCS"].forEach(k=>$("s-"+k).value=S.levels[k]);
   fillLineNames();$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
   METRICS.forEach((_,i)=>{$("lc-"+i).value=S.line.cur.m[i]??"";$("lp-"+i).value=S.line.prior.m[i]??""});
+  {const B=$("lineSlotBox");B.hidden=!P.roles;if(P.roles){const L=S.lineSlot||{};$("ls-season").value=L.season||S.line.season||"2026";$("ls-thru").value=L.thru==="full"?"":(L.thru??"");$("ls-level").value=L.level||"G6";$("ls-db").value=(L.cur&&L.cur.db)||"";METRICS.forEach((_,i)=>{$("lsc-"+i).value=(L.cur&&L.cur.m&&L.cur.m[i])??""})}}
   $("teamGames").value=tg();
   if(typeof applyLock==="function")applyLock();
 }
@@ -3669,6 +3687,7 @@ function readSettings(){
   S.line={name:$("l-name").value||"Starter",level:$("l-level").value,season:$("l-season").value||"2026",thru:num($("l-thru").value)??"full",cur:{db:num($("l-db").value)||0,m:METRICS.map((_,i)=>num($("lc-"+i).value))},
           prior:{db:num($("l-pdb").value)||0,m:METRICS.map((_,i)=>num($("lp-"+i).value))}};
   if(S.line.cur.m.some(v=>v==null)) S.line.cur.m=DEFAULTS.line.cur.m.slice();
+  if(P.roles){const nm=$("ls-name").value;S.lineSlot=nm?{name:nm,level:$("ls-level").value,season:$("ls-season").value||S.line.season||"2026",thru:num($("ls-thru").value)??"full",cur:{db:num($("ls-db").value)||0,m:METRICS.map((_,i)=>num($("lsc-"+i).value))}}:null}
   saveConfig();update();
 }
 document.querySelector(".setbody").addEventListener("change",readSettings);
