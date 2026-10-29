@@ -1249,16 +1249,7 @@ window.claude={use:async n=>{
         <div class="grid2" id="lineCur"></div>
         <div class="grid2" id="linePrior" hidden></div>
       </fieldset>
-      <fieldset id="lineSlotBox" hidden><legend>Slot starter (reference row)</legend>
-        <div class="grid2">
-          <label>Name<select id="ls-name"></select></label>
-          <label>Level<select id="ls-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
-          <label>Season<input id="ls-season" type="number" step="1"></label>
-          <label>Numbers through (games, blank = full)<input id="ls-thru" type="number" step="1"></label>
-          <label>This season <span class="sw">dropbacks</span><input id="ls-db" type="number"></label>
-        </div>
-        <div class="grid2" id="lineSlotCur"></div>
-      </fieldset>
+      <div id="roleLineBoxes" style="display:grid;gap:12px"></div>
       </details>
       <div class="btns"><button class="btn" type="button" id="reset">Reset to defaults</button></div>
     </div>
@@ -1386,7 +1377,7 @@ const POSITIONS={
       anchors:{mid:{floor:[0.43,20.3,2.3,2.7],ceil:[2.56,3.3,15.4,8.2]},full:{floor:[0.43,20.3,2.3,2.7],ceil:[2.56,3.3,15.4,8.2]}},
       line:{name:"Toby Payne",level:"G6",season:"2026",thru:6,cur:{db:187,m:[1.00,5.3,13.0,2.2]},prior:{db:297,m:[1.32,7.4,6.1,3.2]}}},
     samples:[]},
-  IOL:{label:"IOL",sample:"snaps",abbr:"snaps",unnamed:"Unnamed IOL",conf:[600,300],
+  IOL:{label:"IOL",sample:"snaps",abbr:"snaps",unnamed:"Unnamed IOL",conf:[600,300],roles:["C","G"],roleLbl:{C:"C",G:"G"},refRoles:["C"],roleBlank:true,
     metrics:[
       {name:"Pass-block grade (true pass sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
       {name:"Run-block grade",short:"Run Blk",unit:"",dp:1,step:0.1},
@@ -1396,7 +1387,7 @@ const POSITIONS={
       anchors:{mid:{floor:[29.7,52.6,94.6,18.0],ceil:[91.6,93.5,99.8,5.1]},full:{floor:[29.7,52.6,94.6,18.0],ceil:[91.6,93.5,99.8,5.1]}},
       line:{name:"Jalen Slappy",level:"G6",season:"2026",thru:6,cur:{db:436,m:[77.1,50.3,98.2,10.7]},prior:{db:799,m:[62.4,65.1,97.1,7.5]}}},
     samples:[]},
-  OT:{label:"OT",sample:"snaps",abbr:"snaps",unnamed:"Unnamed OT",conf:[600,300],
+  OT:{label:"OT",sample:"snaps",abbr:"snaps",unnamed:"Unnamed OT",conf:[600,300],roles:["LT","RT"],roleLbl:{LT:"LT",RT:"RT"},refRoles:["LT","RT"],roleBlank:true,
     metrics:[
       {name:"Pass-block grade (true pass sets)",short:"TPS PB",unit:"",dp:1,step:0.1},
       {name:"Run-block grade",short:"Run Blk",unit:"",dp:1,step:0.1},
@@ -1406,7 +1397,7 @@ const POSITIONS={
       anchors:{mid:{floor:[38.5,48.2,94.6,18.8],ceil:[89.6,84.2,99.6,5.9]},full:{floor:[38.5,48.2,94.6,18.8],ceil:[89.6,84.2,99.6,5.9]}},
       line:{name:"Tariq Montgomery",level:"G6",season:"2026",thru:6,cur:{db:423,m:[57.3,78.9,96.1,6.6]},prior:{db:571,m:[59.6,56.6,96.1,12.1]}}},
     samples:[]},
-  WR:{label:"WR",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed WR",conf:[250,125],roles:["Slot","Outside"],
+  WR:{label:"WR",sample:"receiving snaps",abbr:"rec. snaps",unnamed:"Unnamed WR",conf:[250,125],roles:["Slot","Outside"],roleLbl:{Slot:"SLOT",Outside:"WR"},refRoles:["Slot"],
     metrics:[
       {name:"Yards per route run",short:"YPRR",unit:"",dp:2,step:0.01},
       {name:"Receiving grade",short:"Rec Grd",unit:"",dp:1,step:0.1},
@@ -1543,6 +1534,8 @@ function saveConfig(){
 }
 function flash(msg,ms){const el=$("status");el.textContent=msg;el.hidden=false;clearTimeout(flash.t);flash.t=setTimeout(()=>el.hidden=true,ms||5000)}
 const $=id=>document.getElementById(id);
+/* player spot tags: WR Slot/Outside, IOL C/G, OT LT/RT */
+const RL=r=>r?((P.roleLbl||{})[r]||r):P.label;
 const num=v=>{const n=parseFloat(v);return isFinite(n)?n:null};
 const fmt=(v,d=1)=>v==null||!isFinite(v)?"–":v.toFixed(d);
 const fm=(v,i)=>fmt(v,METRICS[i].dp);
@@ -1566,7 +1559,9 @@ function rawScore(m,A){const W=S.weights;let tw=0,sum=0;const n=m.map((v,i)=>v==
 function missCount(m){return m?m.filter(v=>v==null).length:99}
 /* our reference starter = his own board entry when he's on the board (one player, one grade);
    the Model settings copy is only a fallback */
-const lineOf=role=>role==="Slot"&&S.lineSlot&&S.lineSlot.name?S.lineSlot:S.line;
+const REF_LBL={Slot:"Slot",C:"Center",LT:"LT",RT:"RT"},REF_SPOTS={Slot:["SLOT"],C:["OC"],LT:["LT"],RT:["RT"]};
+const roleLineOf=role=>{const L=S.roleLines&&S.roleLines[role];if(L&&L.name)return L;if(role==="Slot"&&S.lineSlot&&S.lineSlot.name)return S.lineSlot;return null};
+const lineOf=role=>roleLineOf(role)||S.line;
 function lineEntry(role){const L=lineOf(role);if(!L||!L.name||!Array.isArray(BOARD))return null;const nm=String(L.name).toLowerCase().trim();
   const c=BOARD.filter(p=>!p.deleted&&String(p.name||"").toLowerCase().trim()===nm&&isOurs(p)&&p.m&&p.db);
   if(!c.length)return null;return c.find(p=>String(p.season)===String(L.season))||c.slice().sort((a,b)=>(+b.season||0)-(+a.season||0))[0]}
@@ -1633,11 +1628,13 @@ const TIERNAME={Elite:"Elite",Impact:"Impact Starter",Starter:"Starter",Rotation
 function metricInputs(el,prefix,pre){el.innerHTML=METRICS.map((m,i)=>`<label>${pre||""}${m.name}${m.unit?" (%)":""}<input id="${prefix}-${i}" type="number" step="${m.step}"></label>`).join("")}
 function buildPositionUI(){
   {const w=$("dbWrap"),w2=$("prDbWrap"),lv=$("prLvWrap");metricInputs($("cur"),"c");metricInputs($("prior"),"r");w.hidden=false;w2.hidden=false;$("cur").prepend(w);$("prior").prepend(w2);lv.hidden=false;$("prior").prepend(lv)}
-  metricInputs($("lineCur"),"lc","This season · ");metricInputs($("lineSlotCur"),"lsc","This season · "); metricInputs($("linePrior"),"lp","Last season · ");
+  metricInputs($("lineCur"),"lc","This season · "); metricInputs($("linePrior"),"lp","Last season · ");
   document.querySelectorAll(".sw").forEach(e=>e.textContent=P.sample);
   document.querySelectorAll(".sw-cap").forEach(e=>e.textContent=P.sample[0].toUpperCase()+P.sample.slice(1));
   updateBoardTitle();
   $("roleWrap").hidden=!P.roles; $("roleFilter").hidden=!P.roles;
+  if(P.roles){$("p-role").innerHTML=(P.roleBlank?'<option value="">—</option>':"")+P.roles.map(r=>`<option value="${r}">${RL(r)}</option>`).join("");
+    $("roleFilter").innerHTML='<button type="button" data-rf="All" aria-pressed="true">All</button>'+P.roles.map(r=>`<button type="button" data-rf="${r}" aria-pressed="false">${RL(r)}</button>`).join("")}
   ROLEF="All"; document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"));
   $("posBar").innerHTML=ALL_POS.map(k=>`<button type="button" data-pos="${k}" aria-pressed="${k===POSKEY}"${POSITIONS[k]?"":" disabled title=\"Coming soon\""}>${k}</button>`).join("");
   /* phones scroll the position row: keep the current position in view */
@@ -1653,7 +1650,7 @@ function readForm(){
   const st2=$("p-status").value,el=$("p-elig").value,pd=$("p-pdate").value,vs=$("p-visit").value,vd=$("p-vdate").value;
   {const ag=$("p-agency").value.trim(),an=$("p-agent").value.trim(),pc=$("p-pcontact").value.trim();if(ag)p.agency=ag;if(an)p.agent=an;if(pc)p.pcontact=pc}
   if(st2)p.status=st2; if(el)p.elig=+el; if(pd)p.pdate=pd; else if(LEGACY_PORTAL==="Yes")p.portal="Yes"; if(vs||vd)p.visit=vs||"Scheduled"; if(vd)p.vdate=vd;
-  if(P.roles) p.role=$("p-role").value;
+  if(P.roles) p.role=$("p-role").value||null;
   if($("usePrior").checked){p.prior={db:num($("pr-db").value),m:METRICS.map((_,i)=>num($("r-"+i).value))};const pl=$("pr-level").value;if(pl&&pl!==p.level)p.prior.level=pl}
   Object.keys(ESPN_X).forEach(k=>{if(ESPN_X[k]!=null&&ESPN_X[k]!=="")p[k]=ESPN_X[k]});
   return p;
@@ -1661,7 +1658,7 @@ function readForm(){
 let LOADED_KEY=null,LEGACY_PORTAL=null;
 function fillForm(p){LOADED_KEY=p&&p.name?pkey(p):null;
   ESPN_X={espnId:p.espnId||null,espnClass:p.espnClass||null,career:p.career||null,teamId:p.teamId||null};espnReset();
-  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-agency").value=p.agency||"";$("p-agent").value=p.agent||"";$("p-pcontact").value=p.pcontact||"";$("p-role").value=p.role||"Outside";$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-gms").value=typeof p.thru==="number"?p.thru:(Number(p.thru)||tg()||"");$("gmsWrap").hidden=p.thru==="full";$("p-db").value=p.db??"";
+  $("p-name").value=p.name||"";$("p-school").value=p.school||"";$("p-level").value=p.level||"P4";$("p-ht").value=p.ht||"";$("p-wt").value=p.wt??"";$("p-hs").value=p.hs||"";$("p-home").value=p.home||"";$("p-st").value=p.st||"";$("p-status").value=p.status||"";$("p-elig").value=p.elig!=null?String(p.elig):"";LEGACY_PORTAL=p.portal||null;$("p-pdate").value=p.pdate||"";$("p-visit").value=p.visit||"";$("p-vdate").value=p.vdate||"";$("p-agency").value=p.agency||"";$("p-agent").value=p.agent||"";$("p-pcontact").value=p.pcontact||"";$("p-role").value=p.role||(P.roleBlank?"":"Outside");$("p-season").value=p.season||String(CUR_SEASON);$("p-thru").value=p.thru==="full"?"full":"mid";$("p-gms").value=typeof p.thru==="number"?p.thru:(Number(p.thru)||tg()||"");$("gmsWrap").hidden=p.thru==="full";$("p-db").value=p.db??"";
   METRICS.forEach((_,i)=>$("c-"+i).value=p.m?.[i]??"");
   const hp=!!p.prior; $("usePrior").checked=hp; $("priorBox").hidden=!hp;
   $("pr-db").value=hp?p.prior.db??"":"";$("pr-level").value=hp&&p.prior.level?p.prior.level:""; METRICS.forEach((_,i)=>$("r-"+i).value=hp?p.prior.m[i]??"":"");
@@ -1876,7 +1873,7 @@ function renderBoard(){
   const allOn=rows.length>0&&rows.every(x=>PICK.has(pkey(x.p)));
   updatePickUI();
   $("board").innerHTML=`<thead><tr>${H.map(([k,t])=>k==="pick"?`<th class="pick"><input type="checkbox" id="pickHead" aria-label="Select all players"${allOn?" checked":""}></th>`:`<th data-k="${k}"${/^(m\d|grade|elig)$/.test(k)?' class="num"':k==="letter"?' class="ctr"':""}>${t}${k===sortKey?(sortDir<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>${rows.map(x=>`
-   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${noteMark(x.p)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+(x.p.role==="Slot"?"SLOT":"WR"):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${logoImg(x.p)}${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
+   <tr class="${x.line||isOurs(x.p)?"line":""}"><td class="pick"><input type="checkbox" data-pick="${esc(pkey(x.p))}" aria-label="Include ${esc(x.p.name)} in printout"${PICK.has(pkey(x.p))?" checked":""}></td><td class="cn">${x.line?esc(x.p.name):`<button type="button" class="star${x.p.star?" on":""}" data-star="${x.idx}" aria-pressed="${!!x.p.star}" aria-label="${x.p.star?"Unstar":"Star"} ${esc(x.p.name)}" title="${x.p.star?"Starred priority":"Star as a priority"}">${x.p.star?"★":"☆"}</button><a href="#" data-load="${x.idx}" style="color:var(--fg);font-weight:600"${metaLine(x.p)?` title="${esc(metaLine(x.p))}"`:""}>${esc(x.p.name)}</a>${confFlag(x.r)}${noteMark(x.p)}${x.p.status?`<button type="button" class="stag qs st-${esc(x.p.status.replace(/\s+/g,""))}" data-qs="${x.idx}" title="Change status">${esc(x.p.status)}</button>`:!x.p.season?"":`<button type="button" class="stag qs qs-empty" data-qs="${x.idx}" title="Set status" aria-label="Set status for ${esc(x.p.name)}">+</button>`}${(()=>{const hw=[x.p.ht?fmtHt(x.p.ht):"",x.p.wt?x.p.wt+" lbs":""].filter(Boolean).join(" · ");const l=[(x.p.school||"")+(P.roles&&x.p.role?" · "+RL(x.p.role):""),[x.p.home,x.p.st].filter(Boolean).join(", "),x.p.hs||""].filter(Boolean).join(" · ");const rl=recruitLine(x.p,true),el=eligLong(x.p);return (l||hw||rl||el)?`<div class="sub bio">${logoImg(x.p)}${esc(l)}${hw?`<span class="mob-hw">${l?" · ":""}${esc(hw)}</span>`:""}${el?`<span class="mob-hw">${l||hw?" · ":""}${esc(el)}</span>`:""}${rl?`<span class="recruit">${l||hw||el?" · ":""}${esc(rl)}</span>`:""}</div>`:""})()}`}</td>
    <td class="num chw">${x.p.ht?esc(fmtHt(x.p.ht)):"—"}</td><td class="num chw">${x.p.wt?esc(String(x.p.wt)):"—"}</td><td class="cl">${x.p.level}</td><td class="cs">${x.line?seasonLabel({season:S.line.season||"2026",thru:S.line.thru??tg()})+(S.line.prior&&S.line.prior.db?' <span class="sub">+ '+(Number(S.line.season||2026)-1)+'</span>':""):seasonLabel(x.p)}</td><td class="num cel">${x.line?"—":esc(eligShort(x.p))}</td>${x.r.m.map((v,i)=>`<td class="num cm">${fm(v,i)}${fcsMark(x.p,i)}</td>`).join("")}
    <td class="num cg${x.r.tier?" tc-"+x.r.tier:""}" data-l="${esc(x.r.letter)}"><b>${fmt(x.r.grade)}</b>${trendHtml(x)}</td><td class="ctr cle"><span class="letter${x.r.tier?" tc-"+x.r.tier:""}">${x.r.letter}</span></td>
    <td class="ct" >${x.r.tier?`<span class="chip t-${x.r.tier}">${TIERNAME[x.r.tier]}</span>`:'<span class="sub">Scale not set</span>'}</td>
@@ -1904,7 +1901,7 @@ function confFlag(r){if(!r||!r.conf||r.conf==="–")return"";const why=[r.conf+"
   return `<span class="cflag c-${r.conf}" title="${t}" aria-label="${t}" role="img"><svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M3.8 2.2h9.2l-2.4 3.4 2.4 3.4H3.8z" fill="currentColor"/></svg>${r.split||r.partialM?'<i>*</i>':""}</span>`}
 function filtersOn(){return STARONLY||!!$("statusFilter").value||!!($("boardSearch").value||"").trim()||(P.roles&&ROLEF!=="All")}
 function updateBoardTitle(){const sf=$("statusFilter").value,bits=[];
-  if(P.roles&&ROLEF!=="All")bits.push(ROLEF==="Slot"?"SLOT":"WR");
+  if(P.roles&&ROLEF!=="All")bits.pushRL(ROLEF);
   if(sf)bits.push(sf==="portal"?"Portal only":sf==="none"?"No status":sf==="working"?"Working":sf);
   if(STARONLY)bits.push("★ Starred");
   const q=($("boardSearch").value||"").trim();if(q)bits.push(`“${q}”`);
@@ -1992,7 +1989,7 @@ async function printSelected(){
   doc.text(`Printed ${d}  ·  ${rows.length} player${rows.length>1?"s":""}`,40,62);
   /* columns mirror the board: Player · Ht · Wt · Level · Season · metrics · Score · Grade · Tier */
   const head=[["Player","Ht","Wt","Level","Season","Yrs left",...METRICS.map(m=>m.short),"Score","Grade","Tier"]];
-  const schoolLine=p=>[(p.school||"")+(P.roles&&p.role?" · "+(p.role==="Slot"?"SLOT":"WR"):""),[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ");
+  const schoolLine=p=>[(p.school||"")+(P.roles&&p.role?" · "+RL(p.role):""),[p.home,p.st].filter(Boolean).join(", "),p.hs||""].filter(Boolean).join(" · ");
   const hasFlag=x=>!!CONFRGB[x.r.conf], FLAGGAP="      ";
   const trendTxt=x=>{if(x.p.prevGrade==null||x.r.grade==null)return"";const d=x.r.grade-x.p.prevGrade;return Math.abs(d)<0.1?"":(d>0?" (+":" (-")+fmt(Math.abs(d))+")"};
   const body=rows.map(x=>[pdfTxt([x.p.name+(hasFlag(x)?FLAGGAP+(x.r.split||x.r.partialM?"  ":""):""),schoolLine(x.p)].filter(Boolean).join("\n")),
@@ -2092,7 +2089,7 @@ function renderCompare(given,ctx){
   if(rows.length>4){rows=rows.slice(0,4);flash("Compare shows the first 4 selected players.")}
   const cell=(x,inner,cls)=>`<td class="${cls||""}">${inner}</td>`;
   const hi=(vals,i)=>{const v=vals.map(r=>r.r.n?r.r.n[i]:null);const ok=v.filter(x=>x!=null);if(ok.length<2)return v.map(()=>"");const mx=Math.max(...ok),mn=Math.min(...ok);if(mx===mn)return v.map(()=>"");return v.map(x=>x==null?"":x===mx?"best":x===mn?"worst":"")};
-  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${logoImg(x.p)}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
+  const head=`<thead><tr><th>Metric</th>${rows.map(x=>`<th>${logoImg(x.p)}${esc(x.p.name)}<div class="sub" style="text-transform:none;letter-spacing:0;font-weight:400">${esc([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?RL(x.p.role):""].filter(Boolean).join(" · "))}</div></th>`).join("")}</tr></thead>`;
   const mrows=METRICS.map((m,i)=>{const c=hi(rows,i);return `<tr><td><b>${m.name}</b> <span class="sub">(${S.weights[i]}%)</span></td>${rows.map((x,k)=>{const n=x.r.n?x.r.n[i]:null;return cell(x,`${fm(x.r.m[i],i)}${m.unit}${n!=null?`<div class="mini"><i style="width:${n}%"></i></div>`:""}`,c[k])}).join("")}</tr>`}).join("");
   const gs=rows.map(x=>x.r.grade);const okg=gs.filter(g=>g!=null);const gmx=okg.length?Math.max(...okg):null,gmn=okg.length?Math.min(...okg):null;
   const extra=`<tr><td><b>Score</b></td>${rows.map(x=>cell(x,`<b>${fmt(x.r.grade)}</b> ${x.r.letter}`,okg.length>1&&gmx!==gmn?(x.r.grade===gmx?"best":x.r.grade===gmn?"worst":""):""))}</tr>
@@ -2144,7 +2141,7 @@ async function printCompare(){
   if(v){doc.setFont("helvetica","bold");doc.setFontSize(10.5);const ls=doc.splitTextToSize(T(v.text),W-100),bh=12+ls.length*12;
     doc.setFillColor(244,245,247);doc.rect(40,y,W-80,bh,"F");doc.setDrawColor(11,111,184);doc.setLineWidth(3);doc.line(41.5,y,41.5,y+bh);
     doc.setTextColor(27,30,36);doc.text(ls,52,y+16);y+=bh+12}
-  const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?(x.p.role==="Slot"?"SLOT":"WR"):""].filter(Boolean).join(" · ")))]];
+  const head=[["Metric",...rows.map(x=>T(x.p.name)+"\n"+T([x.p.school,x.p.level,x.p.season?x.p.season+(blendYr(x.p)?" + "+blendYr(x.p):""):"",P.roles&&x.p.role?RL(x.p.role):""].filter(Boolean).join(" · ")))]];
   const best=METRICS.map((_,i)=>{const n=rows.map(x=>x.r.n?x.r.n[i]:null),ok=n.filter(z=>z!=null);if(ok.length<2)return n.map(()=>0);const mx=Math.max(...ok),mn=Math.min(...ok);return n.map(z=>z==null||mx===mn?0:z===mx?1:z===mn?-1:0)});
   const body=METRICS.map((m,i)=>[`${m.name} (${S.weights[i]}%)`,...rows.map(x=>`${T(fm(x.r.m[i],i))}${m.unit}${x.r.n&&x.r.n[i]!=null?`   (${Math.round(x.r.n[i])}/100)`:""}`)]);
   const gs=rows.map(x=>x.r.grade),gmx=Math.max(...gs),gmn=Math.min(...gs);
@@ -2180,7 +2177,7 @@ $("cmpPrint").addEventListener("click",printCompare);
 function csvCell(v){v=v==null?"":String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
 function exportTable(rows){
   const head=["Player","School",...(P.roles?["Role"]:[]),"Level","Season","Through",P.sample.charAt(0).toUpperCase()+P.sample.slice(1),...METRICS.map(m=>m.name+(m.unit?" (%)":"")),"Score","Grade","Tier","Confidence","Height","Weight","Hometown","State","High school","Status","Eligibility","Portal date","Visit","Visit date","Starred","Updated"];
-  const data=rows.map(x=>[x.p.name,x.p.school,...(P.roles?[x.p.role==="Slot"?"SLOT":"WR"]:[]),x.p.level,x.p.season?+x.p.season||x.p.season:"",x.p.thru==="full"?"Full season":x.p.thru?("Game "+x.p.thru):"",x.p.db,...x.r.m.map((v,i)=>v==null?"":+(+v).toFixed(METRICS[i].dp)),x.r.grade==null?"":+x.r.grade.toFixed(1),x.r.letter==="–"?"":x.r.letter.replace("−","-"),TIERNAME[x.r.tier]||"",x.r.conf==="–"?"":x.r.conf,x.p.ht?fmtHt(x.p.ht):"",x.p.wt||"",x.p.home||"",x.p.st||"",x.p.hs||"",x.p.status||"",x.p.elig!=null?x.p.elig:"",x.p.pdate||"",x.p.visit||"",x.p.vdate||"",x.p.star?"Yes":"",x.p.updatedAt?x.p.updatedAt.slice(0,10):""]);
+  const data=rows.map(x=>[x.p.name,x.p.school,...(P.roles?[RL(x.p.role)]:[]),x.p.level,x.p.season?+x.p.season||x.p.season:"",x.p.thru==="full"?"Full season":x.p.thru?("Game "+x.p.thru):"",x.p.db,...x.r.m.map((v,i)=>v==null?"":+(+v).toFixed(METRICS[i].dp)),x.r.grade==null?"":+x.r.grade.toFixed(1),x.r.letter==="–"?"":x.r.letter.replace("−","-"),TIERNAME[x.r.tier]||"",x.r.conf==="–"?"":x.r.conf,x.p.ht?fmtHt(x.p.ht):"",x.p.wt||"",x.p.home||"",x.p.st||"",x.p.hs||"",x.p.status||"",x.p.elig!=null?x.p.elig:"",x.p.pdate||"",x.p.visit||"",x.p.vdate||"",x.p.star?"Yes":"",x.p.updatedAt?x.p.updatedAt.slice(0,10):""]);
   return {head,data};
 }
 async function exportCSV(){
@@ -2188,7 +2185,7 @@ async function exportCSV(){
   if(!rows.length){flash("Nothing on the board to export.");return}
   const T=exportTable(rows);
   const lines=[T.head.map(csvCell).join(",")].concat(T.data.map(r=>r.map(csvCell).join(",")));
-  const label=P.roles&&ROLEF!=="All"?(ROLEF==="Slot"?"SLOT":"WR"):P.label;
+  const label=P.roles&&ROLEF!=="All"?RL(ROLEF):P.label;
   let dl=null;try{dl=await claude.use("downloads")}catch(e){}
   if(!dl){flash("Saving files isn't available in this view.");return}
   try{await dl.save({filename:`${label} board ${new Date().toISOString().slice(0,10)}.csv`,data:"\ufeff"+lines.join("\r\n")});flash("CSV ready. It opens in Excel or Google Sheets.")}
@@ -2250,7 +2247,7 @@ function rowToPlayer(h,r){
   const th=g("through","thru").toLowerCase();p.thru=!th?(tg()||null):th.includes("full")?"full":(parseInt(th.replace(/\D/g,""))||tg()||null);
   p.db=num(g(P.sample,"snaps","dropbacks","carries","routes","receiving snaps"));
   p.m=METRICS.map(m=>num(g(m.name+(m.unit?" (%)":""),m.name,m.short)));
-  if(P.roles){const ro=g("role").toLowerCase();p.role=ro.startsWith("s")?"Slot":"Outside"}
+  if(P.roles){const ro=g("role").toLowerCase();if(POSKEY==="WR")p.role=ro.startsWith("s")?"Slot":"Outside";else{const hit=P.roles.find(r=>r.toLowerCase()===ro||(r==="C"&&ro==="center")||(r==="G"&&ro==="guard"));p.role=hit||null}}
   const ht=g("height"),wt=num(g("weight")),home=g("hometown"),st=g("state").toUpperCase().slice(0,2),hs=g("high school"),
     status=g("status"),el=/grad/i.test(g("eligibility"))?0:parseInt(g("eligibility")),po=g("in portal"),pd=g("portal date"),vis=g("visit"),vdt=g("visit date"),starv=g("starred");
   if(ht)p.ht=ht;if(wt)p.wt=wt;if(home)p.home=home;if(st)p.st=st;if(hs)p.hs=hs;
@@ -2336,14 +2333,14 @@ async function renderOverview(){
           else lineX=match; /* use his board entry (the numbers staff keep updated), not the model-settings copy */
         }
       }return lineX};
-      LXS.main=buildLX(S.line);LXS.slot=S.lineSlot&&S.lineSlot.name?buildLX(S.lineSlot):undefined;
+      LXS.main=buildLX(S.line);(P.refRoles||[]).forEach(r=>{const L=roleLineOf(r);if(L)LXS[r]=buildLX(L)});
       (OV_SPOTS[k]||[{lbl:k,n:1}]).forEach((g,gi)=>{
         const inRole=x=>!g.role||x.p.role===g.role;
         const stays=x=>!NEXT||x.p.elig!==0; /* next season: graduating players drop off */
         const ourAll=all.filter(x=>inRole(x)&&isOurs(x.p)&&(+x.p.season||0)===yr);
         /* next season: every returning player counts (any confidence); no listed-starter fill-in */
         let mine=(NEXT?all:live).filter(x=>inRole(x)&&isOurs(x.p)&&(+x.p.season||0)===yr&&stays(x));
-        const lk=g.role==="Slot"&&LXS.slot!==undefined?"slot":"main",lineX=LXS[lk];
+        const lk=g.role&&g.role in LXS?g.role:"main",lineX=LXS[lk];
         if(!NEXT&&lineX&&(!g.role||!lineX.p.role||lineX.p.role===g.role)&&mine.length<g.n&&ourAll.filter(stays).length>mine.length&&!mine.some(x=>x.p.name.toLowerCase()===lineX.p.name.toLowerCase())){
           if(stays(lineX)){mine.push(lineX);LXS[lk]=null}}
         const isTarget=x=>inRole(x)&&!isOurs(x.p)&&!/^\s*marshall\b/i.test(x.p.school||"")&&x.p.status!=="Pass"&&x.p.status!=="NIP";
@@ -2549,7 +2546,7 @@ async function noteSave(op,arg){const q=CARD_P;if(!DB||!q||!q.id)return;const k=
     openCard(q);d.scrollTop=top;if(TAB==="boards")renderBoard();flash(op==="add"?"Note saved.":"Note deleted.")}
   catch(e){flash("Couldn't save the note. Try again.")}}
 function cardHtml(p){const r=score(p),L=lineScore(),lg=gradeScore(L.final);
-  const role=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
+  const role=P.roles&&p.role?RL(p.role):P.label;
   const top=[p.school,p.level,role].filter(Boolean).join(" · ");
   const st=p.status?`<span class="stag st-${esc(p.status.replace(/\s+/g,""))}" style="margin-left:0">${esc(p.status)}</span>`:"";
   const grade=r&&r.grade!=null?`<div class="pc-grade"><div class="score gtc-${r.tier}">${fmt(r.grade)}<small> ${r.letter}</small></div><div>
@@ -3457,12 +3454,12 @@ async function printReport(){
   const p=readForm();if(!p.name)p.name=P.unnamed;const r=score(p);if(!r)return;
   if(!window.jspdf||!window.jspdf.jsPDF){flash("The print tool didn't load. Refresh the page and try again.");return}
   const doc=new window.jspdf.jsPDF({orientation:"portrait",unit:"pt",format:"letter"});
-  const W=pdfHeader(doc,"Roster Lab · Player Report",P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label);
+  const W=pdfHeader(doc,"Roster Lab · Player Report",P.roles&&p.role?RL(p.role):P.label);
   const ink=[27,30,36],mut=[90,96,107];
   {const id=teamIdFor(p),lg=id?(await logosFor([id]))[id]:null;if(lg)pdfLogo(doc,lg,W-40-46,74,46)}
   doc.setFont("helvetica","bold");doc.setFontSize(22);doc.setTextColor(...ink);doc.text(p.name,40,100);
   doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(...mut);
-  const roleTxt=P.roles&&p.role?(p.role==="Slot"?"SLOT":"WR"):P.label;
+  const roleTxt=P.roles&&p.role?RL(p.role):P.label;
   doc.text([p.school||"",roleTxt,p.level,p.season?`${p.season}${p.thru==="full"?" full season":p.thru?" through game "+p.thru:""}`:"",`${p.db} ${P.sample}`].filter(Boolean).join("  ·  "),40,118);
   /* grade block */
   const tc=TIERRGB[r.tier]||ink;
@@ -3657,24 +3654,36 @@ function renderAnchors(){
 }
 /* reference starter: our players at this position (board entries with numbers first, then the rest of the depth chart group) */
 function lineBoardEntry(nm){const n=String(nm||"").toLowerCase().trim();const c=BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&String(p.name||"").toLowerCase().trim()===n&&p.m&&p.db);return c.sort((a,b)=>(+b.season||0)-(+a.season||0))[0]||null}
-function fillLineNames(keep){fillLineSel(keep,"l-name",S.line,null);if(P.roles)fillLineSel(keep,"ls-name",S.lineSlot,"Slot")}
+function fillLineNames(keep){fillLineSel(keep,"l-name",S.line,null);(P.refRoles||[]).forEach(r=>fillLineSel(keep,"rl-"+r+"-name",roleLineOf(r),r))}
 function fillLineSel(keep,id,L,role){const sel=$(id);if(!sel)return;const cur=(keep&&sel.dataset.dirty&&sel.value)||(L&&L.name)||"";if(!keep)delete sel.dataset.dirty;const seen=new Set(),opts=[];
-  const roleOk=p=>!P.roles||(role==="Slot"?p.role==="Slot":p.role!=="Slot");
+  const RR=P.refRoles||[],allCovered=!!P.roles&&P.roles.every(r=>RR.includes(r));
+  const roleOk=p=>!P.roles||(role?p.role===role:(allCovered||!RR.includes(p.role)));
   latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&roleOk(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
-  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;const spots=P.roles?(role==="Slot"?["SLOT"]:["X","Z"]):null;
+  const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;const spots=role?REF_SPOTS[role]:POSKEY==="WR"?["X","Z"]:POSKEY==="IOL"?["LG","RG"]:null;
   try{["now"].forEach(z=>(spots?spots.flatMap(sp=>((DCS[z]||{}).groups||{})[sp]||[]):dcAllZ(z).filter(y=>y&&y.g===grp)).filter(y=>y&&y.n).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:y.n,l:y.n+" · not on the board"})}))}catch(e){}
   if(cur&&!seen.has(cur.toLowerCase()))opts.unshift({v:cur,l:cur});
-  if(role==="Slot")opts.unshift({v:"",l:"— None (slots use the main starter) —"});
+  if(role)opts.unshift({v:"",l:"— None (uses the main starter) —"});
   sel.innerHTML=opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join("")||'<option value="">No roster players at this position yet</option>';sel.value=cur}
-[["l-name","l","lc"],["ls-name","ls","lsc"]].forEach(([id,pf,mp])=>$(id).addEventListener("change",()=>{$(id).dataset.dirty="1";const e=lineBoardEntry($(id).value);if(!e)return;
-  $(pf+"-level").value=e.level||"G6";$(pf+"-season").value=e.season||"";$(pf+"-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$(pf+"-db").value=e.db??"";METRICS.forEach((_,i)=>{$(mp+"-"+i).value=(e.m||[])[i]??""})}));
+function lineFill(id,pf,mp){$(id).dataset.dirty="1";const e=lineBoardEntry($(id).value);if(!e)return;
+  $(pf+"-level").value=e.level||"G6";$(pf+"-season").value=e.season||"";$(pf+"-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$(pf+"-db").value=e.db??"";METRICS.forEach((_,i)=>{$(mp+"-"+i).value=(e.m||[])[i]??""})}
+$("l-name").addEventListener("change",()=>lineFill("l-name","l","lc"));
+$("roleLineBoxes").addEventListener("change",e=>{const r=e.target.dataset&&e.target.dataset.rlname;if(r)lineFill("rl-"+r+"-name","rl-"+r,"rlc-"+r)});
+function buildRoleLines(){const box=$("roleLineBoxes");const RR=P.refRoles||[];
+  box.innerHTML=RR.map(r=>`<fieldset><legend>${REF_LBL[r]||r} starter (reference row)</legend><div class="grid2">
+    <label>Name<select id="rl-${r}-name" data-rlname="${r}"></select></label>
+    <label>Level<select id="rl-${r}-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
+    <label>Season<input id="rl-${r}-season" type="number" step="1"></label>
+    <label>Numbers through (games, blank = full)<input id="rl-${r}-thru" type="number" step="1"></label>
+    <label>This season ${esc(P.sample)}<input id="rl-${r}-db" type="number"></label></div>
+    <div class="grid2">${METRICS.map((m,i)=>`<label>This season · ${m.name}${m.unit?" (%)":""}<input id="rlc-${r}-${i}" type="number" step="${m.step}"></label>`).join("")}</div></fieldset>`).join("");
+  RR.forEach(r=>{const L=roleLineOf(r)||{};$("rl-"+r+"-season").value=L.season||S.line.season||"2026";$("rl-"+r+"-thru").value=L.thru==="full"?"":(L.thru??"");$("rl-"+r+"-level").value=L.level||"G6";$("rl-"+r+"-db").value=(L.cur&&L.cur.db)||"";METRICS.forEach((_,i)=>{$("rlc-"+r+"-"+i).value=(L.cur&&L.cur.m&&L.cur.m[i])??""})})}
 function fillSettings(){
   renderAnchors();
   $("s-dbpg").value=S.dbPerGame;$("s-season").value=S.seasonGames;$("s-pw").value=S.priorWeight;{const C=cuts();$("s-impact").value=C.impact;$("s-starter").value=C.starter;$("s-rot").value=C.rotation;}$("s-elite").value=S.eliteCut??80;$("s-gap").value=S.agreeGap??20;$("s-mindb").value=S.agreeMinDb??75;
   ["P4","G6","FCS"].forEach(k=>$("s-"+k).value=S.levels[k]);
   fillLineNames();$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
   METRICS.forEach((_,i)=>{$("lc-"+i).value=S.line.cur.m[i]??"";$("lp-"+i).value=S.line.prior.m[i]??""});
-  {const B=$("lineSlotBox");B.hidden=!P.roles;if(P.roles){const L=S.lineSlot||{};$("ls-season").value=L.season||S.line.season||"2026";$("ls-thru").value=L.thru==="full"?"":(L.thru??"");$("ls-level").value=L.level||"G6";$("ls-db").value=(L.cur&&L.cur.db)||"";METRICS.forEach((_,i)=>{$("lsc-"+i).value=(L.cur&&L.cur.m&&L.cur.m[i])??""})}}
+  buildRoleLines();fillLineNames();
   $("teamGames").value=tg();
   if(typeof applyLock==="function")applyLock();
 }
@@ -3687,7 +3696,9 @@ function readSettings(){
   S.line={name:$("l-name").value||"Starter",level:$("l-level").value,season:$("l-season").value||"2026",thru:num($("l-thru").value)??"full",cur:{db:num($("l-db").value)||0,m:METRICS.map((_,i)=>num($("lc-"+i).value))},
           prior:{db:num($("l-pdb").value)||0,m:METRICS.map((_,i)=>num($("lp-"+i).value))}};
   if(S.line.cur.m.some(v=>v==null)) S.line.cur.m=DEFAULTS.line.cur.m.slice();
-  if(P.roles){const nm=$("ls-name").value;S.lineSlot=nm?{name:nm,level:$("ls-level").value,season:$("ls-season").value||S.line.season||"2026",thru:num($("ls-thru").value)??"full",cur:{db:num($("ls-db").value)||0,m:METRICS.map((_,i)=>num($("lsc-"+i).value))}}:null}
+  {const RL0={};(P.refRoles||[]).forEach(r=>{const el=$("rl-"+r+"-name");const nm=el&&el.value;if(!nm)return;
+    RL0[r]={name:nm,level:$("rl-"+r+"-level").value,season:$("rl-"+r+"-season").value||S.line.season||"2026",thru:num($("rl-"+r+"-thru").value)??"full",cur:{db:num($("rl-"+r+"-db").value)||0,m:METRICS.map((_,i)=>num($("rlc-"+r+"-"+i).value))}}});
+    S.roleLines=RL0;delete S.lineSlot}
   saveConfig();update();
 }
 document.querySelector(".setbody").addEventListener("change",readSettings);
