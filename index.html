@@ -3644,12 +3644,12 @@ function renderAnchors(){
 }
 /* reference starter: our players at this position (board entries with numbers first, then the rest of the depth chart group) */
 function lineBoardEntry(nm){const n=String(nm||"").toLowerCase().trim();const c=BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)&&String(p.name||"").toLowerCase().trim()===n&&p.m&&p.db);return c.sort((a,b)=>(+b.season||0)-(+a.season||0))[0]||null}
-function fillLineNames(){const sel=$("l-name");if(!sel)return;const cur=(S.line&&S.line.name)||"";const seen=new Set(),opts=[];
+function fillLineNames(keep){const sel=$("l-name");if(!sel)return;const cur=(keep&&sel.dataset.dirty&&sel.value)||(S.line&&S.line.name)||"";if(!keep)delete sel.dataset.dirty;const seen=new Set(),opts=[];
   latestByPlayer(BOARD.filter(p=>!p.deleted&&!p.ref&&isOurs(p)).map(p=>({p,r:score(p)}))).sort((a,b)=>((b.r&&b.r.grade)??-1)-((a.r&&a.r.grade)??-1)).forEach(x=>{const k=String(x.p.name).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:x.p.name,l:x.p.name+(x.r&&x.r.grade!=null?` · ${fmt(x.r.grade)} ${x.r.letter}`:"")})});
   const grp=({IOL:"OL",OT:"OL"})[POSKEY]||POSKEY;try{["now"].forEach(z=>dcAllZ(z).filter(y=>y&&y.n&&y.g===grp).forEach(y=>{const k=String(y.n).toLowerCase();if(seen.has(k))return;seen.add(k);opts.push({v:y.n,l:y.n+" · not on the board"})}))}catch(e){}
   if(cur&&!seen.has(cur.toLowerCase()))opts.unshift({v:cur,l:cur});
   sel.innerHTML=opts.map(o=>`<option value="${esc(o.v)}">${esc(o.l)}</option>`).join("")||'<option value="">No roster players at this position yet</option>';sel.value=cur}
-$("l-name").addEventListener("change",()=>{const e=lineBoardEntry($("l-name").value);if(!e)return;
+$("l-name").addEventListener("change",()=>{$("l-name").dataset.dirty="1";const e=lineBoardEntry($("l-name").value);if(!e)return;
   $("l-level").value=e.level||"G6";$("l-season").value=e.season||"";$("l-thru").value=e.thru==="full"||e.thru==null?"":e.thru;$("l-db").value=e.db??"";METRICS.forEach((_,i)=>{$("lc-"+i).value=(e.m||[])[i]??""})});
 function fillSettings(){
   renderAnchors();
@@ -3765,7 +3765,7 @@ function subscribe(){
     if(key!==POSKEY)return;
     boardState="ready";
     const allDocs=q.docs.map(d=>{const p=Object.assign({id:d.id},clone(d.data()));if(p.level==="G5")p.level="G6";return fixLegacy(p)});
-    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();renderTrash();resolveNames();openPending();tryCompare();
+    BOARD=allDocs.filter(p=>!p.deleted);TRASH=allDocs.filter(p=>p.deleted);renderBoard();fillLineNames(true);renderTrash();resolveNames();openPending();tryCompare();
     seedBoard(key,allDocs);linkStarterPrior(key);
   },()=>{boardState="local";renderBoard()}));
 }
