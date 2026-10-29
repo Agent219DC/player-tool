@@ -1237,7 +1237,7 @@ window.claude={use:async n=>{
       </details>
       <details class="sgrp" data-sg="starter"><summary>Our starter (reference row)</summary>
       <fieldset><legend>Our starter (reference row)</legend>
-        <p class="note" style="margin:0 0 6px">Pick our starter from the roster; it saves on its own. If he's on the board, his board numbers are used.</p>
+        <p class="note" style="margin:0 0 6px">Pick our starter from the roster, then Save starters. If he's on the board, his board numbers are used.</p>
         <div class="grid2">
           <label>Name<select id="l-name"></select></label>
           <label>Level<select id="l-level"><option>P4</option><option>G6</option><option>FCS</option></select></label>
@@ -1250,6 +1250,7 @@ window.claude={use:async n=>{
         <div class="grid2" id="linePrior" hidden></div>
       </fieldset>
       <div id="roleLineBoxes" style="display:grid;gap:12px"></div>
+      <div class="btns" style="align-items:center"><button class="btn primary" type="button" id="lineSave" disabled>Save starters</button><span class="sub" id="lineSaveMsg"></span></div>
       </details>
       <div class="btns"><button class="btn" type="button" id="reset">Reset to defaults</button></div>
     </div>
@@ -3683,7 +3684,7 @@ function fillSettings(){
   ["P4","G6","FCS"].forEach(k=>$("s-"+k).value=S.levels[k]);
   fillLineNames();$("l-season").value=S.line.season||"2026";$("l-thru").value=S.line.thru==="full"?"":(S.line.thru??tg());$("l-level").value=S.line.level;$("l-db").value=S.line.cur.db;$("l-pdb").value=S.line.prior.db;
   METRICS.forEach((_,i)=>{$("lc-"+i).value=S.line.cur.m[i]??"";$("lp-"+i).value=S.line.prior.m[i]??""});
-  buildRoleLines();fillLineNames();
+  buildRoleLines();fillLineNames();if($("lineSave")){$("lineSave").disabled=true;$("lineSaveMsg").textContent=""}
   $("teamGames").value=tg();
   if(typeof applyLock==="function")applyLock();
 }
@@ -3701,7 +3702,10 @@ function readSettings(){
     S.roleLines=RL0;delete S.lineSlot}
   saveConfig();update();
 }
-document.querySelector("#modelSettings .setbody").addEventListener("change",readSettings);
+/* the position picker only switches positions; reference starters wait for their Save button */
+document.querySelector("#modelSettings .setbody").addEventListener("change",e=>{if(e.target.id==="setPos")return;
+  if(e.target.closest('[data-sg="starter"]')){$("lineSave").disabled=false;$("lineSaveMsg").textContent="Not saved yet";return}readSettings()});
+$("lineSave").addEventListener("click",()=>{readSettings();$("lineSave").disabled=true;$("lineSaveMsg").textContent=OWNER&&DB?"Saved":"Only the owner can save"});
 $("teamGames").addEventListener("change",()=>{TG=num($("teamGames").value)||1;if(DB)DB.doc("shared/season").set({teamGames:TG}).catch(()=>flash("Couldn't save team games. You may have view-only access."));update()});
 $("teamGames").addEventListener("input",()=>{TG=num($("teamGames").value)||1;update()});
 
