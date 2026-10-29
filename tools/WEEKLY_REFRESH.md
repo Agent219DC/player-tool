@@ -41,7 +41,7 @@ The owner runs this every Sunday until the season ends. It updates live data onl
 - Report new offers, commits, decommits, and new test results.
 
 ## 4. Sun Belt snapshot
-- Update the 2026 two-deeps and the portal class in `analytics/sbc` from PFF, in the structure described in CLAUDE.md. Keep `posNote` staff calls.
+- Update the 2026 two-deeps and the portal class in `analytics/sbc` from PFF, in the structure described in CLAUDE.md. Keep staff position calls. A player with `posNote` keeps his staff-set `pos` and `k` (for example, Jalen Slappy is OT, Braydin Ward is DE), and the two-deep is built with him at that position.
 - Update team records, then set `dataAsOf` and `recAsOf`.
 - Never write budgets there. Budgets live in `owner/sbc` only.
 - Don't press "Update portal odds" unless the owner asks.
