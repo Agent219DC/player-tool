@@ -1628,6 +1628,8 @@ function buildPositionUI(){
   $("roleWrap").hidden=!P.roles; $("roleFilter").hidden=!P.roles;
   ROLEF="All"; document.querySelectorAll("[data-rf]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rf==="All"));
   $("posBar").innerHTML=ALL_POS.map(k=>`<button type="button" data-pos="${k}" aria-pressed="${k===POSKEY}"${POSITIONS[k]?"":" disabled title=\"Coming soon\""}>${k}</button>`).join("");
+  /* phones scroll the position row: keep the current position in view */
+  requestAnimationFrame(()=>{const bar=$("posBar"),b=bar.querySelector('[aria-pressed="true"]');if(b&&bar.scrollWidth>bar.clientWidth)bar.scrollLeft=b.offsetLeft-bar.offsetLeft-(bar.clientWidth-b.offsetWidth)/2});
 }
 $("posBar").addEventListener("click",e=>{const b=e.target.closest("[data-pos]");if(!b||b.disabled)return;switchPos(b.dataset.pos)});
 
