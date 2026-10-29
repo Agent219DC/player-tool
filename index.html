@@ -31,7 +31,7 @@
   --fg:#1b1e24; --muted:#5a606b;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#ddf0fc; --accent-text:#0a69ae;
   --impact:#0f7349; --starter:#4b5d6b; --rotation:#8f5d08; --pass:#b03a2e; --elite:#0b5a39; --offer:#6b3fa0;
-  --tElite:#4338ca; --tEliteFill:#4338ca; --cHigh:#0f7349; --tImpact:#0e7490; --tStarter:#4d7c0f; --tRotation:#b45309; --tPass:#b91c1c; --cMed:#7d6300;
+  --tElite:#6d28d9; --tEliteFill:#6d28d9; --cHigh:#0f7349; --tImpact:#0f766e; --tStarter:#a16207; --tRotation:#c2410c; --tPass:#b91c1c; --cMed:#7d6300;
   --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
   --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -40,12 +40,12 @@
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#a5b4fc; --tEliteFill:#4338ca; --cHigh:#4fdb9c; --tImpact:#67e8f9; --tStarter:#a3e635; --tRotation:#fbbf24; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#c4b5fd; --tEliteFill:#6d28d9; --cHigh:#4fdb9c; --tImpact:#2dd4bf; --tStarter:#facc15; --tRotation:#fb923c; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111318; --surface:#181b21; --sunk:#20242c; --line:#2f343e;
   --fg:#eceef2; --muted:#aab1bd;
   --accent:#1fa3ee; --accent-fill:#0b6fb8; --accent-ink:#ffffff; --accent-soft:#0f2a3d; --accent-text:#5cc2ff;
-  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#a5b4fc; --tEliteFill:#4338ca; --cHigh:#4fdb9c; --tImpact:#67e8f9; --tStarter:#a3e635; --tRotation:#fbbf24; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}
+  --impact:#4fdb9c; --starter:#a9b9c6; --rotation:#e6b24f; --pass:#ef8474; --elite:#2fcb86; --offer:#c3a0ee; --tElite:#c4b5fd; --tEliteFill:#6d28d9; --cHigh:#4fdb9c; --tImpact:#2dd4bf; --tStarter:#facc15; --tRotation:#fb923c; --tPass:#f87171; --cMed:#f2cc3d; color-scheme:dark}
 /* side colors: portal blue (default), high school purple, GM green */
 body.mode-hs{--accent:#a93fd9; --accent-fill:#7e2aa8; --accent-soft:#f2e3fa; --accent-text:#7a27a3}
 body.mode-an{--accent:#2fcb86; --accent-fill:#137a4f; --accent-soft:#ddf6ea; --accent-text:#0f7349}
@@ -1945,7 +1945,7 @@ const CONFRGB={High:[15,115,73],Medium:[125,99,0],Low:[198,40,40]};
 /* the board's confidence flag (same shape as the SVG), drawn at x,y = top-left, sz = icon size in pt */
 function pdfFlag(doc,x,y,sz,rgb){const k=sz/16;doc.setDrawColor(...rgb);doc.setFillColor(...rgb);doc.setLineWidth(1.6*k);doc.setLineCap("round");
   doc.line(x+3*k,y+1.5*k,x+3*k,y+14.5*k);doc.lines([[9.2*k,0],[-2.4*k,3.4*k],[2.4*k,3.4*k],[-9.2*k,0]],x+3.8*k,y+2.2*k,[1,1],"F",true);doc.setLineCap("butt")}
-const TIERRGB={Elite:[67,56,202],Impact:[14,116,144],Starter:[77,124,15],Rotation:[180,83,9],Pass:[185,28,28]};
+const TIERRGB={Elite:[109,40,217],Impact:[15,118,110],Starter:[161,98,7],Rotation:[194,65,12],Pass:[185,28,28]};
 async function printSelected(){
   const rows=LAST_ROWS.filter(x=>PICK.has(pkey(x.p)));
   if(!rows.length)return;
