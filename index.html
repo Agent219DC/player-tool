@@ -2070,6 +2070,7 @@ async function printOverview(){
     if(b){line(b.p.name+(b.commit?" (Committed)":""),true);
       const g0=`${fmt(b.r.grade)} ${T(b.r.letter)}`,g=g0+"  ·  ";doc.setFont("helvetica","bold");doc.setFontSize(7.5);doc.setTextColor(...(TIERRGB[b.r.tier]||[27,30,36]));doc.text(g0,x+5,yy);doc.setFont("helvetica","normal");doc.setTextColor(27,30,36);doc.text("  ·  ",x+5+doc.getTextWidth(g0),yy);
       const gw=doc.getTextWidth(g);if(b.p.elig===0){doc.setFont("helvetica","bold");doc.setTextColor(198,40,40);doc.text("0 yrs",x+5+gw,yy)}else doc.text(T(eligText(b.p)),x+5+gw,yy);yy+=8.5}
+    else if(o.off){line(T(o.off),true);line(`Not on the ${o.k} board`,false,[120,126,136])}
     else line(OV_MODE==="next"?"None available":"None entered",false,[120,126,136]);
     yy+=2;lab("TARGET");
     if(t){line(t.p.name+(t.p.level?` (${t.p.level})`:""),true);
@@ -2353,10 +2354,12 @@ async function renderOverview(){
         if(NEXT)mine=mine.concat(commits.map(x=>({p:x.p,r:x.r,commit:true})));
         /* depth chart starters (#1 at each matching spot) take the spot first; any spot left open falls back to the highest grade */
         const dcG=(DCS[NEXT?"next":"now"]||{}).groups||{};const sps=OV_DC[k+"|"+(g.role||"")]||[];const used=new Set();
-        const slots=Array.from({length:g.n},(_,i)=>{const sp=sps[i];const x0=sp&&(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,all);
-          if(e&&!used.has(e.p.id)&&(!NEXT||e.p.elig!==0)){used.add(e.p.id);return Object.assign({},e,{dc:true})}return null});
+        const offs=[];const slots=Array.from({length:g.n},(_,i)=>{const sp=sps[i];const x0=sp&&(dcG[sp]||[])[0];const e=x0&&dcFindIn(x0,all);
+          if(e&&!used.has(e.p.id)&&(!NEXT||e.p.elig!==0)){used.add(e.p.id);return Object.assign({},e,{dc:true})}
+          if(x0&&x0.n&&!e)offs[i]=x0.n; /* his depth chart #1 isn't on this board: name him instead of filling the spot with someone else */
+          return null});
         const fill=mine.filter(x=>!used.has(x.p.id)).sort((a,b)=>b.r.grade-a.r.grade);
-        mine=slots.map(x=>x||fill.shift()||null);
+        mine=slots.map((x,i)=>x||(offs[i]?null:fill.shift())||null);
         /* each card is one depth chart spot (LT, RT, FE, JACK…); targets still go to the weakest of ours first */
         const order=mine.map((x,i)=>i).sort((a,b)=>(mine[b]?mine[b].r.grade:-1)-(mine[a]?mine[a].r.grade:-1));const rankOf={};order.forEach((ix,r)=>rankOf[ix]=r);
         g._sps=sps;g._rank=rankOf;
@@ -2373,7 +2376,7 @@ async function renderOverview(){
           /* a target who grades at or below our player there isn't an upgrade: say so instead of pairing him */
           const noUp=!!(best&&cand&&!best.commit&&cand.r.grade<=best.r.grade),top=noUp?null:cand;
           const need=!best?"High":best.r.grade<70?"High":best.r.grade<80?"Upgrade":"Set";
-          rows.push({k,role:g.role||"",lbl:(g._sps&&g._sps[i]&&(DC_LABEL[g._sps[i]]||g._sps[i]).toUpperCase())||g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":noUp?`No upgrade on the board (best: ${cand.p.name}, ${fmt(cand.r.grade)})`:why});
+          rows.push({k,role:g.role||"",off:offs[i]||null,lbl:(g._sps&&g._sps[i]&&(DC_LABEL[g._sps[i]]||g._sps[i]).toUpperCase())||g.lbl,first:gi===0&&i===0,gfirst:i===0,best,top,n:tg2.length,committed,need,why:top?"":noUp?`No upgrade on the board (best: ${cand.p.name}, ${fmt(cand.r.grade)})`:why});
         }
       });
       return rows});
@@ -2389,7 +2392,7 @@ async function renderOverview(){
   out.forEach(o=>{if(o.best)o.best._k=o.k;if(o.top)o.top._k=o.k});
   $("ovTbl").innerHTML=`<thead><tr><th>Pos</th><th>Need</th><th>Our best player</th><th class="num">Grade</th><th class="ctr">Eligibility</th><th>Best target</th><th class="num">Grade</th><th class="num">Gap</th><th class="ctr">Tier</th></tr></thead><tbody>${out.map(o=>`
     <tr class="go${o.first?" ovfirst":""}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}"><td class="o-pos"><b>${esc(o.lbl)}</b></td><td class="o-need"><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></td>
-    <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</td>
+    <td class="o-mn" data-l="Ours">${o.best?(o.best.commit?`${nm(o.best,esc(o.best.p.name))}${o.best.p.school?` · ${esc(o.best.p.school)}`:""}<span class="stag st-Committed">Committed</span>`:nm(o.best,esc(o.best.p.name))):(o.off?`${esc(o.off)} <span class="sub">· not on the ${esc(o.k)} board</span>`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`)}</td>
     <td class="num o-mg">${o.best?`<span class="gtc-${o.best.r.tier}"><b>${fmt(o.best.r.grade)}</b> ${o.best.r.letter}</span>`:"–"}</td>
     <td class="ctr o-me">${o.best?(o.best.p.elig===0?`<b style="color:var(--tPass)">0 yrs</b>`:eligText(o.best.p)):"–"}</td>
     <td class="o-tn" data-l="Target">${o.top?`${nm(o.top,esc(o.top.p.name))}${o.top.p.school?` · ${esc(o.top.p.school)}`:""}${o.top.p.level?` <span class="sub">(${esc(o.top.p.level)})</span>`:""}${o.top.p.status&&o.top.p.status!=="Target"?`<span class="stag st-${esc(o.top.p.status.replace(/\s+/g,""))}">${esc(o.top.p.status)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</td>
@@ -2413,7 +2416,7 @@ function renderOvField(side,rows){
     const b=o.best,t=o.top;
     return `<div class="ovcard go" style="${pos}" data-go="${o.k}" data-role="${o.role}" data-oi="${OV_ROWS.indexOf(o)}" title="${b&&t?"Compare "+esc(b.p.name)+" with "+esc(t.p.name):"Open the "+esc(o.lbl)+" board"}">
       <div class="ovc-h"><b>${esc(o.lbl)}</b><span class="need need-${o.need}">${NEEDLABEL[o.need]}</span></div>
-      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g gtc-${b.r.tier}">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">0 yrs</b>':eligText(b.p)}`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
+      <div><span class="ovc-l">Ours${b?logoImg(b.p,"slogo ovlogo"):""}</span>${b?`<span class="ovc-n">${nm(b)}</span>${b.commit?' <span class="stag st-Committed">Committed</span>':""}<br><span class="ovc-g gtc-${b.r.tier}">${fmt(b.r.grade)} ${b.r.letter}</span> · ${b.p.elig===0?'<b style="color:var(--tPass)">0 yrs</b>':eligText(b.p)}`:o.off?`<span class="ovc-n">${esc(o.off)}</span><br><span class="sub">Not on the ${esc(o.k)} board</span>`:`<span class="sub">${OV_MODE==="next"?"None available":"None entered"}</span>`}</div>
       <div><span class="ovc-l">Target${t?logoImg(t.p,"slogo ovlogo"):""}</span>${t?`<span class="ovc-n">${nm(t)}</span>${t.p.level?` <span class="sub">(${esc(t.p.level)})</span>`:""}<br><span class="ovc-g gtc-${t.r.tier}">${fmt(t.r.grade)} ${t.r.letter}</span>${b?` · <span class="sub">${t.r.grade-b.r.grade>=0?"+":""}${fmt(t.r.grade-b.r.grade)}</span>`:""}`:`<span class="sub">–${o.why?" "+esc(o.why):""}</span>`}</div>
       ${t&&t.r.tier?`<span class="chip t-${t.r.tier}">${TIERNAME[t.r.tier]}</span>`:""}</div>`};
   const spots=ovSpots(side,rows);const maxR=Math.max(...spots.map(s=>s.r));
@@ -2902,6 +2905,7 @@ const DC_LAST={now:{},next:{}},DC_META={now:{},next:{}};let DC_DRAGGING=false,DC
 const dcSnap=g=>Object.fromEntries(Object.entries(g||{}).map(([k,v])=>[k,JSON.stringify(v)]));
 function watchDepth(db){Object.entries(DC_DOC).forEach(([z,path])=>db.doc(path).onSnapshot(s=>{const d=s.exists?s.data():{};
   DCS[z]={groups:dcFix(JSON.parse(JSON.stringify(d.groups||{}))),limits:d.limits||null};DC_LAST[z]=dcSnap(d.groups);DC_META[z]={at:d.updatedAt||"",by:d.updatedBy||""};
+  if(z==="now"&&SBC_CACHE["2026"]){delete SBC_CACHE["2026"];if(TAB==="sbc"&&SBC_YR==="2026")renderSbc()} /* the Sun Belt snapshot shows Marshall from this chart */
   if(TAB==="depth"&&z===DC_SZN){if($("dcDlg").open||DC_DRAGGING||document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#dcRosterWrap,.dc-add"))DC_REDRAW=true;else drawDepth()}},()=>{}))}
 async function dcSave(z,full){z=z||DC_SZN;if(!DB)return;
   const uid=USER?await USER.id().catch(()=>""):"";const meta={updatedAt:new Date().toISOString(),updatedBy:uid||""};DC_META[z]={at:meta.updatedAt,by:meta.updatedBy};
@@ -3893,6 +3897,8 @@ const SBC_GROUPOF={QB:"QB",RB:"RB",WO:"SK",SL:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"
 function sbcFits(spot,p){const P=p.pos;return spot==="QB"?P==="QB":spot==="RB"?(P==="HB"||P==="FB"):spot==="TE"?P==="TE":(spot==="WO"||spot==="SL")?P==="WR":spot==="OT"?P==="T":spot==="IOL"?(P==="G"||P==="C"):spot==="DT"?P==="DI":spot==="DE"?P==="ED":spot==="LB"?P==="LB":spot==="SAF"?P==="S":spot==="NIC"?(P==="CB"&&p.nic):spot==="CB"?(P==="CB"&&!p.nic):false}
 function sbcAssign(L,side,dep){return sbcAssignP(L.filter(p=>p.dep===dep).sort((a,b)=>(b.snaps||0)-(a.snaps||0)),side)}
 function sbcAssignP(pool,side){const F=SBC_FIELD[side].spots;const used=new Set(),out=F.map(()=>null);
+  /* Marshall: players set by our depth chart go to their own spot first */
+  pool.forEach(p=>{if(p.at!=null&&p.side===side&&!out[p.at]){out[p.at]=p;used.add(p)}});
   F.forEach((s,i)=>{const p=pool.find(x=>!used.has(x)&&SBC_GROUPOF[s[0]]===x.grp&&sbcFits(s[0],x));if(p){used.add(p);out[i]=p}});
   /* leftovers: a slot corner when the nickel is a safety, a third LB in a 3-3-5, a second TE, ... */
   F.forEach((s,i)=>{if(out[i])return;const p=pool.find(x=>!used.has(x)&&SBC_GROUPOF[s[0]]===x.grp);if(p){used.add(p);out[i]=p}});
@@ -3911,7 +3917,7 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
   const PL=p=>p.nic?"NIC":({HB:"RB",FB:"RB",DI:"DT",ED:"DE",S:"SAF",T:"OT",G:"IOL",C:"IOL"})[p.pos]||p.pos;
   const ln=(lab,p,k)=>{if(!p)return `<div><span class="ovc-l">${lab}</span><span class="sub">–</span></div>`;const r=p.r;
     if(p.inc)return `<div><span class="ovc-l">${lab} · incoming</span><span class="ovc-n">${esc(p.name)}</span>${p.prev?`<span class="sub sbc-prev">from ${esc(p.prev)}</span>`:"<br>"}<span class="sub" title="Typical grade for ${esc(p.odds.label)} after a move">~${fmt(p.g)} projected</span></div>`;
-    return `<div><span class="ovc-l">${lab}</span><span class="ovc-n">${esc(p.name)}</span>${k&&!sbcFits(k,p)?` <span class="sub">(${esc(PL(p))})</span>`:""}${p.prev?`<span class="sub sbc-prev" title="Transfer">from ${esc(p.prev)}</span>`:"<br>"}${p.g!=null?`<span class="ovc-g gtc-${r.tier}">${fmt(p.g)} ${esc(r.letter||"")}</span>${r.conf==="Low"?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'} · <span class="sub">${p.snaps||0} snaps</span></div>`};
+    return `<div><span class="ovc-l">${lab}</span><span class="ovc-n">${esc(p.name)}</span>${k&&!sbcFits(k,p)?` <span class="sub">(${esc(PL(p))})</span>`:""}${p.prev?`<span class="sub sbc-prev" title="Transfer">from ${esc(p.prev)}</span>`:"<br>"}${p.g!=null?`<span class="ovc-g gtc-${r.tier}">${fmt(p.g)} ${esc(r.letter||"")}</span>${r.conf==="Low"?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'} · <span class="sub">${esc(sbcUse(p))}</span></div>`};
   const cards=F.spots.map(([k,r,c,lbl],i)=>{const a=S1[i],b=S2[i];const pos=`grid-row:${r+(F.los==="top"?1:0)};grid-column:${Math.round((c-1)*4)+1} / span 4`;
     const show=a&&!sbcFits(k,a)?PL(a):lbl;
     const was=NX&&now1[i]&&now1[i].grad?now1[i]:null;const lostTxt=was?`<div class="sbc-lost">Losing ${esc(was.name)}${was.g!=null?` · ${fmt(was.g)} ${esc((was.r&&was.r.letter)||"")}`:""}</div>`:"";
@@ -3919,6 +3925,28 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
     return `<div class="ovcard sbc-card${NX&&!a?" sbc-open":""}" style="${pos}"><div class="ovc-h"><b>${esc(show)}</b>${NX&&!a?`<span class="chip sbc-openchip">Open</span>`:a&&a.r&&a.r.tier?`<span class="chip t-${a.r.tier}">${TIERNAME[a.r.tier]}</span>`:""}</div>${lostTxt}${ln(NX&&a&&a.dep===2&&!a.inc?"Starter · moves up":"Starter",a)}${ln("Backup",b,k)}</div>`}).join("");
   const maxR=Math.max(...F.spots.map(s=>s[1]));
   return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
+/* Marshall's two-deep follows our depth chart (owner call): each spot's #1 starts and #2 backs up, at that spot. PFF rows supply the numbers;
+   anyone PFF's snap leaders missed comes from his board entry. Only the page changes, analytics/sbc keeps the PFF two-deep. */
+const SBC_SPOTK={X:"WR",Z:"WR",SLOT:"WR",TE:"TE",LT:"OT",RT:"OT",LG:"IOL",OC:"IOL",RG:"IOL",QB:"QB",RB:"RB",SAFA:"SAF",SAFB:"SAF",LBA:"LB",LBB:"LB",NIC:"CB",CBA:"CB",CBB:"CB",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT"};
+const SBC_CHART={X:["off",0],LT:["off",1],LG:["off",2],OC:["off",3],RG:["off",4],RT:["off",5],TE:["off",6],Z:["off",7],SLOT:["off",8],QB:["off",9],RB:["off",10],
+  SAFA:["def",0],SAFB:["def",1],LBA:["def",2],LBB:["def",3],NIC:["def",4],CBA:["def",5],FE:["def",6],DTA:["def",7],DTB:["def",8],JACK:["def",9],CBB:["def",10]};
+async function sbcFollowChart(players,fid,all,cfg){
+  let G=(DCS.now||{}).groups||{};const has=g=>Object.keys(SBC_CHART).some(sp=>(g[sp]||[]).length);
+  if(!has(G)){try{const d=await DB.doc(DC_DOC.now).get();G=d.exists?(d.data().groups||{}):{}}catch(e){return}}
+  if(!has(G))return;
+  const SP={QB:"QB",RB:"HB",WR:"WR",TE:"TE",OT:"T",IOL:"G",DT:"DI",DE:"ED",LB:"LB",SAF:"S",CB:"CB"},GR={QB:"QB",RB:"RB",WR:"SK",TE:"SK",OT:"OL",IOL:"OL",DT:"FR",DE:"FR",LB:"FR",SAF:"DB",CB:"DB"};
+  const ours=players.filter(p=>+p.fid===fid);const board=all.flatMap(g=>(g.docs||[]).filter(d=>!d.deleted&&!d.ref&&isOurs(d)).map(d=>Object.assign({},d,{k:g.k})));
+  const keep=[],seen=new Set();
+  Object.entries(SBC_CHART).forEach(([sp,[side,at]])=>(G[sp]||[]).slice(0,2).forEach((e,i)=>{if(!e||!e.n)return;const n=normName(e.n);if(seen.has(n))return;
+    const p=ours.find(x=>normName(x.name)===n);
+    if(p){seen.add(n);keep.push(Object.assign(p,{dep:i+1,side,at,ord:at,nic:sp==="NIC"}));return}
+    const b=board.find(x=>normName(x.name)===n);seen.add(n);
+    if(!b||!POSITIONS[b.k]||!SP[b.k]){const k=SBC_SPOTK[sp];keep.push({id:fid+"-c-"+n,fid,name:e.n,k,pos:SP[k],grp:GR[k],dep:i+1,side,at,ord:at,nic:sp==="NIC",noData:true,g:null,r:null});return}
+    const q={id:fid+"-b-"+b.id,fid,name:b.name,k:b.k,pos:SP[b.k],grp:GR[b.k],dep:i+1,side,at,ord:at,nic:sp==="NIC",db:b.db,m:b.m,level:b.level,season:b.season,thru:b.thru,grad:b.elig===0,fromBoard:true};
+    const r=withPos(b.k,cfg[b.k],()=>{try{return score(q)}catch(err){return null}});q.r=r;q.g=r&&r.grade!=null?r.grade:null;keep.push(q)}));
+  for(let i=players.length-1;i>=0;i--)if(+players[i].fid===fid)players.splice(i,1);
+  players.push(...keep)}
+const sbcUse=p=>p.noData?"no PFF data":p.fromBoard?`${p.db??0} ${(POSITIONS[p.k]||{}).abbr||""} (board)`:`${p.snaps||0} snaps`;
 /* one doc per season: owner/sbc is this season (2026), owner/sbc2025 is last season's final snapshot (two-deep, records, portal class; no budget/next season) */
 const SBC_DOC=()=>SBC_YR==="2026"?"analytics/sbc":"analytics/sbc"+SBC_YR;
 async function loadSbc(force){if(SBC_CACHE[SBC_YR]&&!force){SBC=SBC_CACHE[SBC_YR];return SBC}
@@ -3931,6 +3959,7 @@ async function loadSbc(force){if(SBC_CACHE[SBC_YR]&&!force){SBC=SBC_CACHE[SBC_YR
   const players=(meta.players||[]).map(p=>Object.assign({id:p.fid+"-"+p.pffId},p));
   const ks=[...new Set(players.map(p=>p.k))].filter(k=>POSITIONS[k]);const all=await loadAllPositions(ks);const cfg=Object.fromEntries(all.map(g=>[g.k,g.cfg]));
   players.forEach(p=>{const r=POSITIONS[p.k]?withPos(p.k,cfg[p.k],()=>{try{return score(p)}catch(e){return null}}):null;p.r=r;p.g=r&&r.grade!=null?r.grade:null});
+  if(SBC_YR==="2026"){const us0=Object.entries(meta.teams||{}).find(([f,t])=>sbcOurs(t));if(us0)await sbcFollowChart(players,+us0[0],all,cfg)}
   /* portal class (247's 2026 transfer lists + PFF): each transfer graded twice on his board position's scale, his last college season played (y25.season, 2025 unless he sat out) at that school's level for the full season, and 2026 here */
   const portal=(meta.portal||[]).map(x=>Object.assign({},x));const pk=[...new Set(portal.map(x=>x.k))].filter(k=>POSITIONS[k]&&!cfg.hasOwnProperty(k));
   if(pk.length){(await loadAllPositions(pk)).forEach(g=>cfg[g.k]=g.cfg)}
@@ -4092,7 +4121,7 @@ function sbcBudgetView(rows){const {rows:R0,fw,fg}=sbcBudgetCalc(rows);const m=S
     ${sbcChart(R0,fw||{a:.5,b:0},{x:r=>r.budget,res:r=>r.wab,xlab:"Roster budget ($M) →",tick:1,pad:.4,fx:v=>"$"+v+"M",tip:r=>"budget "+sbcMoney(r.budget)})}`}
 function sbcDepth(fid){const L=SBC.players.filter(p=>String(p.fid)===String(fid));if(!L.length)return '<p class="sub">No players for this team.</p>';
   const cell=p=>{if(!p)return "<td></td><td></td>";const r=p.r;const low=r&&r.conf==="Low";
-    return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${p.snaps||0} snaps${p.prev?" · from "+esc(p.prev):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
+    return `<td><span class="pn">${esc(p.name)}</span> <span class="ps">${esc(p.nic?"NIC":p.pos)} · ${esc(sbcUse(p))}${p.prev?" · from "+esc(p.prev):""}</span></td><td class="num">${p.g!=null?`<b>${fmt(p.g)}</b> ${esc(r.letter||"")}${low?' <span class="sub" title="Small sample">*</span>':""}`:'<span class="sub" title="Not enough data to grade">–</span>'}</td>`};
   let h="";for(const [k,n] of SBC_GRP){const S=L.filter(p=>p.grp===k&&p.dep===1).sort((a,b)=>a.ord-b.ord),Bk=L.filter(p=>p.grp===k&&p.dep===2).sort((a,b)=>a.ord-b.ord);if(!S.length&&!Bk.length)continue;
     if(k==="QB")h+=`<tr><td class="unit" colspan="4">Offense</td></tr>`;if(k==="FR")h+=`<tr><td class="unit" colspan="4">Defense</td></tr>`;
     for(let i=0;i<Math.max(S.length,Bk.length);i++)h+=`<tr>${i===0?`<td rowspan="${Math.max(S.length,Bk.length)}" class="sub" style="vertical-align:top">${n}</td>`:""}${cell(S[i])}${cell(Bk[i]).replace(/^<td>/,'<td class="sub">')}</tr>`}
@@ -4124,7 +4153,7 @@ async function renderSbc(force){const el=$("sbcBody");if(!DB){el.innerHTML='<p c
     <div class="btns" style="align-items:center"><span class="seg" role="group" aria-label="Side">${[["off","Offense"],["def","Defense"]].map(([k,n])=>`<button type="button" data-sbcside="${k}" aria-pressed="${SBC_SIDE===k&&SBC_VIEW==="field"}">${n}</button>`).join("")}<button type="button" data-sbcview="list" aria-pressed="${SBC_VIEW==="list"}">Full list</button></span>${SBC_YR==="2026"?`<span class="seg" role="group" aria-label="This or next season"><button type="button" data-sbcszn="now" aria-pressed="${SBC_SZN==="now"}">This season</button><button type="button" data-sbcszn="next" aria-pressed="${SBC_SZN==="next"}">Next season</button></span>`:""}${t?`<span class="sub">${SBC_VIEW==="field"?(()=>{const n=SBC_SZN==="next"?sbcNext(SBC_TEAM):t;return (SBC_SZN==="next"?"Next season · ":"")+(SBC_SIDE==="off"?"Offense "+fmt(n.off):"Defense "+fmt(n.def))})():""}</span>`:""}</div>
     ${SBC_SZN==="next"&&t?(()=>{const n=sbcNext(SBC_TEAM);const nin=(SBC.inc||[]).filter(p=>String(p.fid)===String(SBC_TEAM)).length;return `<p style="margin:4px 0"><b>Next season:</b>${nin?` adding <b>${nin}</b> portal commit${nin===1?"":"s"} (projected at their profile's typical grade) ·`:""} losing <b>${n.stLost}</b> of 22 starters and ${n.bkLost} of 22 backups to graduation (PFF 2027 draft class) · ${n.open} starting spot${n.open===1?"":"s"} open after the backups move up · projected grade <b>${fmt(n.grade)}</b> <span class="sub">(this season ${fmt(t.grade)})</span> · offense <b>${fmt(n.off)}</b> <span class="sub">(${fmt(t.off)})</span> · defense <b>${fmt(n.def)}</b> <span class="sub">(${fmt(t.def)})</span></p>`})():""}
     ${SBC_VIEW==="field"?sbcField(SBC_TEAM,SBC_SIDE):sbcDepth(SBC_TEAM)}
-    <p class="note">Two-deep = PFF snap leaders this season. <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
+    <p class="note">Two-deep = PFF snap leaders this season (Marshall: our depth chart). <b>*</b> = small sample · "–" = too little data, left out of the grade.</p>
     ${SBC.portal?`
     <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px"><h3 class="sec-h" style="margin:0">${SBC_YR} portal class</h3>${SBC_YR==="2026"&&OWNER?`<button class="btn" type="button" id="sbcOddsSave" title="Save how each transfer profile turned out, for the portal board cards">Update portal odds</button>`:""}<select id="sbcClsSel" aria-label="Portal class team"><option value="league"${SBC_CLS==="league"?" selected":""}>All teams</option>${[...rows].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${esc(r.fid)}"${SBC_CLS!=="league"&&String(SBC_CLS_TEAM||SBC_TEAM)===String(r.fid)?" selected":""}>${esc(r.name)}</option>`).join("")}</select></div>
     ${SBC_CLS==="league"?sbcClassLeague():sbcClass(SBC_CLS_TEAM||SBC_TEAM)}
