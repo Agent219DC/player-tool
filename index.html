@@ -3927,6 +3927,7 @@ function sbcField(fid,side){const L=SBC.players.filter(p=>String(p.fid)===String
   return `<div class="sbc-fieldwrap"><div class="ovfield" style="grid-template-columns:repeat(${F.cols*4},minmax(0,1fr))"><div class="los" style="grid-row:${F.los==="top"?1:maxR+1}"><span>LINE OF SCRIMMAGE</span></div>${cards}</div></div>`}
 /* Marshall's two-deep follows our depth chart (owner call): each spot's #1 starts and #2 backs up, at that spot. PFF rows supply the numbers;
    anyone PFF's snap leaders missed comes from his board entry. Only the page changes, analytics/sbc keeps the PFF two-deep. */
+const SBC_SPOTK={X:"WR",Z:"WR",SLOT:"WR",TE:"TE",LT:"OT",RT:"OT",LG:"IOL",OC:"IOL",RG:"IOL",QB:"QB",RB:"RB",SAFA:"SAF",SAFB:"SAF",LBA:"LB",LBB:"LB",NIC:"CB",CBA:"CB",CBB:"CB",FE:"DE",JACK:"DE",DTA:"DT",DTB:"DT"};
 const SBC_CHART={X:["off",0],LT:["off",1],LG:["off",2],OC:["off",3],RG:["off",4],RT:["off",5],TE:["off",6],Z:["off",7],SLOT:["off",8],QB:["off",9],RB:["off",10],
   SAFA:["def",0],SAFB:["def",1],LBA:["def",2],LBB:["def",3],NIC:["def",4],CBA:["def",5],FE:["def",6],DTA:["def",7],DTB:["def",8],JACK:["def",9],CBB:["def",10]};
 async function sbcFollowChart(players,fid,all,cfg){
@@ -3939,12 +3940,13 @@ async function sbcFollowChart(players,fid,all,cfg){
   Object.entries(SBC_CHART).forEach(([sp,[side,at]])=>(G[sp]||[]).slice(0,2).forEach((e,i)=>{if(!e||!e.n)return;const n=normName(e.n);if(seen.has(n))return;
     const p=ours.find(x=>normName(x.name)===n);
     if(p){seen.add(n);keep.push(Object.assign(p,{dep:i+1,side,at,ord:at,nic:sp==="NIC"}));return}
-    const b=board.find(x=>normName(x.name)===n);if(!b||!POSITIONS[b.k]||!SP[b.k])return;seen.add(n);
+    const b=board.find(x=>normName(x.name)===n);seen.add(n);
+    if(!b||!POSITIONS[b.k]||!SP[b.k]){const k=SBC_SPOTK[sp];keep.push({id:fid+"-c-"+n,fid,name:e.n,k,pos:SP[k],grp:GR[k],dep:i+1,side,at,ord:at,nic:sp==="NIC",noData:true,g:null,r:null});return}
     const q={id:fid+"-b-"+b.id,fid,name:b.name,k:b.k,pos:SP[b.k],grp:GR[b.k],dep:i+1,side,at,ord:at,nic:sp==="NIC",db:b.db,m:b.m,level:b.level,season:b.season,thru:b.thru,grad:b.elig===0,fromBoard:true};
     const r=withPos(b.k,cfg[b.k],()=>{try{return score(q)}catch(err){return null}});q.r=r;q.g=r&&r.grade!=null?r.grade:null;keep.push(q)}));
   for(let i=players.length-1;i>=0;i--)if(+players[i].fid===fid)players.splice(i,1);
   players.push(...keep)}
-const sbcUse=p=>p.fromBoard?`${p.db??0} ${(POSITIONS[p.k]||{}).abbr||""} (board)`:`${p.snaps||0} snaps`;
+const sbcUse=p=>p.noData?"no PFF data":p.fromBoard?`${p.db??0} ${(POSITIONS[p.k]||{}).abbr||""} (board)`:`${p.snaps||0} snaps`;
 /* one doc per season: owner/sbc is this season (2026), owner/sbc2025 is last season's final snapshot (two-deep, records, portal class; no budget/next season) */
 const SBC_DOC=()=>SBC_YR==="2026"?"analytics/sbc":"analytics/sbc"+SBC_YR;
 async function loadSbc(force){if(SBC_CACHE[SBC_YR]&&!force){SBC=SBC_CACHE[SBC_YR];return SBC}
